@@ -1,0 +1,31 @@
+abstract final class RouteConstants {
+  // Entry
+  static const String splash = '/';
+  static const String onboarding = '/onboarding';
+
+  // Auth
+  static const String signIn = '/sign-in';
+  static const String signUp = '/sign-up';
+  static const String forgotPassword = '/forgot-password';
+  static const String otp = '/otp';
+  static const String changePassword = '/change-password';
+
+  // Employee
+  static const String employee = '/employee';
+  static const String employeeHome = '/employee/home';
+  static const String employeeJobs = '/employee/jobs';
+  static const String employeeTime = '/employee/time';
+  static const String employeeProfile = '/employee/profile';
+
+  // Site Manager
+  static const String siteManager = '/site-manager';
+  static const String siteManagerDashboard = '/site-manager/dashboard';
+  static const String siteManagerProjects = '/site-manager/projects';
+  static const String siteManagerTeam = '/site-manager/team';
+  static const String siteManagerTime = '/site-manager/time';
+  static const String siteManagerMore = '/site-manager/more';
+
+  // Shared
+  static const String projectDetails = '/project-details';
+  static const String jobDetails = '/job-details';
+}
