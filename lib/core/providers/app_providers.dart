@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../enums/user_role.dart';
+import '../enums/app_enum.dart';
 
 final selectedRoleProvider = NotifierProvider<SelectedRoleNotifier, UserRole?>(
   SelectedRoleNotifier.new,

@@ -10,6 +10,9 @@ abstract final class RouteConstants {
   static const String otp = '/otp';
   static const String changePassword = '/change-password';
 
+  //main-nav
+  static const String mainNav = '/mainNav';
+
   // Employee
   static const String employee = '/employee';
   static const String employeeHome = '/employee/home';

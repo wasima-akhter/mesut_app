@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/app_text_styles.dart';
@@ -48,7 +49,7 @@ class AppSelectionBottomSheet<T> extends StatelessWidget {
           return ListTile(
             title: Text(labelBuilder(item), style: AppTextStyles.bodyLarge),
             trailing: item == selectedItem ? const Icon(Icons.check) : null,
-            onTap: () => Navigator.of(context).pop(item),
+            onTap: () => context.pop(item),
           );
         },
       ),

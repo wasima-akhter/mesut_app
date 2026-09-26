@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../core/extensions/num_extensions.dart';
 import 'app_colors.dart';
 import 'app_dimensions.dart';
 import 'app_radii.dart';

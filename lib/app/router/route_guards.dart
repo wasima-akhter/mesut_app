@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/enums/user_role.dart';
+import '../../core/enums/app_enum.dart';
 
 final routeGuardProvider = Provider<RouteGuard>((ref) => RouteGuard());
 

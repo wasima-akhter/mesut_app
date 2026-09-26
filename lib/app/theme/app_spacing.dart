@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AppSpacing {
@@ -19,4 +20,23 @@ class AppSpacing {
   static double get section => 24.h;
   static double get card => 16.h;
   static double get field => 16.h;
+
+  static EdgeInsets screenPadding = EdgeInsets.symmetric(
+    horizontal: screenHorizontal,
+    vertical: screenVertical,
+  );
+
+  // listPadding , bottomSheetPadding
+  static EdgeInsets listPadding = EdgeInsets.symmetric(
+    horizontal: screenHorizontal,
+    vertical: screenVertical,
+  );
+
+  static EdgeInsets bottomSheetPadding = EdgeInsets.symmetric(
+    horizontal: screenHorizontal,
+    vertical: screenVertical,
+  );
+
+  // cardPadding
+  static EdgeInsets cardPadding = EdgeInsets.all(lg);
 }

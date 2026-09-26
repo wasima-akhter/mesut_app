@@ -69,6 +69,8 @@ dependencies:
   # Networking placeholder
   # Kept now so the architecture does not need dependency changes later.
   dio: ^5.11.1
+  shimmer: ^4.0.0
+  pin_code_fields: ^10.1.0
 
 dev_dependencies:
   flutter_test:
