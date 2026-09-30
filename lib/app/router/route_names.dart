@@ -11,7 +11,7 @@ abstract final class RouteNames {
   static const changePassword = 'changePassword';
 
   // Employee shell
-  static const employeeShell = 'employeeShell';
+
   static const employeeHome = 'employeeHome';
   static const employeeJobs = 'employeeJobs';
   static const employeeTime = 'employeeTime';
@@ -19,12 +19,15 @@ abstract final class RouteNames {
   static const employeeProfile = 'employeeProfile';
 
   // Site Manager shell
-  static const siteManagerShell = 'siteManagerShell';
+
   static const siteManagerDashboard = 'siteManagerDashboard';
   static const siteManagerProjects = 'siteManagerProjects';
   static const siteManagerTeam = 'siteManagerTeam';
   static const siteManagerTime = 'siteManagerTime';
   static const siteManagerMore = 'siteManagerMore';
+
+  // Site Manager Individual
+  static const siteManagerProjectDetail = 'siteManagerProjectDetail';
 
   // Shared
   static const projectDetails = 'projectDetails';

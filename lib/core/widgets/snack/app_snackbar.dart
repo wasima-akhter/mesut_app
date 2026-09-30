@@ -3,28 +3,41 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_colors.dart';
 
+final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
+
 enum AppSnackBarType { success, error, info, warning }
 
 class AppSnackBar {
   AppSnackBar._();
 
-  static void show(
-    BuildContext context, {
+  static BuildContext? get _context =>
+      appNavigatorKey.currentState?.overlay?.context;
+
+  static void show({
     required String message,
     AppSnackBarType type = AppSnackBarType.info,
   }) {
-    final messenger = ScaffoldMessenger.of(context);
+    final context = _context;
 
-    final isError = type == AppSnackBarType.error;
+    if (context == null) return;
+
+    final messenger = ScaffoldMessenger.maybeOf(context);
+
+    if (messenger == null) return;
+
+    final backgroundColor = switch (type) {
+      AppSnackBarType.success => AppColors.successDark,
+      AppSnackBarType.error => AppColors.errorDark,
+      AppSnackBarType.info => AppColors.infoDark,
+      AppSnackBarType.warning => AppColors.warningDark,
+    };
 
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
-          backgroundColor: isError
-              ? AppColors.errorDark
-              : AppColors.successDark,
+          backgroundColor: backgroundColor,
           margin: const EdgeInsets.all(16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -37,19 +50,19 @@ class AppSnackBar {
       );
   }
 
-  static void success(BuildContext context, String message) {
-    show(context, message: message, type: AppSnackBarType.success);
+  static void success(String message) {
+    show(message: message, type: AppSnackBarType.success);
   }
 
-  static void error(BuildContext context, String message) {
-    show(context, message: message, type: AppSnackBarType.error);
+  static void error(String message) {
+    show(message: message, type: AppSnackBarType.error);
   }
 
-  static void info(BuildContext context, String message) {
-    show(context, message: message, type: AppSnackBarType.info);
+  static void info(String message) {
+    show(message: message, type: AppSnackBarType.info);
   }
 
-  static void warning(BuildContext context, String message) {
-    show(context, message: message, type: AppSnackBarType.warning);
+  static void warning(String message) {
+    show(message: message, type: AppSnackBarType.warning);
   }
 }

@@ -38,7 +38,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     final passwordError = AuthValidators.password(_passwordController.text);
 
     if (passwordError != null) {
-      AppSnackBar.error(context, passwordError);
+      AppSnackBar.error(passwordError);
       return;
     }
 
@@ -48,11 +48,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     );
 
     if (confirmError != null) {
-      AppSnackBar.error(context, confirmError);
+      AppSnackBar.error(confirmError);
       return;
     }
 
-    AppSnackBar.success(context, 'Password changed successfully');
+    AppSnackBar.success('Password changed successfully');
 
     // TODO: call reset password API
 

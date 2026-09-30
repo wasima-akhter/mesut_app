@@ -66,5 +66,19 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
+	<key>NSCameraUsageDescription</key>
+<string>We need camera access to take project photos.</string>
+
+<key>NSPhotoLibraryUsageDescription</key>
+<string>We need photo library access to upload project photos.</string>
+
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>We use your location to provide navigation to project locations.</string>
+
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>We need access to save project photos to your photo library.</string>
+
+
 </dict>
 </plist>

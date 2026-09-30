@@ -43,28 +43,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final nameError = AuthValidators.name(_nameController.text);
 
     if (nameError != null) {
-      AppSnackBar.error(context, nameError);
+      AppSnackBar.error(nameError);
       return;
     }
 
     final phoneError = AuthValidators.phone(_phoneController.text);
 
     if (phoneError != null) {
-      AppSnackBar.error(context, phoneError);
+      AppSnackBar.error(phoneError);
       return;
     }
 
     final emailError = AuthValidators.email(_emailController.text);
 
     if (emailError != null) {
-      AppSnackBar.error(context, emailError);
+      AppSnackBar.error(emailError);
       return;
     }
 
     final passwordError = AuthValidators.password(_passwordController.text);
 
     if (passwordError != null) {
-      AppSnackBar.error(context, passwordError);
+      AppSnackBar.error(passwordError);
       return;
     }
 
@@ -74,11 +74,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
 
     if (confirmError != null) {
-      AppSnackBar.error(context, confirmError);
+      AppSnackBar.error(confirmError);
       return;
     }
 
-    AppSnackBar.success(context, 'Account created successfully');
+    AppSnackBar.success('Account created successfully');
 
     // TODO: call signup API
 

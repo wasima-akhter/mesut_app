@@ -51,11 +51,11 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
     final error = AuthValidators.otp(_otpController.text);
 
     if (error != null) {
-      AppSnackBar.error(context, error);
+      AppSnackBar.error(error);
       return;
     }
 
-    AppSnackBar.success(context, 'OTP verified successfully');
+    AppSnackBar.success('OTP verified successfully');
 
     switch (widget.purpose) {
       case OtpPurpose.signUp:
@@ -70,10 +70,10 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
   }
 
   void _resendOtp() {
-    AppSnackBar.info(context, 'A new OTP has been sent');
+    AppSnackBar.info('A new OTP has been sent');
 
     // TODO: resend OTP API
-    AppSnackBar.success(context, 'OTP resent successfully');
+    AppSnackBar.success('OTP resent successfully');
   }
 
   @override

@@ -28,6 +28,10 @@ abstract final class RouteConstants {
   static const String siteManagerTime = '/site-manager/time';
   static const String siteManagerMore = '/site-manager/more';
 
+  // Site Manager Individual
+  static const siteManagerProjectDetail = '/site-manager-project-detail';
+  static const siteManagerCreateproject = '/site-manager-create-project';
+
   // Shared
   static const String projectDetails = '/project-details';
   static const String jobDetails = '/job-details';

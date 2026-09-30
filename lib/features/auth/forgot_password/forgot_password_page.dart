@@ -34,11 +34,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final error = AuthValidators.email(_emailController.text);
 
     if (error != null) {
-      AppSnackBar.error(context, error);
+      AppSnackBar.error(error);
       return;
     }
 
-    AppSnackBar.success(context, 'OTP sent to your email');
+    AppSnackBar.success('OTP sent to your email');
 
     context.push(
       RouteConstants.otp,

@@ -42,20 +42,20 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final emailError = AuthValidators.email(_emailController.text);
 
     if (emailError != null) {
-      AppSnackBar.error(context, emailError);
+      AppSnackBar.error(emailError);
       return;
     }
 
     final passwordError = AuthValidators.password(_passwordController.text);
 
     if (passwordError != null) {
-      AppSnackBar.error(context, passwordError);
+      AppSnackBar.error(passwordError);
       return;
     }
 
     // TODO: call login API
 
-    AppSnackBar.success(context, 'Login successful');
+    AppSnackBar.success('Login successful');
 
     context.pushReplacement(RouteConstants.mainNav);
   }
@@ -89,7 +89,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     ref.read(userRoleProvider.notifier).clearRole();
     context.pushReplacement(RouteConstants.signIn);
     AppSnackBar.error(
-      context,
       "We couldn't determine your account role. Please log in again to continue.",
     );
     // Stay on / return to login.
