@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'router/app_router.dart';
+import 'theme/app_text_styles.dart';
 import 'theme/app_theme.dart';
 
 class App extends ConsumerWidget {
@@ -18,10 +19,12 @@ class App extends ConsumerWidget {
       splitScreenMode: true,
       useInheritedMediaQuery: true,
       builder: (_, child) {
+        final theme = AppTheme.light;
+        AppTextStyles.initialize(theme.textTheme);
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
           title: 'Workforce',
-          theme: AppTheme.light,
+          theme: theme,
           routerConfig: router,
         );
       },

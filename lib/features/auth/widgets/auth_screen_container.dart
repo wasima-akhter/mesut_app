@@ -39,7 +39,7 @@ class AuthScreenContainer extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 22.h),
           child: Column(
             children: [
-              ...[const AuthLogo(), SizedBox(height: 34.h)],
+              ...[AuthLogo(height: 80.h), SizedBox(height: 34.h)],
 
               child,
             ],

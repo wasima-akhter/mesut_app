@@ -1,171 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import 'app_colors.dart';
 
 class AppTextStyles {
   AppTextStyles._();
 
-  static const String plusJakartaSans = 'Plus Jakarta Sans';
-  static const String raleway = 'Raleway';
-  static const String inter = 'Inter';
+  static late TextTheme _textTheme;
 
-  // ---------------------------------------------------------------------------
-  // Display / Marketing
-  // ---------------------------------------------------------------------------
+  static void initialize(TextTheme textTheme) {
+    _textTheme = textTheme;
+  }
 
-  static TextStyle get displayLarge => TextStyle(
-    fontFamily: raleway,
-    fontSize: 34.sp,
-    height: 1.18,
-    fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
-  );
+  static TextStyle get displayLarge => _textTheme.displayLarge!;
 
-  static TextStyle get displayMedium => TextStyle(
-    fontFamily: raleway,
-    fontSize: 30.sp,
-    height: 1.2,
-    fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
-  );
-  static TextStyle get displaySmall => TextStyle(
-    fontFamily: raleway,
-    fontSize: 20.sp,
-    height: 1.2,
-    fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
-  );
+  static TextStyle get displayMedium => _textTheme.displayMedium!;
 
-  // ---------------------------------------------------------------------------
-  // Headings
-  // ---------------------------------------------------------------------------
+  static TextStyle get displaySmall => _textTheme.displaySmall!;
 
-  static TextStyle get headlineLarge => TextStyle(
-    fontFamily: plusJakartaSans,
-    fontSize: 26.sp,
-    height: 1.25,
-    fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
-  );
+  static TextStyle get headlineLarge => _textTheme.headlineLarge!;
 
-  static TextStyle get headlineMedium => TextStyle(
-    fontFamily: plusJakartaSans,
-    fontSize: 22.sp,
-    height: 1.3,
-    fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
-  );
+  static TextStyle get headlineMedium => _textTheme.headlineMedium!;
 
-  static TextStyle get headlineSmall => TextStyle(
-    fontFamily: plusJakartaSans,
-    fontSize: 20.sp,
-    height: 1.3,
-    fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
-  );
+  static TextStyle get headlineSmall => _textTheme.headlineSmall!;
 
-  // ---------------------------------------------------------------------------
-  // Titles
-  // ---------------------------------------------------------------------------
+  static TextStyle get titleLarge => _textTheme.titleLarge!;
 
-  static TextStyle get titleLarge => TextStyle(
-    fontFamily: plusJakartaSans,
-    fontSize: 18.sp,
-    height: 1.35,
-    fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
-  );
+  static TextStyle get titleMedium => _textTheme.titleMedium!;
 
-  static TextStyle get titleMedium => TextStyle(
-    fontFamily: plusJakartaSans,
-    fontSize: 16.sp,
-    height: 1.4,
-    fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
-  );
+  static TextStyle get titleSmall => _textTheme.titleSmall!;
 
-  static TextStyle get titleSmall => TextStyle(
-    fontFamily: plusJakartaSans,
-    fontSize: 14.sp,
-    height: 1.4,
-    fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
-  );
+  static TextStyle get bodyLarge => _textTheme.bodyLarge!;
 
-  // ---------------------------------------------------------------------------
-  // Body
-  // ---------------------------------------------------------------------------
+  static TextStyle get bodyMedium => _textTheme.bodyMedium!;
 
-  static TextStyle get bodyLarge => TextStyle(
-    fontFamily: plusJakartaSans,
-    fontSize: 16.sp,
-    height: 1.5,
-    fontWeight: FontWeight.w400,
-    color: AppColors.textPrimary,
-  );
+  static TextStyle get bodySmall => _textTheme.bodySmall!;
 
-  static TextStyle get bodyMedium => TextStyle(
-    fontFamily: plusJakartaSans,
-    fontSize: 14.sp,
-    height: 1.5,
-    fontWeight: FontWeight.w400,
-    color: AppColors.textSecondary,
-  );
+  static TextStyle get labelLarge => _textTheme.labelLarge!;
 
-  static TextStyle get bodySmall => TextStyle(
-    fontFamily: plusJakartaSans,
-    fontSize: 12.sp,
-    height: 1.45,
-    fontWeight: FontWeight.w400,
-    color: AppColors.textTertiary,
-  );
+  static TextStyle get labelMedium => _textTheme.labelMedium!;
 
-  // ---------------------------------------------------------------------------
-  // Labels
-  // ---------------------------------------------------------------------------
+  static TextStyle get labelSmall => _textTheme.labelSmall!;
 
-  static TextStyle get labelLarge => TextStyle(
-    fontFamily: inter,
-    fontSize: 14.sp,
-    height: 1.35,
-    fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
-  );
+  static TextStyle get button =>
+      _textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w700);
 
-  static TextStyle get labelMedium => TextStyle(
-    fontFamily: inter,
-    fontSize: 12.sp,
-    height: 1.35,
-    fontWeight: FontWeight.w600,
-    color: AppColors.textSecondary,
-  );
-
-  static TextStyle get labelSmall => TextStyle(
-    fontFamily: inter,
-    fontSize: 11.sp,
-    height: 1.3,
-    fontWeight: FontWeight.w600,
-    color: AppColors.textTertiary,
-  );
-
-  // ---------------------------------------------------------------------------
-  // Special
-  // ---------------------------------------------------------------------------
-
-  static TextStyle get button => TextStyle(
-    fontFamily: plusJakartaSans,
-    fontSize: 15.sp,
-    height: 1.2,
-    fontWeight: FontWeight.w700,
-    color: AppColors.textOnPrimary,
-  );
-
-  static TextStyle get caption => TextStyle(
-    fontFamily: inter,
-    fontSize: 11.sp,
-    height: 1.35,
-    fontWeight: FontWeight.w400,
-    color: AppColors.textTertiary,
-  );
+  static TextStyle get caption =>
+      _textTheme.labelSmall!.copyWith(fontWeight: FontWeight.w400);
 }

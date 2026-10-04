@@ -23,21 +23,21 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   final List<_OnboardingItem> _items = const [
     _OnboardingItem(
-      icon: Icons.assignment_rounded,
+      image: 'assets/images/onboarding_1.png',
       title: 'Stay on top of your work',
       description:
           'See your assigned jobs, project details, '
           'tasks, and safety instructions in one place.',
     ),
     _OnboardingItem(
-      icon: Icons.timer_rounded,
+      image: 'assets/images/onboarding_2.png',
       title: 'Track your time easily',
       description:
           'Start and manage your working time, breaks, '
           'and activities without unnecessary paperwork.',
     ),
     _OnboardingItem(
-      icon: Icons.groups_rounded,
+      image: 'assets/images/onboarding_2.png',
       title: 'Keep the whole team connected',
       description:
           'Stay aligned with your team, projects, '
@@ -76,27 +76,43 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildTopBar(),
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: _items.length,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentPage = index;
-                  });
-                },
-                itemBuilder: (context, index) {
-                  return _OnboardingContent(item: _items[index]);
-                },
-              ),
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 500),
+        switchInCurve: Curves.easeInOut,
+        switchOutCurve: Curves.easeInOut,
+        child: Container(
+          key: ValueKey(_items[_currentPage].image),
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(_items[_currentPage].image),
+              fit: BoxFit.cover,
             ),
-            _buildBottomSection(),
-          ],
+          ),
+
+          child: SafeArea(
+            child: Column(
+              children: [
+                _buildTopBar(),
+
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: _items.length,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentPage = index;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      return _OnboardingContent(item: _items[index]);
+                    },
+                  ),
+                ),
+
+                _buildBottomSection(),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -144,63 +160,35 @@ class _OnboardingContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return Padding(
       padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: 480.h),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(height: 24.h),
-            _Illustration(icon: item.icon),
-            SizedBox(height: 48.h),
-            Text(
-              item.title,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.headlineMedium.copyWith(
-                color: AppColors.textPrimary,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: 20.h),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                item.title,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.headlineMedium.copyWith(
+                  color: Colors.white,
+                ),
               ),
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              item.description,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.bodyLarge.copyWith(
-                color: AppColors.textSecondary,
-                height: 1.55,
+
+              SizedBox(height: 12.h),
+
+              Text(
+                item.description,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: Colors.white,
+                  height: 1.55,
+                ),
               ),
-            ),
-            SizedBox(height: 32.h),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Illustration extends StatelessWidget {
-  const _Illustration({required this.icon});
-
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 220.r,
-      height: 220.r,
-      decoration: BoxDecoration(
-        color: AppColors.primary50,
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Container(
-          width: 132.r,
-          height: 132.r,
-          decoration: BoxDecoration(
-            color: AppColors.primary100,
-            borderRadius: BorderRadius.circular(40.r),
+            ],
           ),
-          child: Icon(icon, size: 64.r, color: AppColors.primary600),
         ),
       ),
     );
@@ -237,12 +225,12 @@ class _PageIndicator extends StatelessWidget {
 
 class _OnboardingItem {
   const _OnboardingItem({
-    required this.icon,
+    required this.image,
     required this.title,
     required this.description,
   });
 
-  final IconData icon;
+  final String image;
   final String title;
   final String description;
 }
