@@ -203,7 +203,7 @@ class _PhotosTabState extends State<PhotosTab> {
             icon: Icon(Icons.upload_outlined, size: 16.sp),
             label: Text(
               'Upload Files',
-              style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFC8102E),
@@ -238,7 +238,7 @@ class _PhotosTabState extends State<PhotosTab> {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 13.sp,
+            fontSize: 16.sp,
             color: selected ? Colors.white : const Color(0xFF666666),
             fontWeight: FontWeight.w600,
           ),
@@ -279,7 +279,7 @@ class _PhotosTabState extends State<PhotosTab> {
                 child: Text(
                   'Cover',
                   style: TextStyle(
-                    fontSize: 13.sp,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -368,7 +368,7 @@ class _PhotosTabState extends State<PhotosTab> {
                 file.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w500),
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
               ),
             ),
 
@@ -429,12 +429,12 @@ class _PhotosTabState extends State<PhotosTab> {
       children: [
         Text(
           title,
-          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+          style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700),
         ),
         SizedBox(width: 5.w),
         Text(
           '($count)',
-          style: TextStyle(fontSize: 13.sp, color: const Color(0xFF777777)),
+          style: TextStyle(fontSize: 16.sp, color: const Color(0xFF777777)),
         ),
       ],
     );
@@ -470,7 +470,7 @@ class _PhotosTabState extends State<PhotosTab> {
                 Text(
                   'Upload Files',
                   style: TextStyle(
-                    fontSize: 17.sp,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -536,7 +536,7 @@ class _PhotosTabState extends State<PhotosTab> {
 
           Text(
             title,
-            style: TextStyle(fontSize: 10.5.sp, color: const Color(0xFF555555)),
+            style: TextStyle(fontSize: 13.5.sp, color: const Color(0xFF555555)),
           ),
         ],
       ),
@@ -640,7 +640,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
             'Photo',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 15.sp,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -698,7 +698,12 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
                 widget.onSetCover();
 
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Cover photo updated')),
+                  SnackBar(
+                    content: Text(
+                      'Cover photo updated',
+                      style: TextStyle(fontSize: 16.sp),
+                    ),
+                  ),
                 );
               },
             ),
@@ -710,9 +715,14 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
             icon: Icons.download_outlined,
             label: 'Download',
             onTap: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Download started')));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Download started',
+                    style: TextStyle(fontSize: 16.sp),
+                  ),
+                ),
+              );
             },
           ),
 
@@ -741,7 +751,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
         icon: Icon(icon, size: 15.sp),
         label: Text(
           label,
-          style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
@@ -765,7 +775,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
       child: OutlinedButton.icon(
         onPressed: onTap,
         icon: Icon(icon, size: 14.sp),
-        label: Text(label, style: TextStyle(fontSize: 9.5.sp)),
+        label: Text(label, style: TextStyle(fontSize: 12.5.sp)),
         style: OutlinedButton.styleFrom(
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,

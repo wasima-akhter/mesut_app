@@ -30,21 +30,21 @@ class AppTheme {
       textTheme: TextTheme(
         displayLarge: TextStyle(
           fontFamily: 'Raleway',
-          fontSize: 36.sp,
+          fontSize: 37.5.sp,
           height: 1.18,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
         displayMedium: TextStyle(
           fontFamily: 'Raleway',
-          fontSize: 32.sp,
+          fontSize: 33.5.sp,
           height: 1.2,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
         displaySmall: TextStyle(
           fontFamily: 'Raleway',
-          fontSize: 22.sp,
+          fontSize: 23.5.sp,
           height: 1.2,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
@@ -52,21 +52,21 @@ class AppTheme {
 
         headlineLarge: TextStyle(
           fontFamily: 'Plus Jakarta Sans',
-          fontSize: 28.sp,
+          fontSize: 29.5.sp,
           height: 1.25,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
         headlineMedium: TextStyle(
           fontFamily: 'Plus Jakarta Sans',
-          fontSize: 24.sp,
+          fontSize: 25.5.sp,
           height: 1.3,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
         headlineSmall: TextStyle(
           fontFamily: 'Plus Jakarta Sans',
-          fontSize: 22.sp,
+          fontSize: 23.5.sp,
           height: 1.3,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
@@ -74,21 +74,21 @@ class AppTheme {
 
         titleLarge: TextStyle(
           fontFamily: 'Plus Jakarta Sans',
-          fontSize: 20.sp,
+          fontSize: 21.5.sp,
           height: 1.35,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
         titleMedium: TextStyle(
           fontFamily: 'Plus Jakarta Sans',
-          fontSize: 18.sp,
+          fontSize: 19.5.sp,
           height: 1.4,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
         titleSmall: TextStyle(
           fontFamily: 'Plus Jakarta Sans',
-          fontSize: 16.sp,
+          fontSize: 17.5.sp,
           height: 1.4,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
@@ -96,21 +96,21 @@ class AppTheme {
 
         bodyLarge: TextStyle(
           fontFamily: 'Plus Jakarta Sans',
-          fontSize: 18.sp,
+          fontSize: 19.5.sp,
           height: 1.5,
           fontWeight: FontWeight.w400,
           color: AppColors.textPrimary,
         ),
         bodyMedium: TextStyle(
           fontFamily: 'Plus Jakarta Sans',
-          fontSize: 16.sp,
+          fontSize: 17.5.sp,
           height: 1.5,
           fontWeight: FontWeight.w400,
           color: AppColors.textSecondary,
         ),
         bodySmall: TextStyle(
           fontFamily: 'Plus Jakarta Sans',
-          fontSize: 14.sp,
+          fontSize: 15.5.sp,
           height: 1.45,
           fontWeight: FontWeight.w400,
           color: AppColors.textTertiary,
@@ -118,21 +118,21 @@ class AppTheme {
 
         labelLarge: TextStyle(
           fontFamily: 'Inter',
-          fontSize: 16.sp,
+          fontSize: 17.5.sp,
           height: 1.35,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
         labelMedium: TextStyle(
           fontFamily: 'Inter',
-          fontSize: 14.sp,
+          fontSize: 15.5.sp,
           height: 1.35,
           fontWeight: FontWeight.w600,
           color: AppColors.textSecondary,
         ),
         labelSmall: TextStyle(
           fontFamily: 'Inter',
-          fontSize: 13.sp,
+          fontSize: 14.5.sp,
           height: 1.3,
           fontWeight: FontWeight.w600,
           color: AppColors.textTertiary,
@@ -146,7 +146,7 @@ class AppTheme {
         centerTitle: false,
         titleTextStyle: TextStyle(
           fontFamily: 'Plus Jakarta Sans',
-          fontSize: 20.sp,
+          fontSize: 21.5.sp,
           height: 1.35,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
@@ -192,7 +192,7 @@ class AppTheme {
         ),
         hintStyle: TextStyle(
           fontFamily: 'Plus Jakarta Sans',
-          fontSize: 16.sp,
+          fontSize: 17.5.sp,
           height: 1.5,
           fontWeight: FontWeight.w400,
           color: AppColors.textSecondary,
@@ -207,7 +207,7 @@ class AppTheme {
         labelTextStyle: WidgetStatePropertyAll(
           TextStyle(
             fontFamily: 'Inter',
-            fontSize: 13.sp,
+            fontSize: 14.5.sp,
             height: 1.3,
             fontWeight: FontWeight.w600,
             color: AppColors.textTertiary,
@@ -224,7 +224,7 @@ class AppTheme {
         backgroundColor: AppColors.neutral900,
         contentTextStyle: TextStyle(
           fontFamily: 'Plus Jakarta Sans',
-          fontSize: 16.sp,
+          fontSize: 17.5.sp,
           height: 1.5,
           fontWeight: FontWeight.w400,
           color: AppColors.white,

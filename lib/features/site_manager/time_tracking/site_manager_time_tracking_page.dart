@@ -1,10 +1,1643 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class SiteManagerTimeTrackingPage extends StatelessWidget {
+import '../../../app/theme/app_colors.dart';
+import '../../../app/theme/app_radii.dart';
+import '../helper/site_manager_enums.dart';
+import '../helper/site_manager_models.dart';
+import 'bottom_sheet_container.dart';
+
+class SiteManagerTimeTrackingPage extends StatefulWidget {
   const SiteManagerTimeTrackingPage({super.key});
 
   @override
+  State<SiteManagerTimeTrackingPage> createState() =>
+      _SiteManagerTimeTrackingPageState();
+}
+
+class _SiteManagerTimeTrackingPageState
+    extends State<SiteManagerTimeTrackingPage> {
+  TimeTrackingTab _selectedTab = TimeTrackingTab.myTime;
+
+  TimeEntryFilter _selectedFilter = TimeEntryFilter.thisWeek;
+
+  final ActivityType _selectedActivity = ActivityType.erection;
+
+  String _selectedProject = 'PRJ-0842 • Goldstein Complex';
+
+  bool _isTimerRunning = false;
+
+  final DateTime _selectedDate = DateTime(2026, 12, 10);
+
+  final int _scaffolds = 24;
+
+  final List<String> _projects = [
+    'PRJ-0842 • Goldstein Complex',
+    'PRJ-0912 • Riverside Tower',
+    'PRJ-0731 • City Center',
+  ];
+
+  final List<TimeEntryModel> _entries = [
+    TimeEntryModel(
+      id: '1',
+      project: 'PRJ-0842 • Goldsteins Complex',
+      activity: ActivityType.erection,
+      date: DateTime(2026, 9, 18),
+      startTime: '07:30 am',
+      endTime: '04:15 pm',
+      breakTime: '45m',
+      employee: 'Tim Muller',
+    ),
+    TimeEntryModel(
+      id: '2',
+      project: 'PRJ-0842 • Goldsteins Complex',
+      activity: ActivityType.dismantling,
+      date: DateTime(2026, 9, 18),
+      startTime: '07:30 am',
+      endTime: '04:15 pm',
+      breakTime: '45m',
+      employee: 'Tim Muller',
+    ),
+    TimeEntryModel(
+      id: '3',
+      project: 'PRJ-0912 • Riverside Tower',
+      activity: ActivityType.standing,
+      date: DateTime(2026, 9, 17),
+      startTime: '08:00 am',
+      endTime: '04:00 pm',
+      breakTime: '30m',
+      employee: 'John Smith',
+    ),
+  ];
+
+  final List<CrewMemberModel> _crewMembers = [
+    CrewMemberModel(
+      name: 'Tim Muller',
+      activity: ActivityType.erection,
+      startTime: '07:30 am',
+      endTime: '04:15 pm',
+      breakTime: '45m',
+      totalHours: '7h 30min',
+    ),
+    CrewMemberModel(
+      name: 'Alex Brown',
+      activity: ActivityType.dismantling,
+      startTime: '07:30 am',
+      endTime: '04:15 pm',
+      breakTime: '45m',
+      totalHours: '7h 30min',
+    ),
+    CrewMemberModel(
+      name: 'John Smith',
+      activity: ActivityType.others,
+      startTime: '08:00 am',
+      endTime: '04:30 pm',
+      breakTime: '30m',
+      totalHours: '8h',
+    ),
+  ];
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Text("SiteManagerTimeTrackingPage")));
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(),
+
+            _buildMainTabs(),
+
+            Expanded(
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  if (_selectedTab == TimeTrackingTab.myTime)
+                    ..._buildMyTimeSlivers()
+                  else
+                    ..._buildCrewTimeSlivers(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 12.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Time Tracking',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  'Week 38 • Sep 14 – Sep 20',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+
+          _buildHeaderAction(
+            icon: Icons.add,
+            label: 'Add Time',
+            onTap: _showAddTimeSheet,
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showStartTimerSheet() {
+    ActivityType selectedActivity = ActivityType.erection;
+    String? selectedProject;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return SafeArea(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(24.r),
+                  ),
+                ),
+                padding: EdgeInsets.fromLTRB(
+                  20.w,
+                  12.h,
+                  20.w,
+                  MediaQuery.of(context).viewInsets.bottom + 20.h,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40.w,
+                          height: 4.h,
+                          decoration: BoxDecoration(
+                            color: AppColors.neutral300,
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: 20.h),
+
+                      Center(
+                        child: Text(
+                          'Start New Timer',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+
+                      SizedBox(height: 4.h),
+
+                      Center(
+                        child: Text(
+                          'Select an assigned project to begin tracking your work',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+
+                      SizedBox(height: 24.h),
+
+                      Text(
+                        'Assigned Project',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+
+                      SizedBox(height: 8.h),
+
+                      DropdownButtonFormField<String>(
+                        initialValue: selectedProject,
+                        decoration: const InputDecoration(
+                          hintText: 'Select project',
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'PRJ-0842',
+                            child: Text('PRJ-0842 • Goldstein Complex'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'PRJ-0912',
+                            child: Text('PRJ-0912 • City Center'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setSheetState(() {
+                            selectedProject = value;
+                          });
+                        },
+                      ),
+
+                      SizedBox(height: 18.h),
+
+                      Text(
+                        'Activity Type',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+
+                      SizedBox(height: 8.h),
+
+                      DropdownButtonFormField<ActivityType>(
+                        initialValue: selectedActivity,
+                        decoration: const InputDecoration(),
+                        items: ActivityType.values.map((activity) {
+                          return DropdownMenuItem(
+                            value: activity,
+                            child: Text(activity.label),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value == null) return;
+
+                          setSheetState(() {
+                            selectedActivity = value;
+                          });
+                        },
+                      ),
+
+                      SizedBox(height: 12.h),
+
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(12.w),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceTertiary,
+                          borderRadius: AppRadii.medium,
+                        ),
+                        child: Text(
+                          'Timer will start from now.',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+
+                      SizedBox(height: 20.h),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: selectedProject == null
+                              ? null
+                              : () {
+                                  setState(() {
+                                    // Replace with your timer state later.
+                                    _isTimerRunning = true;
+                                  });
+
+                                  Navigator.pop(sheetContext);
+
+                                  _showMessage(
+                                    'Timer started for ${selectedActivity.label}',
+                                  );
+                                },
+                          child: const Text('Start Timer'),
+                        ),
+                      ),
+
+                      SizedBox(height: 8.h),
+
+                      Center(
+                        child: TextButton(
+                          onPressed: () => Navigator.pop(sheetContext),
+                          child: const Text('Cancel'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showAddTimeSheet() {
+    TimeEntryTab selectedTab = TimeEntryTab.myTime;
+
+    String? selectedEmployee = 'Tim Muller';
+    String? selectedProject = 'PRJ-0842 • Goldstein Complex';
+
+    ActivityType selectedActivity = ActivityType.erection;
+
+    DateTime selectedDate = DateTime(2026, 10, 12);
+
+    TimeOfDay startTime = const TimeOfDay(hour: 7, minute: 30);
+
+    TimeOfDay endTime = const TimeOfDay(hour: 18, minute: 30);
+
+    TimeOfDay breakTime = const TimeOfDay(hour: 18, minute: 30);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return SafeArea(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(24.r),
+                  ),
+                ),
+                padding: EdgeInsets.fromLTRB(
+                  20.w,
+                  12.h,
+                  20.w,
+                  MediaQuery.of(context).viewInsets.bottom + 20.h,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40.w,
+                          height: 4.h,
+                          decoration: BoxDecoration(
+                            color: AppColors.neutral300,
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: 18.h),
+
+                      Center(
+                        child: Text(
+                          'Add Time Entry',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+
+                      SizedBox(height: 18.h),
+
+                      _buildTimeEntryTabs(
+                        selectedTab: selectedTab,
+                        onChanged: (tab) {
+                          setSheetState(() {
+                            selectedTab = tab;
+                          });
+                        },
+                      ),
+
+                      SizedBox(height: 18.h),
+
+                      if (selectedTab == TimeEntryTab.siteCrewTime) ...[
+                        Text(
+                          'Select Employee',
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+
+                        SizedBox(height: 8.h),
+
+                        DropdownButtonFormField<String>(
+                          initialValue: selectedEmployee,
+                          decoration: const InputDecoration(),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'Tim Muller',
+                              child: Text('Tim Muller'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Alex Brown',
+                              child: Text('Alex Brown'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'John Smith',
+                              child: Text('John Smith'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setSheetState(() {
+                              selectedEmployee = value;
+                            });
+                          },
+                        ),
+
+                        SizedBox(height: 18.h),
+                      ],
+
+                      Text(
+                        'Date',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+
+                      SizedBox(height: 8.h),
+
+                      _buildDateField(
+                        context: context,
+                        date: selectedDate,
+                        onTap: () async {
+                          final date = await showDatePicker(
+                            context: context,
+                            initialDate: selectedDate,
+                            firstDate: DateTime(2020),
+                            lastDate: DateTime(2035),
+                          );
+
+                          if (date != null) {
+                            setSheetState(() {
+                              selectedDate = date;
+                            });
+                          }
+                        },
+                      ),
+
+                      SizedBox(height: 18.h),
+
+                      Text(
+                        'Project',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+
+                      SizedBox(height: 8.h),
+
+                      DropdownButtonFormField<String>(
+                        initialValue: selectedProject,
+                        decoration: const InputDecoration(),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'PRJ-0842 • Goldstein Complex',
+                            child: Text('PRJ-0842 • Goldstein Complex'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'PRJ-0912 • City Center',
+                            child: Text('PRJ-0912 • City Center'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setSheetState(() {
+                            selectedProject = value;
+                          });
+                        },
+                      ),
+
+                      SizedBox(height: 18.h),
+
+                      Text(
+                        'Activity Type',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+
+                      SizedBox(height: 8.h),
+
+                      DropdownButtonFormField<ActivityType>(
+                        initialValue: selectedActivity,
+                        decoration: const InputDecoration(),
+                        items: ActivityType.values.map((activity) {
+                          return DropdownMenuItem(
+                            value: activity,
+                            child: Text(activity.label),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value == null) return;
+
+                          setSheetState(() {
+                            selectedActivity = value;
+                          });
+                        },
+                      ),
+
+                      SizedBox(height: 18.h),
+
+                      Text(
+                        'Start Time',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+
+                      SizedBox(height: 8.h),
+
+                      _buildTimeField(
+                        context: context,
+                        time: startTime,
+                        onTap: () async {
+                          final time = await showTimePicker(
+                            context: context,
+                            initialTime: startTime,
+                          );
+
+                          if (time != null) {
+                            setSheetState(() {
+                              startTime = time;
+                            });
+                          }
+                        },
+                      ),
+
+                      SizedBox(height: 18.h),
+
+                      Text(
+                        'End Time',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+
+                      SizedBox(height: 8.h),
+
+                      _buildTimeField(
+                        context: context,
+                        time: endTime,
+                        onTap: () async {
+                          final time = await showTimePicker(
+                            context: context,
+                            initialTime: endTime,
+                          );
+
+                          if (time != null) {
+                            setSheetState(() {
+                              endTime = time;
+                            });
+                          }
+                        },
+                      ),
+
+                      SizedBox(height: 18.h),
+
+                      Text(
+                        'Break Time',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+
+                      SizedBox(height: 8.h),
+
+                      _buildTimeField(
+                        context: context,
+                        time: breakTime,
+                        onTap: () async {
+                          final time = await showTimePicker(
+                            context: context,
+                            initialTime: breakTime,
+                          );
+
+                          if (time != null) {
+                            setSheetState(() {
+                              breakTime = time;
+                            });
+                          }
+                        },
+                      ),
+
+                      SizedBox(height: 12.h),
+
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(12.w),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceTertiary,
+                          borderRadius: AppRadii.medium,
+                        ),
+                        child: Text(
+                          'Working time is calculated automatically after deducting the break.',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+
+                      SizedBox(height: 20.h),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              // Add your new entry to the list here.
+                            });
+
+                            Navigator.pop(sheetContext);
+
+                            _showMessage('Time entry added');
+                          },
+                          child: const Text('Save Entry'),
+                        ),
+                      ),
+
+                      SizedBox(height: 8.h),
+
+                      Center(
+                        child: TextButton(
+                          onPressed: () => Navigator.pop(sheetContext),
+                          child: const Text('Cancel'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildDateField({
+    required BuildContext context,
+    required DateTime date,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: AppRadii.medium,
+      child: InputDecorator(
+        decoration: const InputDecoration(
+          suffixIcon: Icon(Icons.calendar_today_outlined),
+        ),
+        child: Text(
+          '${date.day.toString().padLeft(2, '0')}-'
+          '${date.month.toString().padLeft(2, '0')}-'
+          '${date.year}',
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimeField({
+    required BuildContext context,
+    required TimeOfDay time,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: AppRadii.medium,
+      child: InputDecorator(
+        decoration: const InputDecoration(
+          suffixIcon: Icon(Icons.access_time_outlined),
+        ),
+        child: Text(time.format(context)),
+      ),
+    );
+  }
+
+  Widget _buildTimeEntryTabs({
+    required TimeEntryTab selectedTab,
+    required ValueChanged<TimeEntryTab> onChanged,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.border),
+        borderRadius: AppRadii.medium,
+      ),
+      padding: EdgeInsets.all(3.w),
+      child: Row(
+        children: TimeEntryTab.values.map((tab) {
+          final selected = tab == selectedTab;
+
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => onChanged(tab),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: selected ? AppColors.black : Colors.transparent,
+                  borderRadius: AppRadii.small,
+                ),
+                child: Text(
+                  tab.label,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: selected ? AppColors.white : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildHeaderAction({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(8.r),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 17.sp, color: AppColors.textSecondary),
+              SizedBox(width: 4.w),
+              Text(label, style: Theme.of(context).textTheme.labelMedium),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainTabs() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      child: Container(
+        padding: EdgeInsets.all(3.w),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(9.r),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: _tabItem(
+                label: 'My Time',
+                selected: _selectedTab == TimeTrackingTab.myTime,
+                onTap: () {
+                  setState(() {
+                    _selectedTab = TimeTrackingTab.myTime;
+                  });
+                },
+              ),
+            ),
+            Expanded(
+              child: _tabItem(
+                label: 'Site Crew Time',
+                selected: _selectedTab == TimeTrackingTab.siteCrewTime,
+                onTap: () {
+                  setState(() {
+                    _selectedTab = TimeTrackingTab.siteCrewTime;
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _tabItem({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: selected ? AppColors.black : Colors.transparent,
+      borderRadius: BorderRadius.circular(7.r),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(7.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 11.h, horizontal: 12.w),
+          child: Center(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: selected ? AppColors.white : AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildMyTimeSlivers() {
+    return [
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 0),
+        sliver: SliverToBoxAdapter(child: _buildMyTimeSummary()),
+      ),
+
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
+        sliver: SliverToBoxAdapter(child: _buildStartTimerButton()),
+      ),
+
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(20.w, 22.h, 20.w, 0),
+        sliver: SliverToBoxAdapter(child: _buildRecentLogsHeader()),
+      ),
+
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 30.h),
+        sliver: SliverToBoxAdapter(child: _buildFilterChips()),
+      ),
+
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 30.h),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate((context, index) {
+            final entry = _entries[index];
+
+            return Padding(
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: _buildTimeEntryCard(entry),
+            );
+          }, childCount: _entries.length),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildCrewTimeSlivers() {
+    return [
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 0),
+        sliver: SliverToBoxAdapter(child: _buildProjectSelector()),
+      ),
+
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 0),
+        sliver: SliverToBoxAdapter(child: _buildCrewSummary()),
+      ),
+
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(20.w, 22.h, 20.w, 0),
+        sliver: SliverToBoxAdapter(
+          child: Text(
+            'Crew Breakdown',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+        ),
+      ),
+
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 30.h),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate((context, index) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: 10.h),
+              child: _buildCrewCard(_crewMembers[index]),
+            );
+          }, childCount: _crewMembers.length),
+        ),
+      ),
+    ];
+  }
+
+  Widget _buildMyTimeSummary() {
+    return Container(
+      padding: EdgeInsets.all(18.w),
+      decoration: BoxDecoration(
+        color: AppColors.timeDarkSurface,
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _summaryValue(title: 'TODAY', value: '7h 30min'),
+              ),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: _summaryValue(
+                    title: 'THIS WEEK',
+                    value: '35h 30min',
+                    alignRight: true,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 15.h),
+
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20.r),
+            child: LinearProgressIndicator(
+              value: .86,
+              minHeight: 5.h,
+              backgroundColor: AppColors.neutral600,
+              valueColor: const AlwaysStoppedAnimation(AppColors.white),
+            ),
+          ),
+
+          SizedBox(height: 8.h),
+
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '34h 15m of 40h logged this week',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.neutral300),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryValue({
+    required String title,
+    required String value,
+    bool alignRight = false,
+  }) {
+    return Column(
+      crossAxisAlignment: alignRight
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(color: AppColors.neutral400),
+        ),
+        SizedBox(height: 3.h),
+        Text(
+          value,
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(color: AppColors.white),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStartTimerButton() {
+    return Material(
+      color: AppColors.primary,
+      borderRadius: BorderRadius.circular(8.r),
+      child: InkWell(
+        onTap: _isTimerRunning ? _stopTimer : _showStartTimerSheet,
+        borderRadius: BorderRadius.circular(8.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 13.h),
+          child: Center(
+            child: Text(
+              _isTimerRunning ? 'Stop Timer' : 'Start New Timer',
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(color: AppColors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecentLogsHeader() {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            'Recent Logs',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterChips() {
+    return Row(
+      children: [
+        _filterChip(TimeEntryFilter.thisWeek),
+        SizedBox(width: 7.w),
+        _filterChip(TimeEntryFilter.thisMonth),
+      ],
+    );
+  }
+
+  Widget _filterChip(TimeEntryFilter filter) {
+    final selected = _selectedFilter == filter;
+
+    return Material(
+      color: selected ? AppColors.primary : AppColors.surfaceTertiary,
+      borderRadius: BorderRadius.circular(8.r),
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _selectedFilter = filter;
+          });
+        },
+        borderRadius: BorderRadius.circular(8.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+          child: Text(
+            filter.label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: selected ? AppColors.white : AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimeEntryCard(TimeEntryModel entry) {
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(10.r),
+      child: InkWell(
+        onTap: () => _showEntryDetails(entry),
+        borderRadius: BorderRadius.circular(10.r),
+        child: Padding(
+          padding: EdgeInsets.all(15.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Today, Sep 18',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+
+              SizedBox(height: 5.h),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      entry.project,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ),
+                  Text(
+                    entry.duration,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 8.h),
+
+              _activityBadge(entry.activity),
+
+              SizedBox(height: 12.h),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${entry.startTime} – ${entry.endTime} • Break: ${entry.breakTime}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                  Text(
+                    entry.isSynced ? 'Synced' : 'Pending',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: entry.isSynced
+                          ? AppColors.success
+                          : AppColors.warning,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _activityBadge(ActivityType activity) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: _activityColor(activity).withValues(alpha: .10),
+        borderRadius: BorderRadius.circular(6.r),
+      ),
+      child: Text(
+        activity.label,
+        style: Theme.of(
+          context,
+        ).textTheme.labelSmall?.copyWith(color: _activityColor(activity)),
+      ),
+    );
+  }
+
+  Color _activityColor(ActivityType activity) {
+    switch (activity) {
+      case ActivityType.erection:
+        return AppColors.success;
+      case ActivityType.dismantling:
+        return AppColors.warning;
+      case ActivityType.standing:
+        return AppColors.info;
+      case ActivityType.others:
+        return AppColors.timePurple;
+    }
+  }
+
+  Widget _buildProjectSelector() {
+    return _selectField(
+      label: 'Project',
+      value: _selectedProject,
+      onTap: _showProjectSelector,
+    );
+  }
+
+  Widget _buildCrewSummary() {
+    return Container(
+      padding: EdgeInsets.all(18.w),
+      decoration: BoxDecoration(
+        color: AppColors.timeDarkSurface,
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Total Project Hours',
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(color: AppColors.neutral400),
+          ),
+
+          SizedBox(height: 3.h),
+
+          Text(
+            '7h 30min',
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(color: AppColors.white),
+          ),
+
+          SizedBox(height: 14.h),
+
+          _crewProgress(
+            activity: ActivityType.erection,
+            hours: '2hrs',
+            progress: .65,
+          ),
+
+          _crewProgress(
+            activity: ActivityType.dismantling,
+            hours: '2hrs',
+            progress: .45,
+          ),
+
+          _crewProgress(
+            activity: ActivityType.others,
+            hours: '2hrs',
+            progress: .35,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _crewProgress({
+    required ActivityType activity,
+    required String hours,
+    required double progress,
+  }) {
+    return Padding(
+      padding: EdgeInsets.only(top: 12.h),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 7.w,
+                height: 7.w,
+                decoration: BoxDecoration(
+                  color: _activityColor(activity),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              SizedBox(width: 7.w),
+              Expanded(
+                child: Text(
+                  activity.label,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppColors.white),
+                ),
+              ),
+              Text(
+                hours,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.neutral300),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 5.h),
+
+          LinearProgressIndicator(
+            value: progress,
+            minHeight: 4.h,
+            backgroundColor: AppColors.neutral700,
+            valueColor: AlwaysStoppedAnimation(_activityColor(activity)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCrewCard(CrewMemberModel member) {
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(10.r),
+      child: InkWell(
+        onTap: () => _showCrewDetails(member),
+        borderRadius: BorderRadius.circular(10.r),
+        child: Padding(
+          padding: EdgeInsets.all(12.w),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 21.r,
+                backgroundColor: AppColors.primary100,
+                child: Text(
+                  member.name.substring(0, 1),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(color: AppColors.primary700),
+                ),
+              ),
+
+              SizedBox(width: 10.w),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          member.name,
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        SizedBox(width: 7.w),
+                        Text(
+                          member.activity.label,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 4.h),
+
+                    Text(
+                      '${member.startTime} – ${member.endTime} • Break: ${member.breakTime}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'synced',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelSmall?.copyWith(color: AppColors.success),
+                  ),
+                  SizedBox(height: 3.h),
+                  Text(
+                    member.totalHours,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _sheetTabs() {
+    return Container(
+      padding: EdgeInsets.all(3.w),
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _tabItem(label: 'My Time', selected: true, onTap: () {}),
+          ),
+          Expanded(
+            child: _tabItem(
+              label: 'Site Crew Time',
+              selected: false,
+              onTap: () {},
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _sheetField({required String label, required Widget child}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: Theme.of(context).textTheme.labelLarge),
+        SizedBox(height: 7.h),
+        child,
+      ],
+    );
+  }
+
+  Widget _dropdownField({
+    required String value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          items: items.map((item) {
+            return DropdownMenuItem(value: item, child: Text(item));
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+  Widget _clickableField({
+    required String value,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(8.r),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8.r),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 13.h),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.border),
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  value,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+              Icon(icon, size: 18.sp, color: AppColors.textSecondary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _primaryAction({required String label, required VoidCallback onTap}) {
+    return Material(
+      color: AppColors.primary,
+      borderRadius: BorderRadius.circular(8.r),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
+          child: Center(
+            child: Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(color: AppColors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _secondaryAction({
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
+          child: Center(
+            child: Text(label, style: Theme.of(context).textTheme.labelLarge),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _selectField({
+    required String label,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: Theme.of(context).textTheme.labelLarge),
+        SizedBox(height: 7.h),
+        _clickableField(
+          value: value,
+          icon: Icons.keyboard_arrow_down_rounded,
+          onTap: onTap,
+        ),
+      ],
+    );
+  }
+
+  void _showProjectSelector() {
+    showModalBottomSheet(
+      context: context,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 24.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Select Project',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+
+                SizedBox(height: 18.h),
+
+                ..._projects.map((project) {
+                  final selected = project == _selectedProject;
+
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 8.h),
+                    child: Material(
+                      color: selected ? AppColors.primary50 : AppColors.surface,
+                      borderRadius: BorderRadius.circular(8.r),
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            _selectedProject = project;
+                          });
+
+                          Navigator.pop(sheetContext);
+                        },
+                        borderRadius: BorderRadius.circular(8.r),
+                        child: Padding(
+                          padding: EdgeInsets.all(14.w),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  project,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                              ),
+                              if (selected)
+                                Icon(
+                                  Icons.check,
+                                  color: AppColors.primary,
+                                  size: 20.sp,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showEntryDetails(TimeEntryModel entry) {
+    showModalBottomSheet(
+      context: context,
+      builder: (sheetContext) {
+        return BottomSheetContainer(
+          title: 'Time Entry',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _detailRow('Project', entry.project),
+              _detailRow('Activity', entry.activity.label),
+              _detailRow('Date', 'Sep 18, 2026'),
+              _detailRow(
+                'Working time',
+                '${entry.startTime} – ${entry.endTime}',
+              ),
+              _detailRow('Break', entry.breakTime),
+              _detailRow('Total', entry.duration),
+              _detailRow('Employee', entry.employee),
+
+              SizedBox(height: 20.h),
+
+              _secondaryAction(
+                label: 'Close',
+                onTap: () => Navigator.pop(sheetContext),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showCrewDetails(CrewMemberModel member) {
+    showModalBottomSheet(
+      context: context,
+      builder: (sheetContext) {
+        return BottomSheetContainer(
+          title: member.name,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _detailRow('Activity', member.activity.label),
+              _detailRow(
+                'Working time',
+                '${member.startTime} – ${member.endTime}',
+              ),
+              _detailRow('Break', member.breakTime),
+              _detailRow('Total', member.totalHours),
+
+              SizedBox(height: 20.h),
+
+              _secondaryAction(
+                label: 'Close',
+                onTap: () => Navigator.pop(sheetContext),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _detailRow(String title, String value) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 14.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120.w,
+            child: Text(title, style: Theme.of(context).textTheme.bodySmall),
+          ),
+          Expanded(
+            child: Text(value, style: Theme.of(context).textTheme.bodyLarge),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _stopTimer() {
+    setState(() {
+      _isTimerRunning = false;
+    });
+
+    _showMessage('Timer stopped');
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 }

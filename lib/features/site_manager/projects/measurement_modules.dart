@@ -73,7 +73,7 @@ class _MeasurementTabState extends State<MeasurementTab> {
                   Text(
                     'Total Calculated Area',
                     style: TextStyle(
-                      fontSize: 13.sp,
+                      fontSize: 16.sp,
                       color: const Color(0xFF777777),
                     ),
                   ),
@@ -81,7 +81,7 @@ class _MeasurementTabState extends State<MeasurementTab> {
                   Text(
                     '${totalArea.toStringAsFixed(0)} m²',
                     style: TextStyle(
-                      fontSize: 19.sp,
+                      fontSize: 22.sp,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -98,7 +98,7 @@ class _MeasurementTabState extends State<MeasurementTab> {
                   label: Text(
                     'Add Line',
                     style: TextStyle(
-                      fontSize: 13.sp,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -136,7 +136,7 @@ class _MeasurementTabState extends State<MeasurementTab> {
                 child: Text(
                   'Line ${index + 1}. ${item.position}',
                   style: TextStyle(
-                    fontSize: 12.5.sp,
+                    fontSize: 15.5.sp,
                     color: const Color(0xFF888888),
                   ),
                 ),
@@ -174,7 +174,7 @@ class _MeasurementTabState extends State<MeasurementTab> {
 
           Text(
             'Front Scaffold',
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+            style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w700),
           ),
 
           SizedBox(height: 4.h),
@@ -183,7 +183,7 @@ class _MeasurementTabState extends State<MeasurementTab> {
             'L: ${item.length.toStringAsFixed(2)} m × '
             'H: ${item.height.toStringAsFixed(2)} m × '
             'Qty: ${item.quantity}',
-            style: TextStyle(fontSize: 13.sp, color: const Color(0xFF888888)),
+            style: TextStyle(fontSize: 16.sp, color: const Color(0xFF888888)),
           ),
 
           SizedBox(height: 7.h),
@@ -194,7 +194,7 @@ class _MeasurementTabState extends State<MeasurementTab> {
                 child: Text(
                   '"${item.remark}"',
                   style: TextStyle(
-                    fontSize: 13.sp,
+                    fontSize: 16.sp,
                     color: const Color(0xFF777777),
                   ),
                 ),
@@ -202,7 +202,7 @@ class _MeasurementTabState extends State<MeasurementTab> {
 
               Text(
                 '${item.calculatedArea.toStringAsFixed(0)} m²',
-                style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700),
+                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700),
               ),
             ],
           ),
@@ -348,7 +348,7 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
               padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 8.h),
               child: Text(
                 widget.title,
-                style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w800),
+                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800),
               ),
             ),
 
@@ -420,7 +420,7 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
                             '${height.toStringAsFixed(0)}m × '
                             '$_quantity)',
                             style: TextStyle(
-                              fontSize: 13.sp,
+                              fontSize: 16.sp,
                               color: const Color(0xFF888888),
                             ),
                           ),
@@ -440,8 +440,7 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
                         SizedBox(height: 20.h),
 
                         SizedBox(
-                          width: double.infinity,
-                          height: 46.h,
+                          width: double.infinity, 
                           child: ElevatedButton(
                             onPressed: _save,
                             style: ElevatedButton.styleFrom(
@@ -454,7 +453,7 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
                             child: Text(
                               widget.buttonText,
                               style: TextStyle(
-                                fontSize: 14.sp,
+                                fontSize: 17.sp,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -466,7 +465,7 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
                           child: Text(
                             'Cancel',
                             style: TextStyle(
-                              fontSize: 14.sp,
+                              fontSize: 17.sp,
                               color: const Color(0xFF555555),
                             ),
                           ),
@@ -487,7 +486,7 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 14.sp,
+        fontSize: 17.sp,
         fontWeight: FontWeight.w700,
         color: const Color(0xFF333333),
       ),
@@ -500,10 +499,10 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
   }) {
     return TextField(
       controller: controller,
-      style: TextStyle(fontSize: 13.sp),
+      style: TextStyle(fontSize: 16.sp),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(fontSize: 11.sp, color: const Color(0xFF999999)),
+        hintStyle: TextStyle(fontSize: 14.sp, color: const Color(0xFF999999)),
         contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5.r),
@@ -571,7 +570,7 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
                   child: Text(
                     '$_quantity',
                     style: TextStyle(
-                      fontSize: 13.sp,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -618,7 +617,7 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
             child: DropdownButton<String>(
               value: _unit,
               isExpanded: true,
-              style: TextStyle(fontSize: 13.sp, color: const Color(0xFF444444)),
+              style: TextStyle(fontSize: 16.sp, color: const Color(0xFF444444)),
               items: const [
                 DropdownMenuItem(value: 'M²', child: Text('M²')),
                 DropdownMenuItem(value: 'M', child: Text('M')),
@@ -674,7 +673,7 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message, style: TextStyle(fontSize: 13.sp)),
+        content: Text(message, style: TextStyle(fontSize: 16.sp)),
       ),
     );
   }

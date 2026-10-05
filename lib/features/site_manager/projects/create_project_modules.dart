@@ -149,7 +149,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
               child: Text(
                 'New Project',
                 style: TextStyle(
-                  fontSize: 18.sp,
+                  fontSize: 21.sp,
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF111111),
                 ),
@@ -163,7 +163,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
               'Step ${_currentStep + 1} of 3',
               textAlign: TextAlign.right,
               style: TextStyle(
-                fontSize: 12.sp,
+                fontSize: 15.sp,
                 color: const Color(0xFFC8102E),
                 fontWeight: FontWeight.w500,
               ),
@@ -613,7 +613,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                           child: Text(
                             'Next Due Date',
                             style: TextStyle(
-                              fontSize: 13.sp,
+                              fontSize: 16.sp,
                               color: const Color(0xFF777777),
                             ),
                           ),
@@ -627,7 +627,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                         Text(
                           _formatDate(_erectionStartDate),
                           style: TextStyle(
-                            fontSize: 13.sp,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -711,7 +711,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                   child: Text(
                     category.label,
                     style: TextStyle(
-                      fontSize: 11.5.sp,
+                      fontSize: 14.5.sp,
                       fontWeight: FontWeight.w500,
                       color: selected ? Colors.white : const Color(0xFF666666),
                     ),
@@ -741,12 +741,12 @@ class _NewProjectPageState extends State<NewProjectPage> {
           TextField(
             controller: _notesController,
             maxLines: 4,
-            style: TextStyle(fontSize: 13.sp, color: const Color(0xFF333333)),
+            style: TextStyle(fontSize: 16.sp, color: const Color(0xFF333333)),
             decoration: InputDecoration(
               hintText:
                   'Enter site instructions, gate codes, or client requests...',
               hintStyle: TextStyle(
-                fontSize: 12.sp,
+                fontSize: 15.sp,
                 color: const Color(0xFF999999),
               ),
               contentPadding: EdgeInsets.all(12.w),
@@ -803,7 +803,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                   Text(
                     'Upload Front Side',
                     style: TextStyle(
-                      fontSize: 12.sp,
+                      fontSize: 15.sp,
                       color: const Color(0xFF999999),
                     ),
                   ),
@@ -873,7 +873,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 child: Text(
                   dateLabel,
                   style: TextStyle(
-                    fontSize: 12.sp,
+                    fontSize: 15.sp,
                     color: const Color(0xFF999999),
                   ),
                 ),
@@ -892,7 +892,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                     Text(
                       _formatDate(date),
                       style: TextStyle(
-                        fontSize: 12.5.sp,
+                        fontSize: 15.5.sp,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF444444),
                       ),
@@ -914,7 +914,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 child: Text(
                   'Duration',
                   style: TextStyle(
-                    fontSize: 12.sp,
+                    fontSize: 15.sp,
                     color: const Color(0xFF999999),
                   ),
                 ),
@@ -942,7 +942,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
               Text(
                 '${duration.toStringAsFixed(1)} days',
                 style: TextStyle(
-                  fontSize: 12.5.sp,
+                  fontSize: 15.5.sp,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -1029,7 +1029,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
         child: Text(
           title,
           style: TextStyle(
-            fontSize: 14.sp,
+            fontSize: 17.sp,
             fontWeight: FontWeight.w500,
             color: selected ? Colors.white : const Color(0xFF777777),
           ),
@@ -1064,7 +1064,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
               : Text(
                   hint,
                   style: TextStyle(
-                    fontSize: 14.5.sp,
+                    fontSize: 17.5.sp,
                     color: const Color(0xFF999999),
                   ),
                 ),
@@ -1074,12 +1074,12 @@ class _NewProjectPageState extends State<NewProjectPage> {
             size: 21.sp,
             color: const Color(0xFF555555),
           ),
-          style: TextStyle(fontSize: 16.sp, color: const Color(0xFF444444)),
+          style: TextStyle(fontSize: 19.sp, color: const Color(0xFF444444)),
           items: items
               .map(
                 (item) => DropdownMenuItem<String>(
                   value: item,
-                  child: Text(item, style: TextStyle(fontSize: 15.sp)),
+                  child: Text(item, style: TextStyle(fontSize: 18.sp)),
                 ),
               )
               .toList(),
@@ -1118,7 +1118,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
             size: 21.sp,
             color: const Color(0xFF555555),
           ),
-          style: TextStyle(fontSize: 15.sp, color: const Color(0xFF444444)),
+          style: TextStyle(fontSize: 18.sp, color: const Color(0xFF444444)),
           items: items.map((item) {
             final color = colorBuilder != null ? colorBuilder(item) : null;
             print('color: $color');
@@ -1126,7 +1126,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
               value: item,
               child: Text(
                 labelBuilder(item),
-                style: TextStyle(fontSize: 15.sp, color: color),
+                style: TextStyle(fontSize: 18.sp, color: color),
               ),
             );
           }).toList(),
@@ -1148,10 +1148,10 @@ class _NewProjectPageState extends State<NewProjectPage> {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
-      style: TextStyle(fontSize: 14.sp, color: const Color(0xFF333333)),
+      style: TextStyle(fontSize: 17.sp, color: const Color(0xFF333333)),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(fontSize: 14.sp, color: const Color(0xFF999999)),
+        hintStyle: TextStyle(fontSize: 17.sp, color: const Color(0xFF999999)),
         contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(6.r),
@@ -1193,7 +1193,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
     return Text(
       title,
       style: TextStyle(
-        fontSize: 18.5.sp,
+        fontSize: 21.5.sp,
         fontWeight: FontWeight.w600,
         color: const Color(0xFF222222),
       ),
@@ -1204,7 +1204,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 15.sp,
+        fontSize: 18.sp,
         fontWeight: FontWeight.w600,
         color: const Color(0xFF222222),
       ),
@@ -1215,7 +1215,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 14.sp,
+        fontSize: 17.sp,
         fontWeight: FontWeight.w500,
         color: const Color(0xFF333333),
       ),
@@ -1229,7 +1229,6 @@ class _NewProjectPageState extends State<NewProjectPage> {
   Widget _nextButton() {
     return SizedBox(
       width: double.infinity,
-      height: 48.h,
       child: ElevatedButton(
         onPressed: () {
           setState(() {
@@ -1246,7 +1245,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
         ),
         child: Text(
           'Next',
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+          style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -1275,7 +1274,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
               child: Text(
                 previousText,
                 style: TextStyle(
-                  fontSize: 13.5.sp,
+                  fontSize: 16.5.sp,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -1301,7 +1300,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
               child: Text(
                 nextText,
                 style: TextStyle(
-                  fontSize: 13.5.sp,
+                  fontSize: 16.5.sp,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -1423,7 +1422,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message, style: TextStyle(fontSize: 13.sp)),
+        content: Text(message, style: TextStyle(fontSize: 16.sp)),
       ),
     );
   }

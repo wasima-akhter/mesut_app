@@ -38,7 +38,7 @@ Widget buildCustomerCard() {
         Text(
           'Customer',
           style: TextStyle(
-            fontSize: 14.sp,
+            fontSize: 17.sp,
             color: const Color(0xFF777777),
             fontWeight: FontWeight.w600,
           ),
@@ -54,12 +54,12 @@ Widget buildCustomerCard() {
             SizedBox(width: 7.w),
             Text(
               'Hochief AG',
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w700),
             ),
             SizedBox(width: 5.w),
             Text(
               '• Commercial',
-              style: TextStyle(fontSize: 13.sp, color: const Color(0xFF777777)),
+              style: TextStyle(fontSize: 16.sp, color: const Color(0xFF777777)),
             ),
           ],
         ),
@@ -168,7 +168,7 @@ Widget buildMapCard() {
                     child: Text(
                       'Goltsteinstraße 12, 50968 Köln',
                       style: TextStyle(
-                        fontSize: 12.5.sp,
+                        fontSize: 15.5.sp,
                         color: const Color(0xFF777777),
                       ),
                     ),
@@ -185,7 +185,7 @@ Widget buildMapCard() {
                   label: Text(
                     'Start Navigation',
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 17.sp,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -293,7 +293,7 @@ void showMessage(String message) {
     ..hideCurrentSnackBar()
     ..showSnackBar(
       SnackBar(
-        content: Text(message, style: TextStyle(fontSize: 13.sp)),
+        content: Text(message, style: TextStyle(fontSize: 16.sp)),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -310,15 +310,15 @@ Future<void> showPermissionDialog({
       return AlertDialog(
         title: Text(
           title,
-          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700),
+          style: TextStyle(fontSize: 21.sp, fontWeight: FontWeight.w700),
         ),
-        content: Text(message, style: TextStyle(fontSize: 14.sp)),
+        content: Text(message, style: TextStyle(fontSize: 17.sp)),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.pop(context, false);
             },
-            child: Text('Cancel', style: TextStyle(fontSize: 14.sp)),
+            child: Text('Cancel', style: TextStyle(fontSize: 17.sp)),
           ),
           TextButton(
             onPressed: () {
@@ -327,7 +327,7 @@ Future<void> showPermissionDialog({
             child: Text(
               'Settings',
               style: TextStyle(
-                fontSize: 14.sp,
+                fontSize: 17.sp,
                 color: const Color(0xFFC8102E),
                 fontWeight: FontWeight.w700,
               ),
@@ -373,7 +373,7 @@ Widget buildScaffoldSpecificationCard() {
           child: Text(
             'Next Safety Inspection: Sept 18 – Sept 20 (2.5 days)',
             style: TextStyle(
-              fontSize: 12.5.sp,
+              fontSize: 15.5.sp,
               color: const Color(0xFFF79009),
               fontWeight: FontWeight.w600,
             ),
@@ -431,7 +431,7 @@ Widget _contactRow({required IconData icon, required String text}) {
       Expanded(
         child: Text(
           text,
-          style: TextStyle(fontSize: 13.5.sp, color: const Color(0xFF555555)),
+          style: TextStyle(fontSize: 16.5.sp, color: const Color(0xFF555555)),
         ),
       ),
     ],
@@ -450,7 +450,7 @@ Widget _outlineButton({
       icon: Icon(icon, size: 15.sp),
       label: Text(
         label,
-        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
+        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
       ),
       style: OutlinedButton.styleFrom(
         foregroundColor: const Color(0xFF333333),
@@ -469,7 +469,7 @@ Widget _specValue({required String value, required String label}) {
       Text(
         value,
         style: TextStyle(
-          fontSize: 18.sp,
+          fontSize: 21.sp,
           fontWeight: FontWeight.w800,
           color: const Color(0xFF111111),
         ),
@@ -477,7 +477,7 @@ Widget _specValue({required String value, required String label}) {
       SizedBox(height: 2.h),
       Text(
         label,
-        style: TextStyle(fontSize: 12.5.sp, color: const Color(0xFF888888)),
+        style: TextStyle(fontSize: 15.5.sp, color: const Color(0xFF888888)),
       ),
     ],
   );
@@ -506,7 +506,7 @@ Widget _scheduleRow({
             Text(
               title,
               style: TextStyle(
-                fontSize: 13.5.sp,
+                fontSize: 16.5.sp,
                 color: color,
                 fontWeight: FontWeight.w700,
               ),
@@ -514,7 +514,7 @@ Widget _scheduleRow({
             SizedBox(height: 3.h),
             Text(
               '$date • $duration',
-              style: TextStyle(fontSize: 12.sp, color: const Color(0xFF777777)),
+              style: TextStyle(fontSize: 15.sp, color: const Color(0xFF777777)),
             ),
           ],
         ),
@@ -526,6 +526,6 @@ Widget _scheduleRow({
 Text _cardTitle({required String text}) {
   return Text(
     text,
-    style: TextStyle(fontSize: 15.5.sp, fontWeight: FontWeight.w700),
+    style: TextStyle(fontSize: 18.5.sp, fontWeight: FontWeight.w700),
   );
 }

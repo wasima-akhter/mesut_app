@@ -76,44 +76,54 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 500),
-        switchInCurve: Curves.easeInOut,
-        switchOutCurve: Curves.easeInOut,
-        child: Container(
-          key: ValueKey(_items[_currentPage].image),
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(_items[_currentPage].image),
-              fit: BoxFit.cover,
-            ),
-          ),
-
-          child: SafeArea(
-            child: Column(
+      body: Column(
+        children: [
+          Expanded(
+            child: Stack(
               children: [
-                _buildTopBar(),
+                // PageView
+                PageView.builder(
+                  controller: _pageController,
+                  itemCount: _items.length,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentPage = index;
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage(_items[index].image),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      child: SafeArea(
+                        child: Column(
+                          children: [
+                            _buildTopBar(),
 
-                Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: _items.length,
-                    onPageChanged: (index) {
-                      setState(() {
-                        _currentPage = index;
-                      });
-                    },
-                    itemBuilder: (context, index) {
-                      return _OnboardingContent(item: _items[index]);
-                    },
-                  ),
+                            Expanded(
+                              child: _OnboardingContent(item: _items[index]),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
 
-                _buildBottomSection(),
+                // Dots + Button
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _buildBottomSection(),
+                ),
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -142,7 +152,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
       child: Column(
         children: [
           _PageIndicator(count: _items.length, currentIndex: _currentPage),
+
           SizedBox(height: 24.h),
+
           AppButton(
             text: _isLastPage ? 'Get Started' : 'Continue',
             onPressed: _next,
@@ -161,34 +173,34 @@ class _OnboardingContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        0,
+        AppSpacing.lg,
+        150.h, // Space for dots + button
+      ),
       child: Align(
         alignment: Alignment.bottomCenter,
-        child: Padding(
-          padding: EdgeInsets.only(bottom: 20.h),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                item.title,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.headlineMedium.copyWith(
-                  color: Colors.white,
-                ),
-              ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              item.title,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.headlineLarge.copyWith(color: Colors.white),
+            ),
 
-              SizedBox(height: 12.h),
+            SizedBox(height: 12.h),
 
-              Text(
-                item.description,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.bodyLarge.copyWith(
-                  color: Colors.white,
-                  height: 1.55,
-                ),
+            Text(
+              item.description,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.bodyLarge.copyWith(
+                color: Colors.white,
+                height: 1.55,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

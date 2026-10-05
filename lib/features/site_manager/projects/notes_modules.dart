@@ -69,7 +69,7 @@ class _NotesTabState extends State<NotesTab> {
             icon: Icon(Icons.add, size: 17.sp),
             label: Text(
               'Add Note',
-              style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800),
+              style: TextStyle(fontSize: 16.5.sp, fontWeight: FontWeight.w800),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFC8102E),
@@ -109,7 +109,7 @@ class _NotesTabState extends State<NotesTab> {
                 child: Text(
                   note.category.label,
                   style: TextStyle(
-                    fontSize: 14.5.sp,
+                    fontSize: 17.5.sp,
                     fontWeight: FontWeight.w800,
                     color: const Color(0xFF222222),
                   ),
@@ -143,7 +143,7 @@ class _NotesTabState extends State<NotesTab> {
           Text(
             note.details,
             style: TextStyle(
-              fontSize: 13.sp,
+              fontSize: 16.sp,
               height: 1.35,
               color: const Color(0xFF666666),
             ),
@@ -153,7 +153,7 @@ class _NotesTabState extends State<NotesTab> {
 
           Text(
             '${note.author} · ${_formatDate(note.createdAt)}',
-            style: TextStyle(fontSize: 11.5.sp, color: const Color(0xFF999999)),
+            style: TextStyle(fontSize: 14.5.sp, color: const Color(0xFF999999)),
           ),
         ],
       ),
@@ -183,13 +183,13 @@ class _NotesTabState extends State<NotesTab> {
           SizedBox(height: 10.h),
           Text(
             'No project notes',
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800),
+            style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w800),
           ),
           SizedBox(height: 5.h),
           Text(
             'Add a note to keep important project information.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13.sp, color: const Color(0xFF888888)),
+            style: TextStyle(fontSize: 16.sp, color: const Color(0xFF888888)),
           ),
         ],
       ),
@@ -252,23 +252,23 @@ class _NotesTabState extends State<NotesTab> {
         return AlertDialog(
           title: Text(
             'Delete Note?',
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800),
+            style: TextStyle(fontSize: 21.sp, fontWeight: FontWeight.w800),
           ),
           content: Text(
             'This note will be permanently removed.',
-            style: TextStyle(fontSize: 14.sp),
+            style: TextStyle(fontSize: 17.sp),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text('Cancel', style: TextStyle(fontSize: 14.sp)),
+              child: Text('Cancel', style: TextStyle(fontSize: 17.sp)),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
               child: Text(
                 'Delete',
                 style: TextStyle(
-                  fontSize: 14.sp,
+                  fontSize: 17.sp,
                   color: const Color(0xFFE00025),
                   fontWeight: FontWeight.w700,
                 ),
@@ -366,7 +366,7 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
               padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 8.h),
               child: Text(
                 _isEdit ? 'Edit Project Note' : 'Add Project Note',
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800),
+                style: TextStyle(fontSize: 21.sp, fontWeight: FontWeight.w800),
               ),
             ),
 
@@ -398,7 +398,6 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
 
                           SizedBox(
                             width: double.infinity,
-                            height: 48.h,
                             child: ElevatedButton(
                               onPressed: _save,
                               style: ElevatedButton.styleFrom(
@@ -412,7 +411,7 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
                               child: Text(
                                 _isEdit ? 'Save Changes' : 'Save Notes',
                                 style: TextStyle(
-                                  fontSize: 14.5.sp,
+                                  fontSize: 17.5.sp,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
@@ -430,7 +429,7 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
                               child: Text(
                                 'Cancel',
                                 style: TextStyle(
-                                  fontSize: 13.5.sp,
+                                  fontSize: 16.5.sp,
                                   color: const Color(0xFF555555),
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -466,7 +465,7 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 14.sp,
+        fontSize: 17.sp,
         fontWeight: FontWeight.w800,
         color: const Color(0xFF333333),
       ),
@@ -501,7 +500,7 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
             child: Text(
               category.label,
               style: TextStyle(
-                fontSize: 11.5.sp,
+                fontSize: 14.5.sp,
                 color: selected ? Colors.white : const Color(0xFF777777),
                 fontWeight: FontWeight.w600,
               ),
@@ -516,10 +515,10 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
     return TextField(
       controller: _detailsController,
       maxLines: 5,
-      style: TextStyle(fontSize: 14.sp, color: const Color(0xFF333333)),
+      style: TextStyle(fontSize: 17.sp, color: const Color(0xFF333333)),
       decoration: InputDecoration(
         hintText: 'Enter site instructions, gate codes, or client requests...',
-        hintStyle: TextStyle(fontSize: 13.sp, color: const Color(0xFF999999)),
+        hintStyle: TextStyle(fontSize: 16.sp, color: const Color(0xFF999999)),
         contentPadding: EdgeInsets.all(12.w),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(6.r),
@@ -545,7 +544,7 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
         SnackBar(
           content: Text(
             'Please enter note details.',
-            style: TextStyle(fontSize: 14.sp),
+            style: TextStyle(fontSize: 17.sp),
           ),
         ),
       );

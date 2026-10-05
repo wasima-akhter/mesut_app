@@ -118,7 +118,7 @@ class _TasksTabState extends State<TasksTab> {
             icon: Icon(Icons.add, size: 17.sp),
             label: Text(
               'Add New',
-              style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFC8102E),
@@ -160,7 +160,7 @@ class _TasksTabState extends State<TasksTab> {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 13.sp,
+            fontSize: 16.sp,
             color: selected ? Colors.white : const Color(0xFF666666),
             fontWeight: FontWeight.w600,
           ),
@@ -191,7 +191,7 @@ class _TasksTabState extends State<TasksTab> {
           Text(
             isOpen ? 'No open tasks' : 'No completed tasks',
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: 17.sp,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF555555),
             ),
@@ -202,7 +202,7 @@ class _TasksTabState extends State<TasksTab> {
                 ? 'All tasks have been completed.'
                 : 'Completed tasks will appear here.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12.sp, color: const Color(0xFF999999)),
+            style: TextStyle(fontSize: 15.sp, color: const Color(0xFF999999)),
           ),
         ],
       ),
@@ -254,7 +254,7 @@ class _TasksTabState extends State<TasksTab> {
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 13.sp,
+                    fontSize: 16.sp,
                     height: 1.25,
                     fontWeight: FontWeight.w500,
                     decoration: task.completed
@@ -291,7 +291,7 @@ class _TasksTabState extends State<TasksTab> {
                       child: Text(
                         task.employee,
                         style: TextStyle(
-                          fontSize: 11.5.sp,
+                          fontSize: 14.5.sp,
                           color: const Color(0xFF777777),
                         ),
                       ),
@@ -308,7 +308,7 @@ class _TasksTabState extends State<TasksTab> {
                     Text(
                       'Due Sep 20',
                       style: TextStyle(
-                        fontSize: 10.5.sp,
+                        fontSize: 13.5.sp,
                         color: const Color(0xFF777777),
                       ),
                     ),
@@ -344,7 +344,7 @@ class _TasksTabState extends State<TasksTab> {
       child: Text(
         priority.label,
         style: TextStyle(
-          fontSize: 9.5.sp,
+          fontSize: 12.5.sp,
           color: priority.color,
           fontWeight: FontWeight.w700,
         ),
@@ -436,7 +436,7 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
               padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 8.h),
               child: Text(
                 'New Task',
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800),
+                style: TextStyle(fontSize: 21.sp, fontWeight: FontWeight.w800),
               ),
             ),
             Expanded(
@@ -504,7 +504,7 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                                   child: Text(
                                     _formatDate(_dueDate),
                                     style: TextStyle(
-                                      fontSize: 13.sp,
+                                      fontSize: 16.sp,
                                       color: const Color(0xFF555555),
                                     ),
                                   ),
@@ -520,7 +520,6 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                         ),
                         SizedBox(height: 20.h),
                         SizedBox(
-                          height: 48.h,
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: _createTask,
@@ -530,11 +529,12 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(6.r),
                               ),
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
                             ),
                             child: Text(
                               'Create New Task',
                               style: TextStyle(
-                                fontSize: 14.sp,
+                                fontSize: 17.sp,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -546,7 +546,7 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                           child: Text(
                             'Cancel',
                             style: TextStyle(
-                              fontSize: 13.sp,
+                              fontSize: 16.sp,
                               color: const Color(0xFF555555),
                             ),
                           ),
@@ -567,7 +567,7 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 14.sp,
+        fontSize: 17.sp,
         fontWeight: FontWeight.w700,
         color: const Color(0xFF333333),
       ),
@@ -578,11 +578,11 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
     return TextField(
       controller: _descriptionController,
       maxLines: 3,
-      style: TextStyle(fontSize: 13.sp),
+      style: TextStyle(fontSize: 16.sp),
       decoration: InputDecoration(
         hintText:
             'e.g. Anchor scaffold ties into reinforced concrete at 4th floor',
-        hintStyle: TextStyle(fontSize: 13.sp, color: const Color(0xFF999999)),
+        hintStyle: TextStyle(fontSize: 16.sp, color: const Color(0xFF999999)),
         contentPadding: EdgeInsets.all(12.w),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(6.r),
@@ -617,13 +617,13 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
               : Text(
                   hint,
                   style: TextStyle(
-                    fontSize: 13.sp,
+                    fontSize: 16.sp,
                     color: const Color(0xFF999999),
                   ),
                 ),
           isExpanded: true,
           icon: Icon(Icons.keyboard_arrow_down, size: 20.sp),
-          style: TextStyle(fontSize: 13.sp, color: const Color(0xFF444444)),
+          style: TextStyle(fontSize: 16.sp, color: const Color(0xFF444444)),
           items: items
               .map(
                 (item) =>
@@ -676,7 +676,7 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message, style: TextStyle(fontSize: 13.sp)),
+        content: Text(message, style: TextStyle(fontSize: 16.sp)),
       ),
     );
   }

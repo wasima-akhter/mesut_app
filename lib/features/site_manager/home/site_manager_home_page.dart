@@ -24,7 +24,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
       'project': 'Prj-0842 . Goltsteins.Complex',
       'address': 'Goltsteinstrabe 12, 50968 Köln',
       'client': 'Mesut Rahaman',
-      'planned': 14.sp,
+      'planned': 14,
       'running': 5,
     },
     {
@@ -52,7 +52,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(message, style: const TextStyle(fontSize: 16)),
+          content: Text(message, style: TextStyle(fontSize: 19.sp)),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -150,7 +150,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
               Text(
                 'Good Morning',
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 19.sp,
                   color: Color(0xFF777777),
                   fontWeight: FontWeight.w400,
                 ),
@@ -159,7 +159,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
               Text(
                 'Mesut Yilmaz',
                 style: TextStyle(
-                  fontSize: 25.sp,
+                  fontSize: 28.sp,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF171717),
                 ),
@@ -241,10 +241,10 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
               ),
               child: Text(
                 '$activeSites Sites Active Today',
-                style: const TextStyle(
-                  fontSize: 13,
+                style: TextStyle(
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
+                  color: const Color(0xFF333333),
                 ),
               ),
             ),
@@ -283,19 +283,19 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(7),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       'View Full Map',
                       style: TextStyle(
-                        color: Color(0xFFE22B3B),
-                        fontSize: 13,
+                        color: const Color(0xFFE22B3B),
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(width: 4),
-                    Icon(
+                    const SizedBox(width: 4),
+                    const Icon(
                       Icons.arrow_forward,
                       size: 17,
                       color: Color(0xFFE22B3B),
@@ -311,90 +311,98 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
   }
 
   Widget _buildMainStats() {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            height: 150.h,
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: const Color(0xFF004D26),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Standing Scaffolds',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '$scaffolds',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  'Currently up across all sites',
-                  style: TextStyle(color: Colors.white70, fontSize: 14.sp),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        const SizedBox(width: 8),
-
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                inspectionsDue += 1;
-              });
-              _showMessage('Inspection count updated');
-            },
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
             child: Container(
-              height: 150.h,
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFD9DC),
+                color: const Color(0xFF004D26),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFE53948)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
-                    '$inspectionsDue',
+                    'Standing Scaffolds',
                     style: TextStyle(
-                      color: Color(0xFFE32638),
-                      fontSize: 30.sp,
-                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                      fontSize: 17.sp,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
+
+                  const SizedBox(height: 6),
+
                   Text(
-                    'Inspection due',
+                    '$scaffolds',
                     style: TextStyle(
-                      color: Color(0xFFE32638),
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                      fontSize: 33.sp,
+                      fontWeight: FontWeight.w700,
                     ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  Text(
+                    'Currently up across all sites',
+                    maxLines: 2,
+                    style: TextStyle(color: Colors.white70, fontSize: 17.sp),
                   ),
                 ],
               ),
             ),
           ),
-        ),
-      ],
+
+          const SizedBox(width: 8),
+
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  inspectionsDue += 1;
+                });
+
+                _showMessage('Inspection count updated');
+              },
+              child: Container(
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFD9DC),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFE53948)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      '$inspectionsDue',
+                      style: TextStyle(
+                        color: const Color(0xFFE32638),
+                        fontSize: 33.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+
+                    Text(
+                      'Inspection due',
+                      style: TextStyle(
+                        color: const Color(0xFFE32638),
+                        fontSize: 17.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -434,7 +442,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 105,
+        height: 130.h,
         padding: const EdgeInsets.fromLTRB(13, 12, 13, 10),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -459,7 +467,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
                   title,
                   style: TextStyle(
                     color: color,
-                    fontSize: 14,
+                    fontSize: 17.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -471,18 +479,18 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
               children: [
                 Text(
                   '$planned',
-                  style: const TextStyle(
-                    fontSize: 22,
+                  style: TextStyle(
+                    fontSize: 25.sp,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF171717),
+                    color: const Color(0xFF171717),
                   ),
                 ),
                 Text(
                   '$running',
-                  style: const TextStyle(
-                    fontSize: 22,
+                  style: TextStyle(
+                    fontSize: 25.sp,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF171717),
+                    color: const Color(0xFF171717),
                   ),
                 ),
               ],
@@ -493,11 +501,17 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
               children: [
                 Text(
                   'Planned',
-                  style: TextStyle(color: Color(0xFF858585), fontSize: 14.sp),
+                  style: TextStyle(
+                    color: const Color(0xFF858585),
+                    fontSize: 17.sp,
+                  ),
                 ),
                 Text(
                   'Running',
-                  style: TextStyle(color: Color(0xFF858585), fontSize: 14.sp),
+                  style: TextStyle(
+                    color: const Color(0xFF858585),
+                    fontSize: 17.sp,
+                  ),
                 ),
               ],
             ),
@@ -514,9 +528,9 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
           child: Text(
             "Today's operations (3)",
             style: TextStyle(
-              fontSize: 22.sp,
+              fontSize: 25.sp,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF171717),
+              color: const Color(0xFF171717),
             ),
           ),
         ),
@@ -530,7 +544,10 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
             children: [
               Text(
                 showAllOperations ? 'Show less' : 'View all',
-                style: const TextStyle(fontSize: 13, color: Color(0xFF888888)),
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: const Color(0xFF888888),
+                ),
               ),
               const SizedBox(width: 3),
               Icon(
@@ -571,7 +588,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
               operation['type'],
               style: TextStyle(
                 color: typeColor,
-                fontSize: 14.sp,
+                fontSize: 17.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -582,9 +599,9 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
           Text(
             operation['project'],
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: 19.sp,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF171717),
+              color: const Color(0xFF171717),
             ),
           ),
 
@@ -602,7 +619,10 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
               Expanded(
                 child: Text(
                   operation['address'],
-                  style: TextStyle(fontSize: 14.sp, color: Color(0xFF8A8A8A)),
+                  style: TextStyle(
+                    fontSize: 17.sp,
+                    color: const Color(0xFF8A8A8A),
+                  ),
                 ),
               ),
             ],
@@ -612,7 +632,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
 
           Text(
             'Client: ${operation['client']}',
-            style: TextStyle(fontSize: 14.sp, color: Color(0xFF888888)),
+            style: TextStyle(fontSize: 17.sp, color: const Color(0xFF888888)),
           ),
 
           const SizedBox(height: 14),
@@ -626,7 +646,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
                   label: Text(
                     'Route',
                     style: TextStyle(
-                      fontSize: 15.sp,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

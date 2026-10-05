@@ -130,7 +130,7 @@ class _SiteManagerProjectsPageState extends State<SiteManagerProjectsPage> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(message, style: const TextStyle(fontSize: 15)),
+          content: Text(message, style: TextStyle(fontSize: 18.sp)),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -287,7 +287,7 @@ class _SiteManagerProjectsPageState extends State<SiteManagerProjectsPage> {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 11.sp,
+            fontSize: 14.sp,
             color: selected ? Colors.white : const Color(0xFF666666),
             fontWeight: FontWeight.w600,
           ),
@@ -303,13 +303,13 @@ class _SiteManagerProjectsPageState extends State<SiteManagerProjectsPage> {
   Widget _buildHeader() {
     return Row(
       children: [
-        const Expanded(
+        Expanded(
           child: Text(
             'Projects',
             style: TextStyle(
-              fontSize: 23,
+              fontSize: 26.sp,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF151515),
+              color: const Color(0xFF151515),
             ),
           ),
         ),
@@ -346,7 +346,7 @@ class _SiteManagerProjectsPageState extends State<SiteManagerProjectsPage> {
         child: Text(
           tab.label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 15.sp,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
             color: selected ? Colors.white : const Color(0xFF707070),
           ),
@@ -413,9 +413,9 @@ class _SiteManagerProjectsPageState extends State<SiteManagerProjectsPage> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 18.sp,
+                fontSize: 21.sp,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF151515),
+                color: const Color(0xFF151515),
               ),
             ),
 
@@ -462,7 +462,7 @@ class _SiteManagerProjectsPageState extends State<SiteManagerProjectsPage> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 12.sp,
+                        fontSize: 15.sp,
                         color: project.phase == ProjectPhase.standingScaffold
                             ? const Color(0xFFFF7A00)
                             : const Color(0xFF888888),
@@ -541,7 +541,7 @@ class _PhaseBadge extends StatelessWidget {
         phase.label,
         style: TextStyle(
           color: phase.color,
-          fontSize: 13.sp,
+          fontSize: 16.sp,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -570,7 +570,7 @@ class _PriorityBadge extends StatelessWidget {
         priority.label,
         style: TextStyle(
           color: priority.color,
-          fontSize: 13.sp,
+          fontSize: 16.sp,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -604,7 +604,7 @@ class _StatusLabel extends StatelessWidget {
         Text(
           status.label,
           style: TextStyle(
-            fontSize: 12.sp,
+            fontSize: 15.sp,
             color: status.color,
             fontWeight: FontWeight.w400,
           ),
@@ -635,7 +635,7 @@ class _InfoRow extends StatelessWidget {
             text,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 12.5.sp, color: Color(0xFF858585)),
+            style: TextStyle(fontSize: 15.5.sp, color: const Color(0xFF858585)),
           ),
         ),
       ],
@@ -670,7 +670,7 @@ class _FilterChip extends StatelessWidget {
         label,
         style: TextStyle(
           color: color,
-          fontSize: 13.sp,
+          fontSize: 16.sp,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -722,8 +722,8 @@ class ProjectSearchDelegate extends SearchDelegate<Project?> {
     }).toList();
 
     if (results.isEmpty) {
-      return const Center(
-        child: Text('No projects found', style: TextStyle(fontSize: 16)),
+      return Center(
+        child: Text('No projects found', style: TextStyle(fontSize: 19.sp)),
       );
     }
 
@@ -762,12 +762,12 @@ class _SearchResultCard extends StatelessWidget {
         children: [
           Text(
             '${project.id} · ${project.title}',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 6),
           Text(
             project.address,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+            style: TextStyle(fontSize: 15.sp, color: Colors.grey),
           ),
         ],
       ),
@@ -875,7 +875,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                       child: Text(
                         'Reset All',
                         style: TextStyle(
-                          fontSize: 13.sp,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFFC8102E),
                         ),
@@ -888,7 +888,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                       child: Text(
                         'Filter projects',
                         style: TextStyle(
-                          fontSize: 19.sp,
+                          fontSize: 22.sp,
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF111111),
                         ),
@@ -1111,7 +1111,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                         child: Text(
                           'Apply Filters',
                           style: TextStyle(
-                            fontSize: 14.sp,
+                            fontSize: 17.sp,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -1131,7 +1131,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
     return Text(
       title,
       style: TextStyle(
-        fontSize: 15.sp,
+        fontSize: 18.sp,
         fontWeight: FontWeight.w600,
         color: const Color(0xFF999999),
       ),
@@ -1154,7 +1154,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
               child: Text(
                 title,
                 style: TextStyle(
-                  fontSize: 13.5.sp,
+                  fontSize: 16.5.sp,
                   fontWeight: FontWeight.w400,
                   color: const Color(0xFF222222),
                 ),
@@ -1190,10 +1190,10 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
     return TextField(
       controller: _citySearchController,
       onChanged: (_) => setState(() {}),
-      style: TextStyle(fontSize: 13.sp, color: const Color(0xFF333333)),
+      style: TextStyle(fontSize: 16.sp, color: const Color(0xFF333333)),
       decoration: InputDecoration(
         hintText: 'Search City',
-        hintStyle: TextStyle(fontSize: 13.sp, color: const Color(0xFF555555)),
+        hintStyle: TextStyle(fontSize: 16.sp, color: const Color(0xFF555555)),
         prefixIcon: Icon(
           Icons.search,
           size: 20.sp,
@@ -1235,7 +1235,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 13.sp,
+            fontSize: 16.sp,
             fontWeight: FontWeight.w500,
             color: selected
                 ? Colors.white
@@ -1263,7 +1263,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
               child: Text(
                 title,
                 style: TextStyle(
-                  fontSize: 13.5.sp,
+                  fontSize: 16.5.sp,
                   color: const Color(0xFF222222),
                 ),
               ),

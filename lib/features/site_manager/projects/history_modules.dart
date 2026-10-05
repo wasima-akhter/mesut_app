@@ -102,7 +102,7 @@ class _HistoryTabState extends State<HistoryTab> {
                   Text(
                     item.title,
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 17.sp,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF333333),
                       height: 1.3,
@@ -114,7 +114,7 @@ class _HistoryTabState extends State<HistoryTab> {
                   Text(
                     item.user,
                     style: TextStyle(
-                      fontSize: 12.sp,
+                      fontSize: 15.sp,
                       color: const Color(0xFF777777),
                     ),
                   ),
@@ -124,7 +124,7 @@ class _HistoryTabState extends State<HistoryTab> {
                   Text(
                     item.date,
                     style: TextStyle(
-                      fontSize: 11.sp,
+                      fontSize: 14.sp,
                       color: const Color(0xFF999999),
                     ),
                   ),

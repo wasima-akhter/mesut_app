@@ -66,7 +66,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                   widget.projectId,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 18.sp,
+                    fontSize: 21.sp,
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFF111111),
                   ),
@@ -83,7 +83,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
             alignment: Alignment.centerLeft,
             child: Text(
               'Goltstein complex',
-              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 23.sp, fontWeight: FontWeight.w700),
             ),
           ),
           SizedBox(height: 7.h),
@@ -109,7 +109,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                 child: Text(
                   'Goltsteinstraße 12, 50968 Köln',
                   style: TextStyle(
-                    fontSize: 13.sp,
+                    fontSize: 16.sp,
                     color: const Color(0xFF777777),
                   ),
                 ),
@@ -158,7 +158,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 13.sp,
+                    fontSize: 16.sp,
                     // fontWeight: FontWeight.w500,
                     color: selected ? Colors.white : const Color(0xFF777777),
                   ),
@@ -232,7 +232,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 12.5.sp,
+          fontSize: 15.5.sp,
           color: color,
           fontWeight: FontWeight.w600,
         ),
@@ -422,7 +422,7 @@ class _EditProjectDetailsBottomSheetState
               padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 8.h),
               child: Text(
                 widget.title,
-                style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w800),
+                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800),
               ),
             ),
 
@@ -527,7 +527,7 @@ class _EditProjectDetailsBottomSheetState
                     // Save button
                     SizedBox(
                       width: double.infinity,
-                      height: 46.h,
+
                       child: ElevatedButton(
                         onPressed: _save,
                         style: ElevatedButton.styleFrom(
@@ -541,7 +541,7 @@ class _EditProjectDetailsBottomSheetState
                         child: Text(
                           widget.buttonText,
                           style: TextStyle(
-                            fontSize: 14.sp,
+                            fontSize: 17.sp,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -556,7 +556,7 @@ class _EditProjectDetailsBottomSheetState
                         child: Text(
                           'Cancel',
                           style: TextStyle(
-                            fontSize: 14.sp,
+                            fontSize: 17.sp,
                             color: const Color(0xFF555555),
                           ),
                         ),
@@ -576,7 +576,7 @@ class _EditProjectDetailsBottomSheetState
     return Text(
       text,
       style: TextStyle(
-        fontSize: 13.sp,
+        fontSize: 16.sp,
         fontWeight: FontWeight.w500,
         color: const Color(0xFF222222),
       ),
@@ -591,10 +591,10 @@ class _EditProjectDetailsBottomSheetState
     return TextField(
       controller: controller,
       keyboardType: textInputType,
-      style: TextStyle(fontSize: 12.sp, color: const Color(0xFF444444)),
+      style: TextStyle(fontSize: 15.sp, color: const Color(0xFF444444)),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(fontSize: 11.sp, color: const Color(0xFF999999)),
+        hintStyle: TextStyle(fontSize: 14.sp, color: const Color(0xFF999999)),
         contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5.r),
@@ -635,7 +635,7 @@ class _EditProjectDetailsBottomSheetState
             color: const Color(0xFF555555),
           ),
           style: TextStyle(
-            fontSize: 12.sp,
+            fontSize: 15.sp,
             color: isPriority && value == 'High'
                 ? const Color(0xFFC8102E)
                 : const Color(0xFF444444),
@@ -646,7 +646,7 @@ class _EditProjectDetailsBottomSheetState
               child: Text(
                 item,
                 style: TextStyle(
-                  fontSize: 12.sp,
+                  fontSize: 15.sp,
                   color: isPriority && item == 'High'
                       ? const Color(0xFFC8102E)
                       : const Color(0xFF444444),
@@ -695,7 +695,7 @@ class _EditProjectDetailsBottomSheetState
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message, style: TextStyle(fontSize: 13.sp)),
+        content: Text(message, style: TextStyle(fontSize: 16.sp)),
       ),
     );
   }

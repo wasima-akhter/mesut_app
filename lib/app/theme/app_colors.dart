@@ -92,4 +92,16 @@ class AppColors {
 
   static const Color overlay = Color(0x66000000);
   static const Color scrim = Color(0x52000000);
+
+  static const Color timeDarkGreen = Color(0xFF004D26);
+
+  static const Color timeOrange = Color(0xFFF79009);
+
+  static const Color timeBlue = Color(0xFF2E90FA);
+
+  static const Color timePurple = Color(0xFF7F56D9);
+
+  static const Color timeDarkSurface = Color(0xFF171717);
+
+  static const Color timeInputBackground = Color(0xFFF9FAFB);
 }

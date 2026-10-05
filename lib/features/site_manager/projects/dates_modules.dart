@@ -86,7 +86,7 @@ class _DatesTabState extends State<DatesTab> {
             child: Text(
               'Changes here automatically update Calendar and Daily Planning.',
               style: TextStyle(
-                fontSize: 13.5.sp,
+                fontSize: 16.5.sp,
                 color: const Color(0xFF1799D6),
                 fontWeight: FontWeight.w600,
                 height: 1.3,
@@ -165,7 +165,7 @@ class _DatesTabState extends State<DatesTab> {
         children: [
           Text(
             'Safety Inspection',
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800),
+            style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w800),
           ),
 
           SizedBox(height: 10.h),
@@ -180,7 +180,7 @@ class _DatesTabState extends State<DatesTab> {
             child: Text(
               'Next Safety Inspection: Sept 18 – Sept 20 (2.5 days)',
               style: TextStyle(
-                fontSize: 13.sp,
+                fontSize: 16.sp,
                 color: const Color(0xFFF79009),
                 fontWeight: FontWeight.w700,
               ),
@@ -212,7 +212,7 @@ class _DatesTabState extends State<DatesTab> {
                 _safetyInspectionCompleted
                     ? '✓ Inspection Completed'
                     : 'Mark as Complete',
-                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+                style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700),
               ),
             ),
           ),
@@ -228,7 +228,6 @@ class _DatesTabState extends State<DatesTab> {
   Widget _buildSaveButton() {
     return SizedBox(
       width: double.infinity,
-      height: 48.h,
       child: ElevatedButton(
         onPressed: _saving ? null : _saveChanges,
         style: ElevatedButton.styleFrom(
@@ -251,7 +250,7 @@ class _DatesTabState extends State<DatesTab> {
               )
             : Text(
                 'Save Changes',
-                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800),
+                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800),
               ),
       ),
     );
@@ -271,7 +270,7 @@ class _DatesTabState extends State<DatesTab> {
         Expanded(
           child: Text(
             label,
-            style: TextStyle(fontSize: 13.sp, color: const Color(0xFF888888)),
+            style: TextStyle(fontSize: 16.sp, color: const Color(0xFF888888)),
           ),
         ),
 
@@ -288,7 +287,7 @@ class _DatesTabState extends State<DatesTab> {
               Text(
                 _formatDate(date),
                 style: TextStyle(
-                  fontSize: 13.5.sp,
+                  fontSize: 16.5.sp,
                   fontWeight: FontWeight.w600,
                   color: const Color(0xFF444444),
                 ),
@@ -306,13 +305,13 @@ class _DatesTabState extends State<DatesTab> {
         Expanded(
           child: Text(
             label,
-            style: TextStyle(fontSize: 13.sp, color: const Color(0xFF888888)),
+            style: TextStyle(fontSize: 16.sp, color: const Color(0xFF888888)),
           ),
         ),
         Text(
           value,
           style: TextStyle(
-            fontSize: 13.5.sp,
+            fontSize: 16.5.sp,
             color: const Color(0xFF666666),
             fontWeight: FontWeight.w600,
           ),
@@ -332,7 +331,7 @@ class _DatesTabState extends State<DatesTab> {
         Expanded(
           child: Text(
             label,
-            style: TextStyle(fontSize: 13.sp, color: const Color(0xFF888888)),
+            style: TextStyle(fontSize: 16.sp, color: const Color(0xFF888888)),
           ),
         ),
 
@@ -347,12 +346,12 @@ class _DatesTabState extends State<DatesTab> {
               _smallIconButton(icon: Icons.remove, onTap: onMinus),
 
               SizedBox(
-                width: 58.w,
+                // width: 58.w,
                 child: Center(
                   child: Text(
                     '${_formatDuration(value)} days',
                     style: TextStyle(
-                      fontSize: 12.5.sp,
+                      fontSize: 15.5.sp,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -391,7 +390,7 @@ class _DatesTabState extends State<DatesTab> {
         children: [
           Text(
             title,
-            style: TextStyle(fontSize: 15.5.sp, fontWeight: FontWeight.w800),
+            style: TextStyle(fontSize: 18.5.sp, fontWeight: FontWeight.w800),
           ),
           SizedBox(height: 12.h),
           ...children,
@@ -476,7 +475,7 @@ class _DatesTabState extends State<DatesTab> {
       SnackBar(
         content: Text(
           'Schedule changes saved',
-          style: TextStyle(fontSize: 14.sp),
+          style: TextStyle(fontSize: 17.sp),
         ),
         behavior: SnackBarBehavior.floating,
       ),

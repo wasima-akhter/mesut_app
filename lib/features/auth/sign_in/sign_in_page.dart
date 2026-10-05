@@ -169,31 +169,33 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () {
-                context.push(
-                  RouteConstants.otp,
-                  extra: {
-                    'email': "email@mail.com",
-                    'purpose': OtpPurpose.forgotPassword,
-                  },
-                );
-              },
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.only(top: 4.h, bottom: 4.h),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                'verify otp',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: const Color(0xFFE7193F),
+
+          if (kDebugMode)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  context.push(
+                    RouteConstants.otp,
+                    extra: {
+                      'email': "email@mail.com",
+                      'purpose': OtpPurpose.forgotPassword,
+                    },
+                  );
+                },
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.only(top: 4.h, bottom: 4.h),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'verify otp',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: const Color(0xFFE7193F),
+                  ),
                 ),
               ),
             ),
-          ),
 
           SizedBox(height: 22.h),
 
