@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_text_styles.dart';
+import '../../../../core/localization/app_localization.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/buttons/app_text_button.dart';
 import '../../../app/constants/route_constants.dart';
@@ -21,34 +22,31 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   int _currentPage = 0;
 
-  final List<_OnboardingItem> _items = const [
-    _OnboardingItem(
-      image: 'assets/images/onboarding_1.png',
-      title: 'Stay on top of your work',
-      description:
-          'See your assigned jobs, project details, '
-          'tasks, and safety instructions in one place.',
-    ),
-    _OnboardingItem(
-      image: 'assets/images/onboarding_2.png',
-      title: 'Track your time easily',
-      description:
-          'Start and manage your working time, breaks, '
-          'and activities without unnecessary paperwork.',
-    ),
-    _OnboardingItem(
-      image: 'assets/images/onboarding_2.png',
-      title: 'Keep the whole team connected',
-      description:
-          'Stay aligned with your team, projects, '
-          'schedules, and day-to-day site operations.',
-    ),
-  ];
+  List<_OnboardingItem> _getItems() {
+    final loc = AppLocalization.current;
+    return [
+      _OnboardingItem(
+        image: 'assets/images/onboarding_1.png',
+        title: loc.onboarding1Title,
+        description: loc.onboarding1Subtitle,
+      ),
+      _OnboardingItem(
+        image: 'assets/images/onboarding_2.png',
+        title: loc.onboarding2Title,
+        description: loc.onboarding2Subtitle,
+      ),
+      _OnboardingItem(
+        image: 'assets/images/onboarding_2.png',
+        title: loc.onboarding3Title,
+        description: loc.onboarding3Subtitle,
+      ),
+    ];
+  }
 
-  bool get _isLastPage => _currentPage == _items.length - 1;
+  bool _isLastPage(int length) => _currentPage == length - 1;
 
-  void _next() {
-    if (_isLastPage) {
+  void _next(int length) {
+    if (_isLastPage(length)) {
       _finish();
       return;
     }
@@ -75,6 +73,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final items = _getItems();
+    final isLast = _isLastPage(items.length);
+
     return Scaffold(
       body: Column(
         children: [
@@ -84,7 +85,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 // PageView
                 PageView.builder(
                   controller: _pageController,
-                  itemCount: _items.length,
+                  itemCount: items.length,
                   onPageChanged: (index) {
                     setState(() {
                       _currentPage = index;
@@ -94,7 +95,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     return Container(
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage(_items[index].image),
+                          image: AssetImage(items[index].image),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -104,7 +105,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             _buildTopBar(),
 
                             Expanded(
-                              child: _OnboardingContent(item: _items[index]),
+                              child: _OnboardingContent(item: items[index]),
                             ),
                           ],
                         ),
@@ -118,7 +119,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  child: _buildBottomSection(),
+                  child: _buildBottomSection(items.length, isLast),
                 ),
               ],
             ),
@@ -135,13 +136,18 @@ class _OnboardingPageState extends State<OnboardingPage> {
         alignment: Alignment.centerRight,
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: AppTextButton(text: 'Skip', onPressed: _skip),
+          child: AppTextButton(
+            text: AppLocalization.current.skip,
+            onPressed: _skip,
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildBottomSection() {
+  Widget _buildBottomSection(int count, bool isLast) {
+    final loc = AppLocalization.current;
+
     return Padding(
       padding: EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -151,13 +157,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
       ),
       child: Column(
         children: [
-          _PageIndicator(count: _items.length, currentIndex: _currentPage),
+          _PageIndicator(count: count, currentIndex: _currentPage),
 
           SizedBox(height: 24.h),
 
           AppButton(
-            text: _isLastPage ? 'Get Started' : 'Continue',
-            onPressed: _next,
+            text: isLast ? loc.getStarted : loc.next,
+            onPressed: () => _next(count),
           ),
         ],
       ),

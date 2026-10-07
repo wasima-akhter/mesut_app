@@ -1,3 +1,5 @@
+import '../../../core/localization/app_localization.dart';
+
 enum TimeTrackingTab { myTime, siteCrewTime }
 
 enum ActivityType { erection, dismantling, standing, others }
@@ -6,13 +8,13 @@ extension ActivityTypeExtension on ActivityType {
   String get label {
     switch (this) {
       case ActivityType.erection:
-        return 'Erection';
+        return AppLocalization.current.scaffoldErection;
       case ActivityType.dismantling:
-        return 'Dismantling';
+        return AppLocalization.current.scaffoldDismantling;
       case ActivityType.standing:
-        return 'Standing';
+        return AppLocalization.current.standingScaffold;
       case ActivityType.others:
-        return 'Others';
+        return AppLocalization.current.otherActivity;
     }
   }
 }
@@ -23,9 +25,9 @@ extension TimeEntryFilterExtension on TimeEntryFilter {
   String get label {
     switch (this) {
       case TimeEntryFilter.thisWeek:
-        return 'This Week';
+        return AppLocalization.current.thisWeek;
       case TimeEntryFilter.thisMonth:
-        return 'This Month';
+        return AppLocalization.current.thisMonth;
     }
   }
 }
@@ -36,10 +38,10 @@ extension TimeEntryTabX on TimeEntryTab {
   String get label {
     switch (this) {
       case TimeEntryTab.myTime:
-        return 'My Time';
+        return AppLocalization.current.myTime;
 
       case TimeEntryTab.siteCrewTime:
-        return 'Site Crew Time';
+        return AppLocalization.current.siteCrewTime;
     }
   }
 }

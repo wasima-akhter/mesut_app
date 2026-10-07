@@ -1,15 +1,26 @@
-import 'package:construction_app/features/auth/change_password/change_password_page.dart';
 import 'package:construction_app/features/auth/forgot_password/forgot_password_page.dart';
 import 'package:construction_app/features/auth/otp/otp_page.dart';
+import 'package:construction_app/features/auth/reset_password/reset_password_page.dart';
 import 'package:construction_app/features/auth/sign_in/sign_in_page.dart';
 import 'package:construction_app/features/auth/sign_up/sign_up_page.dart';
+import 'package:construction_app/features/employee/assignments/employee_assignment_detail_page.dart';
+import 'package:construction_app/features/employee/timer/active_timer_page.dart';
 import 'package:construction_app/features/entry/splash/splash_page.dart';
+import 'package:construction_app/features/site_manager/profile/site_manager_profile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/widgets/snack/app_snackbar.dart';
 import '../../features/entry/nav/navigation_page.dart';
 import '../../features/entry/onboarding/onboarding_page.dart';
+import '../../features/shared/change_password/change_password_page.dart';
+import '../../features/shared/legal/privacy_policy.dart';
+import '../../features/shared/legal/terms_conditions.dart';
+import '../../features/site_manager/inspection_pages/inspection_calender_page.dart';
+import '../../features/site_manager/inspection_pages/inspection_survey_page.dart';
+import '../../features/site_manager/inspection_pages/site_manager_inspections_page.dart';
+import '../../features/site_manager/phase_board/site_manager_phase_board.dart';
+import '../../features/site_manager/profile/site_manager_edit_profile.dart';
 import '../../features/site_manager/projects/create_project_modules.dart';
 import '../../features/site_manager/projects/site_manager_project_details_screen.dart';
 import '../constants/route_constants.dart';
@@ -63,9 +74,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
-        path: RouteConstants.changePassword,
+        path: RouteConstants.resetPassword,
         builder: (context, state) {
-          return const ChangePasswordScreen(email: "email");
+          return const ResetPasswordScreen(email: "email");
         },
       ),
 
@@ -89,6 +100,77 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RouteConstants.siteManagerCreateproject,
         builder: (context, state) {
           return NewProjectPage();
+        },
+      ),
+      GoRoute(
+        path: RouteConstants.changePassword,
+        builder: (context, state) {
+          return ChangePasswordPage();
+        },
+      ),
+      GoRoute(
+        path: RouteConstants.siteManagerPhaseBoard,
+        builder: (context, state) {
+          return SiteManagerPhaseBoardPage();
+        },
+      ),
+      GoRoute(
+        path: RouteConstants.siteManagerSiteInspection,
+        builder: (context, state) {
+          return SiteInspectionPage();
+        },
+      ),
+      GoRoute(
+        path: RouteConstants.siteManagerInspectionSurveyPage,
+        builder: (context, state) {
+          return InspectionSurveyPage();
+        },
+      ),
+      GoRoute(
+        path: RouteConstants.siteManagerInspectionCalendarPage,
+        builder: (context, state) {
+          return InspectionCalendarPage();
+        },
+      ),
+      GoRoute(
+        path: RouteConstants.siteManagerProfile,
+        builder: (context, state) {
+          return SiteManagerProfile();
+        },
+      ),
+
+      GoRoute(
+        path: RouteConstants.siteManagerProfileEdit,
+        builder: (context, state) {
+          return const EditProfilePage();
+        },
+      ),
+
+      // Employee
+      GoRoute(
+        path: RouteConstants.employeeAssignmentDetails,
+        builder: (context, state) {
+          return const AssignmentDetailsPage();
+        },
+      ),
+      GoRoute(
+        path: RouteConstants.employeeActiveTimerPage,
+        builder: (context, state) {
+          return const ActiveTimerPage();
+        },
+      ),
+
+      GoRoute(
+        path: RouteConstants.privacyPolicy,
+        builder: (context, state) {
+          return const PrivacyPolicyPage();
+        },
+      ),
+
+      GoRoute(
+        path: RouteConstants.termsAndConditions,
+        builder: (context, state) {
+          return const TermsAndConditionsPage();
         },
       ),
     ],

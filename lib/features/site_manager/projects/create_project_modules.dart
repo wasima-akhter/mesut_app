@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/localization/context_extensions.dart';
 import 'enums.dart';
 
 // Import your existing enums file.
@@ -147,7 +148,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
           Expanded(
             child: Center(
               child: Text(
-                'New Project',
+                context.loc.newProject,
                 style: TextStyle(
                   fontSize: 21.sp,
                   fontWeight: FontWeight.w700,
@@ -160,7 +161,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
           SizedBox(
             width: 70.w,
             child: Text(
-              'Step ${_currentStep + 1} of 3',
+              context.loc.stepOf(_currentStep + 1, 3),
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontSize: 15.sp,
@@ -205,11 +206,11 @@ class _NewProjectPageState extends State<NewProjectPage> {
           padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              _sectionTitle('General & Customer Info'),
+              _sectionTitle(context.loc.generalAndCustomerInfo),
 
               SizedBox(height: 16.h),
 
-              _fieldLabel('Project Name'),
+              _fieldLabel(context.loc.projectName),
 
               SizedBox(height: 7.h),
 
@@ -220,7 +221,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
 
               SizedBox(height: 17.h),
 
-              _fieldLabel('Customer'),
+              _fieldLabel(context.loc.customer),
 
               SizedBox(height: 7.h),
 
@@ -231,7 +232,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
               if (_existingClient)
                 _dropdown(
                   value: _selectedClient,
-                  hint: 'Select client',
+                  hint: context.loc.selectClient,
                   items: const [
                     'Goldstein GmbH',
                     'Muller Construction',
@@ -246,7 +247,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
 
               SizedBox(height: 17.h),
 
-              _fieldLabel('Priority'),
+              _fieldLabel(context.loc.priority),
 
               SizedBox(height: 7.h),
 
@@ -266,7 +267,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
 
               SizedBox(height: 17.h),
 
-              _fieldLabel('Contact Person'),
+              _fieldLabel(context.loc.contactPerson),
 
               SizedBox(height: 7.h),
 
@@ -277,7 +278,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
 
               SizedBox(height: 17.h),
 
-              _fieldLabel('Phone Number'),
+              _fieldLabel(context.loc.phoneNumber),
 
               SizedBox(height: 7.h),
 
@@ -289,7 +290,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
 
               SizedBox(height: 17.h),
 
-              _fieldLabel('Email'),
+              _fieldLabel(context.loc.email),
 
               SizedBox(height: 7.h),
 
@@ -320,7 +321,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
           padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              _sectionTitle('Site Location & Status'),
+              _sectionTitle(context.loc.siteLocationAndStatus),
 
               SizedBox(height: 16.h),
 
@@ -328,11 +329,11 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _fieldLabel('Site Address'),
+                    _fieldLabel(context.loc.siteAddress),
 
                     SizedBox(height: 7.h),
 
-                    _fieldLabelSmall('Street & No'),
+                    _fieldLabelSmall(context.loc.streetAndNo),
 
                     SizedBox(height: 6.h),
 
@@ -349,7 +350,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _fieldLabelSmall('Postal Code'),
+                              _fieldLabelSmall(context.loc.postalCode),
 
                               SizedBox(height: 6.h),
 
@@ -368,7 +369,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _fieldLabelSmall('City'),
+                              _fieldLabelSmall(context.loc.city),
 
                               SizedBox(height: 6.h),
 
@@ -391,13 +392,13 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _fieldLabel('Site Manager'),
+                    _fieldLabel(context.loc.siteManager),
 
                     SizedBox(height: 7.h),
 
                     _dropdown(
                       value: _siteManager,
-                      hint: 'Select site manager',
+                      hint: context.loc.selectSiteManager,
                       items: const [
                         'Mesut Yilmaz',
                         'Tim Muller',
@@ -419,11 +420,11 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _fieldLabel('Workflow Status'),
+                    _fieldLabel(context.loc.workflowStatus),
 
                     SizedBox(height: 12.h),
 
-                    _fieldLabelSmall('Project Phase'),
+                    _fieldLabelSmall(context.loc.projectPhase),
 
                     SizedBox(height: 6.h),
 
@@ -443,7 +444,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
 
                     SizedBox(height: 14.h),
 
-                    _fieldLabelSmall('Operational Status'),
+                    _fieldLabelSmall(context.loc.operationalStatus),
 
                     SizedBox(height: 6.h),
 
@@ -463,7 +464,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
 
                     SizedBox(height: 14.h),
 
-                    _fieldLabelSmall('Priority'),
+                    _fieldLabelSmall(context.loc.priority),
 
                     SizedBox(height: 6.h),
 
@@ -487,6 +488,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
               SizedBox(height: 20.h),
 
               _stepButtons(
+                previousText: context.loc.previous,
+                nextText: context.loc.next,
                 onPrevious: () {
                   setState(() {
                     _currentStep--;
@@ -516,7 +519,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
           padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              _sectionTitle('Scaffold Specs & Schedule'),
+              _sectionTitle(context.loc.scaffoldSpecsAndSchedule),
 
               SizedBox(height: 16.h),
 
@@ -524,7 +527,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _fieldLabel('Estimated Area (m²)'),
+                    _fieldLabel(context.loc.estimatedAreaM2),
 
                     SizedBox(height: 7.h),
 
@@ -542,8 +545,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
               SizedBox(height: 12.h),
 
               _scheduleCard(
-                title: 'Erection Schedule',
-                dateLabel: 'Start date',
+                title: context.loc.erectionSchedule,
+                dateLabel: context.loc.startDate,
                 date: _erectionStartDate,
                 duration: _erectionDuration,
                 onDateTap: () => _selectDate(
@@ -571,8 +574,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
               SizedBox(height: 12.h),
 
               _scheduleCard(
-                title: 'Dismantling Schedule',
-                dateLabel: 'Teardown Date',
+                title: context.loc.dismantlingSchedule,
+                dateLabel: context.loc.teardownDate,
                 date: _dismantlingDate,
                 duration: _dismantlingDuration,
                 onDateTap: () => _selectDate(
@@ -603,7 +606,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _fieldLabel('Safety Inspection'),
+                    _fieldLabel(context.loc.safetyInspection),
 
                     SizedBox(height: 10.h),
 
@@ -611,7 +614,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                       children: [
                         Expanded(
                           child: Text(
-                            'Next Due Date',
+                            context.loc.nextDueDate,
                             style: TextStyle(
                               fontSize: 16.sp,
                               color: const Color(0xFF777777),
@@ -652,8 +655,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
               SizedBox(height: 20.h),
 
               _stepButtons(
-                previousText: 'Previous',
-                nextText: 'Create Project',
+                previousText: context.loc.previous,
+                nextText: context.loc.createProject,
                 onPrevious: () {
                   setState(() {
                     _currentStep--;
@@ -677,11 +680,11 @@ class _NewProjectPageState extends State<NewProjectPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _fieldLabel('Site Access & Photos'),
+          _fieldLabel(context.loc.siteAccessAndPhotos),
 
           SizedBox(height: 10.h),
 
-          _fieldLabelSmall('Note Category'),
+          _fieldLabelSmall(context.loc.noteCategory),
 
           SizedBox(height: 8.h),
 
@@ -734,7 +737,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _fieldLabel('Notes Details'),
+          _fieldLabel(context.loc.noteDetails),
 
           SizedBox(height: 7.h),
 
@@ -743,8 +746,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
             maxLines: 4,
             style: TextStyle(fontSize: 16.sp, color: const Color(0xFF333333)),
             decoration: InputDecoration(
-              hintText:
-                  'Enter site instructions, gate codes, or client requests...',
+              hintText: context.loc.enterSiteInstructions,
               hintStyle: TextStyle(
                 fontSize: 15.sp,
                 color: const Color(0xFF999999),
@@ -778,7 +780,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _fieldLabel('Upload Photos'),
+          _fieldLabel(context.loc.uploadPhotos),
 
           SizedBox(height: 8.h),
 
@@ -801,7 +803,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                   ),
                   SizedBox(height: 7.h),
                   Text(
-                    'Upload Front Side',
+                    context.loc.uploadFrontSide,
                     style: TextStyle(
                       fontSize: 15.sp,
                       color: const Color(0xFF999999),
@@ -912,7 +914,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
             children: [
               Expanded(
                 child: Text(
-                  'Duration',
+                  context.loc.duration,
                   style: TextStyle(
                     fontSize: 15.sp,
                     color: const Color(0xFF999999),
@@ -940,7 +942,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
               SizedBox(width: 9.w),
 
               Text(
-                '${duration.toStringAsFixed(1)} days',
+                context.loc.durationDays(duration.toStringAsFixed(1)),
                 style: TextStyle(
                   fontSize: 15.5.sp,
                   fontWeight: FontWeight.w600,
@@ -988,7 +990,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
         children: [
           Expanded(
             child: _customerTypeButton(
-              title: 'Existing Client',
+              title: context.loc.existingClient,
               selected: _existingClient,
               onTap: () {
                 setState(() {
@@ -999,7 +1001,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
           ),
           Expanded(
             child: _customerTypeButton(
-              title: 'New Client',
+              title: context.loc.newClient,
               selected: !_existingClient,
               onTap: () {
                 setState(() {
@@ -1244,7 +1246,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
           ),
         ),
         child: Text(
-          'Next',
+          context.loc.next,
           style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w700),
         ),
       ),
@@ -1254,8 +1256,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
   Widget _stepButtons({
     required VoidCallback onPrevious,
     required VoidCallback onNext,
-    String previousText = 'Previous',
-    String nextText = 'Next',
+    String? previousText,
+    String? nextText,
   }) {
     return Row(
       children: [
@@ -1272,7 +1274,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 ),
               ),
               child: Text(
-                previousText,
+                previousText ?? context.loc.previous,
                 style: TextStyle(
                   fontSize: 16.5.sp,
                   fontWeight: FontWeight.w600,
@@ -1298,7 +1300,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 ),
               ),
               child: Text(
-                nextText,
+                nextText ?? context.loc.next,
                 style: TextStyle(
                   fontSize: 16.5.sp,
                   fontWeight: FontWeight.w700,
@@ -1368,17 +1370,17 @@ class _NewProjectPageState extends State<NewProjectPage> {
 
   void _createProject() {
     if (_projectNameController.text.trim().isEmpty) {
-      _showError('Please enter a project name.');
+      _showError(context.loc.pleaseEnterProjectName);
       return;
     }
 
     if (_streetController.text.trim().isEmpty) {
-      _showError('Please enter the site address.');
+      _showError(context.loc.pleaseEnterSiteAddress);
       return;
     }
 
     if (_cityController.text.trim().isEmpty) {
-      _showError('Please enter the city.');
+      _showError(context.loc.pleaseEnterCity);
       return;
     }
 
@@ -1427,3 +1429,4 @@ class _NewProjectPageState extends State<NewProjectPage> {
     );
   }
 }
+

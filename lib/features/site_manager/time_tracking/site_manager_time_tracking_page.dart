@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_radii.dart';
+import '../../../core/localization/context_extensions.dart';
 import '../helper/site_manager_enums.dart';
 import '../helper/site_manager_models.dart';
 import 'bottom_sheet_container.dart';
@@ -135,12 +136,12 @@ class _SiteManagerTimeTrackingPageState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Time Tracking',
+                  context.loc.timeTracking,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'Week 38 • Sep 14 – Sep 20',
+                  context.loc.weekRange('38', 'Sep 14 – Sep 20'),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
@@ -149,7 +150,7 @@ class _SiteManagerTimeTrackingPageState
 
           _buildHeaderAction(
             icon: Icons.add,
-            label: 'Add Time',
+            label: context.loc.addTime,
             onTap: _showAddTimeSheet,
           ),
         ],
@@ -202,7 +203,7 @@ class _SiteManagerTimeTrackingPageState
 
                       Center(
                         child: Text(
-                          'Start New Timer',
+                          context.loc.startNewTimer,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                       ),
@@ -211,7 +212,7 @@ class _SiteManagerTimeTrackingPageState
 
                       Center(
                         child: Text(
-                          'Select an assigned project to begin tracking your work',
+                          context.loc.selectAssignedProject,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
@@ -220,7 +221,7 @@ class _SiteManagerTimeTrackingPageState
                       SizedBox(height: 24.h),
 
                       Text(
-                        'Assigned Project',
+                        context.loc.assignedProject,
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
 
@@ -228,8 +229,8 @@ class _SiteManagerTimeTrackingPageState
 
                       DropdownButtonFormField<String>(
                         initialValue: selectedProject,
-                        decoration: const InputDecoration(
-                          hintText: 'Select project',
+                        decoration: InputDecoration(
+                          hintText: context.loc.selectProject,
                         ),
                         items: const [
                           DropdownMenuItem(
@@ -251,7 +252,7 @@ class _SiteManagerTimeTrackingPageState
                       SizedBox(height: 18.h),
 
                       Text(
-                        'Activity Type',
+                        context.loc.activityType,
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
 
@@ -285,7 +286,7 @@ class _SiteManagerTimeTrackingPageState
                           borderRadius: AppRadii.medium,
                         ),
                         child: Text(
-                          'Timer will start from now.',
+                          context.loc.timerWillStartFromNow,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ),
@@ -306,10 +307,12 @@ class _SiteManagerTimeTrackingPageState
                                   Navigator.pop(sheetContext);
 
                                   _showMessage(
-                                    'Timer started for ${selectedActivity.label}',
+                                    context.loc.timerStartedFor(
+                                      selectedActivity.label,
+                                    ),
                                   );
                                 },
-                          child: const Text('Start Timer'),
+                          child: Text(context.loc.startNewTimer),
                         ),
                       ),
 
@@ -318,7 +321,7 @@ class _SiteManagerTimeTrackingPageState
                       Center(
                         child: TextButton(
                           onPressed: () => Navigator.pop(sheetContext),
-                          child: const Text('Cancel'),
+                          child: Text(context.loc.cancel),
                         ),
                       ),
                     ],
@@ -355,20 +358,18 @@ class _SiteManagerTimeTrackingPageState
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            return SafeArea(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(24.r),
-                  ),
-                ),
-                padding: EdgeInsets.fromLTRB(
-                  20.w,
-                  12.h,
-                  20.w,
-                  MediaQuery.of(context).viewInsets.bottom + 20.h,
-                ),
+            return Container(
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+              ),
+              padding: EdgeInsets.fromLTRB(
+                20.w,
+                12.h,
+                20.w,
+                MediaQuery.of(context).viewInsets.bottom + 20.h,
+              ),
+              child: SafeArea(
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -389,7 +390,7 @@ class _SiteManagerTimeTrackingPageState
 
                       Center(
                         child: Text(
-                          'Add Time Entry',
+                          context.loc.addTimeEntry,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                       ),
@@ -409,7 +410,7 @@ class _SiteManagerTimeTrackingPageState
 
                       if (selectedTab == TimeEntryTab.siteCrewTime) ...[
                         Text(
-                          'Select Employee',
+                          context.loc.selectEmployee,
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
 
@@ -443,7 +444,7 @@ class _SiteManagerTimeTrackingPageState
                       ],
 
                       Text(
-                        'Date',
+                        context.loc.date,
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
 
@@ -471,7 +472,7 @@ class _SiteManagerTimeTrackingPageState
                       SizedBox(height: 18.h),
 
                       Text(
-                        'Project',
+                        context.loc.project,
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
 
@@ -500,7 +501,7 @@ class _SiteManagerTimeTrackingPageState
                       SizedBox(height: 18.h),
 
                       Text(
-                        'Activity Type',
+                        context.loc.activityType,
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
 
@@ -527,7 +528,7 @@ class _SiteManagerTimeTrackingPageState
                       SizedBox(height: 18.h),
 
                       Text(
-                        'Start Time',
+                        context.loc.startTime,
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
 
@@ -553,7 +554,7 @@ class _SiteManagerTimeTrackingPageState
                       SizedBox(height: 18.h),
 
                       Text(
-                        'End Time',
+                        context.loc.endTime,
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
 
@@ -579,7 +580,7 @@ class _SiteManagerTimeTrackingPageState
                       SizedBox(height: 18.h),
 
                       Text(
-                        'Break Time',
+                        context.loc.breakTime,
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
 
@@ -612,7 +613,7 @@ class _SiteManagerTimeTrackingPageState
                           borderRadius: AppRadii.medium,
                         ),
                         child: Text(
-                          'Working time is calculated automatically after deducting the break.',
+                          context.loc.workingTimeDeductBreak,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ),
@@ -629,9 +630,9 @@ class _SiteManagerTimeTrackingPageState
 
                             Navigator.pop(sheetContext);
 
-                            _showMessage('Time entry added');
+                            _showMessage(context.loc.timeEntryAdded);
                           },
-                          child: const Text('Save Entry'),
+                          child: Text(context.loc.saveEntry),
                         ),
                       ),
 
@@ -640,7 +641,7 @@ class _SiteManagerTimeTrackingPageState
                       Center(
                         child: TextButton(
                           onPressed: () => Navigator.pop(sheetContext),
-                          child: const Text('Cancel'),
+                          child: Text(context.loc.cancel),
                         ),
                       ),
                     ],
@@ -771,7 +772,7 @@ class _SiteManagerTimeTrackingPageState
           children: [
             Expanded(
               child: _tabItem(
-                label: 'My Time',
+                label: context.loc.myTime,
                 selected: _selectedTab == TimeTrackingTab.myTime,
                 onTap: () {
                   setState(() {
@@ -782,7 +783,7 @@ class _SiteManagerTimeTrackingPageState
             ),
             Expanded(
               child: _tabItem(
-                label: 'Site Crew Time',
+                label: context.loc.siteCrewTime,
                 selected: _selectedTab == TimeTrackingTab.siteCrewTime,
                 onTap: () {
                   setState(() {
@@ -877,7 +878,7 @@ class _SiteManagerTimeTrackingPageState
         padding: EdgeInsets.fromLTRB(20.w, 22.h, 20.w, 0),
         sliver: SliverToBoxAdapter(
           child: Text(
-            'Crew Breakdown',
+            context.loc.crewBreakdown,
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
@@ -909,13 +910,16 @@ class _SiteManagerTimeTrackingPageState
           Row(
             children: [
               Expanded(
-                child: _summaryValue(title: 'TODAY', value: '7h 30min'),
+                child: _summaryValue(
+                  title: context.loc.today,
+                  value: '7h 30min',
+                ),
               ),
               Expanded(
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: _summaryValue(
-                    title: 'THIS WEEK',
+                    title: context.loc.thisWeek,
                     value: '35h 30min',
                     alignRight: true,
                   ),
@@ -941,7 +945,7 @@ class _SiteManagerTimeTrackingPageState
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              '34h 15m of 40h logged this week',
+              context.loc.loggedThisWeek('34h 15m', '40h'),
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: AppColors.neutral300),
@@ -990,7 +994,9 @@ class _SiteManagerTimeTrackingPageState
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 13.h),
           child: Center(
             child: Text(
-              _isTimerRunning ? 'Stop Timer' : 'Start New Timer',
+              _isTimerRunning
+                  ? context.loc.stopTimer
+                  : context.loc.startNewTimer,
               style: Theme.of(
                 context,
               ).textTheme.labelLarge?.copyWith(color: AppColors.white),
@@ -1006,7 +1012,7 @@ class _SiteManagerTimeTrackingPageState
       children: [
         Expanded(
           child: Text(
-            'Recent Logs',
+            context.loc.recentLogs,
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
@@ -1099,7 +1105,7 @@ class _SiteManagerTimeTrackingPageState
                     ),
                   ),
                   Text(
-                    entry.isSynced ? 'Synced' : 'Pending',
+                    entry.isSynced ? context.loc.synced : context.loc.pending,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: entry.isSynced
                           ? AppColors.success
@@ -1146,7 +1152,7 @@ class _SiteManagerTimeTrackingPageState
 
   Widget _buildProjectSelector() {
     return _selectField(
-      label: 'Project',
+      label: context.loc.project,
       value: _selectedProject,
       onTap: _showProjectSelector,
     );
@@ -1163,7 +1169,7 @@ class _SiteManagerTimeTrackingPageState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Total Project Hours',
+            context.loc.totalProjectHours,
             style: Theme.of(
               context,
             ).textTheme.labelMedium?.copyWith(color: AppColors.neutral400),
@@ -1281,23 +1287,32 @@ class _SiteManagerTimeTrackingPageState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          member.name,
-                          style: Theme.of(context).textTheme.titleSmall,
+                        Flexible(
+                          child: Text(
+                            member.name,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
                         ),
                         SizedBox(width: 7.w),
-                        Text(
-                          member.activity.label,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
                       ],
                     ),
 
                     SizedBox(height: 4.h),
+                    Text(
+                      member.activity.label,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    SizedBox(height: 4.h),
 
                     Text(
-                      '${member.startTime} – ${member.endTime} • Break: ${member.breakTime}',
+                      '${member.startTime} – ${member.endTime}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      'Break: ${member.breakTime}',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -1308,7 +1323,7 @@ class _SiteManagerTimeTrackingPageState
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    'synced',
+                    context.loc.synced,
                     style: Theme.of(
                       context,
                     ).textTheme.labelSmall?.copyWith(color: AppColors.success),
@@ -1337,11 +1352,15 @@ class _SiteManagerTimeTrackingPageState
       child: Row(
         children: [
           Expanded(
-            child: _tabItem(label: 'My Time', selected: true, onTap: () {}),
+            child: _tabItem(
+              label: context.loc.myTime,
+              selected: true,
+              onTap: () {},
+            ),
           ),
           Expanded(
             child: _tabItem(
-              label: 'Site Crew Time',
+              label: context.loc.siteCrewTime,
               selected: false,
               onTap: () {},
             ),
@@ -1492,7 +1511,7 @@ class _SiteManagerTimeTrackingPageState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Select Project',
+                  context.loc.selectProject,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
 
@@ -1551,25 +1570,25 @@ class _SiteManagerTimeTrackingPageState
       context: context,
       builder: (sheetContext) {
         return BottomSheetContainer(
-          title: 'Time Entry',
+          title: context.loc.timeEntry,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _detailRow('Project', entry.project),
-              _detailRow('Activity', entry.activity.label),
-              _detailRow('Date', 'Sep 18, 2026'),
+              _detailRow(context.loc.project, entry.project),
+              _detailRow(context.loc.activityType, entry.activity.label),
+              _detailRow(context.loc.date, 'Sep 18, 2026'),
               _detailRow(
-                'Working time',
+                context.loc.workingTime,
                 '${entry.startTime} – ${entry.endTime}',
               ),
-              _detailRow('Break', entry.breakTime),
-              _detailRow('Total', entry.duration),
-              _detailRow('Employee', entry.employee),
+              _detailRow(context.loc.breakTime, entry.breakTime),
+              _detailRow(context.loc.total, entry.duration),
+              _detailRow(context.loc.employee, entry.employee),
 
               SizedBox(height: 20.h),
 
               _secondaryAction(
-                label: 'Close',
+                label: context.loc.close,
                 onTap: () => Navigator.pop(sheetContext),
               ),
             ],
@@ -1588,18 +1607,18 @@ class _SiteManagerTimeTrackingPageState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _detailRow('Activity', member.activity.label),
+              _detailRow(context.loc.activityType, member.activity.label),
               _detailRow(
-                'Working time',
+                context.loc.workingTime,
                 '${member.startTime} – ${member.endTime}',
               ),
-              _detailRow('Break', member.breakTime),
-              _detailRow('Total', member.totalHours),
+              _detailRow(context.loc.breakTime, member.breakTime),
+              _detailRow(context.loc.total, member.totalHours),
 
               SizedBox(height: 20.h),
 
               _secondaryAction(
-                label: 'Close',
+                label: context.loc.close,
                 onTap: () => Navigator.pop(sheetContext),
               ),
             ],

@@ -12,6 +12,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/enums/app_enum.dart';
+import '../../../core/localization/app_localization.dart';
 import '../../../core/widgets/fields/app_text_field.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
 import '../auth_validators.dart';
@@ -55,7 +56,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
     // TODO: call login API
 
-    AppSnackBar.success('Login successful');
+    AppSnackBar.success(AppLocalization.current.success);
 
     context.pushReplacement(RouteConstants.mainNav);
   }
@@ -91,18 +92,18 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     AppSnackBar.error(
       "We couldn't determine your account role. Please log in again to continue.",
     );
-    // Stay on / return to login.
-    // If already on SignInScreen, nothing else is required.
   }
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalization.current;
+
     return AuthScreenContainer(
       showBack: false,
       child: Column(
         children: [
           Text(
-            'Log In',
+            loc.signIn,
             style: AppTextStyles.titleLarge.copyWith(
               fontWeight: FontWeight.w700,
             ),
@@ -111,21 +112,21 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
           SizedBox(height: 5.h),
 
           Text(
-            'Sign in to access your assigned projects and daily schedule.',
+            loc.signInToAccount,
             textAlign: TextAlign.center,
             style: AppTextStyles.bodyMedium.copyWith(color: Colors.black38),
           ),
 
           SizedBox(height: 30.h),
 
-          _buildFieldLabel('Email'),
+          _buildFieldLabel(loc.workEmail),
 
           SizedBox(height: 5.h),
 
           AppTextField(
             controller: _emailController,
             type: AppTextFieldType.email,
-            hint: 'Email',
+            hint: loc.enterEmail,
             borderRadius: 5,
             contentPadding: EdgeInsets.symmetric(
               horizontal: 10.w,
@@ -135,14 +136,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
           SizedBox(height: 14.h),
 
-          _buildFieldLabel('Password'),
+          _buildFieldLabel(loc.password),
 
           SizedBox(height: 5.h),
 
           AppTextField(
             controller: _passwordController,
             type: AppTextFieldType.password,
-            hint: 'Password',
+            hint: loc.enterPassword,
             borderRadius: 5,
             contentPadding: EdgeInsets.symmetric(
               horizontal: 10.w,
@@ -162,7 +163,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: Text(
-                'Forgot Password',
+                loc.forgotPassword,
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: const Color(0xFFE7193F),
                 ),
@@ -189,7 +190,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: Text(
-                  'verify otp',
+                  loc.verifyCode,
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: const Color(0xFFE7193F),
                   ),
@@ -199,7 +200,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
           SizedBox(height: 22.h),
 
-          _AuthButton(text: 'Log In  →', onPressed: _login),
+          _AuthButton(text: '${loc.signIn}  →', onPressed: _login),
 
           SizedBox(height: 20.h),
 
@@ -207,7 +208,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Don't have an account? ",
+                loc.dontHaveAccount,
                 style: AppTextStyles.bodyMedium.copyWith(color: Colors.black45),
               ),
               GestureDetector(
@@ -215,7 +216,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   context.push(RouteConstants.signUp);
                 },
                 child: Text(
-                  'Sign Up',
+                  loc.signUp,
                   style: AppTextStyles.bodyMedium.copyWith(
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFFE7193F),
@@ -225,16 +226,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             ],
           ),
 
-          //
-          //
           SizedBox(height: 30),
           if (kDebugMode)
             Wrap(
               runSpacing: 10,
               children: [
-                // ------------------------------------------------
-                // SITE MANAGER
-                // ------------------------------------------------
                 _DebugButton(
                   title: 'Login as Site Manager',
                   icon: Icons.engineering_outlined,
@@ -243,12 +239,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     _loginAs(UserRole.siteManager);
                   },
                 ),
-
                 const SizedBox(height: 14),
-
-                // ------------------------------------------------
-                // EMPLOYEE
-                // ------------------------------------------------
                 _DebugButton(
                   title: 'Login as Employee',
                   icon: Icons.person_outline,
@@ -257,12 +248,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     _loginAs(UserRole.employee);
                   },
                 ),
-
                 const SizedBox(height: 14),
-
-                // ------------------------------------------------
-                // NONE
-                // ------------------------------------------------
                 _DebugButton(
                   title: 'Continue as Unauthenticated',
                   icon: Icons.logout,
@@ -305,10 +291,6 @@ class _AuthButton extends StatelessWidget {
     );
   }
 }
-
-// ============================================================
-// DEBUG BUTTON
-// ============================================================
 
 class _DebugButton extends StatelessWidget {
   const _DebugButton({

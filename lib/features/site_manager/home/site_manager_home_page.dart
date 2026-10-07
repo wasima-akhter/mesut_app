@@ -2,6 +2,8 @@ import 'package:construction_app/core/widgets/buttons/app_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/localization/context_extensions.dart';
+
 class SiteManagerHomePage extends StatefulWidget {
   const SiteManagerHomePage({super.key});
 
@@ -62,18 +64,14 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
     setState(() {
       notificationsEnabled = !notificationsEnabled;
     });
-
-    _showMessage(
-      notificationsEnabled ? 'Notifications enabled' : 'Notifications disabled',
-    );
   }
 
   void _openProject(Map<String, dynamic> project) {
-    _showMessage('Opening ${project['project']}');
+    _showMessage('${context.loc.projectOpened}: ${project['project']}');
   }
 
   void _openRoute(Map<String, dynamic> project) {
-    _showMessage('Opening route to ${project['address']}');
+    _showMessage(context.loc.startNavigation);
   }
 
   @override
@@ -148,7 +146,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Good Morning',
+                context.loc.welcomeBack,
                 style: TextStyle(
                   fontSize: 19.sp,
                   color: Color(0xFF777777),
@@ -240,7 +238,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
                 ],
               ),
               child: Text(
-                '$activeSites Sites Active Today',
+                '$activeSites ${context.loc.activeSites}',
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
@@ -273,7 +271,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
             right: 9,
             bottom: 8,
             child: GestureDetector(
-              onTap: () => _showMessage('Map view opened'),
+              onTap: () => _showMessage(context.loc.navMap),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 11,
@@ -287,7 +285,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'View Full Map',
+                      context.loc.navMap,
                       style: TextStyle(
                         color: const Color(0xFFE22B3B),
                         fontSize: 16.sp,
@@ -326,7 +324,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Standing Scaffolds',
+                    context.loc.standingScaffold,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 17.sp,
@@ -348,7 +346,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
                   const SizedBox(height: 20),
 
                   Text(
-                    'Currently up across all sites',
+                    context.loc.activeSites,
                     maxLines: 2,
                     style: TextStyle(color: Colors.white70, fontSize: 17.sp),
                   ),
@@ -365,8 +363,6 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
                 setState(() {
                   inspectionsDue += 1;
                 });
-
-                _showMessage('Inspection count updated');
               },
               child: Container(
                 padding: const EdgeInsets.all(15),
@@ -389,7 +385,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
                     ),
 
                     Text(
-                      'Inspection due',
+                      context.loc.inspections,
                       style: TextStyle(
                         color: const Color(0xFFE32638),
                         fontSize: 17.sp,
@@ -411,21 +407,21 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
       children: [
         Expanded(
           child: _buildStatCard(
-            title: 'Erection',
+            title: context.loc.erectionPhase,
             color: const Color(0xFF00A651),
             planned: 14,
             running: 5,
-            onTap: () => _showMessage('Erection operations selected'),
+            onTap: () => _showMessage(context.loc.erectionPhase),
           ),
         ),
         const SizedBox(width: 8),
         Expanded(
           child: _buildStatCard(
-            title: 'Dismantling',
+            title: context.loc.dismantlingPhase,
             color: const Color(0xFFFF9800),
             planned: 14,
             running: 5,
-            onTap: () => _showMessage('Dismantling operations selected'),
+            onTap: () => _showMessage(context.loc.dismantlingPhase),
           ),
         ),
       ],
@@ -442,7 +438,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 130.h,
+        height: 160.h,
         padding: const EdgeInsets.fromLTRB(13, 12, 13, 10),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -500,17 +496,17 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Planned',
+                  context.loc.planned,
                   style: TextStyle(
                     color: const Color(0xFF858585),
-                    fontSize: 17.sp,
+                    fontSize: 16.sp,
                   ),
                 ),
                 Text(
-                  'Running',
+                  context.loc.running,
                   style: TextStyle(
                     color: const Color(0xFF858585),
-                    fontSize: 17.sp,
+                    fontSize: 16.sp,
                   ),
                 ),
               ],
@@ -526,7 +522,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
       children: [
         Expanded(
           child: Text(
-            "Today's operations (3)",
+            "${context.loc.upcomingTasks} (${operations.length})",
             style: TextStyle(
               fontSize: 25.sp,
               fontWeight: FontWeight.w700,
@@ -543,7 +539,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
           child: Row(
             children: [
               Text(
-                showAllOperations ? 'Show less' : 'View all',
+                showAllOperations ? context.loc.close : context.loc.viewAll,
                 style: TextStyle(
                   fontSize: 16.sp,
                   color: const Color(0xFF888888),
@@ -631,7 +627,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
           const SizedBox(height: 6),
 
           Text(
-            'Client: ${operation['client']}',
+            '${context.loc.customer}: ${operation['client']}',
             style: TextStyle(fontSize: 17.sp, color: const Color(0xFF888888)),
           ),
 
@@ -644,7 +640,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
                   onPressed: () => _openRoute(operation),
                   icon: const Icon(Icons.location_on_outlined, size: 18),
                   label: Text(
-                    'Route',
+                    context.loc.route,
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
@@ -668,7 +664,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
                 child: AppButton(
                   onPressed: () => _openProject(operation),
                   height: 42.h,
-                  text: 'Open Project',
+                  text: context.loc.openProject,
                 ),
               ),
             ],

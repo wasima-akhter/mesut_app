@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/context_extensions.dart';
 import 'dates_modules.dart';
 import 'enums.dart';
 import 'history_modules.dart';
@@ -89,11 +90,11 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
           SizedBox(height: 7.h),
           Row(
             children: [
-              _statusTag('Erection', color: const Color(0xFF12B76A)),
+              _statusTag(context.loc.erectionPhase, color: const Color(0xFF12B76A)),
               SizedBox(width: 6.w),
-              _statusTag('In Progress', color: const Color(0xFF12B76A)),
+              _statusTag(context.loc.inProgress, color: const Color(0xFF12B76A)),
               SizedBox(width: 6.w),
-              _statusTag('High', color: const Color(0xFFE00025)),
+              _statusTag(context.loc.high, color: const Color(0xFFE00025)),
             ],
           ),
           SizedBox(height: 8.h),
@@ -256,8 +257,8 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
       backgroundColor: Colors.transparent,
       builder: (_) {
         return EditProjectDetailsBottomSheet(
-          title: 'Edit Project Details',
-          buttonText: 'Save Changes',
+          title: context.loc.editProjectDetails,
+          buttonText: context.loc.saveChanges,
 
           initialProjectPhase: 'Preconstruction',
           initialOperationalStatus: 'In Progress',
@@ -433,7 +434,7 @@ class _EditProjectDetailsBottomSheetState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _label('Project Phase'),
+                    _label(context.loc.projectPhase),
 
                     SizedBox(height: 6.h),
 
@@ -451,7 +452,7 @@ class _EditProjectDetailsBottomSheetState
 
                     SizedBox(height: 14.h),
 
-                    _label('Operational Status'),
+                    _label(context.loc.operationalStatus),
 
                     SizedBox(height: 6.h),
 
@@ -469,7 +470,7 @@ class _EditProjectDetailsBottomSheetState
 
                     SizedBox(height: 14.h),
 
-                    _label('Priority'),
+                    _label(context.loc.priority),
 
                     SizedBox(height: 6.h),
 
@@ -488,7 +489,7 @@ class _EditProjectDetailsBottomSheetState
 
                     SizedBox(height: 14.h),
 
-                    _label('Contact Name'),
+                    _label(context.loc.contactName),
 
                     SizedBox(height: 6.h),
 
@@ -500,7 +501,7 @@ class _EditProjectDetailsBottomSheetState
 
                     SizedBox(height: 14.h),
 
-                    _label('Phone Number'),
+                    _label(context.loc.phoneNumber),
 
                     SizedBox(height: 6.h),
 
@@ -512,7 +513,7 @@ class _EditProjectDetailsBottomSheetState
 
                     SizedBox(height: 14.h),
 
-                    _label('Email'),
+                    _label(context.loc.email),
 
                     SizedBox(height: 6.h),
 
@@ -554,7 +555,7 @@ class _EditProjectDetailsBottomSheetState
                       child: TextButton(
                         onPressed: () => Navigator.pop(context),
                         child: Text(
-                          'Cancel',
+                          context.loc.cancel,
                           style: TextStyle(
                             fontSize: 17.sp,
                             color: const Color(0xFF555555),
@@ -666,17 +667,17 @@ class _EditProjectDetailsBottomSheetState
     final email = _emailController.text.trim();
 
     if (contactName.isEmpty) {
-      _showError('Please enter contact name.');
+      _showError(context.loc.pleaseEnterContactName);
       return;
     }
 
     if (phoneNumber.isEmpty) {
-      _showError('Please enter phone number.');
+      _showError(context.loc.pleaseEnterPhoneNumber);
       return;
     }
 
     if (email.isEmpty) {
-      _showError('Please enter email.');
+      _showError(context.loc.pleaseEnterEmail);
       return;
     }
 

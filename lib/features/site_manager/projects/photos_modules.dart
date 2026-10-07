@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/localization/app_localization.dart';
 import '../../../core/services/permission_service.dart';
 import 'models.dart';
 import 'overview_modules.dart';
@@ -56,11 +57,12 @@ class _PhotosTabState extends State<PhotosTab> {
     context.pop();
 
     final allowed = await AppPermissions.requestCamera();
+    final loc = AppLocalization.current;
 
     if (!allowed) {
       await showPermissionDialog(
-        title: 'Camera Permission Required',
-        message: 'Please allow camera access to take a photo.',
+        title: loc.cameraPermissionRequired,
+        message: loc.cameraPermissionMessage,
         context: context,
       );
       return;
@@ -85,11 +87,12 @@ class _PhotosTabState extends State<PhotosTab> {
   Future<void> _pickGallery() async {
     context.pop();
     final allowed = await AppPermissions.requestPhotos();
+    final loc = AppLocalization.current;
 
     if (!allowed) {
       await showPermissionDialog(
-        title: 'Photo Permission Required',
-        message: 'Photo library access is required to upload project photos.',
+        title: loc.photoPermissionRequired,
+        message: loc.photoPermissionMessage,
         context: context,
       );
       return;
@@ -130,10 +133,11 @@ class _PhotosTabState extends State<PhotosTab> {
       }
     }
 
-    showMessage('${result.length} file(s) selected');
+    showMessage(AppLocalization.current.filesSelected(result.length));
   }
 
   Widget buildPhotosTab() {
+    final loc = AppLocalization.current;
     final coverPhoto = _photos.where((photo) => photo.isCover).firstOrNull;
 
     final otherPhotos = _photos.where((photo) => !photo.isCover).toList();
@@ -148,7 +152,7 @@ class _PhotosTabState extends State<PhotosTab> {
               _buildPhotoToolbar(),
               SizedBox(height: 10.h),
 
-              _buildPhotoSectionTitle('Photos', _photos.length),
+              _buildPhotoSectionTitle(loc.photos, _photos.length),
 
               SizedBox(height: 8.h),
 
@@ -160,7 +164,7 @@ class _PhotosTabState extends State<PhotosTab> {
 
               SizedBox(height: 18.h),
 
-              _buildPhotoSectionTitle('PDF Plans', _planFiles.length),
+              _buildPhotoSectionTitle(loc.pdfPlans, _planFiles.length),
 
               SizedBox(height: 8.h),
 
@@ -178,10 +182,11 @@ class _PhotosTabState extends State<PhotosTab> {
   }
 
   Widget _buildPhotoToolbar() {
+    final loc = AppLocalization.current;
     return Row(
       children: [
         _photoFilterButton(
-          label: 'Photos (${_photos.length})',
+          label: '${loc.photos} (${_photos.length})',
           selected: true,
           onTap: () {},
         ),
@@ -189,7 +194,7 @@ class _PhotosTabState extends State<PhotosTab> {
         SizedBox(width: 7.w),
 
         _photoFilterButton(
-          label: 'PDF Plan (${_planFiles.length})',
+          label: loc.pdfPlan(_planFiles.length),
           selected: false,
           onTap: () {},
         ),
@@ -202,7 +207,7 @@ class _PhotosTabState extends State<PhotosTab> {
             onPressed: _showUploadFilesBottomSheet,
             icon: Icon(Icons.upload_outlined, size: 16.sp),
             label: Text(
-              'Upload Files',
+              loc.uploadFiles,
               style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
             ),
             style: ElevatedButton.styleFrom(
@@ -248,6 +253,7 @@ class _PhotosTabState extends State<PhotosTab> {
   }
 
   Widget _buildCoverPhoto(ProjectPhoto photo) {
+    final loc = AppLocalization.current;
     return GestureDetector(
       onTap: () => _openPhoto(photo),
       child: Container(
@@ -277,7 +283,7 @@ class _PhotosTabState extends State<PhotosTab> {
                 padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 3.h),
                 color: Colors.white,
                 child: Text(
-                  'Cover',
+                  loc.cover,
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -334,9 +340,10 @@ class _PhotosTabState extends State<PhotosTab> {
   }
 
   Widget _buildPlanFile(ProjectPlanFile file) {
+    final loc = AppLocalization.current;
     return GestureDetector(
       onTap: () {
-        showMessage('Opening ${file.name}');
+        showMessage(loc.openingFile(file.name));
       },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 9.h),
@@ -441,6 +448,7 @@ class _PhotosTabState extends State<PhotosTab> {
   }
 
   void _showUploadFilesBottomSheet() {
+    final loc = AppLocalization.current;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -468,7 +476,7 @@ class _PhotosTabState extends State<PhotosTab> {
                 SizedBox(height: 12.h),
 
                 Text(
-                  'Upload Files',
+                  loc.uploadFiles,
                   style: TextStyle(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w700,
@@ -482,7 +490,7 @@ class _PhotosTabState extends State<PhotosTab> {
                     Expanded(
                       child: _uploadOption(
                         icon: Icons.camera_alt_outlined,
-                        title: 'Take Photo',
+                        title: loc.takePhoto,
                         onTap: _takePhoto,
                       ),
                     ),
@@ -490,7 +498,7 @@ class _PhotosTabState extends State<PhotosTab> {
                     Expanded(
                       child: _uploadOption(
                         icon: Icons.photo_library_outlined,
-                        title: 'Gallery',
+                        title: loc.gallery,
                         onTap: _pickGallery,
                       ),
                     ),
@@ -498,7 +506,7 @@ class _PhotosTabState extends State<PhotosTab> {
                     Expanded(
                       child: _uploadOption(
                         icon: Icons.attach_file,
-                        title: 'Files',
+                        title: loc.files,
                         onTap: _pickFiles,
                       ),
                     ),
@@ -613,6 +621,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
   }
 
   Widget _buildViewerHeader() {
+    final loc = AppLocalization.current;
     return Padding(
       padding: EdgeInsets.all(12.w),
       child: Row(
@@ -637,7 +646,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
           const Spacer(),
 
           Text(
-            'Photo',
+            loc.photoViewer,
             style: TextStyle(
               color: Colors.white,
               fontSize: 18.sp,
@@ -685,13 +694,14 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
   }
 
   Widget _buildViewerActions() {
+    final loc = AppLocalization.current;
     return Container(
       padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 12.h),
       child: Row(
         children: [
           Expanded(
             child: _viewerButton(
-              label: 'Set as Cover Photo',
+              label: loc.setAsCoverPhoto,
               color: const Color(0xFFC8102E),
               icon: Icons.photo_camera_outlined,
               onTap: () {
@@ -700,7 +710,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      'Cover photo updated',
+                      loc.coverPhotoUpdated,
                       style: TextStyle(fontSize: 16.sp),
                     ),
                   ),
@@ -713,12 +723,12 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
 
           _viewerSmallButton(
             icon: Icons.download_outlined,
-            label: 'Download',
+            label: loc.download,
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    'Download started',
+                    loc.downloadStarted,
                     style: TextStyle(fontSize: 16.sp),
                   ),
                 ),
@@ -730,7 +740,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
 
           _viewerSmallButton(
             icon: Icons.delete_outline,
-            label: 'Delete',
+            label: loc.delete,
             onTap: _deletePhoto,
           ),
         ],

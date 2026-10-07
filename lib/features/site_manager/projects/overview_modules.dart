@@ -2,13 +2,14 @@ import 'package:construction_app/core/widgets/snack/app_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/localization/app_localization.dart';
 import '../../../core/services/permission_service.dart';
 
 /// =============================================================
 /// OVERVIEW
 /// =============================================================
 
-Widget buildOverviewTab() {
+Widget buildOverviewTab([BuildContext? context]) {
   return CustomScrollView(
     physics: const BouncingScrollPhysics(),
     slivers: [
@@ -16,13 +17,13 @@ Widget buildOverviewTab() {
         padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 20.h),
         sliver: SliverList(
           delegate: SliverChildListDelegate([
-            buildCustomerCard(),
+            buildCustomerCard(context),
             SizedBox(height: 10.h),
-            buildMapCard(),
+            buildMapCard(context),
             SizedBox(height: 10.h),
-            buildScaffoldSpecificationCard(),
+            buildScaffoldSpecificationCard(context),
             SizedBox(height: 10.h),
-            buildScheduleCard(),
+            buildScheduleCard(context),
           ]),
         ),
       ),
@@ -30,13 +31,14 @@ Widget buildOverviewTab() {
   );
 }
 
-Widget buildCustomerCard() {
+Widget buildCustomerCard([BuildContext? context]) {
+  final loc = AppLocalization.current;
   return card(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Customer',
+          loc.customer,
           style: TextStyle(
             fontSize: 17.sp,
             color: const Color(0xFF777777),
@@ -58,7 +60,7 @@ Widget buildCustomerCard() {
             ),
             SizedBox(width: 5.w),
             Text(
-              '• Commercial',
+              '• ${loc.commercial}',
               style: TextStyle(fontSize: 16.sp, color: const Color(0xFF777777)),
             ),
           ],
@@ -74,7 +76,7 @@ Widget buildCustomerCard() {
             children: [
               _contactRow(
                 icon: Icons.person_outline,
-                text: 'Contact: Andreas Weber (Project lead)',
+                text: loc.contactLabel('Andreas Weber (${loc.projectLead})'),
               ),
               SizedBox(height: 8.h),
               _contactRow(icon: Icons.phone_outlined, text: '+49 221 555 0192'),
@@ -89,9 +91,9 @@ Widget buildCustomerCard() {
             Expanded(
               child: _outlineButton(
                 icon: Icons.phone_outlined,
-                label: 'Call Client',
+                label: loc.callClient,
                 onTap: () {
-                  showMessage('Calling client...');
+                  showMessage(loc.callingClient);
                 },
               ),
             ),
@@ -99,9 +101,9 @@ Widget buildCustomerCard() {
             Expanded(
               child: _outlineButton(
                 icon: Icons.mail_outline,
-                label: 'Mail Client',
+                label: loc.mailClient,
                 onTap: () {
-                  showMessage('Opening email...');
+                  showMessage(loc.openingEmail);
                 },
               ),
             ),
@@ -112,7 +114,7 @@ Widget buildCustomerCard() {
   );
 }
 
-Widget buildMapCard() {
+Widget buildMapCard([BuildContext? context]) {
   return card(
     padding: EdgeInsets.zero,
     child: Column(
@@ -183,7 +185,7 @@ Widget buildMapCard() {
                   onPressed: _startNavigation,
                   icon: Icon(Icons.navigation_outlined, size: 18.sp),
                   label: Text(
-                    'Start Navigation',
+                    AppLocalization.current.startNavigation,
                     style: TextStyle(
                       fontSize: 17.sp,
                       fontWeight: FontWeight.w700,
@@ -276,16 +278,17 @@ class _MapPlaceholderPainter extends CustomPainter {
 
 Future<void> _startNavigation() async {
   final allowed = await AppPermissions.requestLocation();
+  final loc = AppLocalization.current;
 
   if (!allowed) {
     await showPermissionDialog(
-      title: 'Location Permission Required',
-      message: 'Location access is required to start navigation.',
+      title: loc.locationPermissionRequired,
+      message: loc.locationPermissionMessage,
       context: appNavigatorKey.currentContext!,
     );
     return;
   }
-  showMessage('Starting navigation...');
+  showMessage(loc.startingNavigation);
 }
 
 void showMessage(String message) {
@@ -304,6 +307,7 @@ Future<void> showPermissionDialog({
   required String message,
   required BuildContext context,
 }) async {
+  final loc = AppLocalization.current;
   final shouldOpenSettings = await showDialog<bool>(
     context: context,
     builder: (context) {
@@ -318,14 +322,14 @@ Future<void> showPermissionDialog({
             onPressed: () {
               Navigator.pop(context, false);
             },
-            child: Text('Cancel', style: TextStyle(fontSize: 17.sp)),
+            child: Text(loc.cancel, style: TextStyle(fontSize: 17.sp)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context, true);
             },
             child: Text(
-              'Settings',
+              loc.settings,
               style: TextStyle(
                 fontSize: 17.sp,
                 color: const Color(0xFFC8102E),
@@ -343,25 +347,26 @@ Future<void> showPermissionDialog({
   }
 }
 
-Widget buildScaffoldSpecificationCard() {
+Widget buildScaffoldSpecificationCard([BuildContext? context]) {
+  final loc = AppLocalization.current;
   return card(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _cardTitle(text: 'Scaffold Specification'),
+        _cardTitle(text: loc.scaffoldSpecification),
         SizedBox(height: 12.h),
         Row(
           children: [
             Expanded(
-              child: _specValue(value: '450 m²', label: 'Scaffold area'),
+              child: _specValue(value: '450 m²', label: loc.scaffoldArea),
             ),
             Expanded(
-              child: _specValue(value: 'Front', label: 'Scaffold Type'),
+              child: _specValue(value: loc.frontScaffold, label: loc.scaffoldType),
             ),
           ],
         ),
         SizedBox(height: 14.h),
-        _specValue(value: '24 m', label: 'Building height'),
+        _specValue(value: '24 m', label: loc.buildingHeight),
         SizedBox(height: 10.h),
         Container(
           width: double.infinity,
@@ -371,7 +376,7 @@ Widget buildScaffoldSpecificationCard() {
             borderRadius: BorderRadius.circular(5.r),
           ),
           child: Text(
-            'Next Safety Inspection: Sept 18 – Sept 20 (2.5 days)',
+            loc.nextSafetyInspection('Sept 18 – Sept 20 (2.5 days)'),
             style: TextStyle(
               fontSize: 15.5.sp,
               color: const Color(0xFFF79009),
@@ -384,26 +389,27 @@ Widget buildScaffoldSpecificationCard() {
   );
 }
 
-Widget buildScheduleCard() {
+Widget buildScheduleCard([BuildContext? context]) {
+  final loc = AppLocalization.current;
   return card(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _cardTitle(text: 'Schedule & Duration'),
+        _cardTitle(text: loc.scheduleAndDuration),
 
         SizedBox(height: 12.h),
         _scheduleRow(
           color: const Color(0xFF12B76A),
-          title: 'Erection',
+          title: loc.erectionPhase,
           date: 'Sep 18 – Sep 20, 2026',
-          duration: '2.5 days',
+          duration: loc.durationDays('2.5'),
         ),
         SizedBox(height: 12.h),
         _scheduleRow(
           color: const Color(0xFFF79009),
-          title: 'Dismantling',
+          title: loc.dismantlingPhase,
           date: 'Sep 18 – Sep 20, 2026',
-          duration: '2.5 days',
+          duration: loc.durationDays('2.5'),
         ),
       ],
     ),

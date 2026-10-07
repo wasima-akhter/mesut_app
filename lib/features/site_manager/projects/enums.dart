@@ -4,6 +4,7 @@
 library;
 
 import 'dart:ui';
+import '../../../core/localization/app_localization.dart';
 
 enum ProjectPhase { erection, dismantling, standingScaffold, completed }
 
@@ -21,15 +22,15 @@ enum ProjectTab {
   String get label {
     switch (this) {
       case ProjectTab.all:
-        return 'All';
+        return AppLocalization.current.projectFilterAll;
       case ProjectTab.active:
-        return 'Active';
+        return AppLocalization.current.projectFilterActive;
       case ProjectTab.myProjects:
-        return 'My Projects';
+        return AppLocalization.current.projectFilterMyProjects;
       case ProjectTab.thisWeek:
-        return 'This Week';
+        return AppLocalization.current.projectFilterThisWeek;
       case ProjectTab.inspection:
-        return 'Inspection';
+        return AppLocalization.current.projectFilterInspection;
     }
   }
 }
@@ -52,9 +53,9 @@ enum TaskStatusTab {
   String get label {
     switch (this) {
       case TaskStatusTab.open:
-        return 'Open';
+        return AppLocalization.current.open;
       case TaskStatusTab.completed:
-        return 'Completed';
+        return AppLocalization.current.completed;
     }
   }
 }
@@ -77,19 +78,19 @@ extension ProjectNoteCategoryExtension on ProjectNoteCategory {
   String get label {
     switch (this) {
       case ProjectNoteCategory.siteAccess:
-        return 'Site Access';
+        return AppLocalization.current.siteAccess;
       case ProjectNoteCategory.customerRequest:
-        return 'Customer Request';
+        return AppLocalization.current.customerRequest;
       case ProjectNoteCategory.openPoints:
-        return 'Open Points';
+        return AppLocalization.current.openPoints;
       case ProjectNoteCategory.agreements:
-        return 'Agreements';
+        return AppLocalization.current.agreements;
       case ProjectNoteCategory.specialRequirements:
-        return 'Special Requirements';
+        return AppLocalization.current.specialRequirements;
       case ProjectNoteCategory.localContact:
-        return 'Local Contact';
+        return AppLocalization.current.localContact;
       case ProjectNoteCategory.general:
-        return 'General';
+        return AppLocalization.current.general;
     }
   }
 }
@@ -98,16 +99,16 @@ extension ProjectPhaseExtension on ProjectPhase {
   String get label {
     switch (this) {
       case ProjectPhase.erection:
-        return 'Erection';
+        return AppLocalization.current.erectionPhase;
 
       case ProjectPhase.dismantling:
-        return 'Dismantling';
+        return AppLocalization.current.dismantlingPhase;
 
       case ProjectPhase.standingScaffold:
-        return 'Standing Scaffold';
+        return AppLocalization.current.standingScaffold;
 
       case ProjectPhase.completed:
-        return 'Completed';
+        return AppLocalization.current.completed;
     }
   }
 
@@ -148,13 +149,13 @@ extension ProjectPriorityExtension on ProjectPriority {
   String get label {
     switch (this) {
       case ProjectPriority.high:
-        return 'High';
+        return AppLocalization.current.high;
 
       case ProjectPriority.medium:
-        return 'Medium';
+        return AppLocalization.current.medium;
 
       case ProjectPriority.low:
-        return 'Low';
+        return AppLocalization.current.low;
     }
   }
 
@@ -189,13 +190,13 @@ extension ProjectStatusExtension on ProjectStatus {
   String get label {
     switch (this) {
       case ProjectStatus.inProgress:
-        return 'In Progress';
+        return AppLocalization.current.inProgress;
 
       case ProjectStatus.notStarted:
-        return 'Not Started';
+        return AppLocalization.current.notStarted;
 
       case ProjectStatus.postponed:
-        return 'Postponed';
+        return AppLocalization.current.postponed;
     }
   }
 
@@ -212,25 +213,24 @@ extension ProjectStatusExtension on ProjectStatus {
     }
   }
 }
-//
 
 extension ProjectDetailsTabX on ProjectDetailsTab {
   String get label {
     switch (this) {
       case ProjectDetailsTab.overview:
-        return 'Overview';
+        return AppLocalization.current.smOverview;
       case ProjectDetailsTab.tasks:
-        return 'Tasks';
+        return AppLocalization.current.smTasks;
       case ProjectDetailsTab.photos:
-        return 'Photos';
+        return AppLocalization.current.smPhotos;
       case ProjectDetailsTab.measurement:
-        return 'Measurement';
+        return AppLocalization.current.smMeasurement;
       case ProjectDetailsTab.dates:
-        return 'Dates';
+        return AppLocalization.current.smDates;
       case ProjectDetailsTab.notes:
-        return 'Notes';
+        return AppLocalization.current.smNotes;
       case ProjectDetailsTab.history:
-        return 'History';
+        return AppLocalization.current.smHistory;
     }
   }
 }

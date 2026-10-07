@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/localization/context_extensions.dart';
+
 class DatesTab extends StatefulWidget {
   const DatesTab({super.key});
 
@@ -84,7 +86,7 @@ class _DatesTabState extends State<DatesTab> {
           SizedBox(width: 7.w),
           Expanded(
             child: Text(
-              'Changes here automatically update Calendar and Daily Planning.',
+              context.loc.changesNotice,
               style: TextStyle(
                 fontSize: 16.5.sp,
                 color: const Color(0xFF1799D6),
@@ -104,10 +106,10 @@ class _DatesTabState extends State<DatesTab> {
 
   Widget _buildErectionSchedule() {
     return _scheduleCard(
-      title: 'Erection Schedule',
+      title: context.loc.erectionSchedule,
       children: [
         _dateRow(
-          label: 'Start date',
+          label: context.loc.startDate,
           date: _erectionStart,
           onTap: _selectErectionStartDate,
         ),
@@ -115,7 +117,7 @@ class _DatesTabState extends State<DatesTab> {
         SizedBox(height: 8.h),
 
         _durationRow(
-          label: 'Duration',
+          label: context.loc.duration,
           value: _erectionDuration,
           onMinus: () => _changeErectionDuration(-0.5),
           onPlus: () => _changeErectionDuration(0.5),
@@ -123,7 +125,7 @@ class _DatesTabState extends State<DatesTab> {
 
         SizedBox(height: 8.h),
 
-        _dateValueRow(label: 'End date', value: _formatDate(_erectionEnd)),
+        _dateValueRow(label: context.loc.endDate, value: _formatDate(_erectionEnd)),
       ],
     );
   }
@@ -134,10 +136,10 @@ class _DatesTabState extends State<DatesTab> {
 
   Widget _buildDismantlingSchedule() {
     return _scheduleCard(
-      title: 'Dismantling Schedule',
+      title: context.loc.dismantlingSchedule,
       children: [
         _dateRow(
-          label: 'Planned date',
+          label: context.loc.plannedDateLabel,
           date: _dismantlingDate,
           onTap: _selectDismantlingDate,
         ),
@@ -145,7 +147,7 @@ class _DatesTabState extends State<DatesTab> {
         SizedBox(height: 8.h),
 
         _durationRow(
-          label: 'Duration',
+          label: context.loc.duration,
           value: _dismantlingDuration,
           onMinus: () => _changeDismantlingDuration(-0.5),
           onPlus: () => _changeDismantlingDuration(0.5),
@@ -164,7 +166,7 @@ class _DatesTabState extends State<DatesTab> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Safety Inspection',
+            context.loc.safetyInspection,
             style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w800),
           ),
 
@@ -178,7 +180,7 @@ class _DatesTabState extends State<DatesTab> {
               borderRadius: BorderRadius.circular(5.r),
             ),
             child: Text(
-              'Next Safety Inspection: Sept 18 – Sept 20 (2.5 days)',
+              context.loc.nextSafetyInspection('Sept 18 – Sept 20 (2.5 days)'),
               style: TextStyle(
                 fontSize: 16.sp,
                 color: const Color(0xFFF79009),
@@ -210,8 +212,8 @@ class _DatesTabState extends State<DatesTab> {
               ),
               child: Text(
                 _safetyInspectionCompleted
-                    ? '✓ Inspection Completed'
-                    : 'Mark as Complete',
+                    ? context.loc.inspectionCompleted
+                    : context.loc.markAsComplete,
                 style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700),
               ),
             ),
@@ -249,7 +251,7 @@ class _DatesTabState extends State<DatesTab> {
                 ),
               )
             : Text(
-                'Save Changes',
+                context.loc.saveChanges,
                 style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800),
               ),
       ),
@@ -349,7 +351,7 @@ class _DatesTabState extends State<DatesTab> {
                 // width: 58.w,
                 child: Center(
                   child: Text(
-                    '${_formatDuration(value)} days',
+                    context.loc.durationDays(_formatDuration(value)),
                     style: TextStyle(
                       fontSize: 15.5.sp,
                       fontWeight: FontWeight.w700,
@@ -474,7 +476,7 @@ class _DatesTabState extends State<DatesTab> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Schedule changes saved',
+          context.loc.scheduleChangesSaved,
           style: TextStyle(fontSize: 17.sp),
         ),
         behavior: SnackBarBehavior.floating,

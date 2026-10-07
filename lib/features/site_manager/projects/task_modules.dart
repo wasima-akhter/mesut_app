@@ -6,6 +6,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/localization/context_extensions.dart';
 import 'enums.dart';
 import 'models.dart';
 import 'overview_modules.dart';
@@ -101,12 +102,12 @@ class _TasksTabState extends State<TasksTab> {
           children: [
             _buildTaskStatusTab(
               tab: TaskStatusTab.open,
-              label: 'Open ($openCount)',
+              label: context.loc.openTasks(openCount),
             ),
             SizedBox(width: 8.w),
             _buildTaskStatusTab(
               tab: TaskStatusTab.completed,
-              label: 'Completed ($completedCount)',
+              label: context.loc.completedTasks(completedCount),
             ),
           ],
         ),
@@ -117,7 +118,7 @@ class _TasksTabState extends State<TasksTab> {
             onPressed: () => showAddTaskBottomSheet(context),
             icon: Icon(Icons.add, size: 17.sp),
             label: Text(
-              'Add New',
+              context.loc.addNew,
               style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
             ),
             style: ElevatedButton.styleFrom(
@@ -189,7 +190,7 @@ class _TasksTabState extends State<TasksTab> {
           ),
           SizedBox(height: 10.h),
           Text(
-            isOpen ? 'No open tasks' : 'No completed tasks',
+            isOpen ? context.loc.noOpenTasks : context.loc.noCompletedTasks,
             style: TextStyle(
               fontSize: 17.sp,
               fontWeight: FontWeight.w700,
@@ -199,8 +200,8 @@ class _TasksTabState extends State<TasksTab> {
           SizedBox(height: 4.h),
           Text(
             isOpen
-                ? 'All tasks have been completed.'
-                : 'Completed tasks will appear here.',
+                ? context.loc.allTasksCompleted
+                : context.loc.completedTasksAppearHere,
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 15.sp, color: const Color(0xFF999999)),
           ),
@@ -306,7 +307,7 @@ class _TasksTabState extends State<TasksTab> {
                     ),
                     SizedBox(width: 4.w),
                     Text(
-                      'Due Sep 20',
+                      context.loc.dueOn('Sep 20'),
                       style: TextStyle(
                         fontSize: 13.5.sp,
                         color: const Color(0xFF777777),
@@ -376,7 +377,7 @@ class _TasksTabState extends State<TasksTab> {
       _tasks.remove(task);
     });
 
-    showMessage('Task deleted');
+    showMessage(context.loc.taskDeleted);
   }
 
   @override
@@ -435,7 +436,7 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
             Padding(
               padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 8.h),
               child: Text(
-                'New Task',
+                context.loc.newTask,
                 style: TextStyle(fontSize: 21.sp, fontWeight: FontWeight.w800),
               ),
             ),
@@ -446,15 +447,15 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                     padding: EdgeInsets.fromLTRB(18.w, 8.h, 18.w, 20.h),
                     sliver: SliverList(
                       delegate: SliverChildListDelegate([
-                        _fieldLabel('Task Description'),
+                        _fieldLabel(context.loc.taskDescription),
                         SizedBox(height: 6.h),
                         _descriptionField(),
                         SizedBox(height: 14.h),
-                        _fieldLabel('Responsible Employee'),
+                        _fieldLabel(context.loc.responsibleEmployee),
                         SizedBox(height: 6.h),
                         _dropdown(
                           value: _employee,
-                          hint: 'Select Employee',
+                          hint: context.loc.selectEmployee,
                           items: const [
                             'Tim Muler',
                             'Andreas Weber',
@@ -467,7 +468,7 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                           },
                         ),
                         SizedBox(height: 14.h),
-                        _fieldLabel('Priority'),
+                        _fieldLabel(context.loc.priority),
                         SizedBox(height: 6.h),
                         _dropdown(
                           value: _priority.label,
@@ -485,7 +486,7 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                           },
                         ),
                         SizedBox(height: 14.h),
-                        _fieldLabel('Due Date'),
+                        _fieldLabel(context.loc.dueDate),
                         SizedBox(height: 6.h),
                         GestureDetector(
                           onTap: _selectDate,
@@ -532,7 +533,7 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                               padding: EdgeInsets.symmetric(vertical: 12.h),
                             ),
                             child: Text(
-                              'Create New Task',
+                              context.loc.createNewTask,
                               style: TextStyle(
                                 fontSize: 17.sp,
                                 fontWeight: FontWeight.w700,
@@ -544,7 +545,7 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                         TextButton(
                           onPressed: () => Navigator.pop(context),
                           child: Text(
-                            'Cancel',
+                            context.loc.cancel,
                             style: TextStyle(
                               fontSize: 16.sp,
                               color: const Color(0xFF555555),
@@ -653,12 +654,12 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
 
   void _createTask() {
     if (_descriptionController.text.trim().isEmpty) {
-      _showError('Please enter a task description.');
+      _showError(context.loc.pleaseEnterTaskDescription);
       return;
     }
 
     if (_employee == null) {
-      _showError('Please select an employee.');
+      _showError(context.loc.pleaseSelectEmployee);
       return;
     }
 

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/localization/app_localization.dart';
+
 class HistoryTab extends StatefulWidget {
   const HistoryTab({super.key});
 
@@ -9,36 +11,39 @@ class HistoryTab extends StatefulWidget {
 }
 
 class _HistoryTabState extends State<HistoryTab> {
-  final List<_HistoryItem> _history = [
-    _HistoryItem(
-      icon: Icons.refresh_rounded,
-      color: const Color(0xFF12B76A),
-      title: 'Duration Updated: 2.0 days → 2.5 days',
-      user: 'Mesut Yilmaz (Site manager)',
-      date: 'Sep 18, 2026 at 06:30 AM',
-    ),
-    _HistoryItem(
-      icon: Icons.edit_outlined,
-      color: const Color(0xFF4F7CFF),
-      title: 'Phase changed: Order confirmed → Erection',
-      user: 'Mesut Yilmaz (Site manager)',
-      date: 'Sep 18, 2026 at 07:30 AM',
-    ),
-    _HistoryItem(
-      icon: Icons.camera_alt_outlined,
-      color: const Color(0xFFF79009),
-      title: 'Phase changed: Order confirmed → Erection',
-      user: 'Mesut Yilmaz (Site manager)',
-      date: 'Sep 18, 2026 at 07:30 AM',
-    ),
-    _HistoryItem(
-      icon: Icons.folder_outlined,
-      color: const Color(0xFF7B61FF),
-      title: 'Phase changed: Order confirmed → Erection',
-      user: 'Mesut Yilmaz (Site manager)',
-      date: 'Sep 18, 2026 at 07:30 AM',
-    ),
-  ];
+  List<_HistoryItem> get _history {
+    final loc = AppLocalization.current;
+    return [
+      _HistoryItem(
+        icon: Icons.refresh_rounded,
+        color: const Color(0xFF12B76A),
+        title: loc.durationUpdated('2.0 days', '2.5 days'),
+        user: 'Mesut Yilmaz (${loc.siteManagerRole})',
+        date: 'Sep 18, 2026 at 06:30 AM',
+      ),
+      _HistoryItem(
+        icon: Icons.edit_outlined,
+        color: const Color(0xFF4F7CFF),
+        title: loc.phaseChanged(loc.orderConfirmed, loc.erectionPhase),
+        user: 'Mesut Yilmaz (${loc.siteManagerRole})',
+        date: 'Sep 18, 2026 at 07:30 AM',
+      ),
+      _HistoryItem(
+        icon: Icons.camera_alt_outlined,
+        color: const Color(0xFFF79009),
+        title: loc.phaseChanged(loc.orderConfirmed, loc.erectionPhase),
+        user: 'Mesut Yilmaz (${loc.siteManagerRole})',
+        date: 'Sep 18, 2026 at 07:30 AM',
+      ),
+      _HistoryItem(
+        icon: Icons.folder_outlined,
+        color: const Color(0xFF7B61FF),
+        title: loc.phaseChanged(loc.orderConfirmed, loc.erectionPhase),
+        user: 'Mesut Yilmaz (${loc.siteManagerRole})',
+        date: 'Sep 18, 2026 at 07:30 AM',
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {

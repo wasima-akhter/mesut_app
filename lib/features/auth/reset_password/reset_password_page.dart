@@ -8,22 +8,23 @@ import 'package:go_router/go_router.dart';
 import '../../../app/constants/route_constants.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_styles.dart';
+import '../../../core/localization/app_localization.dart';
 import '../../../core/widgets/fields/app_text_field.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
 import '../auth_validators.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_screen_container.dart';
 
-class ChangePasswordScreen extends StatefulWidget {
+class ResetPasswordScreen extends StatefulWidget {
   final String email;
 
-  const ChangePasswordScreen({super.key, required this.email});
+  const ResetPasswordScreen({super.key, required this.email});
 
   @override
-  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
+  State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
 }
 
-class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
@@ -52,7 +53,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       return;
     }
 
-    AppSnackBar.success('Password changed successfully');
+    AppSnackBar.success(AppLocalization.current.passwordChangedSuccess);
 
     // TODO: call reset password API
 
@@ -61,25 +62,26 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalization.current;
+
     return AuthScreenContainer(
       child: Column(
         children: [
-          const AuthHeader(
-            title: 'Create a New Password',
-            subtitle:
-                'Almost there! Set a new password to get back into your account.',
+          AuthHeader(
+            title: loc.resetPassword,
+            subtitle: loc.resetPasswordSubtitle,
           ),
 
           SizedBox(height: 32.h),
 
-          _label('Create Password'),
+          _label(loc.createPassword),
 
           SizedBox(height: 5.h),
 
           AppTextField(
             controller: _passwordController,
             type: AppTextFieldType.password,
-            hint: 'Password',
+            hint: loc.enterPassword,
             borderRadius: 5,
             contentPadding: EdgeInsets.symmetric(
               horizontal: 10.w,
@@ -89,14 +91,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
           SizedBox(height: 14.h),
 
-          _label('Confirm Password'),
+          _label(loc.confirmPassword),
 
           SizedBox(height: 5.h),
 
           AppTextField(
             controller: _confirmPasswordController,
             type: AppTextFieldType.password,
-            hint: 'Confirm Password',
+            hint: loc.reenterPassword,
             borderRadius: 5,
             contentPadding: EdgeInsets.symmetric(
               horizontal: 10.w,
@@ -106,7 +108,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
           SizedBox(height: 36.h),
 
-          _AuthButton(text: 'Save Changes', onPressed: _changePassword),
+          _AuthButton(text: loc.saveChanges, onPressed: _changePassword),
         ],
       ),
     );

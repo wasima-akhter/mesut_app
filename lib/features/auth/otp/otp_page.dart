@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 import '../../../app/constants/route_constants.dart';
+import '../../../core/localization/app_localization.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
 import '../auth_validators.dart';
 import '../widgets/auth_screen_container.dart';
@@ -33,15 +34,6 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
   final _otpController = PinInputController();
 
   @override
-  void initState() {
-    // TODO: implement initState
-
-    debugPrint('email: ${widget.email}');
-    debugPrint('purpose ${widget.purpose}');
-    super.initState();
-  }
-
-  @override
   void dispose() {
     _otpController.dispose();
     super.dispose();
@@ -55,34 +47,32 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
       return;
     }
 
-    AppSnackBar.success('OTP verified successfully');
+    AppSnackBar.success(AppLocalization.current.success);
 
     switch (widget.purpose) {
       case OtpPurpose.signUp:
-        // TODO: Navigate to the next signup step/home screen.
         context.pushReplacement(RouteConstants.mainNav);
         break;
 
       case OtpPurpose.forgotPassword:
-        context.push(RouteConstants.changePassword);
+        context.push(RouteConstants.resetPassword);
         break;
     }
   }
 
   void _resendOtp() {
-    AppSnackBar.info('A new OTP has been sent');
-
-    // TODO: resend OTP API
-    AppSnackBar.success('OTP resent successfully');
+    AppSnackBar.success(AppLocalization.current.success);
   }
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalization.current;
+
     return AuthScreenContainer(
       child: Column(
         children: [
           Text(
-            'Verify Otp',
+            loc.enterOtp,
             style: AppTextStyles.titleLarge.copyWith(
               fontWeight: FontWeight.w700,
             ),
@@ -91,7 +81,7 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
           SizedBox(height: 5.h),
 
           Text(
-            'We sent an otp to your email. Enter it below to continue.',
+            loc.enterOtpSubtitle(widget.email),
             textAlign: TextAlign.center,
             style: AppTextStyles.bodyMedium.copyWith(color: Colors.black38),
           ),
@@ -156,13 +146,13 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Didn't get the code? ",
+                loc.didNotReceiveCode,
                 style: AppTextStyles.bodyMedium.copyWith(color: Colors.black38),
               ),
               GestureDetector(
                 onTap: _resendOtp,
                 child: Text(
-                  'Resend OTP',
+                  loc.resendCode,
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: const Color(0xFFE7193F),
                     fontWeight: FontWeight.w600,
@@ -174,7 +164,7 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
 
           SizedBox(height: 20.h),
 
-          _AuthButton(text: 'Verify OTP →', onPressed: _verifyOtp),
+          _AuthButton(text: '${loc.verifyCode} →', onPressed: _verifyOtp),
         ],
       ),
     );

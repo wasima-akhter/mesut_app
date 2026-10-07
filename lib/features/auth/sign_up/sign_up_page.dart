@@ -1,7 +1,5 @@
 // lib/features/auth/screens/sign_up_screen.dart
 
-// lib/features/auth/screens/sign_up_screen.dart
-
 import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:construction_app/app/theme/app_text_styles.dart';
 import 'package:construction_app/core/widgets/buttons/app_button.dart';
@@ -9,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/app_localization.dart';
 import '../../../core/widgets/fields/app_text_field.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
 import '../auth_validators.dart';
@@ -78,7 +77,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    AppSnackBar.success('Account created successfully');
+    AppSnackBar.success(AppLocalization.current.success);
 
     // TODO: call signup API
 
@@ -90,11 +89,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalization.current;
+
     return AuthScreenContainer(
       child: Column(
         children: [
           Text(
-            'Create an Account',
+            loc.createAccount,
             style: AppTextStyles.titleLarge.copyWith(
               fontSize: 28.sp,
               fontWeight: FontWeight.w700,
@@ -105,21 +106,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
           SizedBox(height: 5.h),
 
           Text(
-            'Create your account to get started.',
+            loc.startJourney,
             textAlign: TextAlign.center,
             style: AppTextStyles.bodyMedium.copyWith(color: Colors.black38),
           ),
 
           SizedBox(height: 24.h),
 
-          _buildFieldLabel('Name'),
+          _buildFieldLabel(loc.fullName),
 
           SizedBox(height: 5.h),
 
           AppTextField(
             controller: _nameController,
             type: AppTextFieldType.name,
-            hint: 'Name',
+            hint: loc.enterFullName,
             borderRadius: 5,
             contentPadding: EdgeInsets.symmetric(
               horizontal: 10.w,
@@ -134,14 +135,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
           SizedBox(height: 11.h),
 
-          _buildFieldLabel('Phone'),
+          _buildFieldLabel(loc.phone),
 
           SizedBox(height: 5.h),
 
           AppTextField(
             controller: _phoneController,
             type: AppTextFieldType.phone,
-            hint: 'Phone',
+            hint: loc.enterPhone,
             borderRadius: 5,
             contentPadding: EdgeInsets.symmetric(
               horizontal: 10.w,
@@ -156,14 +157,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
           SizedBox(height: 11.h),
 
-          _buildFieldLabel('Email'),
+          _buildFieldLabel(loc.workEmail),
 
           SizedBox(height: 5.h),
 
           AppTextField(
             controller: _emailController,
             type: AppTextFieldType.email,
-            hint: 'Email',
+            hint: loc.enterEmail,
             borderRadius: 5,
             contentPadding: EdgeInsets.symmetric(
               horizontal: 10.w,
@@ -178,14 +179,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
           SizedBox(height: 11.h),
 
-          _buildFieldLabel('Password'),
+          _buildFieldLabel(loc.password),
 
           SizedBox(height: 5.h),
 
           AppTextField(
             controller: _passwordController,
             type: AppTextFieldType.password,
-            hint: 'Password',
+            hint: loc.enterPassword,
             borderRadius: 5,
             contentPadding: EdgeInsets.symmetric(
               horizontal: 10.w,
@@ -200,14 +201,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
           SizedBox(height: 11.h),
 
-          _buildFieldLabel('Confirm Password'),
+          _buildFieldLabel(loc.confirmPassword),
 
           SizedBox(height: 5.h),
 
           AppTextField(
             controller: _confirmPasswordController,
             type: AppTextFieldType.password,
-            hint: 'Confirm Password',
+            hint: loc.reenterPassword,
             borderRadius: 5,
             contentPadding: EdgeInsets.symmetric(
               horizontal: 10.w,
@@ -222,7 +223,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
           SizedBox(height: 28.h),
 
-          _AuthButton(text: 'Create Account  →', onPressed: _signUp),
+          _AuthButton(text: '${loc.createAccount}  →', onPressed: _signUp),
 
           SizedBox(height: 17.h),
 
@@ -230,7 +231,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Already have an account? ',
+                loc.alreadyHaveAccount,
                 style: AppTextStyles.bodyMedium.copyWith(color: Colors.black38),
               ),
               GestureDetector(
@@ -238,7 +239,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   context.pop();
                 },
                 child: Text(
-                  'Log In',
+                  loc.signIn,
                   style: AppTextStyles.bodyMedium.copyWith(
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFFE7193F),

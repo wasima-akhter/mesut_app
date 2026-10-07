@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/localization/context_extensions.dart';
 import '../helper/site_manager_models.dart';
 
 class SiteManagerMapPage extends StatefulWidget {
@@ -188,7 +189,7 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
                       Navigator.pop(context);
                       _showMessage('Project opened');
                     },
-                    child: const Text('Open Project'),
+                    child: Text(context.loc.openProject),
                   ),
                 ),
               ],
@@ -299,7 +300,7 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
         textInputAction: TextInputAction.search,
         style: Theme.of(context).textTheme.bodyMedium,
         decoration: InputDecoration(
-          hintText: 'Search City',
+          hintText: context.loc.searchCity,
           prefixIcon: Icon(
             Icons.search,
             size: 20.sp,
@@ -327,22 +328,22 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
     return Wrap(
       runSpacing: 6.w,
       children: [
-        _filterChip(label: 'All', color: Colors.black),
+        _filterChip(keyName: 'All', label: context.loc.all, color: Colors.black),
         SizedBox(width: 6.w),
-        _filterChip(label: 'Erection', color: Colors.green),
+        _filterChip(keyName: 'Erection', label: context.loc.erectionPhase, color: Colors.green),
         SizedBox(width: 6.w),
-        _filterChip(label: 'Dismantling', color: Colors.orange),
+        _filterChip(keyName: 'Dismantling', label: context.loc.dismantlingPhase, color: Colors.orange),
         SizedBox(width: 6.w),
-        _filterChip(label: 'Standing', color: Colors.lightBlue),
+        _filterChip(keyName: 'Standing', label: context.loc.standing, color: Colors.lightBlue),
       ],
     );
   }
 
-  Widget _filterChip({required String label, required Color color}) {
-    final selected = _selectedFilter == label;
+  Widget _filterChip({required String keyName, required String label, required Color color}) {
+    final selected = _selectedFilter == keyName;
 
     return GestureDetector(
-      onTap: () => _selectFilter(label),
+      onTap: () => _selectFilter(keyName),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
 
@@ -435,6 +436,36 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
   }
 
   Widget _projectCard(MapLocation location) {
+    String typeLabel;
+    switch (location.type) {
+      case 'Erection':
+        typeLabel = context.loc.erectionPhase;
+        break;
+      case 'Dismantling':
+        typeLabel = context.loc.dismantlingPhase;
+        break;
+      case 'Standing':
+        typeLabel = context.loc.standing;
+        break;
+      default:
+        typeLabel = location.type;
+    }
+
+    String priorityLabel;
+    switch (location.priority.toLowerCase()) {
+      case 'high':
+        priorityLabel = context.loc.high;
+        break;
+      case 'medium':
+        priorityLabel = context.loc.medium;
+        break;
+      case 'low':
+        priorityLabel = context.loc.low;
+        break;
+      default:
+        priorityLabel = location.priority;
+    }
+
     return Material(
       elevation: 12,
       borderRadius: BorderRadius.circular(16.r),
@@ -489,7 +520,7 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
                               borderRadius: BorderRadius.circular(4.r),
                             ),
                             child: Text(
-                              location.type,
+                              typeLabel,
                               style: Theme.of(context).textTheme.labelSmall
                                   ?.copyWith(
                                     color: Colors.green.shade700,
@@ -500,7 +531,7 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
                           ),
                           SizedBox(width: 5.w),
                           Text(
-                            location.priority,
+                            priorityLabel,
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   color: Colors.redAccent,
@@ -601,7 +632,7 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
                   flex: 2,
                   child: _cardButton(
                     icon: Icons.navigation_outlined,
-                    text: 'Route',
+                    text: context.loc.route,
                     filled: true,
                     onTap: _handleRoute,
                   ),
@@ -611,7 +642,7 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
                   flex: 2,
                   child: _cardButton(
                     icon: Icons.open_in_new,
-                    text: 'Open',
+                    text: context.loc.open,
                     onTap: _handleOpen,
                   ),
                 ),
@@ -701,7 +732,7 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
         children: [
           _navItem(
             icon: Icons.home_outlined,
-            label: 'Home',
+            label: context.loc.home,
             selected: false,
             onTap: () {
               _showMessage('Home selected');
@@ -709,7 +740,7 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
           ),
           _navItem(
             icon: Icons.folder_outlined,
-            label: 'Projects',
+            label: context.loc.projects,
             selected: false,
             onTap: () {
               _showMessage('Projects selected');
@@ -717,13 +748,13 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
           ),
           _navItem(
             icon: Icons.map_outlined,
-            label: 'Map',
+            label: context.loc.map,
             selected: true,
             onTap: () {},
           ),
           _navItem(
             icon: Icons.access_time,
-            label: 'Time',
+            label: context.loc.time,
             selected: false,
             onTap: () {
               _showMessage('Time selected');
@@ -731,7 +762,7 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
           ),
           _navItem(
             icon: Icons.more_horiz,
-            label: 'More',
+            label: context.loc.more,
             selected: false,
             onTap: () {
               _showMessage('More selected');

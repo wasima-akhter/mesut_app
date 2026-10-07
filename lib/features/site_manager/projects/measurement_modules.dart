@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/localization/context_extensions.dart';
 import 'models.dart';
 import 'overview_modules.dart';
 
@@ -71,7 +72,7 @@ class _MeasurementTabState extends State<MeasurementTab> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Total Calculated Area',
+                    context.loc.totalCalculatedArea,
                     style: TextStyle(
                       fontSize: 16.sp,
                       color: const Color(0xFF777777),
@@ -96,7 +97,7 @@ class _MeasurementTabState extends State<MeasurementTab> {
                   onPressed: _showAddMeasurementBottomSheet,
                   icon: Icon(Icons.add, size: 15.sp),
                   label: Text(
-                    'Add Line',
+                    context.loc.addLine,
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
@@ -134,7 +135,7 @@ class _MeasurementTabState extends State<MeasurementTab> {
             children: [
               Expanded(
                 child: Text(
-                  'Line ${index + 1}. ${item.position}',
+                  context.loc.lineItem(index + 1, item.position),
                   style: TextStyle(
                     fontSize: 15.5.sp,
                     color: const Color(0xFF888888),
@@ -173,7 +174,7 @@ class _MeasurementTabState extends State<MeasurementTab> {
           SizedBox(height: 5.h),
 
           Text(
-            'Front Scaffold',
+            context.loc.frontScaffold,
             style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w700),
           ),
 
@@ -218,8 +219,8 @@ class _MeasurementTabState extends State<MeasurementTab> {
       backgroundColor: Colors.transparent,
       builder: (_) {
         return MeasurementBottomSheet(
-          title: 'Add Measurement Item',
-          buttonText: 'Save Line Item',
+          title: context.loc.addMeasurementItem,
+          buttonText: context.loc.saveLineItem,
           onSave: (item) {
             setState(() {
               _measurements.add(item);
@@ -237,8 +238,8 @@ class _MeasurementTabState extends State<MeasurementTab> {
       backgroundColor: Colors.transparent,
       builder: (_) {
         return MeasurementBottomSheet(
-          title: 'Edit Measurement Item',
-          buttonText: 'Save Changes',
+          title: context.loc.editMeasurementItem,
+          buttonText: context.loc.saveChanges,
           initialItem: item,
           onSave: (updatedItem) {
             setState(() {
@@ -359,7 +360,7 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
                     padding: EdgeInsets.fromLTRB(18.w, 8.h, 18.w, 20.h),
                     sliver: SliverList(
                       delegate: SliverChildListDelegate([
-                        _label('Position'),
+                        _label(context.loc.position),
 
                         SizedBox(height: 6.h),
 
@@ -374,7 +375,7 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
                           children: [
                             Expanded(
                               child: _measurementField(
-                                label: 'Length',
+                                label: context.loc.length,
                                 controller: _lengthController,
                                 hint: '30.00 m',
                               ),
@@ -384,7 +385,7 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
 
                             Expanded(
                               child: _measurementField(
-                                label: 'Height',
+                                label: context.loc.height,
                                 controller: _heightController,
                                 hint: '30.00 m',
                               ),
@@ -414,11 +415,10 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
                           ),
                           color: const Color(0xFFF0F0F0),
                           child: Text(
-                            'Calculated Area: '
-                            '${calculated.toStringAsFixed(2)} m² '
-                            '(${length.toStringAsFixed(0)}m × '
-                            '${height.toStringAsFixed(0)}m × '
-                            '$_quantity)',
+                            context.loc.calculatedArea(
+                              calculated.toStringAsFixed(2),
+                              '${length.toStringAsFixed(0)}m × ${height.toStringAsFixed(0)}m × $_quantity',
+                            ),
                             style: TextStyle(
                               fontSize: 16.sp,
                               color: const Color(0xFF888888),
@@ -428,7 +428,7 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
 
                         SizedBox(height: 14.h),
 
-                        _label('Remark'),
+                        _label(context.loc.remark),
 
                         SizedBox(height: 6.h),
 
@@ -463,7 +463,7 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
                         TextButton(
                           onPressed: () => Navigator.pop(context),
                           child: Text(
-                            'Cancel',
+                            context.loc.cancel,
                             style: TextStyle(
                               fontSize: 17.sp,
                               color: const Color(0xFF555555),
@@ -536,7 +536,7 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _label('Quantity'),
+        _label(context.loc.quantity),
         SizedBox(height: 6.h),
 
         Container(
@@ -603,7 +603,7 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _label('Unit'),
+        _label(context.loc.unit),
         SizedBox(height: 6.h),
 
         Container(
@@ -647,12 +647,12 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
     final height = double.tryParse(_heightController.text.trim()) ?? 0;
 
     if (position.isEmpty) {
-      _showError('Please enter a position.');
+      _showError(context.loc.pleaseEnterPosition);
       return;
     }
 
     if (length <= 0 || height <= 0) {
-      _showError('Length and height must be greater than 0.');
+      _showError(context.loc.lengthHeightGreaterThanZero);
       return;
     }
 

@@ -8,7 +8,7 @@ abstract final class RouteConstants {
   static const String signUp = '/sign-up';
   static const String forgotPassword = '/forgot-password';
   static const String otp = '/otp';
-  static const String changePassword = '/change-password';
+  static const String resetPassword = '/reset-password';
 
   //main-nav
   static const String mainNav = '/mainNav';
@@ -32,7 +32,22 @@ abstract final class RouteConstants {
   static const siteManagerProjectDetail = '/site-manager-project-detail';
   static const siteManagerCreateproject = '/site-manager-create-project';
 
+  static const siteManagerPhaseBoard = '/site-manager-phase-board';
+  static const siteManagerSiteInspection = '/site-manager-site-inspection';
+  static const siteManagerInspectionSurveyPage =
+      '/site-manager-inspection-survey';
+  static const siteManagerInspectionCalendarPage =
+      '/site-manager-inspection-calendar';
+  static const siteManagerProfile = '/site-manager-profile';
+  static const siteManagerProfileEdit = '/site-manager-profile-edit';
+
+  // Employee Individual
+  static const employeeAssignmentDetails = '/employee-assignment-details';
+  static const employeeActiveTimerPage = '/employee-active-timer';
+
   // Shared
-  static const String projectDetails = '/project-details';
   static const String jobDetails = '/job-details';
+  static const String changePassword = '/change-password';
+  static const String privacyPolicy = '/privacy-policy';
+  static const String termsAndConditions = '/terms-and-conditions';
 }

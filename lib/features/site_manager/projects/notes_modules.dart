@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/localization/context_extensions.dart';
 import 'enums.dart';
 import 'models.dart';
 
@@ -68,7 +69,7 @@ class _NotesTabState extends State<NotesTab> {
             onPressed: _showAddNoteBottomSheet,
             icon: Icon(Icons.add, size: 17.sp),
             label: Text(
-              'Add Note',
+              context.loc.addNote,
               style: TextStyle(fontSize: 16.5.sp, fontWeight: FontWeight.w800),
             ),
             style: ElevatedButton.styleFrom(
@@ -182,12 +183,12 @@ class _NotesTabState extends State<NotesTab> {
           ),
           SizedBox(height: 10.h),
           Text(
-            'No project notes',
+            context.loc.noProjectNotes,
             style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w800),
           ),
           SizedBox(height: 5.h),
           Text(
-            'Add a note to keep important project information.',
+            context.loc.noProjectNotesDesc,
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 16.sp, color: const Color(0xFF888888)),
           ),
@@ -251,22 +252,22 @@ class _NotesTabState extends State<NotesTab> {
       builder: (context) {
         return AlertDialog(
           title: Text(
-            'Delete Note?',
+            context.loc.deleteNote,
             style: TextStyle(fontSize: 21.sp, fontWeight: FontWeight.w800),
           ),
           content: Text(
-            'This note will be permanently removed.',
+            context.loc.deleteNoteConfirmation,
             style: TextStyle(fontSize: 17.sp),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text('Cancel', style: TextStyle(fontSize: 17.sp)),
+              child: Text(context.loc.cancel, style: TextStyle(fontSize: 17.sp)),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
               child: Text(
-                'Delete',
+                context.loc.delete,
                 style: TextStyle(
                   fontSize: 17.sp,
                   color: const Color(0xFFE00025),
@@ -365,7 +366,7 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
             Padding(
               padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 8.h),
               child: Text(
-                _isEdit ? 'Edit Project Note' : 'Add Project Note',
+                _isEdit ? context.loc.editNote : context.loc.addNote,
                 style: TextStyle(fontSize: 21.sp, fontWeight: FontWeight.w800),
               ),
             ),
@@ -380,7 +381,7 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _fieldLabel('Note Category'),
+                          _fieldLabel(context.loc.noteCategory),
 
                           SizedBox(height: 9.h),
 
@@ -388,7 +389,7 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
 
                           SizedBox(height: 18.h),
 
-                          _fieldLabel('Notes Details'),
+                          _fieldLabel(context.loc.notesDetails),
 
                           SizedBox(height: 7.h),
 
@@ -409,7 +410,7 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
                                 ),
                               ),
                               child: Text(
-                                _isEdit ? 'Save Changes' : 'Save Notes',
+                                _isEdit ? context.loc.saveChanges : context.loc.saveNotes,
                                 style: TextStyle(
                                   fontSize: 17.5.sp,
                                   fontWeight: FontWeight.w800,
@@ -427,7 +428,7 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
                                 Navigator.pop(context);
                               },
                               child: Text(
-                                'Cancel',
+                                context.loc.cancel,
                                 style: TextStyle(
                                   fontSize: 16.5.sp,
                                   color: const Color(0xFF555555),
@@ -543,7 +544,7 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Please enter note details.',
+            context.loc.pleaseEnterNoteDetails,
             style: TextStyle(fontSize: 17.sp),
           ),
         ),

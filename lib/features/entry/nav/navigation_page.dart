@@ -1,6 +1,5 @@
 import 'package:construction_app/features/employee/home/employee_home_page.dart';
 import 'package:construction_app/features/employee/plan/employee_plan_page.dart';
-import 'package:construction_app/features/employee/timer/employee_time_page.dart';
 import 'package:construction_app/features/site_manager/home/site_manager_home_page.dart';
 import 'package:construction_app/features/site_manager/map/site_manager_map_page.dart';
 import 'package:construction_app/features/site_manager/more/site_manager_more_page.dart';
@@ -12,8 +11,10 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/enums/app_enum.dart';
+import '../../../core/localization/app_localization.dart';
 import '../../../core/providers/common_provider.dart';
 import '../../employee/profile/profile/employee_profile_page.dart';
+import '../../employee/timer/employee_time_tracking_page.dart';
 import 'navigation_provider.dart';
 
 class NavigationPage extends ConsumerStatefulWidget {
@@ -53,7 +54,7 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
       case UserRole.employee:
         return const [
           EmployeeHomePage(),
-          EmployeeTimePage(),
+          EmployeeTimeTrackingPage(),
           EmployeePlanPage(),
           EmployeeProfilePage(),
         ];
@@ -90,12 +91,13 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
   // ------------------------------------------------------------
 
   List<String> _getLabels(UserRole role) {
+    final loc = AppLocalization.current;
     switch (role) {
       case UserRole.siteManager:
-        return ['Home', 'Projects', 'Map', 'Timer', 'More'];
+        return [loc.navHome, loc.navProjects, loc.navMap, loc.navTimer, loc.navMore];
 
       case UserRole.employee:
-        return ['Home', 'Time', 'My Plan', 'Profile'];
+        return [loc.navHome, loc.navTime, loc.navMyPlan, loc.navProfile];
     }
   }
 
@@ -108,7 +110,7 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
     final role = ref.watch(userRoleProvider);
 
     if (role == null) {
-      return const Scaffold(body: Center(child: Text('Not authenticated')));
+      return Scaffold(body: Center(child: Text(AppLocalization.current.error)));
     }
 
     final selectedIndex = ref.watch(navigationProvider);

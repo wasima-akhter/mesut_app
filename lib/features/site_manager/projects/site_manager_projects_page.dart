@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/context_extensions.dart';
 import 'models.dart';
 
 // ============================================================
@@ -305,7 +306,7 @@ class _SiteManagerProjectsPageState extends State<SiteManagerProjectsPage> {
       children: [
         Expanded(
           child: Text(
-            'Projects',
+            context.loc.projects,
             style: TextStyle(
               fontSize: 26.sp,
               fontWeight: FontWeight.w700,
@@ -723,7 +724,10 @@ class ProjectSearchDelegate extends SearchDelegate<Project?> {
 
     if (results.isEmpty) {
       return Center(
-        child: Text('No projects found', style: TextStyle(fontSize: 19.sp)),
+        child: Text(
+          context.loc.noProjectsFound,
+          style: TextStyle(fontSize: 19.sp),
+        ),
       );
     }
 
@@ -869,11 +873,11 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
               child: Row(
                 children: [
                   SizedBox(
-                    width: 65.w,
+                    width: 85.w,
                     child: GestureDetector(
                       onTap: _resetAll,
                       child: Text(
-                        'Reset All',
+                        context.loc.resetAll,
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w500,
@@ -886,9 +890,9 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                   Expanded(
                     child: Center(
                       child: Text(
-                        'Filter projects',
+                        context.loc.filterProjects,
                         style: TextStyle(
-                          fontSize: 22.sp,
+                          fontSize: 20.sp,
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF111111),
                         ),
@@ -923,7 +927,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                     // -------------------------
                     // Phase
                     // -------------------------
-                    _sectionTitle('Phase'),
+                    _sectionTitle(context.loc.phase),
 
                     SizedBox(height: 8.h),
 
@@ -948,7 +952,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                     // -------------------------
                     // City / Location
                     // -------------------------
-                    _sectionTitle('City / Location'),
+                    _sectionTitle(context.loc.cityOrLocation),
 
                     SizedBox(height: 8.h),
 
@@ -977,7 +981,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                     // -------------------------
                     // Priority
                     // -------------------------
-                    _sectionTitle('Priority'),
+                    _sectionTitle(context.loc.priority),
 
                     SizedBox(height: 8.h),
 
@@ -986,7 +990,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                       runSpacing: 8.h,
                       children: [
                         _filterChip(
-                          label: 'All',
+                          label: context.loc.all,
                           selected: _selectedPriority == 'All',
                           onTap: () {
                             setState(() {
@@ -995,7 +999,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                           },
                         ),
                         _filterChip(
-                          label: 'High',
+                          label: context.loc.high,
                           selected: _selectedPriority == 'High',
                           textColor: const Color(0xFFC8102E),
                           onTap: () {
@@ -1005,7 +1009,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                           },
                         ),
                         _filterChip(
-                          label: 'Medium',
+                          label: context.loc.medium,
                           selected: _selectedPriority == 'Medium',
                           textColor: const Color(0xFFFF9800),
                           onTap: () {
@@ -1015,7 +1019,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                           },
                         ),
                         _filterChip(
-                          label: 'Low',
+                          label: context.loc.low,
                           selected: _selectedPriority == 'Low',
                           onTap: () {
                             setState(() {
@@ -1031,7 +1035,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                     // -------------------------
                     // Customer Category
                     // -------------------------
-                    _sectionTitle('Customer Category'),
+                    _sectionTitle(context.loc.customerCategory),
 
                     SizedBox(height: 8.h),
 
@@ -1040,7 +1044,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                       runSpacing: 8.h,
                       children: [
                         _filterChip(
-                          label: 'All',
+                          label: context.loc.all,
                           selected: _selectedCustomerCategory == 'All',
                           onTap: () {
                             setState(() {
@@ -1049,7 +1053,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                           },
                         ),
                         _filterChip(
-                          label: 'Commercial',
+                          label: context.loc.commercial,
                           selected: _selectedCustomerCategory == 'Commercial',
                           onTap: () {
                             setState(() {
@@ -1058,7 +1062,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                           },
                         ),
                         _filterChip(
-                          label: 'Private',
+                          label: context.loc.private,
                           selected: _selectedCustomerCategory == 'Private',
                           onTap: () {
                             setState(() {
@@ -1074,19 +1078,19 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                     // -------------------------
                     // Sort By
                     // -------------------------
-                    _sectionTitle('Sort by'),
+                    _sectionTitle(context.loc.sortBy),
 
                     SizedBox(height: 8.h),
 
-                    _radioRow(title: 'Newest', value: 'Newest'),
+                    _radioRow(title: context.loc.newest, value: 'Newest'),
 
                     _radioRow(
-                      title: 'Next inspection date',
+                      title: context.loc.nextInspectionDate,
                       value: 'Next inspection date',
                     ),
 
                     _radioRow(
-                      title: 'Project name (a-z)',
+                      title: context.loc.projectNameAz,
                       value: 'Project name (a-z)',
                     ),
 
@@ -1109,7 +1113,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                           ),
                         ),
                         child: Text(
-                          'Apply Filters',
+                          context.loc.applyFilters,
                           style: TextStyle(
                             fontSize: 17.sp,
                             fontWeight: FontWeight.w700,
@@ -1192,7 +1196,7 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
       onChanged: (_) => setState(() {}),
       style: TextStyle(fontSize: 16.sp, color: const Color(0xFF333333)),
       decoration: InputDecoration(
-        hintText: 'Search City',
+        hintText: context.loc.searchCity,
         hintStyle: TextStyle(fontSize: 16.sp, color: const Color(0xFF555555)),
         prefixIcon: Icon(
           Icons.search,
