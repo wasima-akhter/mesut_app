@@ -741,7 +741,10 @@ class _SheetContainer extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(18.r)),
       ),
-      child: child,
+      child: SafeArea(
+        top: false,
+        child: child,
+      ),
     );
   }
 }

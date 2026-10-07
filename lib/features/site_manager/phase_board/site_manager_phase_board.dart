@@ -377,7 +377,7 @@ class _SiteManagerPhaseBoardPageState extends State<SiteManagerPhaseBoardPage> {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          context.push('/phase-board/move-to', extra: project);
+          // context.push('/phase-board/move-to', extra: project);
         },
         borderRadius: BorderRadius.circular(50.r),
         child: Container(

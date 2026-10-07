@@ -1,14 +1,29 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'app_language.dart';
 import 'app_strings.dart';
 
 class AppLocalization {
+  final AppStrings strings;
+
+  const AppLocalization(this.strings);
+
   static final Map<AppLanguage, AppStrings> _cache = {};
   static AppStrings _current = const AppStrings({});
 
   static AppStrings get current => _current;
+
+  static const LocalizationsDelegate<AppLocalization> delegate =
+      _AppLocalizationDelegate();
+
+  static List<Locale> get supportedLocales =>
+      AppLanguage.values.map((l) => l.locale).toList();
+
+  static AppLocalization? of(BuildContext context) {
+    return Localizations.of<AppLocalization>(context, AppLocalization);
+  }
 
   static Future<AppStrings> load(AppLanguage language) async {
     if (_cache.containsKey(language)) {
@@ -44,4 +59,23 @@ class AppLocalization {
   static AppStrings getStringsForLanguage(AppLanguage language) {
     return _cache[language] ?? _current;
   }
+}
+
+class _AppLocalizationDelegate extends LocalizationsDelegate<AppLocalization> {
+  const _AppLocalizationDelegate();
+
+  @override
+  bool isSupported(Locale locale) {
+    return AppLanguage.values.any((lang) => lang.code == locale.languageCode);
+  }
+
+  @override
+  Future<AppLocalization> load(Locale locale) async {
+    final language = AppLanguage.fromCode(locale.languageCode);
+    final strings = await AppLocalization.load(language);
+    return AppLocalization(strings);
+  }
+
+  @override
+  bool shouldReload(_AppLocalizationDelegate old) => true;
 }

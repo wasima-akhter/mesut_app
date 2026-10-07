@@ -1,6 +1,7 @@
 abstract final class RouteConstants {
   // Entry
   static const String splash = '/';
+  static const String chooseLanguage = '/choose-language';
   static const String onboarding = '/onboarding';
 
   // Auth
@@ -50,4 +51,5 @@ abstract final class RouteConstants {
   static const String changePassword = '/change-password';
   static const String privacyPolicy = '/privacy-policy';
   static const String termsAndConditions = '/terms-and-conditions';
+  static const String notifications = '/notifications';
 }

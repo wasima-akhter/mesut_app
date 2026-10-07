@@ -182,10 +182,10 @@ Widget buildMapCard([BuildContext? context]) {
                 width: double.infinity,
                 height: 42.h,
                 child: ElevatedButton.icon(
-                  onPressed: _startNavigation,
+                  onPressed: _navigation,
                   icon: Icon(Icons.navigation_outlined, size: 18.sp),
                   label: Text(
-                    AppLocalization.current.startNavigation,
+                    AppLocalization.current.navigation,
                     style: TextStyle(
                       fontSize: 17.sp,
                       fontWeight: FontWeight.w700,
@@ -276,7 +276,7 @@ class _MapPlaceholderPainter extends CustomPainter {
   }
 }
 
-Future<void> _startNavigation() async {
+Future<void> _navigation() async {
   final allowed = await AppPermissions.requestLocation();
   final loc = AppLocalization.current;
 
@@ -361,7 +361,10 @@ Widget buildScaffoldSpecificationCard([BuildContext? context]) {
               child: _specValue(value: '450 m²', label: loc.scaffoldArea),
             ),
             Expanded(
-              child: _specValue(value: loc.frontScaffold, label: loc.scaffoldType),
+              child: _specValue(
+                value: loc.frontScaffold,
+                label: loc.scaffoldType,
+              ),
             ),
           ],
         ),

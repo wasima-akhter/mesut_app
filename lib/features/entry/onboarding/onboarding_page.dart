@@ -148,24 +148,27 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Widget _buildBottomSection(int count, bool isLast) {
     final loc = AppLocalization.current;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.lg,
-        AppSpacing.lg,
-      ),
-      child: Column(
-        children: [
-          _PageIndicator(count: count, currentIndex: _currentPage),
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.md,
+          AppSpacing.lg,
+          AppSpacing.lg,
+        ),
+        child: Column(
+          children: [
+            _PageIndicator(count: count, currentIndex: _currentPage),
 
-          SizedBox(height: 24.h),
+            SizedBox(height: 24.h),
 
-          AppButton(
-            text: isLast ? loc.getStarted : loc.next,
-            onPressed: () => _next(count),
-          ),
-        ],
+            AppButton(
+              text: isLast ? loc.getStarted : loc.next,
+              onPressed: () => _next(count),
+            ),
+          ],
+        ),
       ),
     );
   }

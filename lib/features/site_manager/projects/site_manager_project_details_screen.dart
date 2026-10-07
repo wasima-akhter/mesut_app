@@ -90,9 +90,15 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
           SizedBox(height: 7.h),
           Row(
             children: [
-              _statusTag(context.loc.erectionPhase, color: const Color(0xFF12B76A)),
+              _statusTag(
+                context.loc.erectionPhase,
+                color: const Color(0xFF12B76A),
+              ),
               SizedBox(width: 6.w),
-              _statusTag(context.loc.inProgress, color: const Color(0xFF12B76A)),
+              _statusTag(
+                context.loc.inProgress,
+                color: const Color(0xFF12B76A),
+              ),
               SizedBox(width: 6.w),
               _statusTag(context.loc.high, color: const Color(0xFFE00025)),
             ],
@@ -145,6 +151,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                 });
               },
               child: Container(
+                constraints: BoxConstraints(maxWidth: 100.w),
                 margin: EdgeInsets.symmetric(horizontal: 2.w, vertical: 5.h),
                 padding: EdgeInsets.symmetric(horizontal: 12.w),
                 decoration: BoxDecoration(

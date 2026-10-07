@@ -594,9 +594,9 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
     required bool isSelected,
   }) {
     return ListTile(
-      onTap: () {
-        ref.read(appLanguageProvider.notifier).setLanguage(language);
+      onTap: () async {
         Navigator.of(context).pop();
+        await ref.read(appLanguageProvider.notifier).setLanguage(language);
       },
       title: Text(title, style: TextStyle(fontSize: 17.sp)),
       trailing: isSelected

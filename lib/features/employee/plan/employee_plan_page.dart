@@ -257,7 +257,7 @@ class _EmployeePlanPageState extends State<EmployeePlanPage> {
   }
 
   Widget _buildLegend() {
-    return Row(
+    return Wrap(
       children: [
         _legendItem(AppColors.success, context.loc.scaffoldErection),
         SizedBox(width: 18.w),
@@ -270,6 +270,7 @@ class _EmployeePlanPageState extends State<EmployeePlanPage> {
 
   Widget _legendItem(Color color, String title) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 8.w,

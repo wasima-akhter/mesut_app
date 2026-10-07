@@ -238,10 +238,10 @@ class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
             width: double.infinity,
             child: AppButton(
               onPressed: () {
-                _showMessage(context.loc.startNavigation);
+                _showMessage(context.loc.navigation);
               },
               height: 48.h,
-              text: context.loc.startNavigation,
+              text: context.loc.navigation,
             ),
           ),
         ],

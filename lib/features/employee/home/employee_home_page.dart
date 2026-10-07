@@ -153,7 +153,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
 
         GestureDetector(
           onTap: () {
-            context.push(RouteConstants.siteManagerProfileEdit);
+            context.push(RouteConstants.notifications);
           },
           child: Container(
             width: 48.w,
@@ -163,14 +163,10 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.border),
             ),
-            child: Icon(
-              notificationsEnabled
-                  ? Icons.notifications
-                  : Icons.notifications_none_outlined,
+            child: const Icon(
+              Icons.notifications_none_outlined,
               size: 25,
-              color: notificationsEnabled
-                  ? AppColors.primary
-                  : AppColors.textSecondary,
+              color: AppColors.textSecondary,
             ),
           ),
         ),
@@ -308,12 +304,12 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
             Row(
               children: [
                 Expanded(
-                  flex: 4,
+                  flex: 5,
                   child: OutlinedButton.icon(
                     onPressed: () {},
                     icon: const Icon(Icons.directions_outlined, size: 21),
                     label: Text(
-                      context.loc.startNavigation,
+                      context.loc.navigation,
                       style: TextStyle(
                         fontSize: 17.sp,
                         fontWeight: FontWeight.w600,

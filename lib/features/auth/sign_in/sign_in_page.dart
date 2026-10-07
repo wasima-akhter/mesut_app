@@ -227,7 +227,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
           ),
 
           SizedBox(height: 30),
-          if (kDebugMode)
+          if (!kDebugMode)
             Wrap(
               runSpacing: 10,
               children: [

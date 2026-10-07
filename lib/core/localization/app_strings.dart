@@ -205,6 +205,13 @@ class AppStrings {
     'entry.onboarding3Subtitle',
     'Perform routine scaffold safety audits, capture photos, and ensure full compliance.',
   );
+  String get chooseLanguageTitle =>
+      get('entry.chooseLanguageTitle', 'Choose Your Language');
+  String get chooseLanguageSubtitle => get(
+    'entry.chooseLanguageSubtitle',
+    'Select your preferred language to customize your app experience.',
+  );
+  String get continueAction => get('entry.continueAction', 'Continue');
   String get getStarted => get('entry.getStarted', 'Get Started');
   String get skip => get('entry.skip', 'Skip');
 
@@ -537,8 +544,7 @@ class AppStrings {
       get('siteManager.projectNameAz', 'Project name (a-z)');
   String get callClient => get('siteManager.callClient', 'Call Client');
   String get mailClient => get('siteManager.mailClient', 'Mail Client');
-  String get startNavigation =>
-      get('siteManager.startNavigation', 'Start Navigation');
+  String get navigation => get('siteManager.navigation', 'Navigation');
   String get scaffoldSpecification =>
       get('siteManager.scaffoldSpecification', 'Scaffold Specification');
   String get scaffoldArea => get('siteManager.scaffoldArea', 'Scaffold area');
@@ -763,4 +769,28 @@ class AppStrings {
     {'activity': activity},
   );
   String get total => get('siteManager.total', 'Total');
+
+  // ============================================================
+  // NOTIFICATIONS
+  // ============================================================
+  String get notificationsTitle =>
+      get('notifications.title', 'Notifications');
+  String get notificationsAll => get('notifications.all', 'All');
+  String get notificationsUnread => get('notifications.unread', 'Unread');
+  String get markAllAsRead =>
+      get('notifications.markAllAsRead', 'Mark all as read');
+  String get clearAll => get('notifications.clearAll', 'Clear all');
+  String get noNotifications =>
+      get('notifications.noNotifications', 'No notifications');
+  String get noNotificationsSubtitle => get(
+    'notifications.noNotificationsSubtitle',
+    "You're all caught up! New updates and alerts will appear here.",
+  );
+  String get notifToday => get('notifications.today', 'Today');
+  String get notifYesterday => get('notifications.yesterday', 'Yesterday');
+  String get notifEarlier => get('notifications.earlier', 'Earlier');
+  String get markedAsRead =>
+      get('notifications.markedAsRead', 'All notifications marked as read');
+  String get allCleared =>
+      get('notifications.allCleared', 'All notifications cleared');
 }

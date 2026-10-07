@@ -65,12 +65,12 @@ class SiteManagerProfile extends StatelessWidget {
           ),
         ),
 
-        _CircleButton(
-          icon: Icons.edit_outlined,
-          onTap: () {
-            context.push('/profile/edit');
-          },
-        ),
+        // _CircleButton(
+        //   icon: Icons.edit_outlined,
+        //   onTap: () {
+        //     // context.push(RouteConstants.edit);
+        //   },
+        // ),
       ],
     );
   }

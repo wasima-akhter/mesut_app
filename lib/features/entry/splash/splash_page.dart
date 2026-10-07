@@ -29,7 +29,7 @@ class _SplashPageState extends State<SplashPage> {
   void _continue() {
     if (!mounted) return;
 
-    context.go(RouteConstants.onboarding);
+    context.go(RouteConstants.chooseLanguage);
   }
 
   @override

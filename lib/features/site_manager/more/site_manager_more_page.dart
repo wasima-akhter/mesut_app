@@ -112,6 +112,13 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
                         onTap: _showLanguageOptions,
                       ),
                       _buildSettingsTile(
+                        icon: Icons.notifications_outlined,
+                        title: context.loc.notifications,
+                        onTap: () {
+                          context.push(RouteConstants.notifications);
+                        },
+                      ),
+                      _buildSettingsTile(
                         icon: Icons.lock_outline_rounded,
                         title: context.loc.changePassword,
                         onTap: () {
@@ -158,68 +165,71 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
   }
 
   Widget _buildProfileCard() {
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: AppRadii.medium,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48.w,
-            height: 48.w,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.neutral200,
-            ),
-            child: ClipOval(
-              child: Image.asset(
-                'assets/images/profile.png',
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) {
-                  return Icon(
-                    Icons.person,
-                    color: AppColors.textSecondary,
-                    size: 25.sp,
-                  );
-                },
+    return GestureDetector(
+      onTap: () => context.push(RouteConstants.siteManagerProfileEdit),
+      child: Container(
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: AppRadii.medium,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48.w,
+              height: 48.w,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.neutral200,
+              ),
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/images/profile.png',
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) {
+                    return Icon(
+                      Icons.person,
+                      color: AppColors.textSecondary,
+                      size: 25.sp,
+                    );
+                  },
+                ),
               ),
             ),
-          ),
 
-          SizedBox(width: 12.w),
+            SizedBox(width: 12.w),
 
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Tim Muller',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  context.loc.siteManagerRole,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                SizedBox(height: 3.h),
-                Text(
-                  context.loc.inProgress,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelSmall?.copyWith(color: AppColors.success),
-                ),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tim Muller',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    context.loc.siteManagerRole,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  SizedBox(height: 3.h),
+                  Text(
+                    context.loc.inProgress,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelSmall?.copyWith(color: AppColors.success),
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          Icon(
-            Icons.chevron_right_rounded,
-            size: 22.sp,
-            color: AppColors.textPrimary,
-          ),
-        ],
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 22.sp,
+              color: AppColors.textPrimary,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -354,20 +364,24 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
                 value: AppLanguage.english,
                 groupValue: currentLang,
                 title: Text(context.loc.english),
-                onChanged: (value) {
+                onChanged: (value) async {
                   if (value == null) return;
-                  ref.read(appLanguageProvider.notifier).setLanguage(value);
                   Navigator.pop(dialogContext);
+                  await ref
+                      .read(appLanguageProvider.notifier)
+                      .setLanguage(value);
                 },
               ),
               RadioListTile<AppLanguage>(
                 value: AppLanguage.german,
                 groupValue: currentLang,
                 title: Text(context.loc.german),
-                onChanged: (value) {
+                onChanged: (value) async {
                   if (value == null) return;
-                  ref.read(appLanguageProvider.notifier).setLanguage(value);
                   Navigator.pop(dialogContext);
+                  await ref
+                      .read(appLanguageProvider.notifier)
+                      .setLanguage(value);
                 },
               ),
             ],

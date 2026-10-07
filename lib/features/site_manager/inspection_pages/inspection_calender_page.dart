@@ -1,3 +1,4 @@
+import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -448,7 +449,7 @@ class _InspectionCalendarPageState extends State<InspectionCalendarPage> {
               SmallRedButton(
                 text: context.loc.openProject,
                 onTap: () {
-                  context.push('/project/${event.projectId}');
+                  context.push(RouteConstants.siteManagerProjectDetail);
                 },
               ),
             ],

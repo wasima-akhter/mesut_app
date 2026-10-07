@@ -37,21 +37,30 @@ class AppSelectionBottomSheet<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: ListView.separated(
-        shrinkWrap: true,
-        padding: EdgeInsets.all(AppSpacing.lg),
-        itemCount: items.length,
-        separatorBuilder: (_, _) => SizedBox(height: AppSpacing.xs),
-        itemBuilder: (context, index) {
-          final item = items[index];
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(16),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: ListView.separated(
+          shrinkWrap: true,
+          padding: EdgeInsets.all(AppSpacing.lg),
+          itemCount: items.length,
+          separatorBuilder: (_, _) => SizedBox(height: AppSpacing.xs),
+          itemBuilder: (context, index) {
+            final item = items[index];
 
-          return ListTile(
-            title: Text(labelBuilder(item), style: AppTextStyles.bodyLarge),
-            trailing: item == selectedItem ? const Icon(Icons.check) : null,
-            onTap: () => context.pop(item),
-          );
-        },
+            return ListTile(
+              title: Text(labelBuilder(item), style: AppTextStyles.bodyLarge),
+              trailing: item == selectedItem ? const Icon(Icons.check) : null,
+              onTap: () => context.pop(item),
+            );
+          },
+        ),
       ),
     );
   }

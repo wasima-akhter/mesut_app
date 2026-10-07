@@ -71,7 +71,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
   }
 
   void _openRoute(Map<String, dynamic> project) {
-    _showMessage(context.loc.startNavigation);
+    _showMessage(context.loc.navigation);
   }
 
   @override
