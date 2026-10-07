@@ -19,12 +19,14 @@ abstract final class RouteConstants {
   static const String employeeHome = '/employee/home';
   static const String employeeJobs = '/employee/jobs';
   static const String employeeTime = '/employee/time';
+  static const String employeePlan = '/employee/plan';
   static const String employeeProfile = '/employee/profile';
 
   // Site Manager
   static const String siteManager = '/site-manager';
   static const String siteManagerDashboard = '/site-manager/dashboard';
   static const String siteManagerProjects = '/site-manager/projects';
+  static const String siteManagerMap = '/site-manager/map';
   static const String siteManagerTeam = '/site-manager/team';
   static const String siteManagerTime = '/site-manager/time';
   static const String siteManagerMore = '/site-manager/more';
@@ -37,6 +39,8 @@ abstract final class RouteConstants {
   static const siteManagerSiteInspection = '/site-manager-site-inspection';
   static const siteManagerInspectionSurveyPage =
       '/site-manager-inspection-survey';
+  static const siteManagerInspectionPhotos =
+      '/site-manager-inspection-photos';
   static const siteManagerInspectionCalendarPage =
       '/site-manager-inspection-calendar';
   static const siteManagerProfile = '/site-manager-profile';
@@ -44,6 +48,7 @@ abstract final class RouteConstants {
 
   // Employee Individual
   static const employeeAssignmentDetails = '/employee-assignment-details';
+  static const employeeAssignmentPhotos = '/employee-assignment-photos';
   static const employeeActiveTimerPage = '/employee-active-timer';
 
   // Shared

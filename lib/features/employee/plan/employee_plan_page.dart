@@ -1,59 +1,21 @@
 import 'package:construction_app/app/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../../core/localization/context_extensions.dart';
 import '../helper/employee_enums.dart';
 import '../helper/employee_models.dart';
+import '../presentation/providers/employee_plan_provider.dart';
 
-class EmployeePlanPage extends StatefulWidget {
+class EmployeePlanPage extends ConsumerWidget {
   const EmployeePlanPage({super.key});
 
   @override
-  State<EmployeePlanPage> createState() => _EmployeePlanPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final planState = ref.watch(employeePlanProvider);
 
-class _EmployeePlanPageState extends State<EmployeePlanPage> {
-  DateTime _focusedDay = DateTime(2026, 9, 18);
-
-  DateTime _selectedDay = DateTime(2026, 9, 18);
-
-  final List<EmployeeCalendarEventModel> _events = [
-    EmployeeCalendarEventModel(
-      date: DateTime(2026, 9, 18),
-      project: EmployeeProjectModel(
-        id: 'Prj-0842',
-        name: 'Goltsteins.Complex',
-        address: 'Goltsteinstraße 12, 50968 Köln',
-        activity: EmployeeActivityType.erection,
-        startTime: '07:30 am',
-        endTime: '04:30 pm',
-        siteManager: 'Mesut Rahaman',
-      ),
-    ),
-    EmployeeCalendarEventModel(
-      date: DateTime(2026, 9, 19),
-      project: EmployeeProjectModel(
-        id: 'Prj-0842',
-        name: 'Goltsteins.Complex',
-        address: 'Goltsteinstraße 12, 50968 Köln',
-        activity: EmployeeActivityType.erection,
-        startTime: '07:30 am',
-        endTime: '04:30 pm',
-        siteManager: 'Mesut Rahaman',
-      ),
-    ),
-  ];
-
-  List<EmployeeCalendarEventModel> get _selectedEvents {
-    return _events.where((event) {
-      return isSameDay(event.date, _selectedDay);
-    }).toList();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -62,33 +24,39 @@ class _EmployeePlanPageState extends State<EmployeePlanPage> {
           slivers: [
             SliverPadding(
               padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 10.h),
-              sliver: SliverToBoxAdapter(child: _buildHeader()),
+              sliver: SliverToBoxAdapter(child: _buildHeader(context, ref)),
             ),
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildCalendarCard()),
+              sliver: SliverToBoxAdapter(
+                child: _buildCalendarCard(context, ref, planState),
+              ),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 14.h)),
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildLegend()),
+              sliver: SliverToBoxAdapter(child: _buildLegend(context)),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 16.h)),
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildScheduleHeader()),
+              sliver: SliverToBoxAdapter(
+                child: _buildScheduleHeader(context, planState),
+              ),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 10.h)),
 
             SliverPadding(
               padding: EdgeInsets.fromLTRB(18.w, 0, 18.w, 30.h),
-              sliver: SliverToBoxAdapter(child: _buildSchedule()),
+              sliver: SliverToBoxAdapter(
+                child: _buildSchedule(context, planState),
+              ),
             ),
           ],
         ),
@@ -96,7 +64,7 @@ class _EmployeePlanPageState extends State<EmployeePlanPage> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context, WidgetRef ref) {
     return Row(
       children: [
         Expanded(
@@ -112,10 +80,8 @@ class _EmployeePlanPageState extends State<EmployeePlanPage> {
 
         GestureDetector(
           onTap: () {
-            setState(() {
-              _selectedDay = DateTime.now();
-              _focusedDay = DateTime.now();
-            });
+            final now = DateTime.now();
+            ref.read(employeePlanProvider.notifier).selectDay(now, now);
           },
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 9.h),
@@ -138,7 +104,11 @@ class _EmployeePlanPageState extends State<EmployeePlanPage> {
     );
   }
 
-  Widget _buildCalendarCard() {
+  Widget _buildCalendarCard(
+    BuildContext context,
+    WidgetRef ref,
+    EmployeePlanState state,
+  ) {
     return Container(
       padding: EdgeInsets.fromLTRB(8.w, 8.h, 8.w, 10.h),
       decoration: BoxDecoration(
@@ -148,37 +118,26 @@ class _EmployeePlanPageState extends State<EmployeePlanPage> {
       child: TableCalendar<EmployeeCalendarEventModel>(
         firstDay: DateTime(2020),
         lastDay: DateTime(2035),
-        focusedDay: _focusedDay,
-
+        focusedDay: state.focusedDay,
         calendarFormat: CalendarFormat.week,
-
         startingDayOfWeek: StartingDayOfWeek.monday,
-
         availableCalendarFormats: const {CalendarFormat.week: 'Week'},
-
         selectedDayPredicate: (day) {
-          return isSameDay(_selectedDay, day);
+          return isSameDay(state.selectedDay, day);
         },
-
         onDaySelected: (selectedDay, focusedDay) {
-          setState(() {
-            _selectedDay = selectedDay;
-            _focusedDay = focusedDay;
-          });
+          ref
+              .read(employeePlanProvider.notifier)
+              .selectDay(selectedDay, focusedDay);
         },
-
         onPageChanged: (focusedDay) {
-          setState(() {
-            _focusedDay = focusedDay;
-          });
+          ref.read(employeePlanProvider.notifier).updateFocusedDay(focusedDay);
         },
-
         eventLoader: (day) {
-          return _events.where((event) {
+          return state.events.where((event) {
             return isSameDay(event.date, day);
           }).toList();
         },
-
         headerStyle: HeaderStyle(
           formatButtonVisible: false,
           titleCentered: true,
@@ -191,9 +150,7 @@ class _EmployeePlanPageState extends State<EmployeePlanPage> {
             color: AppColors.textPrimary,
           ),
         ),
-
         daysOfWeekHeight: 30.h,
-
         daysOfWeekStyle: DaysOfWeekStyle(
           weekdayStyle: TextStyle(
             fontSize: 15.sp,
@@ -206,49 +163,39 @@ class _EmployeePlanPageState extends State<EmployeePlanPage> {
             fontWeight: FontWeight.w500,
           ),
         ),
-
         rowHeight: 46.h,
-
         calendarStyle: CalendarStyle(
           outsideDaysVisible: false,
-
           defaultTextStyle: TextStyle(
             fontSize: 16.sp,
             color: AppColors.textPrimary,
           ),
-
           weekendTextStyle: TextStyle(
             fontSize: 16.sp,
             color: AppColors.textSecondary,
           ),
-
           selectedTextStyle: TextStyle(
             fontSize: 16.sp,
             color: AppColors.white,
             fontWeight: FontWeight.w600,
           ),
-
           selectedDecoration: const BoxDecoration(
             color: AppColors.black,
             shape: BoxShape.circle,
           ),
-
           todayDecoration: const BoxDecoration(
             color: Colors.transparent,
             shape: BoxShape.circle,
           ),
-
           todayTextStyle: TextStyle(
             fontSize: 16.sp,
             color: AppColors.primary,
             fontWeight: FontWeight.w700,
           ),
-
           markerDecoration: const BoxDecoration(
             color: AppColors.success,
             shape: BoxShape.circle,
           ),
-
           markerSize: 5.w,
           markerMargin: EdgeInsets.only(top: 3.h),
         ),
@@ -256,7 +203,7 @@ class _EmployeePlanPageState extends State<EmployeePlanPage> {
     );
   }
 
-  Widget _buildLegend() {
+  Widget _buildLegend(BuildContext context) {
     return Wrap(
       children: [
         _legendItem(AppColors.success, context.loc.scaffoldErection),
@@ -286,8 +233,8 @@ class _EmployeePlanPageState extends State<EmployeePlanPage> {
     );
   }
 
-  Widget _buildScheduleHeader() {
-    final dayName = _dayName(_selectedDay);
+  Widget _buildScheduleHeader(BuildContext context, EmployeePlanState state) {
+    final dayName = _dayName(state.selectedDay);
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 11.h),
@@ -308,7 +255,7 @@ class _EmployeePlanPageState extends State<EmployeePlanPage> {
             ),
           ),
           Text(
-            '(${_selectedEvents.length} ${context.loc.smTasks.toUpperCase()})',
+            '(${state.selectedEvents.length} ${context.loc.smTasks.toUpperCase()})',
             style: TextStyle(fontSize: 15.sp, color: AppColors.textSecondary),
           ),
         ],
@@ -316,22 +263,22 @@ class _EmployeePlanPageState extends State<EmployeePlanPage> {
     );
   }
 
-  Widget _buildSchedule() {
-    if (_selectedEvents.isEmpty) {
-      return _emptySchedule();
+  Widget _buildSchedule(BuildContext context, EmployeePlanState state) {
+    if (state.selectedEvents.isEmpty) {
+      return _emptySchedule(context);
     }
 
     return Column(
       children: [
-        for (final event in _selectedEvents) ...[
-          _buildEventCard(event),
+        for (final event in state.selectedEvents) ...[
+          _buildEventCard(context, event),
           SizedBox(height: 10.h),
         ],
       ],
     );
   }
 
-  Widget _emptySchedule() {
+  Widget _emptySchedule(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.w),
@@ -361,13 +308,13 @@ class _EmployeePlanPageState extends State<EmployeePlanPage> {
     );
   }
 
-  Widget _buildEventCard(EmployeeCalendarEventModel event) {
+  Widget _buildEventCard(BuildContext context, EmployeeCalendarEventModel event) {
     final project = event.project;
     final activity = project.activity;
 
     return GestureDetector(
       onTap: () {
-        _showMessage('Selected ${project.fullName}');
+        _showMessage(context, 'Selected ${project.fullName}');
       },
       child: Container(
         width: double.infinity,
@@ -475,7 +422,7 @@ class _EmployeePlanPageState extends State<EmployeePlanPage> {
     return months[month - 1];
   }
 
-  void _showMessage(String message) {
+  void _showMessage(BuildContext context, String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(

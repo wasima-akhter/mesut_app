@@ -360,28 +360,28 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              RadioListTile<AppLanguage>(
-                value: AppLanguage.english,
-                groupValue: currentLang,
+              ListTile(
                 title: Text(context.loc.english),
-                onChanged: (value) async {
-                  if (value == null) return;
+                trailing: currentLang == AppLanguage.english
+                    ? const Icon(Icons.check_circle, color: AppColors.primary)
+                    : const Icon(Icons.circle_outlined, color: AppColors.border),
+                onTap: () async {
                   Navigator.pop(dialogContext);
                   await ref
                       .read(appLanguageProvider.notifier)
-                      .setLanguage(value);
+                      .setLanguage(AppLanguage.english);
                 },
               ),
-              RadioListTile<AppLanguage>(
-                value: AppLanguage.german,
-                groupValue: currentLang,
+              ListTile(
                 title: Text(context.loc.german),
-                onChanged: (value) async {
-                  if (value == null) return;
+                trailing: currentLang == AppLanguage.german
+                    ? const Icon(Icons.check_circle, color: AppColors.primary)
+                    : const Icon(Icons.circle_outlined, color: AppColors.border),
+                onTap: () async {
                   Navigator.pop(dialogContext);
                   await ref
                       .read(appLanguageProvider.notifier)
-                      .setLanguage(value);
+                      .setLanguage(AppLanguage.german);
                 },
               ),
             ],

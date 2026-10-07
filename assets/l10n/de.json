@@ -244,6 +244,8 @@
   "siteManager.dismantlingSchedule": "Abbau-Zeitplan",
   "siteManager.startDate": "Startdatum",
   "siteManager.teardownDate": "Abbaudatum",
+  "siteManager.planned": "Geplant",
+  "siteManager.running": "Laufend",
   "siteManager.plannedDate": "Geplantes Datum",
   "siteManager.endDate": "Enddatum",
   "siteManager.safetyInspection": "Sicherheitsprüfung",

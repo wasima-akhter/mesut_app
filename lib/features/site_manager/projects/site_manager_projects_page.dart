@@ -1,186 +1,60 @@
 import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:construction_app/features/site_manager/projects/enums.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/context_extensions.dart';
+import '../presentation/providers/site_manager_projects_provider.dart';
 import 'models.dart';
 
 // ============================================================
 // PROJECT PAGE
 // ============================================================
 
-class SiteManagerProjectsPage extends StatefulWidget {
+class SiteManagerProjectsPage extends ConsumerWidget {
   const SiteManagerProjectsPage({super.key});
 
-  @override
-  State<SiteManagerProjectsPage> createState() =>
-      _SiteManagerProjectsPageState();
-}
-
-class _SiteManagerProjectsPageState extends State<SiteManagerProjectsPage> {
-  ProjectTab selectedTab = ProjectTab.all;
-
-  final List<Project> allProjects = const [
-    Project(
-      id: 'Prj-0842',
-      title: 'Goltsteins.Complex',
-      company: 'Hochief AG',
-      address: 'Goltsteinstraße 12, 50968 Köln',
-      owner: 'Mesut Yilmaz',
-      duration: 'Erection: Sept 18 – Sept 20 (2.5 days)',
-      phase: ProjectPhase.erection,
-      priority: ProjectPriority.high,
-      status: ProjectStatus.inProgress,
-    ),
-    Project(
-      id: 'Prj-0842',
-      title: 'Goltsteins.Complex',
-      company: 'Hochief AG',
-      address: 'Goltsteinstraße 12, 50968 Köln',
-      owner: 'Mesut Yilmaz',
-      duration: 'Dismantling: Sept 18 – Sept 20 (2.5 days)',
-      phase: ProjectPhase.dismantling,
-      priority: ProjectPriority.medium,
-      status: ProjectStatus.notStarted,
-    ),
-    Project(
-      id: 'Prj-0842',
-      title: 'Goltsteins.Complex',
-      company: 'Hochief AG',
-      address: 'Goltsteinstraße 12, 50968 Köln',
-      owner: 'Mesut Yilmaz',
-      duration: 'Inspection Due: Sept 18 – Sept 20 (2.5 days)',
-      phase: ProjectPhase.standingScaffold,
-      priority: ProjectPriority.medium,
-      status: ProjectStatus.postponed,
-    ),
-    Project(
-      id: 'Prj-0842',
-      title: 'Goltsteins.Complex',
-      company: 'Hochief AG',
-      address: 'Goltsteinstraße 12, 50968 Köln',
-      owner: 'Mesut Yilmaz',
-      duration: 'Finished On: Aug 28, 2026',
-      phase: ProjectPhase.completed,
-      priority: ProjectPriority.low,
-      status: ProjectStatus.inProgress,
-    ),
-    Project(
-      id: 'Prj-0851',
-      title: 'Riverside Tower',
-      company: 'Hochief AG',
-      address: 'Rheinstrasse 28, 50667 Köln',
-      owner: 'Mesut Yilmaz',
-      duration: 'Erection: Sept 20 – Sept 24 (4 days)',
-      phase: ProjectPhase.erection,
-      priority: ProjectPriority.low,
-      status: ProjectStatus.inProgress,
-    ),
-    Project(
-      id: 'Prj-0858',
-      title: 'Central Plaza',
-      company: 'Hochief AG',
-      address: 'Hohenzollernring 44, 50672 Köln',
-      owner: 'Mesut Yilmaz',
-      duration: 'Dismantling: Sept 21 – Sept 25 (4 days)',
-      phase: ProjectPhase.dismantling,
-      priority: ProjectPriority.high,
-      status: ProjectStatus.notStarted,
-    ),
-  ];
-
-  List<Project> get filteredProjects {
-    switch (selectedTab) {
-      case ProjectTab.all:
-        return allProjects;
-
-      case ProjectTab.active:
-        return allProjects
-            .where(
-              (project) =>
-                  project.status == ProjectStatus.inProgress ||
-                  project.status == ProjectStatus.notStarted,
-            )
-            .toList();
-
-      case ProjectTab.myProjects:
-        return allProjects
-            .where((project) => project.owner == 'Mesut Yilmaz')
-            .toList();
-
-      case ProjectTab.thisWeek:
-        return allProjects
-            .where(
-              (project) =>
-                  project.phase == ProjectPhase.erection ||
-                  project.phase == ProjectPhase.dismantling,
-            )
-            .toList();
-
-      case ProjectTab.inspection:
-        return allProjects
-            .where((project) => project.phase == ProjectPhase.standingScaffold)
-            .toList();
-    }
-  }
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message, style: TextStyle(fontSize: 18.sp)),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-  }
-
-  void _openSearch() {
+  void _openSearch(BuildContext context, List<Project> allProjects) {
     showSearch(context: context, delegate: ProjectSearchDelegate(allProjects));
   }
 
-  void _openFilters() {
+  void _openFilters(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) {
         return ProjectFilterBottomSheet(
-          onApply:
-              ({
-                required List<String> phases,
-                required List<String> cities,
-                required String priority,
-                required String customerCategory,
-                required String sortBy,
-              }) {
-                setState(() {
-                  // Apply your filters here.
-
-                  // Example:
-                  // _selectedPhases = phases;
-                  // _selectedCities = cities;
-                  // _selectedPriority = priority;
-                  // _selectedCustomerCategory = customerCategory;
-                  // _selectedSortBy = sortBy;
-                });
-              },
+          onApply: ({
+            required List<String> phases,
+            required List<String> cities,
+            required String priority,
+            required String customerCategory,
+            required String sortBy,
+          }) {
+            ref.read(siteManagerProjectsProvider.notifier).setFilter(
+                  phases: phases,
+                  cities: cities,
+                  priority: priority,
+                  customerCategory: customerCategory,
+                  sortBy: sortBy,
+                );
+          },
         );
       },
     );
   }
 
-  void _addProject() {
-    // _showMessage('Create new project');
-
+  void _addProject(BuildContext context) {
     context.push(RouteConstants.siteManagerCreateproject);
   }
 
   @override
-  Widget build(BuildContext context) {
-    final projects = filteredProjects;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final projectsState = ref.watch(siteManagerProjectsProvider);
+    final projects = projectsState.filteredProjects;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -196,7 +70,7 @@ class _SiteManagerProjectsPageState extends State<SiteManagerProjectsPage> {
             // ------------------------------------------------
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-              child: _buildHeader(),
+              child: _buildHeader(context, ref, projectsState.allProjects),
             ),
 
             const SizedBox(height: 12),
@@ -218,7 +92,7 @@ class _SiteManagerProjectsPageState extends State<SiteManagerProjectsPage> {
                       padding: EdgeInsets.only(
                         right: index == ProjectTab.values.length - 1 ? 0 : 7,
                       ),
-                      child: _buildTab(tab),
+                      child: _buildTab(ref, tab, projectsState.selectedTab),
                     );
                   }),
                 ),
@@ -242,7 +116,7 @@ class _SiteManagerProjectsPageState extends State<SiteManagerProjectsPage> {
 
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 10),
-                          child: _buildProjectCard(project),
+                          child: _buildProjectCard(context, project),
                         );
                       }, childCount: projects.length),
                     ),
@@ -258,7 +132,7 @@ class _SiteManagerProjectsPageState extends State<SiteManagerProjectsPage> {
       // FLOATING ADD BUTTON
       // ======================================================
       floatingActionButton: FloatingActionButton(
-        onPressed: _addProject,
+        onPressed: () => _addProject(context),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         elevation: 3,
@@ -268,40 +142,15 @@ class _SiteManagerProjectsPageState extends State<SiteManagerProjectsPage> {
     );
   }
 
-  //
-  Widget _taskFilterChip({
-    required String label,
-    required bool selected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 7.h),
-        decoration: BoxDecoration(
-          color: selected ? const Color(0xFF333333) : Colors.white,
-          borderRadius: BorderRadius.circular(5.r),
-          border: Border.all(
-            color: selected ? const Color(0xFF333333) : const Color(0xFFE0E0E0),
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: selected ? Colors.white : const Color(0xFF666666),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-
   // ==========================================================
   // HEADER
   // ==========================================================
 
-  Widget _buildHeader() {
+  Widget _buildHeader(
+    BuildContext context,
+    WidgetRef ref,
+    List<Project> allProjects,
+  ) {
     return Row(
       children: [
         Expanded(
@@ -315,11 +164,17 @@ class _SiteManagerProjectsPageState extends State<SiteManagerProjectsPage> {
           ),
         ),
 
-        _HeaderButton(icon: Icons.search, onTap: _openSearch),
+        _HeaderButton(
+          icon: Icons.search,
+          onTap: () => _openSearch(context, allProjects),
+        ),
 
         const SizedBox(width: 8),
 
-        _HeaderButton(icon: Icons.tune, onTap: _openFilters),
+        _HeaderButton(
+          icon: Icons.tune,
+          onTap: () => _openFilters(context, ref),
+        ),
       ],
     );
   }
@@ -328,14 +183,12 @@ class _SiteManagerProjectsPageState extends State<SiteManagerProjectsPage> {
   // TAB
   // ==========================================================
 
-  Widget _buildTab(ProjectTab tab) {
+  Widget _buildTab(WidgetRef ref, ProjectTab tab, ProjectTab selectedTab) {
     final bool selected = selectedTab == tab;
 
     return GestureDetector(
       onTap: () {
-        setState(() {
-          selectedTab = tab;
-        });
+        ref.read(siteManagerProjectsProvider.notifier).selectTab(tab);
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
@@ -360,7 +213,7 @@ class _SiteManagerProjectsPageState extends State<SiteManagerProjectsPage> {
   // PROJECT CARD
   // ==========================================================
 
-  Widget _buildProjectCard(Project project) {
+  Widget _buildProjectCard(BuildContext context, Project project) {
     return GestureDetector(
       onTap: () {
         // _showMessage('Opening ${project.id} · ${project.title}');
@@ -644,40 +497,6 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-// ============================================================
-// FILTER CHIP
-// ============================================================
-
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final Color color;
-  final Color backgroundColor;
-
-  const _FilterChip({
-    required this.label,
-    required this.color,
-    required this.backgroundColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(7),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-}
 
 // ============================================================
 // SEARCH DELEGATE

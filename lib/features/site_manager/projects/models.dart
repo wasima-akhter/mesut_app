@@ -37,15 +37,47 @@ class ProjectTask {
     required this.description,
     required this.employee,
     required this.priority,
-    required this.dueDate,
+    this.dueDate,
     this.completed = false,
   });
 
   String description;
   String employee;
   ProjectPriority priority;
-  DateTime dueDate;
+  DateTime? dueDate;
   bool completed;
+
+  ProjectTask copyWith({
+    String? description,
+    String? employee,
+    ProjectPriority? priority,
+    DateTime? dueDate,
+    bool? completed,
+  }) {
+    return ProjectTask(
+      description: description ?? this.description,
+      employee: employee ?? this.employee,
+      priority: priority ?? this.priority,
+      dueDate: dueDate ?? this.dueDate,
+      completed: completed ?? this.completed,
+    );
+  }
+}
+
+class PhotoItem {
+  final String title;
+  final String meta;
+  final String tag;
+  final String? badge;
+  final String imagePath;
+
+  const PhotoItem({
+    required this.title,
+    required this.meta,
+    required this.tag,
+    this.badge,
+    required this.imagePath,
+  });
 }
 
 class ProjectPhoto {

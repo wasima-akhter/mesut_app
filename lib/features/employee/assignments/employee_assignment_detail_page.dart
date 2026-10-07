@@ -1,36 +1,43 @@
 import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:construction_app/core/widgets/buttons/app_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/services/launcher_service.dart';
 import '../helper/employee_enums.dart';
 import '../helper/employee_models.dart';
+import '../presentation/providers/employee_assignment_details_provider.dart';
+import '../presentation/providers/employee_timer_provider.dart';
 
-class AssignmentDetailsPage extends StatefulWidget {
+class AssignmentDetailsPage extends ConsumerWidget {
   const AssignmentDetailsPage({super.key});
 
-  @override
-  State<AssignmentDetailsPage> createState() => _AssignmentDetailsPageState();
-}
-
-class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
-  late EmployeeAssignmentModel assignment;
-
-  @override
-  void initState() {
-    super.initState();
-    assignment = fakeAssignments.first;
-  }
-
-  void _startTimer() {
+  void _startTimer(BuildContext context, WidgetRef ref) {
+    final assignment = ref.read(assignmentDetailsProvider).assignment;
+    ref.read(employeeTimerProvider.notifier).startTimer(
+      project: EmployeeProjectModel(
+        id: assignment.project.split('·').first.trim(),
+        name: assignment.project,
+        address: assignment.address,
+        activity: assignment.activity,
+        startTime: '07:30 am',
+        endTime: '04:15 pm',
+        siteManager: assignment.siteManager,
+      ),
+      activity: assignment.activity,
+    );
     context.push(RouteConstants.employeeActiveTimerPage);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(assignmentDetailsProvider);
+    final assignment = state.assignment;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -39,47 +46,59 @@ class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
           slivers: [
             SliverPadding(
               padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 10.h),
-              sliver: SliverToBoxAdapter(child: _buildHeader()),
+              sliver: SliverToBoxAdapter(child: _buildHeader(context)),
             ),
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildProjectCard()),
-            ),
-
-            SliverToBoxAdapter(child: SizedBox(height: 12.h)),
-
-            SliverPadding(
-              padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildMapCard()),
+              sliver: SliverToBoxAdapter(
+                child: _buildProjectCard(context, assignment),
+              ),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 12.h)),
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildManagerCard()),
+              sliver: SliverToBoxAdapter(
+                child: _buildMapCard(context, assignment),
+              ),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 12.h)),
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildInstructionsCard()),
+              sliver: SliverToBoxAdapter(
+                child: _buildManagerCard(context, assignment),
+              ),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 12.h)),
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildPhotosCard()),
+              sliver: SliverToBoxAdapter(
+                child: _buildInstructionsCard(context),
+              ),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 12.h)),
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildTasksCard()),
+              sliver: SliverToBoxAdapter(
+                child: _buildPhotosCard(context, assignment),
+              ),
+            ),
+
+            SliverToBoxAdapter(child: SizedBox(height: 12.h)),
+
+            SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 18.w),
+              sliver: SliverToBoxAdapter(
+                child: _buildTasksCard(context, ref, state),
+              ),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 16.h)),
@@ -88,7 +107,7 @@ class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
               padding: EdgeInsets.fromLTRB(18.w, 0, 18.w, 25.h),
               sliver: SliverToBoxAdapter(
                 child: AppButton(
-                  onPressed: _startTimer,
+                  onPressed: () => _startTimer(context, ref),
                   height: 52.h,
                   text: context.loc.startNewTimer,
                 ),
@@ -100,7 +119,7 @@ class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
         GestureDetector(
@@ -135,7 +154,10 @@ class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
     );
   }
 
-  Widget _buildProjectCard() {
+  Widget _buildProjectCard(
+    BuildContext context,
+    EmployeeAssignmentModel assignment,
+  ) {
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,7 +193,10 @@ class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
     );
   }
 
-  Widget _buildMapCard() {
+  Widget _buildMapCard(
+    BuildContext context,
+    EmployeeAssignmentModel assignment,
+  ) {
     return _card(
       padding: EdgeInsets.all(8.w),
       child: Column(
@@ -238,7 +263,7 @@ class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
             width: double.infinity,
             child: AppButton(
               onPressed: () {
-                _showMessage(context.loc.navigation);
+                _showMessage(context, context.loc.navigation);
               },
               height: 48.h,
               text: context.loc.navigation,
@@ -249,7 +274,10 @@ class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
     );
   }
 
-  Widget _buildManagerCard() {
+  Widget _buildManagerCard(
+    BuildContext context,
+    EmployeeAssignmentModel assignment,
+  ) {
     return _card(
       child: Row(
         children: [
@@ -294,7 +322,14 @@ class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
           ),
 
           GestureDetector(
-            onTap: () => _showMessage(context.loc.callingContact),
+            onTap: () async {
+              final success = await AppLauncherService.makePhoneCall(
+                '+49 221 555 0192',
+              );
+              if (!success && context.mounted) {
+                _showMessage(context, context.loc.callingContact);
+              }
+            },
             child: Container(
               width: 44.w,
               height: 44.w,
@@ -310,7 +345,7 @@ class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
     );
   }
 
-  Widget _buildInstructionsCard() {
+  Widget _buildInstructionsCard(BuildContext context) {
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,7 +362,10 @@ class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
     );
   }
 
-  Widget _buildPhotosCard() {
+  Widget _buildPhotosCard(
+    BuildContext context,
+    EmployeeAssignmentModel assignment,
+  ) {
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -345,7 +383,10 @@ class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
                 ),
               ),
               TextButton(
-                onPressed: () => _showMessage(context.loc.smPhotos),
+                onPressed: () => context.push(
+                  RouteConstants.employeeAssignmentPhotos,
+                  extra: assignment.project,
+                ),
                 child: Text(
                   '${context.loc.viewAll} →',
                   style: TextStyle(
@@ -361,11 +402,35 @@ class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
 
           Row(
             children: [
-              Expanded(child: _photoPlaceholder(Icons.business)),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => context.push(
+                    RouteConstants.employeeAssignmentPhotos,
+                    extra: assignment.project,
+                  ),
+                  child: _photoPlaceholder(Icons.business),
+                ),
+              ),
               SizedBox(width: 8.w),
-              Expanded(child: _photoPlaceholder(Icons.construction)),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => context.push(
+                    RouteConstants.employeeAssignmentPhotos,
+                    extra: assignment.project,
+                  ),
+                  child: _photoPlaceholder(Icons.construction),
+                ),
+              ),
               SizedBox(width: 8.w),
-              Expanded(child: _photoPlaceholder(Icons.apartment)),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => context.push(
+                    RouteConstants.employeeAssignmentPhotos,
+                    extra: assignment.project,
+                  ),
+                  child: _photoPlaceholder(Icons.apartment),
+                ),
+              ),
             ],
           ),
         ],
@@ -373,13 +438,17 @@ class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
     );
   }
 
-  Widget _buildTasksCard() {
+  Widget _buildTasksCard(
+    BuildContext context,
+    WidgetRef ref,
+    AssignmentDetailsState state,
+  ) {
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${context.loc.smTasks} (2)',
+            '${context.loc.smTasks} (${state.tasks.length})',
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.w700,
@@ -389,32 +458,54 @@ class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
 
           SizedBox(height: 12.h),
 
-          _taskRow('Assemble base jacks and ground frame'),
-          SizedBox(height: 10.h),
-          _taskRow('Assemble base jacks and ground frame'),
+          for (int i = 0; i < state.tasks.length; i++) ...[
+            if (i > 0) SizedBox(height: 10.h),
+            _taskRow(context, ref, state.tasks[i]),
+          ],
         ],
       ),
     );
   }
 
-  Widget _taskRow(String text) {
+  Widget _taskRow(
+    BuildContext context,
+    WidgetRef ref,
+    AssignmentTaskItem task,
+  ) {
     return GestureDetector(
-      onTap: () => _showMessage(text),
+      onTap: () {
+        ref.read(assignmentDetailsProvider.notifier).toggleTask(task.id);
+      },
       child: Row(
         children: [
           Container(
             width: 22.w,
             height: 22.w,
             decoration: BoxDecoration(
-              border: Border.all(color: AppColors.neutral300),
+              color: task.isCompleted ? AppColors.primary : Colors.transparent,
+              border: Border.all(
+                color: task.isCompleted
+                    ? AppColors.primary
+                    : AppColors.neutral300,
+              ),
               borderRadius: BorderRadius.circular(5.r),
             ),
+            child: task.isCompleted
+                ? const Icon(Icons.check, size: 16, color: Colors.white)
+                : null,
           ),
           SizedBox(width: 9.w),
           Expanded(
             child: Text(
-              text,
-              style: TextStyle(fontSize: 16.sp, color: AppColors.textSecondary),
+              task.title,
+              style: TextStyle(
+                fontSize: 16.sp,
+                color: task.isCompleted
+                    ? AppColors.textTertiary
+                    : AppColors.textSecondary,
+                decoration:
+                    task.isCompleted ? TextDecoration.lineThrough : null,
+              ),
             ),
           ),
         ],
@@ -522,7 +613,7 @@ class _AssignmentDetailsPageState extends State<AssignmentDetailsPage> {
     );
   }
 
-  void _showMessage(String message) {
+  void _showMessage(BuildContext context, String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(

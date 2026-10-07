@@ -8,21 +8,17 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/localization/app_language.dart';
 import '../../../../core/localization/context_extensions.dart';
 import '../../../../core/localization/localization_provider.dart';
+import '../../../../core/services/launcher_service.dart';
 import '../../../auth/logout/logout.dart';
+import '../../presentation/providers/employee_profile_provider.dart';
 
-class EmployeeProfilePage extends ConsumerStatefulWidget {
+class EmployeeProfilePage extends ConsumerWidget {
   const EmployeeProfilePage({super.key});
 
   @override
-  ConsumerState<EmployeeProfilePage> createState() =>
-      _EmployeeProfilePageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileState = ref.watch(employeeProfileProvider);
 
-class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
-  bool notificationsEnabled = true;
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -31,40 +27,46 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
           slivers: [
             SliverPadding(
               padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 20.h),
-              sliver: SliverToBoxAdapter(child: _buildHeader()),
+              sliver: SliverToBoxAdapter(child: _buildHeader(context)),
             ),
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildProfileHeader()),
+              sliver: SliverToBoxAdapter(
+                child: _buildProfileHeader(context, profileState),
+              ),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 20.h)),
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildStats()),
+              sliver: SliverToBoxAdapter(child: _buildStats(context)),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 14.h)),
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildContactInformation()),
+              sliver: SliverToBoxAdapter(
+                child: _buildContactInformation(context, profileState),
+              ),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 14.h)),
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildSettings()),
+              sliver: SliverToBoxAdapter(
+                child: _buildSettings(context, ref, profileState),
+              ),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 14.h)),
 
             SliverPadding(
               padding: EdgeInsets.fromLTRB(18.w, 0, 18.w, 30.h),
-              sliver: SliverToBoxAdapter(child: _buildLegalAndLogout()),
+              sliver: SliverToBoxAdapter(child: _buildLegalAndLogout(context)),
             ),
           ],
         ),
@@ -76,7 +78,7 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
   // HEADER
   // ============================================================
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
         SizedBox(width: 50.w),
@@ -94,7 +96,7 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
           ),
         ),
 
-        _circleButton(Icons.edit_outlined, _editProfile),
+        _circleButton(Icons.edit_outlined, () => _editProfile(context)),
       ],
     );
   }
@@ -103,7 +105,10 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
   // PROFILE HEADER
   // ============================================================
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(
+    BuildContext context,
+    EmployeeProfileState profileState,
+  ) {
     return Column(
       children: [
         Stack(
@@ -134,19 +139,19 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
               right: 0,
               bottom: 1,
               child: GestureDetector(
-                onTap: _changeProfilePhoto,
+                onTap: () => _changeProfilePhoto(context),
                 child: Container(
                   width: 31.w,
                   height: 31.w,
                   decoration: BoxDecoration(
-                    color: AppColors.black,
+                    color: AppColors.primary,
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.background, width: 2),
+                    border: Border.all(color: AppColors.white, width: 2),
                   ),
                   child: const Icon(
                     Icons.camera_alt_outlined,
-                    color: AppColors.white,
-                    size: 17,
+                    size: 16,
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -157,9 +162,9 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
         SizedBox(height: 12.h),
 
         Text(
-          'Mesut Rahman',
+          profileState.name,
           style: TextStyle(
-            fontSize: 23.sp,
+            fontSize: 22.sp,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
@@ -168,41 +173,25 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
         SizedBox(height: 4.h),
 
         Text(
-          context.loc.employeeRole,
-          style: TextStyle(fontSize: 17.sp, color: AppColors.textSecondary),
+          profileState.roleTitle,
+          style: TextStyle(fontSize: 16.sp, color: AppColors.textSecondary),
         ),
 
-        SizedBox(height: 9.h),
+        SizedBox(height: 8.h),
 
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 7.h),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
           decoration: BoxDecoration(
             color: AppColors.successLight,
-            borderRadius: BorderRadius.circular(6.r),
+            borderRadius: BorderRadius.circular(5.r),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 7.w,
-                height: 7.w,
-                decoration: const BoxDecoration(
-                  color: AppColors.success,
-                  shape: BoxShape.circle,
-                ),
-              ),
-
-              SizedBox(width: 6.w),
-
-              Text(
-                context.loc.inProgress,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.success,
-                ),
-              ),
-            ],
+          child: Text(
+            context.loc.get('profile.active', 'Active'),
+            style: TextStyle(
+              fontSize: 15.sp,
+              color: AppColors.success,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
@@ -213,37 +202,32 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
   // STATS
   // ============================================================
 
-  Widget _buildStats() {
+  Widget _buildStats(BuildContext context) {
     return Container(
-      height: 88.h,
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 10.w),
       decoration: BoxDecoration(
         color: AppColors.black,
-        borderRadius: BorderRadius.circular(8.r),
+        borderRadius: BorderRadius.circular(10.r),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _stat(
-            title: context.loc.thisWeek,
-            value: '30 hrs',
-          ),
-
+          _statItem(context.loc.assignedProjects, '2'),
           _divider(),
-
-          _stat(
-            title: context.loc.assignedProjects,
-            value: '2 projects',
-          ),
+          _statItem(context.loc.completed, '14'),
+          _divider(),
+          _statItem(context.loc.get('employee.hoursThisWeek', 'Hours this Week'), '35.5h'),
         ],
       ),
     );
   }
 
-  Widget _stat({required String title, required String value}) {
+  Widget _statItem(String title, String value) {
     return Expanded(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8.w),
+        padding: EdgeInsets.symmetric(horizontal: 4.w),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               title,
@@ -283,15 +267,17 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
   // CONTACT
   // ============================================================
 
-  Widget _buildContactInformation() {
+  Widget _buildContactInformation(
+    BuildContext context,
+    EmployeeProfileState profileState,
+  ) {
     return _section(
       title: context.loc.contactInformation,
       children: [
-        _contactRow(Icons.phone_outlined, '+49 170 1234567'),
-
-        _contactRow(Icons.mail_outline_rounded, 'mesut.rahman@allround.de'),
-
+        _contactRow(context, Icons.phone_outlined, profileState.phone),
+        _contactRow(context, Icons.mail_outline_rounded, profileState.email),
         _contactRow(
+          context,
           Icons.badge_outlined,
           'Employee ID: emp-042',
           showDivider: false,
@@ -300,12 +286,29 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
     );
   }
 
-  Widget _contactRow(IconData icon, String text, {bool showDivider = true}) {
+  Widget _contactRow(
+    BuildContext context,
+    IconData icon,
+    String text, {
+    bool showDivider = true,
+  }) {
     return Column(
       children: [
         InkWell(
-          onTap: () {
-            _showMessage(text);
+          onTap: () async {
+            if (icon == Icons.phone_outlined) {
+              final success = await AppLauncherService.makePhoneCall(text);
+              if (!success && context.mounted) {
+                _showMessage(context, text);
+              }
+            } else if (icon == Icons.mail_outline_rounded) {
+              final success = await AppLauncherService.sendEmail(email: text);
+              if (!success && context.mounted) {
+                _showMessage(context, text);
+              }
+            } else {
+              _showMessage(context, text);
+            }
           },
           borderRadius: BorderRadius.circular(7.r),
           child: Padding(
@@ -339,7 +342,11 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
   // SETTINGS
   // ============================================================
 
-  Widget _buildSettings() {
+  Widget _buildSettings(
+    BuildContext context,
+    WidgetRef ref,
+    EmployeeProfileState profileState,
+  ) {
     final currentLang = ref.watch(appLanguageProvider);
     final langName = currentLang == AppLanguage.german
         ? context.loc.german
@@ -352,25 +359,23 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
           icon: Icons.language_outlined,
           title: context.loc.language,
           trailing: langName,
-          onTap: _changeLanguage,
+          onTap: () => _changeLanguage(context, ref),
         ),
 
         _settingRow(
           icon: Icons.lock_outline,
           title: context.loc.changePassword,
-          onTap: _changePassword,
+          onTap: () => _changePassword(context),
         ),
 
         _settingRow(
-          icon: notificationsEnabled
+          icon: profileState.notificationsEnabled
               ? Icons.notifications_outlined
               : Icons.notifications_off_outlined,
           title: context.loc.notifications,
-          trailing: notificationsEnabled ? 'On' : 'Off',
+          trailing: profileState.notificationsEnabled ? 'On' : 'Off',
           onTap: () {
-            setState(() {
-              notificationsEnabled = !notificationsEnabled;
-            });
+            ref.read(employeeProfileProvider.notifier).toggleNotifications();
           },
           showDivider: false,
         ),
@@ -434,7 +439,7 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
   // LEGAL
   // ============================================================
 
-  Widget _buildLegalAndLogout() {
+  Widget _buildLegalAndLogout(BuildContext context) {
     return Column(
       children: [
         _section(
@@ -464,7 +469,7 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
-            onPressed: _logout,
+            onPressed: () => _logout(context),
             icon: const Icon(Icons.logout, size: 20),
             label: Text(
               context.loc.logout,
@@ -484,7 +489,7 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
     );
   }
 
-  void _logout() {
+  void _logout(BuildContext context) {
     LogoutConfirmation.show(
       context: context,
       onLogout: () {
@@ -529,15 +534,15 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
   // ACTIONS
   // ============================================================
 
-  void _editProfile() {
+  void _editProfile(BuildContext context) {
     context.push(RouteConstants.siteManagerProfileEdit);
   }
 
-  void _changeProfilePhoto() {
-    _showMessage(context.loc.cameraPermissionMessage);
+  void _changeProfilePhoto(BuildContext context) {
+    _showMessage(context, context.loc.cameraPermissionMessage);
   }
 
-  void _changeLanguage() {
+  void _changeLanguage(BuildContext context, WidgetRef ref) {
     final currentLang = ref.read(appLanguageProvider);
 
     showModalBottomSheet<void>(
@@ -546,7 +551,7 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
       ),
-      builder: (_) {
+      builder: (dialogContext) {
         return SafeArea(
           child: CustomScrollView(
             shrinkWrap: true,
@@ -568,11 +573,15 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
                       SizedBox(height: 14.h),
 
                       _languageOption(
+                        context: dialogContext,
+                        ref: ref,
                         title: context.loc.english,
                         language: AppLanguage.english,
                         isSelected: currentLang == AppLanguage.english,
                       ),
                       _languageOption(
+                        context: dialogContext,
+                        ref: ref,
                         title: context.loc.german,
                         language: AppLanguage.german,
                         isSelected: currentLang == AppLanguage.german,
@@ -589,6 +598,8 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
   }
 
   Widget _languageOption({
+    required BuildContext context,
+    required WidgetRef ref,
     required String title,
     required AppLanguage language,
     required bool isSelected,
@@ -605,7 +616,7 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
     );
   }
 
-  void _changePassword() {
+  void _changePassword(BuildContext context) {
     context.push(RouteConstants.changePassword);
   }
 
@@ -625,7 +636,7 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
     );
   }
 
-  void _showMessage(String message) {
+  void _showMessage(BuildContext context, String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(

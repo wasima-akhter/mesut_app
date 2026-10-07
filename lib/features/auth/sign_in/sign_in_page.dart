@@ -30,8 +30,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  UserRole? _selectedRole;
-
   @override
   void dispose() {
     _emailController.dispose();
@@ -66,10 +64,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   // ------------------------------------------------------------
 
   void _loginAs(UserRole role) {
-    setState(() {
-      _selectedRole = role;
-    });
-
     // Assign role to Riverpod provider.
     ref.read(userRoleProvider.notifier).setRole(role);
 
@@ -82,10 +76,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   // ------------------------------------------------------------
 
   void _loginAsNone() {
-    setState(() {
-      _selectedRole = null;
-    });
-
     // Clear authenticated role.
     ref.read(userRoleProvider.notifier).clearRole();
     context.pushReplacement(RouteConstants.signIn);
@@ -227,37 +217,37 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
           ),
 
           SizedBox(height: 30),
-          if (!kDebugMode)
-            Wrap(
-              runSpacing: 10,
-              children: [
-                _DebugButton(
-                  title: 'Login as Site Manager',
-                  icon: Icons.engineering_outlined,
-                  color: Colors.green,
-                  onPressed: () {
-                    _loginAs(UserRole.siteManager);
-                  },
-                ),
-                const SizedBox(height: 14),
-                _DebugButton(
-                  title: 'Login as Employee',
-                  icon: Icons.person_outline,
-                  color: Colors.blue,
-                  onPressed: () {
-                    _loginAs(UserRole.employee);
-                  },
-                ),
-                const SizedBox(height: 14),
-                _DebugButton(
-                  title: 'Continue as Unauthenticated',
-                  icon: Icons.logout,
-                  color: Colors.red,
-                  outlined: true,
-                  onPressed: _loginAsNone,
-                ),
-              ],
-            ),
+          // if ( kDebugMode)
+          Wrap(
+            runSpacing: 10,
+            children: [
+              _DebugButton(
+                title: 'Login as Site Manager',
+                icon: Icons.engineering_outlined,
+                color: Colors.green,
+                onPressed: () {
+                  _loginAs(UserRole.siteManager);
+                },
+              ),
+              const SizedBox(height: 14),
+              _DebugButton(
+                title: 'Login as Employee',
+                icon: Icons.person_outline,
+                color: Colors.blue,
+                onPressed: () {
+                  _loginAs(UserRole.employee);
+                },
+              ),
+              const SizedBox(height: 14),
+              _DebugButton(
+                title: 'Continue as Unauthenticated',
+                icon: Icons.logout,
+                color: Colors.red,
+                outlined: true,
+                onPressed: _loginAsNone,
+              ),
+            ],
+          ),
         ],
       ),
     );

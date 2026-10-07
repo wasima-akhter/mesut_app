@@ -1,10 +1,12 @@
 import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../presentation/providers/site_manager_inspections_provider.dart';
 
 // ============================================================
 // MODELS
@@ -60,7 +62,7 @@ class CalendarEventModel {
 // 1. SITE INSPECTION - PENDING
 // ============================================================
 
-class SiteInspectionPage extends StatefulWidget {
+class SiteInspectionPage extends ConsumerWidget {
   const SiteInspectionPage({
     super.key,
     this.initialStatus = InspectionStatus.pending,
@@ -69,66 +71,9 @@ class SiteInspectionPage extends StatefulWidget {
   final InspectionStatus initialStatus;
 
   @override
-  State<SiteInspectionPage> createState() => _SiteInspectionPageState();
-}
-
-class _SiteInspectionPageState extends State<SiteInspectionPage> {
-  late InspectionStatus _selectedStatus;
-
-  final List<SiteInspectionModel> _inspections = [
-    SiteInspectionModel(
-      projectId: 'PRJ-0842',
-      projectName: 'Goldsteins.Complex',
-      company: 'HochTief AG',
-      type: 'Commercial',
-      address: 'Goldsteinstraße 12, 50968 Köln',
-      inspector: 'Mesut Yilmaz (you)',
-      appointment: 'Today, 10:30 am',
-      status: InspectionStatus.pending,
-    ),
-    SiteInspectionModel(
-      projectId: 'PRJ-0843',
-      projectName: 'Goldsteins.Complex',
-      company: 'HochTief AG',
-      type: 'Commercial',
-      address: 'Goldsteinstraße 12, 50968 Köln',
-      inspector: 'Mesut Yilmaz (you)',
-      appointment: 'Today, 10:30 am',
-      status: InspectionStatus.pending,
-    ),
-    SiteInspectionModel(
-      projectId: 'PRJ-0844',
-      projectName: 'Goldsteins.Complex',
-      company: 'HochTief AG',
-      type: 'Commercial',
-      address: 'Goldsteinstraße 12, 50968 Köln',
-      inspector: 'Mesut Yilmaz (you)',
-      appointment: 'Today, 10:30 am',
-      status: InspectionStatus.pending,
-    ),
-    SiteInspectionModel(
-      projectId: 'PRJ-0845',
-      projectName: 'Goldsteins.Complex',
-      company: 'HochTief AG',
-      type: 'Commercial',
-      address: 'Goldsteinstraße 12, 50968 Köln',
-      inspector: 'Mesut Yilmaz (you)',
-      appointment: 'Today, 10:30 am',
-      status: InspectionStatus.completed,
-    ),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedStatus = widget.initialStatus;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final items = _inspections
-        .where((item) => item.status == _selectedStatus)
-        .toList();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final inspectionState = ref.watch(siteInspectionProvider);
+    final items = inspectionState.filteredInspections;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -142,11 +87,9 @@ class _SiteInspectionPageState extends State<SiteInspectionPage> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 12.w),
               child: InspectionStatusTabs(
-                selected: _selectedStatus,
+                selected: inspectionState.selectedStatus,
                 onChanged: (status) {
-                  setState(() {
-                    _selectedStatus = status;
-                  });
+                  ref.read(siteInspectionProvider.notifier).setStatus(status);
                 },
               ),
             ),
@@ -398,7 +341,9 @@ class SiteInspectionCard extends StatelessWidget {
 
               if (onPrimaryAction != null)
                 SmallRedButton(
-                  text: completed ? context.loc.openProject : context.loc.startSurvey,
+                  text: completed
+                      ? context.loc.openProject
+                      : context.loc.startSurvey,
                   onTap: onPrimaryAction!,
                 ),
             ],
@@ -504,40 +449,6 @@ class SmallRedButton extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-// ============================================================
-// PRIMARY BUTTON
-// ============================================================
-
-class _PrimaryButton extends StatelessWidget {
-  final String text;
-  final VoidCallback onTap;
-
-  const _PrimaryButton({required this.text, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 48.h,
-      child: ElevatedButton(
-        onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.error,
-          foregroundColor: AppColors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
         ),
       ),
     );

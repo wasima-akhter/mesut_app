@@ -1,55 +1,18 @@
+import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:construction_app/core/widgets/buttons/app_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/context_extensions.dart';
+import '../../entry/nav/navigation_provider.dart';
+import '../presentation/providers/site_manager_home_provider.dart';
 
-class SiteManagerHomePage extends StatefulWidget {
+class SiteManagerHomePage extends ConsumerWidget {
   const SiteManagerHomePage({super.key});
 
-  @override
-  State<SiteManagerHomePage> createState() => _SiteManagerHomePageState();
-}
-
-class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
-  bool notificationsEnabled = false;
-  bool showAllOperations = false;
-
-  int activeSites = 3;
-  int scaffolds = 30;
-  int inspectionsDue = 30;
-
-  final List<Map<String, dynamic>> operations = [
-    {
-      'type': 'Erection',
-      'typeColor': Color(0xFF00A651),
-      'project': 'Prj-0842 . Goltsteins.Complex',
-      'address': 'Goltsteinstrabe 12, 50968 Köln',
-      'client': 'Mesut Rahaman',
-      'planned': 14,
-      'running': 5,
-    },
-    {
-      'type': 'Dismantling',
-      'typeColor': Color(0xFFFF9800),
-      'project': 'Prj-0845 . Riverside Tower',
-      'address': 'Rheinstrasse 28, 50667 Köln',
-      'client': 'David Miller',
-      'planned': 8,
-      'running': 3,
-    },
-    {
-      'type': 'Erection',
-      'typeColor': Color(0xFF00A651),
-      'project': 'Prj-0850 . Central Plaza',
-      'address': 'Hohenzollernring 44, 50672 Köln',
-      'client': 'Thomas Weber',
-      'planned': 15,
-      'running': 7,
-    },
-  ];
-
-  void _showMessage(String message) {
+  void _showMessage(BuildContext context, String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
@@ -60,25 +23,32 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
       );
   }
 
-  void _toggleNotifications() {
-    setState(() {
-      notificationsEnabled = !notificationsEnabled;
-    });
+  void _openProject(BuildContext context, Map<String, dynamic> project) {
+    context.push(RouteConstants.siteManagerProjectDetail);
   }
 
-  void _openProject(Map<String, dynamic> project) {
-    _showMessage('${context.loc.projectOpened}: ${project['project']}');
+  void _openRoute(BuildContext context, Map<String, dynamic> project) {
+    _showMessage(context, context.loc.navigation);
   }
 
-  void _openRoute(Map<String, dynamic> project) {
-    _showMessage(context.loc.navigation);
+  String _localizeOperationType(BuildContext context, String type) {
+    switch (type.toLowerCase()) {
+      case 'erection':
+        return context.loc.erectionPhase;
+      case 'dismantling':
+        return context.loc.dismantlingPhase;
+      case 'standing':
+      case 'standing scaffold':
+        return context.loc.standingScaffold;
+      default:
+        return type;
+    }
   }
 
   @override
-  Widget build(BuildContext context) {
-    final visibleOperations = showAllOperations
-        ? operations
-        : operations.take(1).toList();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final homeState = ref.watch(siteManagerHomeProvider);
+    final visibleOperations = homeState.visibleOperations;
 
     return Scaffold(
       body: SafeArea(
@@ -87,33 +57,41 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
           slivers: [
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(18, 18, 18, 8),
-              sliver: SliverToBoxAdapter(child: _buildHeader()),
+              sliver: SliverToBoxAdapter(
+                child: _buildHeader(context, ref, homeState),
+              ),
             ),
 
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 18),
-              sliver: SliverToBoxAdapter(child: _buildMapCard()),
-            ),
-
-            const SliverToBoxAdapter(child: SizedBox(height: 14)),
-
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              sliver: SliverToBoxAdapter(child: _buildMainStats()),
+              sliver: SliverToBoxAdapter(
+                child: _buildMapCard(context, homeState.activeSites),
+              ),
             ),
 
             const SliverToBoxAdapter(child: SizedBox(height: 14)),
 
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 18),
-              sliver: SliverToBoxAdapter(child: _buildSecondaryStats()),
+              sliver: SliverToBoxAdapter(child: _buildMainStats(context)),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 14)),
+
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              sliver: SliverToBoxAdapter(
+                child: _buildSecondaryStats(context, homeState),
+              ),
             ),
 
             const SliverToBoxAdapter(child: SizedBox(height: 18)),
 
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 18),
-              sliver: SliverToBoxAdapter(child: _buildOperationsHeader()),
+              sliver: SliverToBoxAdapter(
+                child: _buildOperationsHeader(context, ref, homeState),
+              ),
             ),
 
             const SliverToBoxAdapter(child: SizedBox(height: 10)),
@@ -126,7 +104,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 14),
-                    child: _buildOperationCard(operation),
+                    child: _buildOperationCard(context, operation),
                   );
                 }, childCount: visibleOperations.length),
               ),
@@ -137,7 +115,13 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(
+    BuildContext context,
+    WidgetRef ref,
+    SiteManagerHomeState homeState,
+  ) {
+    final notificationsEnabled = homeState.notificationsEnabled;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -149,7 +133,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
                 context.loc.welcomeBack,
                 style: TextStyle(
                   fontSize: 19.sp,
-                  color: Color(0xFF777777),
+                  color: const Color(0xFF777777),
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -159,7 +143,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
                 style: TextStyle(
                   fontSize: 28.sp,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF171717),
+                  color: const Color(0xFF171717),
                 ),
               ),
             ],
@@ -184,7 +168,8 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
         const SizedBox(width: 9),
 
         GestureDetector(
-          onTap: _toggleNotifications,
+          onTap: () =>
+              ref.read(siteManagerHomeProvider.notifier).toggleNotifications(),
           child: Container(
             width: 43,
             height: 43,
@@ -208,7 +193,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
     );
   }
 
-  Widget _buildMapCard() {
+  Widget _buildMapCard(BuildContext context, int activeSites) {
     return Container(
       height: 148,
       decoration: BoxDecoration(
@@ -271,7 +256,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
             right: 9,
             bottom: 8,
             child: GestureDetector(
-              onTap: () => _showMessage(context.loc.navMap),
+              onTap: () => _showMessage(context, context.loc.navMap),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 11,
@@ -308,7 +293,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
     );
   }
 
-  Widget _buildMainStats() {
+  Widget _buildMainStats(BuildContext context) {
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -335,7 +320,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
                   const SizedBox(height: 6),
 
                   Text(
-                    '$scaffolds',
+                    '30',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 33.sp,
@@ -359,11 +344,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
 
           Expanded(
             child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  inspectionsDue += 1;
-                });
-              },
+              onTap: () => _showMessage(context, context.loc.inspections),
               child: Container(
                 padding: const EdgeInsets.all(15),
                 decoration: BoxDecoration(
@@ -376,7 +357,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      '$inspectionsDue',
+                      '30',
                       style: TextStyle(
                         color: const Color(0xFFE32638),
                         fontSize: 33.sp,
@@ -402,26 +383,31 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
     );
   }
 
-  Widget _buildSecondaryStats() {
+  Widget _buildSecondaryStats(
+    BuildContext context,
+    SiteManagerHomeState homeState,
+  ) {
     return Row(
       children: [
         Expanded(
           child: _buildStatCard(
+            context: context,
             title: context.loc.erectionPhase,
             color: const Color(0xFF00A651),
             planned: 14,
             running: 5,
-            onTap: () => _showMessage(context.loc.erectionPhase),
+            onTap: () => _showMessage(context, context.loc.erectionPhase),
           ),
         ),
         const SizedBox(width: 8),
         Expanded(
           child: _buildStatCard(
+            context: context,
             title: context.loc.dismantlingPhase,
             color: const Color(0xFFFF9800),
             planned: 14,
             running: 5,
-            onTap: () => _showMessage(context.loc.dismantlingPhase),
+            onTap: () => _showMessage(context, context.loc.dismantlingPhase),
           ),
         ),
       ],
@@ -429,6 +415,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
   }
 
   Widget _buildStatCard({
+    required BuildContext context,
     required String title,
     required Color color,
     required int planned,
@@ -459,12 +446,16 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
                   ),
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 17.sp,
-                    fontWeight: FontWeight.w500,
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ],
@@ -517,7 +508,13 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
     );
   }
 
-  Widget _buildOperationsHeader() {
+  Widget _buildOperationsHeader(
+    BuildContext context,
+    WidgetRef ref,
+    SiteManagerHomeState homeState,
+  ) {
+    final operations = homeState.operations;
+
     return Row(
       children: [
         Expanded(
@@ -532,14 +529,19 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
         ),
         GestureDetector(
           onTap: () {
-            setState(() {
-              showAllOperations = !showAllOperations;
-            });
+            // ref
+            //     .read(siteManagerHomeProvider.notifier)
+            //     .toggleShowAllOperations();
+
+            // go to projects tab
+            ref.read(navigationProvider.notifier).goToTabProjects();
           },
+
           child: Row(
             children: [
               Text(
-                showAllOperations ? context.loc.close : context.loc.viewAll,
+                // showAllOperations ? context.loc.close :
+                context.loc.viewAll,
                 style: TextStyle(
                   fontSize: 16.sp,
                   color: const Color(0xFF888888),
@@ -547,9 +549,10 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
               ),
               const SizedBox(width: 3),
               Icon(
-                showAllOperations
-                    ? Icons.keyboard_arrow_up
-                    : Icons.arrow_forward_ios,
+                // showAllOperations
+                //     ? Icons.keyboard_arrow_up
+                //     :
+                Icons.arrow_forward_ios,
                 size: 13,
                 color: const Color(0xFF888888),
               ),
@@ -560,7 +563,10 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
     );
   }
 
-  Widget _buildOperationCard(Map<String, dynamic> operation) {
+  Widget _buildOperationCard(
+    BuildContext context,
+    Map<String, dynamic> operation,
+  ) {
     final Color typeColor = operation['typeColor'];
 
     return Container(
@@ -581,7 +587,10 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
               borderRadius: BorderRadius.circular(5),
             ),
             child: Text(
-              operation['type'],
+              _localizeOperationType(
+                context,
+                operation['type'] as String? ?? '',
+              ),
               style: TextStyle(
                 color: typeColor,
                 fontSize: 17.sp,
@@ -637,7 +646,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => _openRoute(operation),
+                  onPressed: () => _openRoute(context, operation),
                   icon: const Icon(Icons.location_on_outlined, size: 18),
                   label: Text(
                     context.loc.route,
@@ -662,7 +671,7 @@ class _SiteManagerHomePageState extends State<SiteManagerHomePage> {
               Expanded(
                 flex: 2,
                 child: AppButton(
-                  onPressed: () => _openProject(operation),
+                  onPressed: () => _openProject(context, operation),
                   height: 42.h,
                   text: context.loc.openProject,
                 ),

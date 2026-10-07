@@ -1123,7 +1123,6 @@ class _NewProjectPageState extends State<NewProjectPage> {
           style: TextStyle(fontSize: 18.sp, color: const Color(0xFF444444)),
           items: items.map((item) {
             final color = colorBuilder != null ? colorBuilder(item) : null;
-            print('color: $color');
             return DropdownMenuItem<T>(
               value: item,
               child: Text(

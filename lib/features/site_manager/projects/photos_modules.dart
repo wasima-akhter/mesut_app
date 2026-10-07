@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:construction_app/core/widgets/snack/app_snackbar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -16,7 +15,7 @@ class PhotosTab extends StatefulWidget {
   const PhotosTab({super.key});
 
   @override
-  _PhotosTabState createState() => _PhotosTabState();
+  State<PhotosTab> createState() => _PhotosTabState();
 }
 
 class _PhotosTabState extends State<PhotosTab> {
@@ -51,8 +50,7 @@ class _PhotosTabState extends State<PhotosTab> {
       url: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742',
     ),
   ];
-  @override
-  final context = appNavigatorKey.currentContext!;
+
   Future<void> _takePhoto() async {
     context.pop();
 
@@ -60,6 +58,7 @@ class _PhotosTabState extends State<PhotosTab> {
     final loc = AppLocalization.current;
 
     if (!allowed) {
+      if (!mounted) return;
       await showPermissionDialog(
         title: loc.cameraPermissionRequired,
         message: loc.cameraPermissionMessage,
@@ -74,6 +73,7 @@ class _PhotosTabState extends State<PhotosTab> {
 
     if (image == null) return;
 
+    if (!mounted) return;
     setState(() {
       _photos.add(
         ProjectPhoto(
@@ -90,6 +90,7 @@ class _PhotosTabState extends State<PhotosTab> {
     final loc = AppLocalization.current;
 
     if (!allowed) {
+      if (!mounted) return;
       await showPermissionDialog(
         title: loc.photoPermissionRequired,
         message: loc.photoPermissionMessage,
@@ -183,44 +184,49 @@ class _PhotosTabState extends State<PhotosTab> {
 
   Widget _buildPhotoToolbar() {
     final loc = AppLocalization.current;
-    return Row(
-      children: [
-        _photoFilterButton(
-          label: '${loc.photos} (${_photos.length})',
-          selected: true,
-          onTap: () {},
-        ),
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _photoFilterButton(
+            label: '${loc.photos} (${_photos.length})',
+            selected: true,
+            onTap: () {},
+          ),
 
-        SizedBox(width: 7.w),
+          SizedBox(width: 7.w),
 
-        _photoFilterButton(
-          label: loc.pdfPlan(_planFiles.length),
-          selected: false,
-          onTap: () {},
-        ),
+          _photoFilterButton(
+            label: loc.pdfPlan(_planFiles.length),
+            selected: false,
+            onTap: () {},
+          ),
 
-        const Spacer(),
+          SizedBox(width: 14.w),
 
-        SizedBox(
-          height: 36.h,
-          child: ElevatedButton.icon(
-            onPressed: _showUploadFilesBottomSheet,
-            icon: Icon(Icons.upload_outlined, size: 16.sp),
-            label: Text(
-              loc.uploadFiles,
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFC8102E),
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 9.w),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6.r),
+          SizedBox(
+            height: 36.h,
+            child: ElevatedButton.icon(
+              onPressed: _showUploadFilesBottomSheet,
+              icon: Icon(Icons.upload_outlined, size: 16.sp),
+              label: Text(
+                loc.uploadFiles,
+                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFC8102E),
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 9.w),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

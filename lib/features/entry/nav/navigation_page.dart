@@ -1,20 +1,20 @@
-import 'package:construction_app/features/employee/home/employee_home_page.dart';
-import 'package:construction_app/features/employee/plan/employee_plan_page.dart';
-import 'package:construction_app/features/site_manager/home/site_manager_home_page.dart';
-import 'package:construction_app/features/site_manager/map/site_manager_map_page.dart';
-import 'package:construction_app/features/site_manager/more/site_manager_more_page.dart';
-import 'package:construction_app/features/site_manager/projects/site_manager_projects_page.dart';
-import 'package:construction_app/features/site_manager/time_tracking/site_manager_time_tracking_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/enums/app_enum.dart';
 import '../../../core/localization/app_localization.dart';
 import '../../../core/providers/common_provider.dart';
+import '../../employee/home/employee_home_page.dart';
+import '../../employee/plan/employee_plan_page.dart';
 import '../../employee/profile/profile/employee_profile_page.dart';
 import '../../employee/timer/employee_time_tracking_page.dart';
+import '../../site_manager/home/site_manager_home_page.dart';
+import '../../site_manager/map/site_manager_map_page.dart';
+import '../../site_manager/more/site_manager_more_page.dart';
+import '../../site_manager/projects/site_manager_projects_page.dart';
+import '../../site_manager/time_tracking/site_manager_time_tracking_page.dart';
+import 'bottom_nav_tabs.dart';
 import 'navigation_provider.dart';
 
 class NavigationPage extends ConsumerStatefulWidget {
@@ -32,12 +32,14 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(navigationProvider.notifier).changeTab(widget.index);
+      if (widget.index != 0) {
+        ref.read(navigationProvider.notifier).changeTab(widget.index);
+      }
     });
   }
 
   // ------------------------------------------------------------
-  // PAGES
+  // PAGES BY ROLE
   // ------------------------------------------------------------
 
   List<Widget> _getPages(UserRole role) {
@@ -61,43 +63,12 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
     }
   }
 
-  // ------------------------------------------------------------
-  // ICONS
-  // ------------------------------------------------------------
-
-  List<IconData> _getIcons(UserRole role) {
+  List<AppBottomTab> _getTabs(UserRole role) {
     switch (role) {
       case UserRole.siteManager:
-        return [
-          Iconsax.home_2,
-          Iconsax.folder_2,
-          Iconsax.map_1,
-          Iconsax.timer_1,
-          Iconsax.more,
-        ];
-
+        return SiteManagerBottomTabs.tabs;
       case UserRole.employee:
-        return [
-          Iconsax.home_2,
-          Iconsax.clock,
-          Iconsax.task_square,
-          Iconsax.profile_circle,
-        ];
-    }
-  }
-
-  // ------------------------------------------------------------
-  // LABELS
-  // ------------------------------------------------------------
-
-  List<String> _getLabels(UserRole role) {
-    final loc = AppLocalization.current;
-    switch (role) {
-      case UserRole.siteManager:
-        return [loc.navHome, loc.navProjects, loc.navMap, loc.navTimer, loc.navMore];
-
-      case UserRole.employee:
-        return [loc.navHome, loc.navTime, loc.navMyPlan, loc.navProfile];
+        return EmployeeBottomTabs.tabs;
     }
   }
 
@@ -114,18 +85,15 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
     }
 
     final selectedIndex = ref.watch(navigationProvider);
-
     final pages = _getPages(role);
-    final icons = _getIcons(role);
-    final labels = _getLabels(role);
+    final tabs = _getTabs(role);
 
     final safeIndex = selectedIndex >= pages.length ? 0 : selectedIndex;
 
     return Scaffold(
       body: IndexedStack(index: safeIndex, children: pages),
       bottomNavigationBar: _buildBottomNavBar(
-        icons: icons,
-        labels: labels,
+        tabs: tabs,
         selectedIndex: safeIndex,
       ),
     );
@@ -136,10 +104,11 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
   // ------------------------------------------------------------
 
   Widget _buildBottomNavBar({
-    required List<IconData> icons,
-    required List<String> labels,
+    required List<AppBottomTab> tabs,
     required int selectedIndex,
   }) {
+    final loc = AppLocalization.current;
+
     return Container(
       padding: const EdgeInsets.only(top: 20, bottom: 4),
       decoration: BoxDecoration(
@@ -159,11 +128,11 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(
-              icons.length,
+              tabs.length,
               (index) => _buildNavItem(
                 index: index,
-                icon: icons[index],
-                label: labels[index],
+                tab: tabs[index],
+                label: tabs[index].getLabel(loc),
                 selectedIndex: selectedIndex,
               ),
             ),
@@ -179,12 +148,11 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
 
   Widget _buildNavItem({
     required int index,
-    required IconData icon,
+    required AppBottomTab tab,
     required String label,
     required int selectedIndex,
   }) {
     final isSelected = selectedIndex == index;
-
     final color = isSelected ? AppColors.primary : AppColors.neutral400;
 
     return Expanded(
@@ -197,7 +165,11 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color, size: 24),
+            Icon(
+              isSelected ? (tab.activeIcon ?? tab.icon) : tab.icon,
+              color: color,
+              size: 24,
+            ),
             const SizedBox(height: 4),
             Text(
               label,

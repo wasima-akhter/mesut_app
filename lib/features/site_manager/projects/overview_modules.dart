@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/localization/app_localization.dart';
+import '../../../core/services/launcher_service.dart';
 import '../../../core/services/permission_service.dart';
 
 /// =============================================================
@@ -92,8 +93,11 @@ Widget buildCustomerCard([BuildContext? context]) {
               child: _outlineButton(
                 icon: Icons.phone_outlined,
                 label: loc.callClient,
-                onTap: () {
-                  showMessage(loc.callingClient);
+                onTap: () async {
+                  final success = await AppLauncherService.makePhoneCall('+49 221 555 0192');
+                  if (!success) {
+                    showMessage(loc.callingClient);
+                  }
                 },
               ),
             ),
@@ -102,8 +106,14 @@ Widget buildCustomerCard([BuildContext? context]) {
               child: _outlineButton(
                 icon: Icons.mail_outline,
                 label: loc.mailClient,
-                onTap: () {
-                  showMessage(loc.openingEmail);
+                onTap: () async {
+                  final success = await AppLauncherService.sendEmail(
+                    email: 'you@gmail.com',
+                    subject: 'Project Inquiry: Andreas Weber',
+                  );
+                  if (!success) {
+                    showMessage(loc.openingEmail);
+                  }
                 },
               ),
             ),

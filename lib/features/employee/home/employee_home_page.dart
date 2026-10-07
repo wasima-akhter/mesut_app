@@ -1,7 +1,6 @@
-// EmployeeHomePage
-
 import 'package:construction_app/core/widgets/buttons/app_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,18 +9,13 @@ import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../helper/employee_enums.dart';
 import '../helper/employee_models.dart';
+import '../presentation/providers/employee_assignment_details_provider.dart';
+import '../presentation/providers/employee_timer_provider.dart';
 
-class EmployeeHomePage extends StatefulWidget {
+class EmployeeHomePage extends ConsumerWidget {
   const EmployeeHomePage({super.key});
 
-  @override
-  State<EmployeeHomePage> createState() => _EmployeeHomePageState();
-}
-
-class _EmployeeHomePageState extends State<EmployeeHomePage> {
-  bool notificationsEnabled = false;
-
-  final List<EmployeeAssignmentModel> assignments = const [
+  static const List<EmployeeAssignmentModel> assignments = [
     EmployeeAssignmentModel(
       project: 'Prj-0842 . Goltsteins.Complex',
       address: 'Goltsteinstraße 12, 50968 Köln',
@@ -48,23 +42,38 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
     ),
   ];
 
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message, style: TextStyle(fontSize: 17.sp)),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-  }
-
-  void _openAssignment(EmployeeAssignmentModel assignment) {
+  void _openAssignment(
+    BuildContext context,
+    WidgetRef ref,
+    EmployeeAssignmentModel assignment,
+  ) {
+    ref.read(assignmentDetailsProvider.notifier).setAssignment(assignment);
     context.push(RouteConstants.employeeAssignmentDetails);
   }
 
+  void _startNewTimer(
+    BuildContext context,
+    WidgetRef ref,
+    EmployeeAssignmentModel assignment,
+  ) {
+    ref.read(assignmentDetailsProvider.notifier).setAssignment(assignment);
+    ref.read(employeeTimerProvider.notifier).startTimer(
+      project: EmployeeProjectModel(
+        id: assignment.project.split('·').first.trim(),
+        name: assignment.project,
+        address: assignment.address,
+        activity: assignment.activity,
+        startTime: '07:30 am',
+        endTime: '04:15 pm',
+        siteManager: assignment.siteManager,
+      ),
+      activity: assignment.activity,
+    );
+    context.push(RouteConstants.employeeActiveTimerPage);
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -73,7 +82,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
           slivers: [
             SliverPadding(
               padding: EdgeInsets.fromLTRB(18.w, 20.h, 18.w, 10.h),
-              sliver: SliverToBoxAdapter(child: _buildHeader()),
+              sliver: SliverToBoxAdapter(child: _buildHeader(context)),
             ),
 
             SliverPadding(
@@ -85,7 +94,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildSectionHeader()),
+              sliver: SliverToBoxAdapter(child: _buildSectionHeader(context)),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 12.h)),
@@ -96,7 +105,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
                 child: Column(
                   children: [
                     for (final assignment in assignments) ...[
-                      _buildAssignmentCard(assignment),
+                      _buildAssignmentCard(context, ref, assignment),
                       SizedBox(height: 14.h),
                     ],
                   ],
@@ -109,7 +118,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
         Container(
@@ -188,7 +197,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
     );
   }
 
-  Widget _buildSectionHeader() {
+  Widget _buildSectionHeader(BuildContext context) {
     return Row(
       children: [
         Expanded(
@@ -220,11 +229,15 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
     );
   }
 
-  Widget _buildAssignmentCard(EmployeeAssignmentModel assignment) {
+  Widget _buildAssignmentCard(
+    BuildContext context,
+    WidgetRef ref,
+    EmployeeAssignmentModel assignment,
+  ) {
     final activity = assignment.activity;
 
     return GestureDetector(
-      onTap: () => _openAssignment(assignment),
+      onTap: () => _openAssignment(context, ref, assignment),
       child: Container(
         padding: EdgeInsets.all(14.w),
         decoration: BoxDecoration(
@@ -306,7 +319,9 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
                 Expanded(
                   flex: 5,
                   child: OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      _showNavigationMessage(context, assignment.address);
+                    },
                     icon: const Icon(Icons.directions_outlined, size: 21),
                     label: Text(
                       context.loc.navigation,
@@ -331,7 +346,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
                 Expanded(
                   flex: 5,
                   child: AppButton(
-                    onPressed: () => _openAssignment(assignment),
+                    onPressed: () => _startNewTimer(context, ref, assignment),
                     text: context.loc.startNewTimer,
                   ),
                 ),
@@ -341,6 +356,20 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
         ),
       ),
     );
+  }
+
+  void _showNavigationMessage(BuildContext context, String address) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            '${context.loc.navigation}: $address',
+            style: TextStyle(fontSize: 16.sp),
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
   }
 
   Widget _activityChip(EmployeeActivityType activity) {

@@ -1,73 +1,33 @@
+import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/services/launcher_service.dart';
 import '../helper/site_manager_models.dart';
+import '../presentation/providers/site_manager_map_provider.dart';
 
-class SiteManagerMapPage extends StatefulWidget {
+class SiteManagerMapPage extends ConsumerStatefulWidget {
   const SiteManagerMapPage({super.key});
 
   @override
-  State<SiteManagerMapPage> createState() => _SiteManagerMapPageState();
+  ConsumerState<SiteManagerMapPage> createState() => _SiteManagerMapPageState();
 }
 
-class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
+class _SiteManagerMapPageState extends ConsumerState<SiteManagerMapPage> {
   final TextEditingController _searchController = TextEditingController();
 
-  String _selectedFilter = 'All';
-  MapLocation? _selectedLocation;
+  String get _selectedFilter =>
+      ref.watch(siteManagerMapProvider).selectedFilter;
 
-  final List<MapLocation> _locations = const [
-    MapLocation(
-      id: '1',
-      type: 'Erection',
-      priority: 'High',
-      title: 'Prj-0842 . Goisteins.Complex',
-      company: 'Hochtief AG • Commercial',
-      address: 'Goisteinstraße 12, 50968 Köln',
-      date: 'Sept 18 - Sept 20 (2.5 days)',
-      image: 'assets/images/project_preview.jpg',
-      x: 0.60,
-      y: 0.24,
-    ),
-    MapLocation(
-      id: '2',
-      type: 'Erection',
-      priority: 'Medium',
-      title: 'Project Erection Site',
-      company: 'Construction Project',
-      address: 'Leipzig, Germany',
-      date: 'Sept 20 - Sept 22',
-      image: 'assets/images/project_preview.jpg',
-      x: 0.51,
-      y: 0.34,
-    ),
-    MapLocation(
-      id: '3',
-      type: 'Dismantling',
-      priority: 'High',
-      title: 'Dismantling Project',
-      company: 'Construction Company',
-      address: 'Chemnitz, Germany',
-      date: 'Sept 22 - Sept 24',
-      image: 'assets/images/project_preview.jpg',
-      x: 0.64,
-      y: 0.43,
-    ),
-    MapLocation(
-      id: '4',
-      type: 'Standing',
-      priority: 'Low',
-      title: 'Standing Project',
-      company: 'Construction Company',
-      address: 'Bamberg, Germany',
-      date: 'Sept 25 - Sept 28',
-      image: 'assets/images/project_preview.jpg',
-      x: 0.24,
-      y: 0.54,
-    ),
-  ];
+  MapLocation? get _selectedLocation =>
+      ref.watch(siteManagerMapProvider).selectedLocation;
+
+  List<MapLocation> get _filteredLocations =>
+      ref.watch(siteManagerMapProvider).filteredLocations;
 
   @override
   void dispose() {
@@ -75,62 +35,21 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
     super.dispose();
   }
 
-  List<MapLocation> get _filteredLocations {
-    return _locations.where((location) {
-      final matchesFilter =
-          _selectedFilter == 'All' || location.type == _selectedFilter;
-
-      final query = _searchController.text.trim().toLowerCase();
-
-      if (query.isEmpty) {
-        return matchesFilter;
-      }
-
-      final matchesSearch =
-          location.title.toLowerCase().contains(query) ||
-          location.company.toLowerCase().contains(query) ||
-          location.address.toLowerCase().contains(query);
-
-      return matchesFilter && matchesSearch;
-    }).toList();
-  }
-
   void _selectMarker(MapLocation location) {
-    setState(() {
-      _selectedLocation = location;
-    });
+    ref.read(siteManagerMapProvider.notifier).selectLocation(location);
   }
 
   void _selectFilter(String filter) {
-    setState(() {
-      _selectedFilter = filter;
-
-      // Clear selected marker if it no longer belongs to filter.
-      if (_selectedLocation != null &&
-          filter != 'All' &&
-          _selectedLocation!.type != filter) {
-        _selectedLocation = null;
-      }
-    });
+    ref.read(siteManagerMapProvider.notifier).setFilter(filter);
+    if (_selectedLocation != null &&
+        filter != 'All' &&
+        _selectedLocation!.type != filter) {
+      ref.read(siteManagerMapProvider.notifier).selectLocation(null);
+    }
   }
 
   void _onSearchChanged(String value) {
-    setState(() {});
-
-    // If the selected location doesn't match search anymore,
-    // close its detail card.
-    if (_selectedLocation != null) {
-      final query = value.trim().toLowerCase();
-
-      if (query.isNotEmpty &&
-          !_selectedLocation!.title.toLowerCase().contains(query) &&
-          !_selectedLocation!.company.toLowerCase().contains(query) &&
-          !_selectedLocation!.address.toLowerCase().contains(query)) {
-        setState(() {
-          _selectedLocation = null;
-        });
-      }
-    }
+    ref.read(siteManagerMapProvider.notifier).setSearchQuery(value);
   }
 
   void _showMessage(String message) {
@@ -187,7 +106,8 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      _showMessage('Project opened');
+                      // _showMessage('Project opened');
+                      context.push(RouteConstants.siteManagerProjectDetail);
                     },
                     child: Text(context.loc.openProject),
                   ),
@@ -200,12 +120,22 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
     );
   }
 
-  void _handleCall() {
-    _showMessage('Calling project contact...');
+  void _handleCall() async {
+    final success = await AppLauncherService.makePhoneCall('+49 221 555 0192');
+    if (!success && mounted) {
+      _showMessage(context.loc.callingContact);
+    }
   }
 
-  void _handleEmail() {
-    _showMessage('Opening project email...');
+  void _handleEmail() async {
+    final title = _selectedLocation?.title ?? 'Project';
+    final success = await AppLauncherService.sendEmail(
+      email: 'contact@goldstein-bau.de',
+      subject: 'Inquiry: $title',
+    );
+    if (!success && mounted) {
+      _showMessage(context.loc.openingEmail);
+    }
   }
 
   @override
@@ -328,18 +258,38 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
     return Wrap(
       runSpacing: 6.w,
       children: [
-        _filterChip(keyName: 'All', label: context.loc.all, color: Colors.black),
+        _filterChip(
+          keyName: 'All',
+          label: context.loc.all,
+          color: Colors.black,
+        ),
         SizedBox(width: 6.w),
-        _filterChip(keyName: 'Erection', label: context.loc.erectionPhase, color: Colors.green),
+        _filterChip(
+          keyName: 'Erection',
+          label: context.loc.erectionPhase,
+          color: Colors.green,
+        ),
         SizedBox(width: 6.w),
-        _filterChip(keyName: 'Dismantling', label: context.loc.dismantlingPhase, color: Colors.orange),
+        _filterChip(
+          keyName: 'Dismantling',
+          label: context.loc.dismantlingPhase,
+          color: Colors.orange,
+        ),
         SizedBox(width: 6.w),
-        _filterChip(keyName: 'Standing', label: context.loc.standing, color: Colors.lightBlue),
+        _filterChip(
+          keyName: 'Standing',
+          label: context.loc.standing,
+          color: Colors.lightBlue,
+        ),
       ],
     );
   }
 
-  Widget _filterChip({required String keyName, required String label, required Color color}) {
+  Widget _filterChip({
+    required String keyName,
+    required String label,
+    required Color color,
+  }) {
     final selected = _selectedFilter == keyName;
 
     return GestureDetector(
@@ -654,9 +604,9 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
                 _iconCardButton(
                   icon: Icons.close,
                   onTap: () {
-                    setState(() {
-                      _selectedLocation = null;
-                    });
+                    ref
+                        .read(siteManagerMapProvider.notifier)
+                        .selectLocation(null);
                   },
                 ),
               ],
@@ -717,90 +667,6 @@ class _SiteManagerMapPageState extends State<SiteManagerMapPage> {
           ),
         ),
         child: Icon(icon, size: 15.sp, color: AppColors.textPrimary),
-      ),
-    );
-  }
-
-  Widget _bottomNavigation() {
-    return Container(
-      height: 58.h,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: AppColors.border, width: 0.6)),
-      ),
-      child: Row(
-        children: [
-          _navItem(
-            icon: Icons.home_outlined,
-            label: context.loc.home,
-            selected: false,
-            onTap: () {
-              _showMessage('Home selected');
-            },
-          ),
-          _navItem(
-            icon: Icons.folder_outlined,
-            label: context.loc.projects,
-            selected: false,
-            onTap: () {
-              _showMessage('Projects selected');
-            },
-          ),
-          _navItem(
-            icon: Icons.map_outlined,
-            label: context.loc.map,
-            selected: true,
-            onTap: () {},
-          ),
-          _navItem(
-            icon: Icons.access_time,
-            label: context.loc.time,
-            selected: false,
-            onTap: () {
-              _showMessage('Time selected');
-            },
-          ),
-          _navItem(
-            icon: Icons.more_horiz,
-            label: context.loc.more,
-            selected: false,
-            onTap: () {
-              _showMessage('More selected');
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _navItem({
-    required IconData icon,
-    required String label,
-    required bool selected,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 19.sp,
-              color: selected ? AppColors.primary : AppColors.textTertiary,
-            ),
-            SizedBox(height: 2.h),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontSize: 15.sp,
-                color: selected ? AppColors.primary : AppColors.textTertiary,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

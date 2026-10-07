@@ -152,6 +152,13 @@ class _DatesTabState extends State<DatesTab> {
           onMinus: () => _changeDismantlingDuration(-0.5),
           onPlus: () => _changeDismantlingDuration(0.5),
         ),
+
+        SizedBox(height: 8.h),
+
+        _dateValueRow(
+          label: context.loc.endDate,
+          value: _formatDate(_dismantlingEnd),
+        ),
       ],
     );
   }

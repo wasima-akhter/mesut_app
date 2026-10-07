@@ -1,75 +1,30 @@
+import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../presentation/providers/site_manager_phase_board_provider.dart';
 
 enum ProjectPhase { enquiry, erection, dismantling, standing }
 
-class SiteManagerPhaseBoardPage extends StatefulWidget {
+class SiteManagerPhaseBoardPage extends ConsumerStatefulWidget {
   const SiteManagerPhaseBoardPage({super.key});
 
   @override
-  State<SiteManagerPhaseBoardPage> createState() =>
+  ConsumerState<SiteManagerPhaseBoardPage> createState() =>
       _SiteManagerPhaseBoardPageState();
 }
 
-class _SiteManagerPhaseBoardPageState extends State<SiteManagerPhaseBoardPage> {
-  ProjectPhase _selectedPhase = ProjectPhase.erection;
+class _SiteManagerPhaseBoardPageState
+    extends ConsumerState<SiteManagerPhaseBoardPage> {
+  ProjectPhase get _selectedPhase =>
+      ref.watch(phaseBoardProvider).selectedPhase;
 
-  final List<ProjectBoardModel> _projects = [
-    ProjectBoardModel(
-      id: 'PRJ-0842',
-      title: 'Goldsteins.Complex',
-      company: 'HochTief AG',
-      type: 'Commercial',
-      address: 'Goldsteinstraße 12, 50968 Köln',
-      assignee: 'Mesut Yilmaz',
-      priority: 'High',
-      days: '2.5 days',
-    ),
-    ProjectBoardModel(
-      id: 'PRJ-0842',
-      title: 'Goldsteins.Complex',
-      company: 'HochTief AG',
-      type: 'Commercial',
-      address: 'Goldsteinstraße 12, 50968 Köln',
-      assignee: 'Mesut Yilmaz',
-      priority: 'Medium',
-      days: '2.5 days',
-    ),
-    ProjectBoardModel(
-      id: 'PRJ-0842',
-      title: 'Goldsteins.Complex',
-      company: 'HochTief AG',
-      type: 'Commercial',
-      address: 'Goldsteinstraße 12, 50968 Köln',
-      assignee: 'Mesut Yilmaz',
-      priority: 'Low',
-      days: '2.5 days',
-    ),
-    ProjectBoardModel(
-      id: 'PRJ-0843',
-      title: 'Goldsteins.Complex',
-      company: 'HochTief AG',
-      type: 'Commercial',
-      address: 'Goldsteinstraße 12, 50968 Köln',
-      assignee: 'Mesut Yilmaz',
-      priority: 'Low',
-      days: '2.5 days',
-    ),
-    ProjectBoardModel(
-      id: 'PRJ-0844',
-      title: 'Goldsteins.Complex',
-      company: 'HochTief AG',
-      type: 'Commercial',
-      address: 'Goldsteinstraße 12, 50968 Köln',
-      assignee: 'Mesut Yilmaz',
-      priority: 'Low',
-      days: '2.5 days',
-    ),
-  ];
+  List<ProjectBoardModel> get _projects =>
+      ref.watch(phaseBoardProvider).projects;
 
   @override
   Widget build(BuildContext context) {
@@ -200,9 +155,7 @@ class _SiteManagerPhaseBoardPageState extends State<SiteManagerPhaseBoardPage> {
             borderRadius: BorderRadius.circular(7.r),
             child: InkWell(
               onTap: () {
-                setState(() {
-                  _selectedPhase = phase;
-                });
+                ref.read(phaseBoardProvider.notifier).setPhase(phase);
               },
               borderRadius: BorderRadius.circular(7.r),
               child: Padding(
@@ -238,105 +191,113 @@ class _SiteManagerPhaseBoardPageState extends State<SiteManagerPhaseBoardPage> {
   }
 
   Widget _buildProjectCard(ProjectBoardModel project) {
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(9.r),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              _priorityBadge(project.priority),
+    return GestureDetector(
+      onTap: () => context.push(RouteConstants.siteManagerProjectDetail),
+      child: Container(
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(9.r),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _priorityBadge(project.priority),
 
-              const Spacer(),
+                const Spacer(),
 
-              Icon(
-                Icons.calendar_month_outlined,
-                size: 16.sp,
-                color: AppColors.textSecondary,
-              ),
+                Icon(
+                  Icons.calendar_month_outlined,
+                  size: 16.sp,
+                  color: AppColors.textSecondary,
+                ),
 
-              SizedBox(width: 5.w),
+                SizedBox(width: 5.w),
 
-              Text(project.days, style: Theme.of(context).textTheme.bodySmall),
-            ],
-          ),
-
-          SizedBox(height: 10.h),
-
-          Text(
-            '${project.id} • ${project.title}',
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-
-          SizedBox(height: 7.h),
-
-          Row(
-            children: [
-              Icon(
-                Icons.business_outlined,
-                size: 15.sp,
-                color: AppColors.textSecondary,
-              ),
-              SizedBox(width: 5.w),
-              Expanded(
-                child: Text(
-                  '${project.company} • ${project.type}',
+                Text(
+                  project.days,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
 
-          SizedBox(height: 6.h),
+            SizedBox(height: 10.h),
 
-          Row(
-            children: [
-              Icon(
-                Icons.location_on_outlined,
-                size: 15.sp,
-                color: AppColors.textSecondary,
-              ),
-              SizedBox(width: 5.w),
-              Expanded(
-                child: Text(
-                  project.address,
-                  style: Theme.of(context).textTheme.bodySmall,
+            Text(
+              '${project.id} • ${project.title}',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+
+            SizedBox(height: 7.h),
+
+            Row(
+              children: [
+                Icon(
+                  Icons.business_outlined,
+                  size: 15.sp,
+                  color: AppColors.textSecondary,
                 ),
-              ),
-            ],
-          ),
-
-          SizedBox(height: 11.h),
-
-          Divider(height: 1, color: AppColors.border),
-
-          SizedBox(height: 9.h),
-
-          Row(
-            children: [
-              Icon(
-                Icons.person_outline_rounded,
-                size: 17.sp,
-                color: AppColors.textSecondary,
-              ),
-
-              SizedBox(width: 5.w),
-
-              Expanded(
-                child: Text(
-                  project.assignee,
-                  style: Theme.of(context).textTheme.bodySmall,
+                SizedBox(width: 5.w),
+                Expanded(
+                  child: Text(
+                    '${project.company} • ${project.type}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ),
-              ),
+              ],
+            ),
 
-              _moreButton(project),
-            ],
-          ),
-        ],
+            SizedBox(height: 6.h),
+
+            Row(
+              children: [
+                Icon(
+                  Icons.location_on_outlined,
+                  size: 15.sp,
+                  color: AppColors.textSecondary,
+                ),
+                SizedBox(width: 5.w),
+                Expanded(
+                  child: Text(
+                    project.address,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 11.h),
+
+            Divider(height: 1, color: AppColors.border),
+
+            SizedBox(height: 9.h),
+
+            Row(
+              children: [
+                Icon(
+                  Icons.person_outline_rounded,
+                  size: 17.sp,
+                  color: AppColors.textSecondary,
+                ),
+
+                SizedBox(width: 5.w),
+
+                Expanded(
+                  child: Text(
+                    project.assignee,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+
+                _moreButton(project),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -376,9 +337,7 @@ class _SiteManagerPhaseBoardPageState extends State<SiteManagerPhaseBoardPage> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {
-          // context.push('/phase-board/move-to', extra: project);
-        },
+        onTap: () => _showMoveToBottomSheet(project),
         borderRadius: BorderRadius.circular(50.r),
         child: Container(
           width: 28.w,
@@ -389,6 +348,191 @@ class _SiteManagerPhaseBoardPageState extends State<SiteManagerPhaseBoardPage> {
           ),
           child: Icon(Icons.more_vert_rounded, size: 17.sp),
         ),
+      ),
+    );
+  }
+
+  void _showMoveToBottomSheet(ProjectBoardModel project) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+          ),
+          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 16.h),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 42.w,
+                    height: 4.h,
+                    decoration: BoxDecoration(
+                      color: AppColors.border,
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  '${project.id}.${project.title}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: 18.sp,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  context.loc.get('siteManager.moveTo', 'Move to...'),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 19.sp,
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                _buildMoveOption(
+                  sheetContext,
+                  icon: Icons.apartment_rounded,
+                  iconColor: const Color(0xFF0EA5E9),
+                  iconBgColor: const Color(0xFFE8F6FE),
+                  title: context.loc.get(
+                    'siteManager.standingScaffold',
+                    'Standing Scaffold',
+                  ),
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    _onMoveProject(project, ProjectPhase.standing);
+                  },
+                ),
+                Divider(
+                  height: 1,
+                  color: AppColors.border.withValues(alpha: 0.6),
+                ),
+                _buildMoveOption(
+                  sheetContext,
+                  icon: Icons.build_outlined,
+                  iconColor: const Color(0xFFF59E0B),
+                  iconBgColor: const Color(0xFFFFF4E5),
+                  title: context.loc.get(
+                    'siteManager.dismantling',
+                    'Dismantling',
+                  ),
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    _onMoveProject(project, ProjectPhase.dismantling);
+                  },
+                ),
+                Divider(
+                  height: 1,
+                  color: AppColors.border.withValues(alpha: 0.6),
+                ),
+                _buildMoveOption(
+                  sheetContext,
+                  icon: Icons.check_rounded,
+                  iconColor: const Color(0xFF4B5563),
+                  iconBgColor: const Color(0xFFF3F4F6),
+                  title: context.loc.get('siteManager.completed', 'Completed'),
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    _onMoveProject(project, null, isCompleted: true);
+                  },
+                ),
+                SizedBox(height: 16.h),
+                Center(
+                  child: InkWell(
+                    onTap: () => Navigator.of(sheetContext).pop(),
+                    borderRadius: BorderRadius.circular(8.r),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24.w,
+                        vertical: 8.h,
+                      ),
+                      child: Text(
+                        context.loc.cancel,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18.sp,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMoveOption(
+    BuildContext sheetContext, {
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBgColor,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8.r),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 4.w),
+        child: Row(
+          children: [
+            Container(
+              width: 38.w,
+              height: 38.w,
+              decoration: BoxDecoration(
+                color: iconBgColor,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 19.sp, color: iconColor),
+            ),
+            SizedBox(width: 14.w),
+            Expanded(
+              child: Text(
+                title,
+                style: Theme.of(sheetContext).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18.sp,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _onMoveProject(
+    ProjectBoardModel project,
+    ProjectPhase? phase, {
+    bool isCompleted = false,
+  }) {
+    final destination = isCompleted
+        ? context.loc.get('siteManager.completed', 'Completed')
+        : (phase != null ? _phaseLabel(phase) : '');
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          context.loc.get(
+            'siteManager.projectMovedTo',
+            'Moved ${project.id} to $destination',
+            {'id': project.id, 'phase': destination},
+          ),
+        ),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }

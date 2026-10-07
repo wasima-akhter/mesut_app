@@ -14,6 +14,7 @@ class AppRadio<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: deprecated_member_use
     return Radio<T>(value: value, groupValue: groupValue, onChanged: onChanged);
   }
 }

@@ -244,6 +244,8 @@
   "siteManager.dismantlingSchedule": "Dismantling Schedule",
   "siteManager.startDate": "Start date",
   "siteManager.teardownDate": "Teardown Date",
+  "siteManager.planned": "Planned",
+  "siteManager.running": "Running",
   "siteManager.plannedDate": "Planned date",
   "siteManager.endDate": "End date",
   "siteManager.safetyInspection": "Safety Inspection",

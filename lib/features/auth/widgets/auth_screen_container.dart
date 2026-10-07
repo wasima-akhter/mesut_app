@@ -36,7 +36,7 @@ class AuthScreenContainer extends StatelessWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 22.h),
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 0.h),
           child: Column(
             children: [
               ...[AuthLogo(height: 80.h), SizedBox(height: 34.h)],

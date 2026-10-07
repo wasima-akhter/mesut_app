@@ -1,89 +1,29 @@
-import 'dart:async';
-
-import 'package:construction_app/features/employee/helper/employee_models.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/widgets/buttons/app_button.dart';
 import '../helper/employee_enums.dart';
+import '../helper/employee_models.dart';
+import '../presentation/providers/employee_timer_provider.dart';
 
-class ActiveTimerPage extends StatefulWidget {
+class ActiveTimerPage extends ConsumerWidget {
   const ActiveTimerPage({super.key});
 
-  @override
-  State<ActiveTimerPage> createState() => _ActiveTimerPageState();
-}
+  EmployeeAssignmentModel get assignment => fakeAssignments.last;
 
-class _ActiveTimerPageState extends State<ActiveTimerPage> {
-  final assignment = fakeAssignments.last;
-  Timer? _timer;
-
-  Duration elapsed = const Duration(hours: 2, minutes: 45, seconds: 20);
-
-  Duration breakTime = Duration.zero;
-
-  bool isOnBreak = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _startTimer();
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  void _startTimer() {
-    _timer?.cancel();
-
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted || isOnBreak) {
-        return;
-      }
-
-      setState(() {
-        elapsed += const Duration(seconds: 1);
-      });
-    });
-  }
-
-  void _toggleBreak() {
-    setState(() {
-      isOnBreak = !isOnBreak;
-    });
-
-    if (isOnBreak) {
-      _timer?.cancel();
-    } else {
-      _startTimer();
-    }
-  }
-
-  String _formatDuration(Duration duration) {
-    final hours = duration.inHours.toString().padLeft(2, '0');
-    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-
-    return '$hours:$minutes:$seconds';
-  }
-
-  void _finishWork() {
-    _timer?.cancel();
-
+  void _finishWork(BuildContext context, WidgetRef ref, EmployeeTimerState timerState) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) {
         return _FinishWorkDialog(
           projectName: assignment.project,
-          totalTime: _formatDuration(elapsed),
+          totalTime: timerState.formattedElapsed,
           onSave: () {
+            ref.read(employeeTimerProvider.notifier).finishTimer();
             Navigator.of(context).pop();
             Navigator.of(context).pop();
 
@@ -103,7 +43,9 @@ class _ActiveTimerPageState extends State<ActiveTimerPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final timerState = ref.watch(employeeTimerProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -112,7 +54,7 @@ class _ActiveTimerPageState extends State<ActiveTimerPage> {
           slivers: [
             SliverPadding(
               padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 12.h),
-              sliver: SliverToBoxAdapter(child: _buildHeader()),
+              sliver: SliverToBoxAdapter(child: _buildHeader(context, timerState)),
             ),
 
             SliverPadding(
@@ -124,7 +66,9 @@ class _ActiveTimerPageState extends State<ActiveTimerPage> {
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildTimerCard()),
+              sliver: SliverToBoxAdapter(
+                child: _buildTimerCard(context, ref, timerState),
+              ),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 25.h)),
@@ -134,7 +78,7 @@ class _ActiveTimerPageState extends State<ActiveTimerPage> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context, EmployeeTimerState timerState) {
     return Row(
       children: [
         GestureDetector(
@@ -164,15 +108,15 @@ class _ActiveTimerPageState extends State<ActiveTimerPage> {
           ),
         ),
 
-        _statusBadge(),
+        _statusBadge(context, timerState),
       ],
     );
   }
 
-  Widget _statusBadge() {
-    final color = isOnBreak ? AppColors.warning : AppColors.success;
+  Widget _statusBadge(BuildContext context, EmployeeTimerState timerState) {
+    final color = timerState.isOnBreak ? AppColors.warning : AppColors.success;
 
-    final background = isOnBreak
+    final background = timerState.isOnBreak
         ? AppColors.warningLight
         : AppColors.successLight;
 
@@ -192,7 +136,7 @@ class _ActiveTimerPageState extends State<ActiveTimerPage> {
           ),
           SizedBox(width: 6.w),
           Text(
-            isOnBreak ? context.loc.pauseBreak : context.loc.inProgress,
+            timerState.isOnBreak ? context.loc.pauseBreak : context.loc.inProgress,
             style: TextStyle(
               fontSize: 15.sp,
               fontWeight: FontWeight.w600,
@@ -269,16 +213,20 @@ class _ActiveTimerPageState extends State<ActiveTimerPage> {
     );
   }
 
-  Widget _buildTimerCard() {
+  Widget _buildTimerCard(
+    BuildContext context,
+    WidgetRef ref,
+    EmployeeTimerState timerState,
+  ) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 16.h),
       decoration: BoxDecoration(
-        color: isOnBreak ? const Color(0xFFFFF7E8) : AppColors.white,
+        color: timerState.isOnBreak ? const Color(0xFFFFF7E8) : AppColors.white,
         borderRadius: BorderRadius.circular(11.r),
         border: Border.all(
-          color: isOnBreak ? const Color(0xFFF9D89A) : AppColors.border,
+          color: timerState.isOnBreak ? const Color(0xFFF9D89A) : AppColors.border,
         ),
       ),
       child: Column(
@@ -286,12 +234,14 @@ class _ActiveTimerPageState extends State<ActiveTimerPage> {
           SizedBox(height: 4.h),
 
           Text(
-            _formatDuration(elapsed),
+            timerState.formattedElapsed,
             style: TextStyle(
               fontSize: 44.sp,
               fontWeight: FontWeight.w600,
               letterSpacing: 1,
-              color: isOnBreak ? const Color(0xFFC47A0A) : AppColors.success,
+              color: timerState.isOnBreak
+                  ? const Color(0xFFC47A0A)
+                  : AppColors.success,
             ),
           ),
 
@@ -305,10 +255,12 @@ class _ActiveTimerPageState extends State<ActiveTimerPage> {
           SizedBox(height: 5.h),
 
           Text(
-            '${context.loc.breakTime}: ${_formatDuration(breakTime)}',
+            '${context.loc.breakTime}: 45m',
             style: TextStyle(
               fontSize: 16.sp,
-              color: isOnBreak ? AppColors.warningDark : AppColors.textTertiary,
+              color: timerState.isOnBreak
+                  ? AppColors.warningDark
+                  : AppColors.textTertiary,
             ),
           ),
 
@@ -318,24 +270,28 @@ class _ActiveTimerPageState extends State<ActiveTimerPage> {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: _toggleBreak,
+                  onPressed: () {
+                    ref.read(employeeTimerProvider.notifier).toggleBreak();
+                  },
                   icon: Icon(
-                    isOnBreak ? Icons.play_arrow : Icons.pause,
+                    timerState.isOnBreak ? Icons.play_arrow : Icons.pause,
                     size: 22,
                   ),
                   label: Text(
-                    isOnBreak ? context.loc.resumeWork : context.loc.pauseBreak,
+                    timerState.isOnBreak
+                        ? context.loc.resumeWork
+                        : context.loc.pauseBreak,
                     style: TextStyle(
                       fontSize: 17.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: isOnBreak
+                    foregroundColor: timerState.isOnBreak
                         ? AppColors.primary
                         : AppColors.textSecondary,
                     side: BorderSide(
-                      color: isOnBreak
+                      color: timerState.isOnBreak
                           ? AppColors.primary
                           : AppColors.borderDark,
                     ),
@@ -351,7 +307,7 @@ class _ActiveTimerPageState extends State<ActiveTimerPage> {
 
               Expanded(
                 child: AppButton(
-                  onPressed: _finishWork,
+                  onPressed: () => _finishWork(context, ref, timerState),
                   height: 48.h,
                   text: context.loc.finishWork,
                 ),
@@ -404,7 +360,7 @@ class _FinishWorkDialog extends StatelessWidget {
             Container(
               width: 50.w,
               height: 50.w,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.infoLight,
                 shape: BoxShape.circle,
               ),

@@ -1,47 +1,31 @@
 import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../presentation/providers/site_manager_inspections_provider.dart';
 import 'site_manager_inspections_page.dart';
 
-class InspectionCalendarPage extends StatefulWidget {
+class InspectionCalendarPage extends ConsumerStatefulWidget {
   const InspectionCalendarPage({super.key});
 
   @override
-  State<InspectionCalendarPage> createState() => _InspectionCalendarPageState();
+  ConsumerState<InspectionCalendarPage> createState() =>
+      _InspectionCalendarPageState();
 }
 
-class _InspectionCalendarPageState extends State<InspectionCalendarPage> {
-  DateTime _selectedDate = DateTime(2026, 9, 18);
-  DateTime _focusedDay = DateTime(2026, 9, 18);
-
-  final List<CalendarEventModel> _events = [
-    CalendarEventModel(
-      projectId: 'PRJ-0842',
-      title: 'Goldsteins.Complex',
-      address: 'Goldsteinstraße 12, 50968 Köln',
-      type: 'Erection',
-      dateRange: 'Sept 18 – Sept 20 (2.5 days)',
-      time: '7:30–4:30',
-      assignee: 'Mesut Yilmaz (you)',
-      color: Colors.green,
-    ),
-
-    CalendarEventModel(
-      projectId: 'PRJ-0842',
-      title: 'Goldsteins.Complex',
-      address: 'Goldsteinstraße 12, 50968 Köln',
-      type: 'Dismantling',
-      dateRange: 'Sept 18 – Sept 20 (2.5 days)',
-      time: '7:30–4:30',
-      assignee: 'Mesut Yilmaz (you)',
-      color: Colors.orange,
-    ),
-  ];
+class _InspectionCalendarPageState
+    extends ConsumerState<InspectionCalendarPage> {
+  DateTime get _selectedDate =>
+      ref.watch(siteInspectionProvider).selectedCalendarDate;
+  DateTime get _focusedDay =>
+      ref.watch(siteInspectionProvider).focusedCalendarDate;
+  List<CalendarEventModel> get _events =>
+      ref.watch(siteInspectionProvider).calendarEvents;
 
   @override
   Widget build(BuildContext context) {
@@ -106,14 +90,17 @@ class _InspectionCalendarPageState extends State<InspectionCalendarPage> {
         },
 
         onDaySelected: (selectedDay, focusedDay) {
-          setState(() {
-            _selectedDate = selectedDay;
-            _focusedDay = focusedDay;
-          });
+          ref.read(siteInspectionProvider.notifier).setCalendarDates(
+                selectedDay: selectedDay,
+                focusedDay: focusedDay,
+              );
         },
 
         onPageChanged: (focusedDay) {
-          _focusedDay = focusedDay;
+          ref.read(siteInspectionProvider.notifier).setCalendarDates(
+                selectedDay: _selectedDate,
+                focusedDay: focusedDay,
+              );
         },
 
         startingDayOfWeek: StartingDayOfWeek.monday,

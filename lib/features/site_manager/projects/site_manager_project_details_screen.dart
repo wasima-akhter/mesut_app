@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/context_extensions.dart';
+import '../presentation/providers/site_manager_project_details_provider.dart';
 import 'dates_modules.dart';
 import 'enums.dart';
 import 'history_modules.dart';
@@ -16,29 +18,25 @@ import 'task_modules.dart';
 /// PROJECT DETAILS SCREEN
 /// ===============================================================
 
-class ProjectDetailsScreen extends StatefulWidget {
+class ProjectDetailsScreen extends ConsumerWidget {
   const ProjectDetailsScreen({super.key, this.projectId = 'Prj-0842'});
 
   final String projectId;
 
   @override
-  State<ProjectDetailsScreen> createState() => _ProjectDetailsScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final detailsState = ref.watch(projectDetailsProvider);
 
-class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
-  ProjectDetailsTab _selectedTab = ProjectDetailsTab.overview;
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
-
       body: SafeArea(
         child: Column(
           children: [
-            _buildFixedHeader(),
-            _buildFixedTabs(),
-            Expanded(child: _buildScrollableTabContent()),
+            _buildFixedHeader(context),
+            _buildFixedTabs(ref, detailsState.selectedTab),
+            Expanded(
+              child: _buildScrollableTabContent(detailsState.selectedTab),
+            ),
           ],
         ),
       ),
@@ -49,7 +47,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   /// FIXED HEADER
   /// =============================================================
 
-  Widget _buildFixedHeader() {
+  Widget _buildFixedHeader(BuildContext context) {
     return Container(
       color: Colors.white,
       padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
@@ -64,7 +62,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
               SizedBox(width: 12.w),
               Expanded(
                 child: Text(
-                  widget.projectId,
+                  projectId,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 21.sp,
@@ -75,7 +73,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
               ),
               _circleIconButton(
                 icon: Icons.edit_outlined,
-                onTap: _onEditProject,
+                onTap: () => _onEditProject(context),
               ),
             ],
           ),
@@ -132,7 +130,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   /// FIXED TABS
   /// =============================================================
 
-  Widget _buildFixedTabs() {
+  Widget _buildFixedTabs(WidgetRef ref, ProjectDetailsTab selectedTab) {
     return Container(
       height: 44.h,
       color: Colors.white,
@@ -141,14 +139,12 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: ProjectDetailsTab.values.map((tab) {
-            final selected = tab == _selectedTab;
+            final selected = tab == selectedTab;
 
             return GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
-                setState(() {
-                  _selectedTab = tab;
-                });
+                ref.read(projectDetailsProvider.notifier).selectTab(tab);
               },
               child: Container(
                 constraints: BoxConstraints(maxWidth: 100.w),
@@ -167,7 +163,6 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 16.sp,
-                    // fontWeight: FontWeight.w500,
                     color: selected ? Colors.white : const Color(0xFF777777),
                   ),
                 ),
@@ -183,16 +178,16 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   /// SCROLLABLE CONTENT
   /// =============================================================
 
-  Widget _buildScrollableTabContent() {
-    switch (_selectedTab) {
+  Widget _buildScrollableTabContent(ProjectDetailsTab selectedTab) {
+    switch (selectedTab) {
       case ProjectDetailsTab.overview:
         return buildOverviewTab();
 
       case ProjectDetailsTab.tasks:
-        return TasksTab();
+        return const TasksTab();
 
       case ProjectDetailsTab.photos:
-        return PhotosTab();
+        return const PhotosTab();
 
       case ProjectDetailsTab.measurement:
         return const MeasurementTab();
@@ -252,12 +247,11 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   /// ACTIONS
   /// =============================================================
 
-  void _onEditProject() {
-    // showMessage('Edit project clicked');
-    _showEditProjectDetailsBottomSheet();
+  void _onEditProject(BuildContext context) {
+    _showEditProjectDetailsBottomSheet(context);
   }
 
-  void _showEditProjectDetailsBottomSheet() {
+  void _showEditProjectDetailsBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -283,17 +277,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                 required String phoneNumber,
                 required String email,
               }) {
-                // Update your project here.
-
-                setState(() {
-                  // Example:
-                  // project.phase = projectPhase;
-                  // project.operationalStatus = operationalStatus;
-                  // project.priority = priority;
-                  // project.contactName = contactName;
-                  // project.phoneNumber = phoneNumber;
-                  // project.email = email;
-                });
+                // Update project state via Riverpod
               },
         );
       },

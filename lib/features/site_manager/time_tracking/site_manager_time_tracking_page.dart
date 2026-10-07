@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_colors.dart';
@@ -6,97 +7,39 @@ import '../../../app/theme/app_radii.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../helper/site_manager_enums.dart';
 import '../helper/site_manager_models.dart';
+import '../presentation/providers/site_manager_time_provider.dart';
 import 'bottom_sheet_container.dart';
 
-class SiteManagerTimeTrackingPage extends StatefulWidget {
+class SiteManagerTimeTrackingPage extends ConsumerStatefulWidget {
   const SiteManagerTimeTrackingPage({super.key});
 
   @override
-  State<SiteManagerTimeTrackingPage> createState() =>
+  ConsumerState<SiteManagerTimeTrackingPage> createState() =>
       _SiteManagerTimeTrackingPageState();
 }
 
 class _SiteManagerTimeTrackingPageState
-    extends State<SiteManagerTimeTrackingPage> {
-  TimeTrackingTab _selectedTab = TimeTrackingTab.myTime;
+    extends ConsumerState<SiteManagerTimeTrackingPage> {
+  TimeTrackingTab get _selectedTab =>
+      ref.watch(siteManagerTimeProvider).selectedTab;
 
-  TimeEntryFilter _selectedFilter = TimeEntryFilter.thisWeek;
+  TimeEntryFilter get _selectedFilter =>
+      ref.watch(siteManagerTimeProvider).selectedFilter;
 
-  final ActivityType _selectedActivity = ActivityType.erection;
+  String get _selectedProject =>
+      ref.watch(siteManagerTimeProvider).selectedProject;
 
-  String _selectedProject = 'PRJ-0842 • Goldstein Complex';
+  bool get _isTimerRunning =>
+      ref.watch(siteManagerTimeProvider).isTimerRunning;
 
-  bool _isTimerRunning = false;
+  List<String> get _projects =>
+      ref.watch(siteManagerTimeProvider).projects;
 
-  final DateTime _selectedDate = DateTime(2026, 12, 10);
+  List<TimeEntryModel> get _entries =>
+      ref.watch(siteManagerTimeProvider).entries;
 
-  final int _scaffolds = 24;
-
-  final List<String> _projects = [
-    'PRJ-0842 • Goldstein Complex',
-    'PRJ-0912 • Riverside Tower',
-    'PRJ-0731 • City Center',
-  ];
-
-  final List<TimeEntryModel> _entries = [
-    TimeEntryModel(
-      id: '1',
-      project: 'PRJ-0842 • Goldsteins Complex',
-      activity: ActivityType.erection,
-      date: DateTime(2026, 9, 18),
-      startTime: '07:30 am',
-      endTime: '04:15 pm',
-      breakTime: '45m',
-      employee: 'Tim Muller',
-    ),
-    TimeEntryModel(
-      id: '2',
-      project: 'PRJ-0842 • Goldsteins Complex',
-      activity: ActivityType.dismantling,
-      date: DateTime(2026, 9, 18),
-      startTime: '07:30 am',
-      endTime: '04:15 pm',
-      breakTime: '45m',
-      employee: 'Tim Muller',
-    ),
-    TimeEntryModel(
-      id: '3',
-      project: 'PRJ-0912 • Riverside Tower',
-      activity: ActivityType.standing,
-      date: DateTime(2026, 9, 17),
-      startTime: '08:00 am',
-      endTime: '04:00 pm',
-      breakTime: '30m',
-      employee: 'John Smith',
-    ),
-  ];
-
-  final List<CrewMemberModel> _crewMembers = [
-    CrewMemberModel(
-      name: 'Tim Muller',
-      activity: ActivityType.erection,
-      startTime: '07:30 am',
-      endTime: '04:15 pm',
-      breakTime: '45m',
-      totalHours: '7h 30min',
-    ),
-    CrewMemberModel(
-      name: 'Alex Brown',
-      activity: ActivityType.dismantling,
-      startTime: '07:30 am',
-      endTime: '04:15 pm',
-      breakTime: '45m',
-      totalHours: '7h 30min',
-    ),
-    CrewMemberModel(
-      name: 'John Smith',
-      activity: ActivityType.others,
-      startTime: '08:00 am',
-      endTime: '04:30 pm',
-      breakTime: '30m',
-      totalHours: '8h',
-    ),
-  ];
+  List<CrewMemberModel> get _crewMembers =>
+      ref.watch(siteManagerTimeProvider).crewMembers;
 
   @override
   Widget build(BuildContext context) {
@@ -299,10 +242,9 @@ class _SiteManagerTimeTrackingPageState
                           onPressed: selectedProject == null
                               ? null
                               : () {
-                                  setState(() {
-                                    // Replace with your timer state later.
-                                    _isTimerRunning = true;
-                                  });
+                                  ref
+                                      .read(siteManagerTimeProvider.notifier)
+                                      .toggleTimer();
 
                                   Navigator.pop(sheetContext);
 
@@ -624,9 +566,18 @@ class _SiteManagerTimeTrackingPageState
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            setState(() {
-                              // Add your new entry to the list here.
-                            });
+                            ref.read(siteManagerTimeProvider.notifier).addEntry(
+                                  TimeEntryModel(
+                                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                                    project: selectedProject ?? _selectedProject,
+                                    activity: selectedActivity,
+                                    date: DateTime.now(),
+                                    startTime: startTime.format(context),
+                                    endTime: endTime.format(context),
+                                    breakTime: '${breakTime.hour * 60 + breakTime.minute}m',
+                                    employee: 'Tim Muller',
+                                  ),
+                                );
 
                             Navigator.pop(sheetContext);
 
@@ -775,9 +726,9 @@ class _SiteManagerTimeTrackingPageState
                 label: context.loc.myTime,
                 selected: _selectedTab == TimeTrackingTab.myTime,
                 onTap: () {
-                  setState(() {
-                    _selectedTab = TimeTrackingTab.myTime;
-                  });
+                  ref
+                      .read(siteManagerTimeProvider.notifier)
+                      .setTab(TimeTrackingTab.myTime);
                 },
               ),
             ),
@@ -786,9 +737,9 @@ class _SiteManagerTimeTrackingPageState
                 label: context.loc.siteCrewTime,
                 selected: _selectedTab == TimeTrackingTab.siteCrewTime,
                 onTap: () {
-                  setState(() {
-                    _selectedTab = TimeTrackingTab.siteCrewTime;
-                  });
+                  ref
+                      .read(siteManagerTimeProvider.notifier)
+                      .setTab(TimeTrackingTab.siteCrewTime);
                 },
               ),
             ),
@@ -1038,9 +989,7 @@ class _SiteManagerTimeTrackingPageState
       borderRadius: BorderRadius.circular(8.r),
       child: InkWell(
         onTap: () {
-          setState(() {
-            _selectedFilter = filter;
-          });
+          ref.read(siteManagerTimeProvider.notifier).setFilter(filter);
         },
         borderRadius: BorderRadius.circular(8.r),
         child: Padding(
@@ -1342,70 +1291,6 @@ class _SiteManagerTimeTrackingPageState
     );
   }
 
-  Widget _sheetTabs() {
-    return Container(
-      padding: EdgeInsets.all(3.w),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _tabItem(
-              label: context.loc.myTime,
-              selected: true,
-              onTap: () {},
-            ),
-          ),
-          Expanded(
-            child: _tabItem(
-              label: context.loc.siteCrewTime,
-              selected: false,
-              onTap: () {},
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _sheetField({required String label, required Widget child}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: Theme.of(context).textTheme.labelLarge),
-        SizedBox(height: 7.h),
-        child,
-      ],
-    );
-  }
-
-  Widget _dropdownField({
-    required String value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          isExpanded: true,
-          items: items.map((item) {
-            return DropdownMenuItem(value: item, child: Text(item));
-          }).toList(),
-          onChanged: onChanged,
-        ),
-      ),
-    );
-  }
-
   Widget _clickableField({
     required String value,
     required IconData icon,
@@ -1433,28 +1318,6 @@ class _SiteManagerTimeTrackingPageState
               ),
               Icon(icon, size: 18.sp, color: AppColors.textSecondary),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _primaryAction({required String label, required VoidCallback onTap}) {
-    return Material(
-      color: AppColors.primary,
-      borderRadius: BorderRadius.circular(8.r),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8.r),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
-          child: Center(
-            child: Text(
-              label,
-              style: Theme.of(
-                context,
-              ).textTheme.labelLarge?.copyWith(color: AppColors.white),
-            ),
           ),
         ),
       ),
@@ -1527,9 +1390,9 @@ class _SiteManagerTimeTrackingPageState
                       borderRadius: BorderRadius.circular(8.r),
                       child: InkWell(
                         onTap: () {
-                          setState(() {
-                            _selectedProject = project;
-                          });
+                          ref
+                              .read(siteManagerTimeProvider.notifier)
+                              .setSelectedProject(project);
 
                           Navigator.pop(sheetContext);
                         },
@@ -1647,9 +1510,7 @@ class _SiteManagerTimeTrackingPageState
   }
 
   void _stopTimer() {
-    setState(() {
-      _isTimerRunning = false;
-    });
+    ref.read(siteManagerTimeProvider.notifier).toggleTimer();
 
     _showMessage('Timer stopped');
   }

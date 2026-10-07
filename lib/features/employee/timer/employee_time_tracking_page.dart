@@ -1,171 +1,57 @@
-import 'dart:async';
-
-import 'package:construction_app/app/theme/app_colors.dart';
-import 'package:construction_app/core/widgets/buttons/app_button.dart';
+import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/widgets/buttons/app_button.dart';
 import '../helper/employee_bottom_sheets.dart' hide EmployeeProjectModel;
 import '../helper/employee_enums.dart';
 import '../helper/employee_models.dart';
+import '../presentation/providers/employee_timer_provider.dart';
 
-class EmployeeTimeTrackingPage extends StatefulWidget {
+class EmployeeTimeTrackingPage extends ConsumerWidget {
   const EmployeeTimeTrackingPage({super.key});
 
-  @override
-  State<EmployeeTimeTrackingPage> createState() =>
-      _EmployeeTimeTrackingPageState();
-}
-
-class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
-  bool isTimerRunning = false;
-  bool isOnBreak = false;
-
-  bool showThisMonth = false;
-
-  Timer? _timer;
-
-  Duration elapsed = const Duration(hours: 2, minutes: 45, seconds: 20);
-
-  final List<EmployeeTimeLogModel> _logs = [
-    EmployeeTimeLogModel(
-      date: 'Today, Sept 18',
-      project: EmployeeProjectModel(
-        id: 'Prj-0842',
-        name: 'Goltsteins.Complex',
-        address: 'Goltsteinstraße 12, 50968 Köln',
-        activity: EmployeeActivityType.erection,
-        startTime: '07:30 am',
-        endTime: '04:15 pm',
-        siteManager: 'Mesut Rahaman',
-      ),
-      duration: '8.0',
-      breakTime: '45m',
-      synced: true,
-    ),
-    EmployeeTimeLogModel(
-      date: 'Today, Sept 18',
-      project: EmployeeProjectModel(
-        id: 'Prj-0842',
-        name: 'Goltsteins.Complex',
-        address: 'Goltsteinstraße 12, 50968 Köln',
-        activity: EmployeeActivityType.dismantling,
-        startTime: '07:30 am',
-        endTime: '04:15 pm',
-        siteManager: 'Mesut Rahaman',
-      ),
-      duration: '8.0',
-      breakTime: '45m',
-      synced: true,
-    ),
-  ];
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
+  void _showMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message, style: TextStyle(fontSize: 17.sp)),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
   }
 
-  // ============================================================
-  // TIMER
-  // ============================================================
-
-  void _startTimer() {
-    setState(() {
-      isTimerRunning = true;
-      isOnBreak = false;
-    });
-
-    _timer?.cancel();
-
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted || !isTimerRunning || isOnBreak) {
-        return;
-      }
-
-      setState(() {
-        elapsed += const Duration(seconds: 1);
-      });
-    });
-  }
-
-  void _pauseTimer() {
-    setState(() {
-      isOnBreak = true;
-    });
-  }
-
-  void _resumeTimer() {
-    setState(() {
-      isOnBreak = false;
-    });
-  }
-
-  void _finishTimer() {
-    _timer?.cancel();
-
-    setState(() {
-      isTimerRunning = false;
-      isOnBreak = false;
-    });
+  void _finishTimer(
+    BuildContext context,
+    WidgetRef ref,
+    EmployeeTimerState state,
+  ) {
+    ref.read(employeeTimerProvider.notifier).finishTimer();
 
     showFinishWorkSheet(
       context: context,
-      projectName: 'PRJ-0842 · Goltsteins.Complex',
-      totalLogged: '8.0 hrs',
+      projectName: state.currentProject.fullName,
+      totalLogged: '${(state.elapsed.inMinutes / 60).toStringAsFixed(1)} hrs',
       onSave: () {
-        setState(() {
-          isTimerRunning = false;
-          isOnBreak = false;
-        });
-
-        _showMessage(context.loc.workFinished);
+        ref.read(employeeTimerProvider.notifier).finishTimer();
+        _showMessage(context, context.loc.workFinished);
       },
     );
   }
-
-  String _formatDuration(Duration duration) {
-    final hours = duration.inHours.toString().padLeft(2, '0');
-
-    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
-
-    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-
-    return '$hours:$minutes:$seconds';
-  }
-
-  // ============================================================
-  // SAMPLE DATA
-  // ============================================================
-
-  final List<EmployeeProjectModel> _availableProjects = const [
-    EmployeeProjectModel(
-      id: 'PRJ-0842',
-      name: 'Goltstein Complex',
-      address: 'Goltsteinstraße 12, 50968 Köln',
-      activity: EmployeeActivityType.erection,
-      startTime: '07:30 am',
-      endTime: '04:30 pm',
-      siteManager: 'Mesut Rahaman',
-    ),
-    EmployeeProjectModel(
-      id: 'PRJ-0845',
-      name: 'Riverside Tower',
-      address: 'Rheinstrasse 28, 50667 Köln',
-      activity: EmployeeActivityType.dismantling,
-      startTime: '07:30 am',
-      endTime: '04:30 pm',
-      siteManager: 'David Miller',
-    ),
-  ];
 
   // ============================================================
   // BUILD
   // ============================================================
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final timerState = ref.watch(employeeTimerProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -174,7 +60,7 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
           slivers: [
             SliverPadding(
               padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 8.h),
-              sliver: SliverToBoxAdapter(child: _buildHeader()),
+              sliver: SliverToBoxAdapter(child: _buildHeader(context, ref)),
             ),
 
             SliverPadding(
@@ -184,10 +70,12 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
 
             SliverToBoxAdapter(child: SizedBox(height: 14.h)),
 
-            if (isTimerRunning) ...[
+            if (timerState.isTimerRunning) ...[
               SliverPadding(
                 padding: EdgeInsets.symmetric(horizontal: 18.w),
-                sliver: SliverToBoxAdapter(child: _buildActiveTimerCard()),
+                sliver: SliverToBoxAdapter(
+                  child: _buildActiveTimerCard(context, ref, timerState),
+                ),
               ),
 
               SliverToBoxAdapter(child: SizedBox(height: 12.h)),
@@ -195,12 +83,12 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildWeeklySummary()),
+              sliver: SliverToBoxAdapter(child: _buildWeeklySummary(context)),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 12.h)),
 
-            if (!isTimerRunning)
+            if (!timerState.isTimerRunning)
               SliverPadding(
                 padding: EdgeInsets.symmetric(horizontal: 18.w),
                 sliver: SliverToBoxAdapter(
@@ -208,11 +96,8 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
                     onPressed: () => showStartNewTimerSheet(
                       context: context,
                       onStart: () {
-                        setState(() {
-                          isTimerRunning = true;
-                        });
-
-                        _showMessage(context.loc.timerRunning);
+                        ref.read(employeeTimerProvider.notifier).startTimer();
+                        _showMessage(context, context.loc.timerRunning);
                       },
                     ),
                     height: 50.h,
@@ -221,12 +106,14 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
                 ),
               ),
 
-            if (!isTimerRunning)
+            if (!timerState.isTimerRunning)
               SliverToBoxAdapter(child: SizedBox(height: 18.h)),
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildRecentLogsHeader()),
+              sliver: SliverToBoxAdapter(
+                child: _buildRecentLogsHeader(context, ref, timerState),
+              ),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 10.h)),
@@ -236,8 +123,8 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
               sliver: SliverToBoxAdapter(
                 child: Column(
                   children: [
-                    for (final log in _visibleLogs) ...[
-                      _buildTimeLogCard(log),
+                    for (final log in timerState.visibleLogs) ...[
+                      _buildTimeLogCard(context, log),
                       SizedBox(height: 10.h),
                     ],
                   ],
@@ -250,19 +137,11 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
     );
   }
 
-  List<EmployeeTimeLogModel> get _visibleLogs {
-    if (!showThisMonth) {
-      return _logs;
-    }
-
-    return [..._logs, ..._logs];
-  }
-
   // ============================================================
   // HEADER
   // ============================================================
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context, WidgetRef ref) {
     return Row(
       children: [
         Expanded(
@@ -280,11 +159,7 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
           onPressed: () => showAddTimeEntrySheet(
             context: context,
             onSaved: () {
-              setState(() {
-                // Add the newly created entry to your logs.
-              });
-
-              _showMessage(context.loc.entrySaved);
+              _showMessage(context, context.loc.entrySaved);
             },
           ),
           icon: const Icon(Icons.add, size: 19),
@@ -319,7 +194,11 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
   // ACTIVE TIMER
   // ============================================================
 
-  Widget _buildActiveTimerCard() {
+  Widget _buildActiveTimerCard(
+    BuildContext context,
+    WidgetRef ref,
+    EmployeeTimerState state,
+  ) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(14.w),
@@ -339,7 +218,9 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
                   borderRadius: BorderRadius.circular(5.r),
                 ),
                 child: Text(
-                  isOnBreak ? context.loc.pauseBreak : context.loc.inProgress,
+                  state.isOnBreak
+                      ? context.loc.pauseBreak
+                      : context.loc.inProgress,
                   style: TextStyle(
                     fontSize: 15.sp,
                     color: Colors.white,
@@ -369,7 +250,7 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
               const Spacer(),
 
               Icon(
-                isOnBreak ? Icons.pause_circle_outline : Icons.more_horiz,
+                state.isOnBreak ? Icons.pause_circle_outline : Icons.more_horiz,
                 color: Colors.white,
               ),
             ],
@@ -378,7 +259,7 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
           SizedBox(height: 13.h),
 
           Text(
-            'PRJ-0842 · Goltsteins.Complex',
+            state.currentProject.fullName,
             style: TextStyle(
               fontSize: 18.sp,
               color: Colors.white,
@@ -389,7 +270,7 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
           SizedBox(height: 8.h),
 
           Text(
-            _formatDuration(elapsed),
+            state.formattedElapsed,
             style: TextStyle(
               fontSize: 42.sp,
               fontWeight: FontWeight.w600,
@@ -413,13 +294,21 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: isOnBreak ? _resumeTimer : _pauseTimer,
+                  onPressed: () {
+                    if (state.isOnBreak) {
+                      ref.read(employeeTimerProvider.notifier).resumeTimer();
+                    } else {
+                      ref.read(employeeTimerProvider.notifier).pauseTimer();
+                    }
+                  },
                   icon: Icon(
-                    isOnBreak ? Icons.play_arrow : Icons.pause,
+                    state.isOnBreak ? Icons.play_arrow : Icons.pause,
                     size: 20,
                   ),
                   label: Text(
-                    isOnBreak ? context.loc.resumeWork : context.loc.pauseBreak,
+                    state.isOnBreak
+                        ? context.loc.resumeWork
+                        : context.loc.pauseBreak,
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
@@ -440,7 +329,7 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
 
               Expanded(
                 child: AppButton(
-                  onPressed: _finishTimer,
+                  onPressed: () => _finishTimer(context, ref, state),
                   height: 46.h,
                   text: context.loc.finishWork,
                 ),
@@ -456,7 +345,7 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
   // WEEKLY SUMMARY
   // ============================================================
 
-  Widget _buildWeeklySummary() {
+  Widget _buildWeeklySummary(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(14.w),
@@ -520,8 +409,8 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
         Text(
           title,
           style: TextStyle(
-            fontSize: 15.sp,
-            color: Colors.white.withValues(alpha: .55),
+            fontSize: 14.sp,
+            color: Colors.white.withValues(alpha: .5),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -542,7 +431,11 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
   // RECENT LOGS
   // ============================================================
 
-  Widget _buildRecentLogsHeader() {
+  Widget _buildRecentLogsHeader(
+    BuildContext context,
+    WidgetRef ref,
+    EmployeeTimerState state,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -561,22 +454,26 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
           children: [
             GestureDetector(
               onTap: () {
-                setState(() {
-                  showThisMonth = false;
-                });
+                if (state.showThisMonth) {
+                  ref
+                      .read(employeeTimerProvider.notifier)
+                      .toggleShowThisMonth();
+                }
               },
-              child: _filterChip(context.loc.thisWeek, !showThisMonth),
+              child: _filterChip(context.loc.thisWeek, !state.showThisMonth),
             ),
 
             SizedBox(width: 8.w),
 
             GestureDetector(
               onTap: () {
-                setState(() {
-                  showThisMonth = true;
-                });
+                if (!state.showThisMonth) {
+                  ref
+                      .read(employeeTimerProvider.notifier)
+                      .toggleShowThisMonth();
+                }
               },
-              child: _filterChip(context.loc.thisMonth, showThisMonth),
+              child: _filterChip(context.loc.thisMonth, state.showThisMonth),
             ),
           ],
         ),
@@ -602,12 +499,13 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
     );
   }
 
-  Widget _buildTimeLogCard(EmployeeTimeLogModel log) {
+  Widget _buildTimeLogCard(BuildContext context, EmployeeTimeLogModel log) {
     final activity = log.project.activity;
 
     return GestureDetector(
       onTap: () {
-        _showMessage('${log.project.fullName} · ${log.duration} hrs');
+        _showMessage(context, '${log.project.fullName} · ${log.duration} hrs');
+        context.push(RouteConstants.employeeAssignmentDetails);
       },
       child: Container(
         width: double.infinity,
@@ -711,16 +609,5 @@ class _EmployeeTimeTrackingPageState extends State<EmployeeTimeTrackingPage> {
         ),
       ),
     );
-  }
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message, style: TextStyle(fontSize: 17.sp)),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
   }
 }

@@ -9,7 +9,7 @@ class MeasurementTab extends StatefulWidget {
   const MeasurementTab({super.key});
 
   @override
-  _MeasurementTabState createState() => _MeasurementTabState();
+  State<MeasurementTab> createState() => _MeasurementTabState();
 }
 
 class _MeasurementTabState extends State<MeasurementTab> {
@@ -68,28 +68,32 @@ class _MeasurementTabState extends State<MeasurementTab> {
         children: [
           Row(
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.loc.totalCalculatedArea,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      color: const Color(0xFF777777),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.loc.totalCalculatedArea,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        color: const Color(0xFF777777),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    '${totalArea.toStringAsFixed(0)} m²',
-                    style: TextStyle(
-                      fontSize: 22.sp,
-                      fontWeight: FontWeight.w700,
+                    SizedBox(height: 4.h),
+                    Text(
+                      '${totalArea.toStringAsFixed(0)} m²',
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
 
-              const Spacer(),
+              SizedBox(width: 8.w),
 
               SizedBox(
                 height: 36.h,
@@ -99,7 +103,7 @@ class _MeasurementTabState extends State<MeasurementTab> {
                   label: Text(
                     context.loc.addLine,
                     style: TextStyle(
-                      fontSize: 16.sp,
+                      fontSize: 15.sp,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/constants/route_constants.dart';
 import '../../../app/theme/app_colors.dart';
+import '../../../core/services/launcher_service.dart';
 import 'site_manager_inspections_page.dart';
 
 class InspectionSurveyPage extends StatefulWidget {
@@ -158,23 +160,34 @@ class _InspectionSurveyPageState extends State<InspectionSurveyPage> {
   }
 
   Widget _contactRow(String text, IconData icon, String action) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(text, style: Theme.of(context).textTheme.bodySmall),
+    return InkWell(
+      onTap: () {
+        if (icon == Icons.phone_outlined) {
+          AppLauncherService.makePhoneCall('+49 221 555 0192');
+        }
+      },
+      borderRadius: BorderRadius.circular(4.r),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 2.h),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(text, style: Theme.of(context).textTheme.bodySmall),
+            ),
+
+            Icon(icon, size: 16.sp, color: AppColors.textPrimary),
+
+            SizedBox(width: 5.w),
+
+            Text(
+              action,
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w500),
+            ),
+          ],
         ),
-
-        Icon(icon, size: 16.sp, color: AppColors.textPrimary),
-
-        SizedBox(width: 5.w),
-
-        Text(
-          action,
-          style: Theme.of(
-            context,
-          ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w500),
-        ),
-      ],
+      ),
     );
   }
 
@@ -333,16 +346,14 @@ class _InspectionSurveyPageState extends State<InspectionSurveyPage> {
     required int minLines,
     required int maxLines,
   }) {
-    return Container(
-      child: TextField(
-        controller: controller,
-        minLines: minLines,
-        maxLines: maxLines,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.35),
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.all(10.w),
-        ),
+    return TextField(
+      controller: controller,
+      minLines: minLines,
+      maxLines: maxLines,
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.35),
+      decoration: InputDecoration(
+        border: InputBorder.none,
+        contentPadding: EdgeInsets.all(10.w),
       ),
     );
   }
@@ -353,7 +364,7 @@ class _InspectionSurveyPageState extends State<InspectionSurveyPage> {
   Widget _buildPhotos() {
     return _SurveySection(
       title: context.loc.sitePhoto,
-      trailing: SmallRedButton(text: context.loc.takePhoto, onTap: _takePhoto),
+      trailing: SmallRedButton(text: context.loc.viewAll, onTap: _viewAllPhotos),
       child: Row(
         children: [
           Expanded(
@@ -383,23 +394,26 @@ class _InspectionSurveyPageState extends State<InspectionSurveyPage> {
   }
 
   Widget _photoPlaceholder(String url) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(5.r),
-      child: AspectRatio(
-        aspectRatio: 1.05,
-        child: Image.network(
-          url,
-          fit: BoxFit.cover,
-          errorBuilder: (_, _, _) {
-            return Container(
-              color: AppColors.background,
-              child: Icon(
-                Icons.image_outlined,
-                color: AppColors.textSecondary,
-                size: 24.sp,
-              ),
-            );
-          },
+    return GestureDetector(
+      onTap: _viewAllPhotos,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(5.r),
+        child: AspectRatio(
+          aspectRatio: 1.05,
+          child: Image.network(
+            url,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) {
+              return Container(
+                color: AppColors.background,
+                child: Icon(
+                  Icons.image_outlined,
+                  color: AppColors.textSecondary,
+                  size: 24.sp,
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -418,8 +432,8 @@ class _InspectionSurveyPageState extends State<InspectionSurveyPage> {
     );
   }
 
-  void _takePhoto() {
-    // Connect your image picker/camera here.
+  void _viewAllPhotos() {
+    context.push(RouteConstants.siteManagerInspectionPhotos);
   }
 
   void _completeSurvey() {

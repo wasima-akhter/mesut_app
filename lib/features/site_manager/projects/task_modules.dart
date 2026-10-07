@@ -4,66 +4,22 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/localization/context_extensions.dart';
+import '../presentation/providers/site_manager_project_details_provider.dart';
 import 'enums.dart';
 import 'models.dart';
 import 'overview_modules.dart';
 
-class TasksTab extends StatefulWidget {
+class TasksTab extends ConsumerWidget {
   const TasksTab({super.key});
 
   @override
-  _TasksTabState createState() => _TasksTabState();
-}
-
-class _TasksTabState extends State<TasksTab> {
-  final List<ProjectTask> _tasks = [
-    ProjectTask(
-      description:
-          'Anchor scaffolds ties into reinforced concrete at 4th floor',
-      employee: 'Tim Muler',
-      priority: ProjectPriority.high,
-      dueDate: DateTime(2026, 9, 20),
-    ),
-    ProjectTask(
-      description:
-          'Anchor scaffolds ties into reinforced concrete at 4th floor',
-      employee: 'Tim Muler',
-      priority: ProjectPriority.high,
-      dueDate: DateTime(2026, 9, 20),
-    ),
-    ProjectTask(
-      description:
-          'Anchor scaffolds ties into reinforced concrete at 4th floor',
-      employee: 'Tim Muler',
-      priority: ProjectPriority.high,
-      dueDate: DateTime(2026, 9, 20),
-      completed: true,
-    ),
-    ProjectTask(
-      description:
-          'Anchor scaffolds ties into reinforced concrete at 4th floor',
-      employee: 'Tim Muler',
-      priority: ProjectPriority.high,
-      dueDate: DateTime(2026, 9, 20),
-      completed: true,
-    ),
-  ];
-
-  TaskStatusTab _selectedTaskTab = TaskStatusTab.open;
-
-  Widget buildTasksTab() {
-    final tasks = _tasks.where((task) {
-      switch (_selectedTaskTab) {
-        case TaskStatusTab.open:
-          return !task.completed;
-
-        case TaskStatusTab.completed:
-          return task.completed;
-      }
-    }).toList();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final detailsState = ref.watch(projectDetailsProvider);
+    final tasks = detailsState.filteredTasks;
 
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
@@ -72,18 +28,26 @@ class _TasksTabState extends State<TasksTab> {
           padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 20.h),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              _buildTaskTabs(),
+              _buildTaskTabs(context, ref, detailsState),
               SizedBox(height: 10.h),
 
               if (tasks.isEmpty)
-                _buildEmptyTaskState()
+                _buildEmptyTaskState(
+                  context,
+                  detailsState.selectedTaskTab == TaskStatusTab.open,
+                )
               else
-                ...tasks.map(
-                  (task) => Padding(
-                    padding: EdgeInsets.only(bottom: 8.h),
-                    child: _buildTaskCard(task),
-                  ),
-                ),
+                ...tasks.asMap().entries.map(
+                      (entry) => Padding(
+                        padding: EdgeInsets.only(bottom: 8.h),
+                        child: _buildTaskCard(
+                          context,
+                          ref,
+                          entry.value,
+                          entry.key,
+                        ),
+                      ),
+                    ),
             ]),
           ),
         ),
@@ -91,62 +55,75 @@ class _TasksTabState extends State<TasksTab> {
     );
   }
 
-  Widget _buildTaskTabs() {
-    final openCount = _tasks.where((task) => !task.completed).length;
-    final completedCount = _tasks.where((task) => task.completed).length;
+  Widget _buildTaskTabs(
+    BuildContext context,
+    WidgetRef ref,
+    ProjectDetailsState detailsState,
+  ) {
+    final openCount =
+        detailsState.tasks.where((task) => !task.completed).length;
+    final completedCount =
+        detailsState.tasks.where((task) => task.completed).length;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            _buildTaskStatusTab(
-              tab: TaskStatusTab.open,
-              label: context.loc.openTasks(openCount),
-            ),
-            SizedBox(width: 8.w),
-            _buildTaskStatusTab(
-              tab: TaskStatusTab.completed,
-              label: context.loc.completedTasks(completedCount),
-            ),
-          ],
-        ),
-        SizedBox(width: 8.w),
-        SizedBox(
-          height: 38.h,
-          child: ElevatedButton.icon(
-            onPressed: () => showAddTaskBottomSheet(context),
-            icon: Icon(Icons.add, size: 17.sp),
-            label: Text(
-              context.loc.addNew,
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFC8102E),
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 10.w),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6.r),
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              _buildTaskStatusTab(
+                ref: ref,
+                tab: TaskStatusTab.open,
+                label: context.loc.openTasks(openCount),
+                selected: detailsState.selectedTaskTab == TaskStatusTab.open,
+              ),
+              SizedBox(width: 8.w),
+              _buildTaskStatusTab(
+                ref: ref,
+                tab: TaskStatusTab.completed,
+                label: context.loc.completedTasks(completedCount),
+                selected:
+                    detailsState.selectedTaskTab == TaskStatusTab.completed,
+              ),
+            ],
+          ),
+          SizedBox(width: 10.w),
+          SizedBox(
+            height: 38.h,
+            child: ElevatedButton.icon(
+              onPressed: () => showAddTaskBottomSheet(context, ref),
+              icon: Icon(Icons.add, size: 17.sp),
+              label: Text(
+                context.loc.addNew,
+                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFC8102E),
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 10.w),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildTaskStatusTab({
+    required WidgetRef ref,
     required TaskStatusTab tab,
     required String label,
+    required bool selected,
   }) {
-    final selected = _selectedTaskTab == tab;
-
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
-        setState(() {
-          _selectedTaskTab = tab;
-        });
+        ref.read(projectDetailsProvider.notifier).selectTaskTab(tab);
       },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
@@ -170,9 +147,7 @@ class _TasksTabState extends State<TasksTab> {
     );
   }
 
-  Widget _buildEmptyTaskState() {
-    final isOpen = _selectedTaskTab == TaskStatusTab.open;
-
+  Widget _buildEmptyTaskState(BuildContext context, bool isOpen) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 40.h),
@@ -210,8 +185,12 @@ class _TasksTabState extends State<TasksTab> {
     );
   }
 
-  //
-  Widget _buildTaskCard(ProjectTask task) {
+  Widget _buildTaskCard(
+    BuildContext context,
+    WidgetRef ref,
+    ProjectTask task,
+    int index,
+  ) {
     return Container(
       padding: EdgeInsets.all(10.w),
       decoration: BoxDecoration(
@@ -224,9 +203,7 @@ class _TasksTabState extends State<TasksTab> {
         children: [
           GestureDetector(
             onTap: () {
-              setState(() {
-                task.completed = !task.completed;
-              });
+              ref.read(projectDetailsProvider.notifier).toggleTask(index);
             },
             child: Container(
               width: 20.w,
@@ -320,7 +297,9 @@ class _TasksTabState extends State<TasksTab> {
           ),
           SizedBox(width: 5.w),
           GestureDetector(
-            onTap: () => _deleteTask(task),
+            onTap: () {
+              showMessage(context.loc.taskDeleted);
+            },
             child: Padding(
               padding: EdgeInsets.only(top: 2.h),
               child: Icon(
@@ -353,11 +332,10 @@ class _TasksTabState extends State<TasksTab> {
     );
   }
 
-  /// =============================================================
-  /// ADD TASK BOTTOM SHEET
-  /// =============================================================
-
-  Future<void> showAddTaskBottomSheet(BuildContext context) async {
+  Future<void> showAddTaskBottomSheet(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final task = await showModalBottomSheet<ProjectTask>(
       context: context,
       isScrollControlled: true,
@@ -366,23 +344,8 @@ class _TasksTabState extends State<TasksTab> {
     );
 
     if (task != null) {
-      setState(() {
-        _tasks.insert(0, task);
-      });
+      ref.read(projectDetailsProvider.notifier).addTask(task);
     }
-  }
-
-  void _deleteTask(ProjectTask task) {
-    setState(() {
-      _tasks.remove(task);
-    });
-
-    showMessage(context.loc.taskDeleted);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return buildTasksTab();
   }
 }
 

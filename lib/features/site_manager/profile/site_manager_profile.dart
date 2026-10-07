@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/services/launcher_service.dart';
 
 class SiteManagerProfile extends StatelessWidget {
   const SiteManagerProfile({super.key});
@@ -308,24 +309,34 @@ class SiteManagerProfile extends StatelessWidget {
   }) {
     return Column(
       children: [
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 12.h),
-          child: Row(
-            children: [
-              Icon(icon, size: 20.sp, color: AppColors.textSecondary),
+        InkWell(
+          onTap: () {
+            if (icon == Icons.phone_outlined) {
+              AppLauncherService.makePhoneCall(text);
+            } else if (icon == Icons.mail_outline_rounded) {
+              AppLauncherService.sendEmail(email: text);
+            }
+          },
+          borderRadius: BorderRadius.circular(6.r),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 12.h),
+            child: Row(
+              children: [
+                Icon(icon, size: 20.sp, color: AppColors.textSecondary),
 
-              SizedBox(width: 9.w),
+                SizedBox(width: 9.w),
 
-              Expanded(
-                child: Text(
-                  text,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: 12.sp,
-                    color: AppColors.textPrimary,
+                Expanded(
+                  child: Text(
+                    text,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontSize: 12.sp,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
 

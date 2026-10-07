@@ -4,6 +4,7 @@ import 'package:construction_app/features/auth/reset_password/reset_password_pag
 import 'package:construction_app/features/auth/sign_in/sign_in_page.dart';
 import 'package:construction_app/features/auth/sign_up/sign_up_page.dart';
 import 'package:construction_app/features/employee/assignments/employee_assignment_detail_page.dart';
+import 'package:construction_app/features/employee/assignments/employee_assignment_photos_page.dart';
 import 'package:construction_app/features/employee/timer/active_timer_page.dart';
 import 'package:construction_app/features/entry/splash/splash_page.dart';
 import 'package:construction_app/features/site_manager/profile/site_manager_profile.dart';
@@ -19,6 +20,7 @@ import '../../features/shared/legal/privacy_policy.dart';
 import '../../features/shared/legal/terms_conditions.dart';
 import '../../features/shared/notifications/notifications_page.dart';
 import '../../features/site_manager/inspection_pages/inspection_calender_page.dart';
+import '../../features/site_manager/inspection_pages/inspection_photos_view_all_page.dart';
 import '../../features/site_manager/inspection_pages/inspection_survey_page.dart';
 import '../../features/site_manager/inspection_pages/site_manager_inspections_page.dart';
 import '../../features/site_manager/phase_board/site_manager_phase_board.dart';
@@ -134,6 +136,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: RouteConstants.siteManagerInspectionPhotos,
+        builder: (context, state) {
+          return const InspectionPhotosViewAllPage();
+        },
+      ),
+      GoRoute(
         path: RouteConstants.siteManagerInspectionCalendarPage,
         builder: (context, state) {
           return InspectionCalendarPage();
@@ -158,6 +166,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RouteConstants.employeeAssignmentDetails,
         builder: (context, state) {
           return const AssignmentDetailsPage();
+        },
+      ),
+      GoRoute(
+        path: RouteConstants.employeeAssignmentPhotos,
+        builder: (context, state) {
+          final assignmentTitle = state.extra as String?;
+          return EmployeeAssignmentPhotosPage(
+            assignmentTitle: assignmentTitle,
+          );
         },
       ),
       GoRoute(
