@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+
+import '../../../../core/extensions/date_time_extensions.dart';
 import 'employee_enums.dart';
 
 class EmployeeAssignmentModel {
@@ -5,6 +8,8 @@ class EmployeeAssignmentModel {
   final String address;
   final EmployeeActivityType activity;
   final String schedule;
+  final TimeOfDay? startTimeOfDay;
+  final TimeOfDay? endTimeOfDay;
   final String scaffoldArea;
   final String siteManager;
 
@@ -13,10 +18,20 @@ class EmployeeAssignmentModel {
     required this.address,
     required this.activity,
     required this.schedule,
+    this.startTimeOfDay,
+    this.endTimeOfDay,
     required this.scaffoldArea,
     required this.siteManager,
   });
+
+  String get formattedSchedule {
+    if (startTimeOfDay != null && endTimeOfDay != null) {
+      return '${startTimeOfDay!.formatLocalized()} – ${endTimeOfDay!.formatLocalized()}';
+    }
+    return schedule;
+  }
 }
+
 //
 
 class EmployeeProjectModel {
@@ -26,6 +41,8 @@ class EmployeeProjectModel {
   final EmployeeActivityType activity;
   final String startTime;
   final String endTime;
+  final TimeOfDay? startTimeOfDay;
+  final TimeOfDay? endTimeOfDay;
   final String siteManager;
 
   const EmployeeProjectModel({
@@ -33,28 +50,73 @@ class EmployeeProjectModel {
     required this.name,
     required this.address,
     required this.activity,
-    required this.startTime,
-    required this.endTime,
+    this.startTime = '07:30 am',
+    this.endTime = '04:15 pm',
+    this.startTimeOfDay,
+    this.endTimeOfDay,
     required this.siteManager,
   });
 
   String get fullName => '$id · $name';
+
+  String get formattedStartTime {
+    if (startTimeOfDay != null) {
+      return startTimeOfDay!.formatLocalized();
+    }
+    return startTime;
+  }
+
+  String get formattedEndTime {
+    if (endTimeOfDay != null) {
+      return endTimeOfDay!.formatLocalized();
+    }
+    return endTime;
+  }
+
+  String get formattedTimeRange => '$formattedStartTime – $formattedEndTime';
 }
 
 class EmployeeTimeLogModel {
   final String date;
+  final DateTime? timestamp;
   final EmployeeProjectModel project;
   final String duration;
+  final double? durationHours;
   final String breakTime;
+  final Duration? breakDuration;
   final bool synced;
 
   const EmployeeTimeLogModel({
-    required this.date,
+    this.date = '',
+    this.timestamp,
     required this.project,
-    required this.duration,
-    required this.breakTime,
+    this.duration = '8.0',
+    this.durationHours,
+    this.breakTime = '45m',
+    this.breakDuration,
     required this.synced,
   });
+
+  String get formattedDate {
+    if (timestamp != null) {
+      return timestamp!.formatRelative(includeTime: false);
+    }
+    return date;
+  }
+
+  String get formattedBreakTime {
+    if (breakDuration != null) {
+      return breakDuration!.formatCompactLocalized();
+    }
+    return breakTime;
+  }
+
+  String get formattedDuration {
+    if (durationHours != null) {
+      return durationHours.toString();
+    }
+    return duration;
+  }
 }
 
 class EmployeeCalendarEventModel {
@@ -65,43 +127,53 @@ class EmployeeCalendarEventModel {
 }
 
 final List<EmployeeAssignmentModel> fakeAssignments = [
-  EmployeeAssignmentModel(
+  const EmployeeAssignmentModel(
     project: 'Skyline Tower',
     address: 'Gulshan Avenue, Dhaka',
     activity: EmployeeActivityType.dismantling,
     schedule: '08:00 AM - 05:00 PM',
+    startTimeOfDay: TimeOfDay(hour: 8, minute: 0),
+    endTimeOfDay: TimeOfDay(hour: 17, minute: 0),
     scaffoldArea: 'North Wing - Level 8',
     siteManager: 'Rahim Ahmed',
   ),
-  EmployeeAssignmentModel(
+  const EmployeeAssignmentModel(
     project: 'Green Valley Complex',
     address: 'Banani, Dhaka',
     activity: EmployeeActivityType.erection,
     schedule: '09:00 AM - 04:00 PM',
+    startTimeOfDay: TimeOfDay(hour: 9, minute: 0),
+    endTimeOfDay: TimeOfDay(hour: 16, minute: 0),
     scaffoldArea: 'Building B - Level 5',
     siteManager: 'Tanvir Hasan',
   ),
-  EmployeeAssignmentModel(
+  const EmployeeAssignmentModel(
     project: 'Riverside Plaza',
     address: 'Uttara, Dhaka',
     activity: EmployeeActivityType.others,
     schedule: '07:30 AM - 03:30 PM',
+    startTimeOfDay: TimeOfDay(hour: 7, minute: 30),
+    endTimeOfDay: TimeOfDay(hour: 15, minute: 30),
     scaffoldArea: 'East Block - Level 3',
     siteManager: 'Karim Hossain',
   ),
-  EmployeeAssignmentModel(
+  const EmployeeAssignmentModel(
     project: 'City Center Mall',
     address: 'Dhanmondi, Dhaka',
     activity: EmployeeActivityType.dismantling,
     schedule: '10:00 AM - 06:00 PM',
+    startTimeOfDay: TimeOfDay(hour: 10, minute: 0),
+    endTimeOfDay: TimeOfDay(hour: 18, minute: 0),
     scaffoldArea: 'Main Entrance - Level 2',
     siteManager: 'Sabbir Rahman',
   ),
-  EmployeeAssignmentModel(
+  const EmployeeAssignmentModel(
     project: 'Lakeview Residences',
     address: 'Mirpur, Dhaka',
     activity: EmployeeActivityType.erection,
     schedule: '08:30 AM - 05:30 PM',
+    startTimeOfDay: TimeOfDay(hour: 8, minute: 30),
+    endTimeOfDay: TimeOfDay(hour: 17, minute: 30),
     scaffoldArea: 'Tower A - Level 12',
     siteManager: 'Nayeem Islam',
   ),

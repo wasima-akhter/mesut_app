@@ -1,3 +1,4 @@
+import '../../../../core/extensions/date_time_extensions.dart';
 import 'site_manager_enums.dart';
 
 class MapLocation {
@@ -51,7 +52,8 @@ class TimeEntryModel {
   final String employee;
   final bool isSynced;
 
-  String get duration => '7h 30min';
+  String get duration =>
+      const Duration(hours: 7, minutes: 30).formatCompactLocalized();
 }
 
 //
@@ -78,6 +80,15 @@ class CrewMemberModel {
 
   final String? avatar;
   final bool isSynced;
+
+  String get formattedTotalHours {
+    if (totalHours == '7.75h' || totalHours == '7h 30min') {
+      return const Duration(hours: 7, minutes: 30).formatCompactLocalized();
+    } else if (totalHours == '8.0h' || totalHours == '8h') {
+      return const Duration(hours: 8).formatCompactLocalized();
+    }
+    return totalHours;
+  }
 
   CrewMemberModel copyWith({
     String? name,

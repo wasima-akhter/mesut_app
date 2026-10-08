@@ -5,7 +5,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/utils/app_date_time_formatter.dart';
 import '../../../core/widgets/buttons/app_button.dart';
 import '../helper/employee_bottom_sheets.dart' hide EmployeeProjectModel;
 import '../helper/employee_enums.dart';
@@ -36,7 +38,10 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
     showFinishWorkSheet(
       context: context,
       projectName: state.currentProject.fullName,
-      totalLogged: '${(state.elapsed.inMinutes / 60).toStringAsFixed(1)} hrs',
+      totalLogged: AppDateTimeFormatter.formatShortUnit(
+        double.parse((state.elapsed.inMinutes / 60).toStringAsFixed(1)),
+        'hrs',
+      ),
       onSave: () {
         ref.read(employeeTimerProvider.notifier).finishTimer();
         _showMessage(context, context.loc.workFinished);
@@ -65,7 +70,7 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildWeekLabel()),
+              sliver: SliverToBoxAdapter(child: _buildWeekLabel(context)),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 14.h)),
@@ -180,11 +185,15 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildWeekLabel() {
+  Widget _buildWeekLabel(BuildContext context) {
+    final weekStart = DateTime.utc(2026, 9, 14);
+    final weekEnd = DateTime.utc(2026, 9, 20);
+    final formattedRange =
+        AppDateTimeFormatter.formatDateRange(weekStart, weekEnd);
     return Padding(
       padding: EdgeInsets.only(top: 4.h),
       child: Text(
-        'Week 38 · Sept 14 – Sept 20',
+        context.loc.weekRange('38', formattedRange),
         style: TextStyle(fontSize: 16.sp, color: AppColors.textTertiary),
       ),
     );
@@ -281,7 +290,7 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
           SizedBox(height: 5.h),
 
           Text(
-            'Started at 07:30 am',
+            context.loc.startedAt(state.currentProject.formattedStartTime),
             style: TextStyle(
               fontSize: 15.sp,
               color: Colors.white.withValues(alpha: .65),
@@ -350,7 +359,7 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
       width: double.infinity,
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: AppColors.black,
+        color: AppColors.textPrimary,
         borderRadius: BorderRadius.circular(8.r),
       ),
       child: Column(
@@ -360,14 +369,16 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
               Expanded(
                 child: _summaryItem(
                   title: context.loc.today.toUpperCase(),
-                  value: '7h 30min',
+                  value: const Duration(hours: 7, minutes: 30)
+                      .formatCompactLocalized(),
                 ),
               ),
 
               Expanded(
                 child: _summaryItem(
                   title: context.loc.thisWeek.toUpperCase(),
-                  value: '35h 30min',
+                  value: const Duration(hours: 35, minutes: 30)
+                      .formatCompactLocalized(),
                 ),
               ),
             ],
@@ -390,7 +401,11 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              context.loc.weekProgress('34h 15m', '40h'),
+              context.loc.weekProgress(
+                const Duration(hours: 34, minutes: 15)
+                    .formatCompactLocalized(),
+                const Duration(hours: 40).formatCompactLocalized(),
+              ),
               style: TextStyle(
                 fontSize: 15.sp,
                 color: Colors.white.withValues(alpha: .55),
@@ -504,7 +519,10 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
 
     return GestureDetector(
       onTap: () {
-        _showMessage(context, '${log.project.fullName} · ${log.duration} hrs');
+        _showMessage(
+          context,
+          '${log.project.fullName} · ${log.formattedDuration} ${context.loc.hrsShort}',
+        );
         context.push(RouteConstants.employeeAssignmentDetails);
       },
       child: Container(
@@ -522,7 +540,7 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    log.date,
+                    log.formattedDate,
                     style: TextStyle(
                       fontSize: 15.sp,
                       color: AppColors.textTertiary,
@@ -531,7 +549,7 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
                 ),
 
                 Text(
-                  log.duration,
+                  log.formattedDuration,
                   style: TextStyle(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w700,
@@ -542,7 +560,7 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
                 SizedBox(width: 5.w),
 
                 Text(
-                  'hrs',
+                  context.loc.hrsShort,
                   style: TextStyle(
                     fontSize: 15.sp,
                     color: AppColors.textSecondary,
@@ -586,7 +604,7 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    '${log.project.startTime} – ${log.project.endTime} · ${context.loc.breakTime}: ${log.breakTime}',
+                    '${log.project.formattedTimeRange} · ${context.loc.breakTime}: ${log.formattedBreakTime}',
                     style: TextStyle(
                       fontSize: 15.sp,
                       color: AppColors.textTertiary,

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../helper/employee_enums.dart';
 import '../helper/employee_models.dart';
@@ -180,7 +181,7 @@ class EmployeePlanPage extends ConsumerWidget {
             fontWeight: FontWeight.w600,
           ),
           selectedDecoration: const BoxDecoration(
-            color: AppColors.black,
+            color: AppColors.primary,
             shape: BoxShape.circle,
           ),
           todayDecoration: const BoxDecoration(
@@ -308,7 +309,10 @@ class EmployeePlanPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildEventCard(BuildContext context, EmployeeCalendarEventModel event) {
+  Widget _buildEventCard(
+    BuildContext context,
+    EmployeeCalendarEventModel event,
+  ) {
     final project = event.project;
     final activity = project.activity;
 
@@ -389,37 +393,7 @@ class EmployeePlanPage extends ConsumerWidget {
   }
 
   String _dayName(DateTime date) {
-    const names = [
-      'MONDAY',
-      'TUESDAY',
-      'WEDNESDAY',
-      'THURSDAY',
-      'FRIDAY',
-      'SATURDAY',
-      'SUNDAY',
-    ];
-
-    return '${names[date.weekday - 1]}, '
-        '${_monthName(date.month)} ${date.day}';
-  }
-
-  String _monthName(int month) {
-    const months = [
-      'JAN',
-      'FEB',
-      'MAR',
-      'APR',
-      'MAY',
-      'JUN',
-      'JUL',
-      'AUG',
-      'SEP',
-      'OCT',
-      'NOV',
-      'DEC',
-    ];
-
-    return months[month - 1];
+    return date.formatDayHeader();
   }
 
   void _showMessage(BuildContext context, String message) {

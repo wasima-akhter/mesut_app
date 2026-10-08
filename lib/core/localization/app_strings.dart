@@ -52,6 +52,7 @@ class AppStrings {
   String get date => get('common.date', 'Date');
   String get time => get('common.time', 'Time');
   String get duration => get('common.duration', 'Duration');
+  String get hrsShort => get('common.hrsShort', 'hrs');
   String durationDays(String count) =>
       get('common.durationDays', '{count} days', {'count': count});
   String durationHours(String count) =>
@@ -272,6 +273,8 @@ class AppStrings {
   String get employeeRole => get('employee.employeeRole', 'Field Employee');
   String get currentTask => get('employee.currentTask', 'Current Task');
   String get activeTimer => get('employee.activeTimer', 'Active Timer');
+  String startedAt(String time) =>
+      get('employee.startedAt', 'Started at {time}', {'time': time});
   String get timerRunning =>
       get('employee.timerRunning', 'Timer is currently running');
   String get startNewTimer => get('employee.startNewTimer', 'Start New Timer');
@@ -338,6 +341,8 @@ class AppStrings {
     '{logged} of {total} logged this week',
     {'logged': logged, 'total': total},
   );
+  String get hoursThisWeek =>
+      get('employee.hoursThisWeek', 'Hours this Week');
   String get myPlan => get('employee.myPlan', 'My Plan');
   String get noAssignments =>
       get('employee.noAssignments', 'No assignments found for this date');

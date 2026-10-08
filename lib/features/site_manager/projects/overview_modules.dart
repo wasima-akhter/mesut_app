@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/localization/app_localization.dart';
 import '../../../core/services/launcher_service.dart';
 import '../../../core/services/permission_service.dart';
+import '../../../core/utils/app_date_time_formatter.dart';
 
 /// =============================================================
 /// OVERVIEW
@@ -389,7 +390,9 @@ Widget buildScaffoldSpecificationCard([BuildContext? context]) {
             borderRadius: BorderRadius.circular(5.r),
           ),
           child: Text(
-            loc.nextSafetyInspection('Sept 18 – Sept 20 (2.5 days)'),
+            loc.nextSafetyInspection(
+              '${AppDateTimeFormatter.formatDateRange(DateTime.utc(2026, 9, 18), DateTime.utc(2026, 9, 20))} (${AppDateTimeFormatter.formatShortUnit(2.5, 'days')})',
+            ),
             style: TextStyle(
               fontSize: 15.5.sp,
               color: const Color(0xFFF79009),
@@ -404,6 +407,11 @@ Widget buildScaffoldSpecificationCard([BuildContext? context]) {
 
 Widget buildScheduleCard([BuildContext? context]) {
   final loc = AppLocalization.current;
+  final scheduleDateRange = AppDateTimeFormatter.formatDateRange(
+    DateTime.utc(2026, 9, 18),
+    DateTime.utc(2026, 9, 20),
+  );
+
   return card(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -414,14 +422,14 @@ Widget buildScheduleCard([BuildContext? context]) {
         _scheduleRow(
           color: const Color(0xFF12B76A),
           title: loc.erectionPhase,
-          date: 'Sep 18 – Sep 20, 2026',
+          date: scheduleDateRange,
           duration: loc.durationDays('2.5'),
         ),
         SizedBox(height: 12.h),
         _scheduleRow(
           color: const Color(0xFFF79009),
           title: loc.dismantlingPhase,
-          date: 'Sep 18 – Sep 20, 2026',
+          date: scheduleDateRange,
           duration: loc.durationDays('2.5'),
         ),
       ],

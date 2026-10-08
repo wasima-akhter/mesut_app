@@ -4,7 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_radii.dart';
+import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/utils/app_date_time_formatter.dart';
 import '../helper/site_manager_enums.dart';
 import '../helper/site_manager_models.dart';
 import '../presentation/providers/site_manager_time_provider.dart';
@@ -84,7 +86,13 @@ class _SiteManagerTimeTrackingPageState
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  context.loc.weekRange('38', 'Sep 14 – Sep 20'),
+                  context.loc.weekRange(
+                    '38',
+                    AppDateTimeFormatter.formatDateRange(
+                      DateTime.utc(2026, 9, 14),
+                      DateTime.utc(2026, 9, 20),
+                    ),
+                  ),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
@@ -863,7 +871,8 @@ class _SiteManagerTimeTrackingPageState
               Expanded(
                 child: _summaryValue(
                   title: context.loc.today,
-                  value: '7h 30min',
+                  value: const Duration(hours: 7, minutes: 30)
+                      .formatCompactLocalized(),
                 ),
               ),
               Expanded(
@@ -871,7 +880,8 @@ class _SiteManagerTimeTrackingPageState
                   alignment: Alignment.centerRight,
                   child: _summaryValue(
                     title: context.loc.thisWeek,
-                    value: '35h 30min',
+                    value: const Duration(hours: 35, minutes: 30)
+                        .formatCompactLocalized(),
                     alignRight: true,
                   ),
                 ),
@@ -896,7 +906,11 @@ class _SiteManagerTimeTrackingPageState
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              context.loc.loggedThisWeek('34h 15m', '40h'),
+              context.loc.loggedThisWeek(
+                const Duration(hours: 34, minutes: 15)
+                    .formatCompactLocalized(),
+                const Duration(hours: 40).formatCompactLocalized(),
+              ),
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: AppColors.neutral300),
@@ -1127,7 +1141,7 @@ class _SiteManagerTimeTrackingPageState
           SizedBox(height: 3.h),
 
           Text(
-            '7h 30min',
+            const Duration(hours: 7, minutes: 30).formatCompactLocalized(),
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(color: AppColors.white),
@@ -1137,19 +1151,19 @@ class _SiteManagerTimeTrackingPageState
 
           _crewProgress(
             activity: ActivityType.erection,
-            hours: '2hrs',
+            hours: const Duration(hours: 2).formatCompactLocalized(),
             progress: .65,
           ),
 
           _crewProgress(
             activity: ActivityType.dismantling,
-            hours: '2hrs',
+            hours: const Duration(hours: 2).formatCompactLocalized(),
             progress: .45,
           ),
 
           _crewProgress(
             activity: ActivityType.others,
-            hours: '2hrs',
+            hours: const Duration(hours: 2).formatCompactLocalized(),
             progress: .35,
           ),
         ],

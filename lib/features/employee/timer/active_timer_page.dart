@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/widgets/buttons/app_button.dart';
 import '../helper/employee_enums.dart';
@@ -248,14 +249,14 @@ class ActiveTimerPage extends ConsumerWidget {
           SizedBox(height: 14.h),
 
           Text(
-            'Started today at 07:30 am',
+            '${context.loc.today} · ${context.loc.startedAt(const TimeOfDay(hour: 7, minute: 30).formatLocalized())}',
             style: TextStyle(fontSize: 16.sp, color: AppColors.textTertiary),
           ),
 
           SizedBox(height: 5.h),
 
           Text(
-            '${context.loc.breakTime}: 45m',
+            '${context.loc.breakTime}: ${const Duration(minutes: 45).formatCompactLocalized()}',
             style: TextStyle(
               fontSize: 16.sp,
               color: timerState.isOnBreak

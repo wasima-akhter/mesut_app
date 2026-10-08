@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../helper/employee_enums.dart';
@@ -77,37 +78,47 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
       activity: EmployeeActivityType.erection,
       startTime: '07:30 am',
       endTime: '04:15 pm',
+      startTimeOfDay: TimeOfDay(hour: 7, minute: 30),
+      endTimeOfDay: TimeOfDay(hour: 16, minute: 15),
       siteManager: 'Mesut Rahaman',
     );
 
-    return const EmployeeTimerState(
+    final now = DateTime.now();
+
+    return EmployeeTimerState(
       isTimerRunning: false,
       isOnBreak: false,
       showThisMonth: false,
-      elapsed: Duration(hours: 2, minutes: 45, seconds: 20),
+      elapsed: const Duration(hours: 2, minutes: 45, seconds: 20),
       currentProject: defaultProject,
       currentActivity: EmployeeActivityType.erection,
       logs: [
         EmployeeTimeLogModel(
-          date: 'Today, Sept 18',
+          timestamp: now.toUtc(),
           project: defaultProject,
           duration: '8.0',
+          durationHours: 8.0,
           breakTime: '45m',
+          breakDuration: const Duration(minutes: 45),
           synced: true,
         ),
         EmployeeTimeLogModel(
-          date: 'Today, Sept 18',
-          project: EmployeeProjectModel(
+          timestamp: now.toUtc(),
+          project: const EmployeeProjectModel(
             id: 'Prj-0842',
             name: 'Goltsteins.Complex',
             address: 'Goltsteinstraße 12, 50968 Köln',
             activity: EmployeeActivityType.dismantling,
             startTime: '07:30 am',
             endTime: '04:15 pm',
+            startTimeOfDay: TimeOfDay(hour: 7, minute: 30),
+            endTimeOfDay: TimeOfDay(hour: 16, minute: 15),
             siteManager: 'Mesut Rahaman',
           ),
           duration: '8.0',
+          durationHours: 8.0,
           breakTime: '45m',
+          breakDuration: const Duration(minutes: 45),
           synced: true,
         ),
       ],
@@ -152,14 +163,11 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
     state = state.copyWith(
       isTimerRunning: false,
       isOnBreak: false,
+      elapsed: Duration.zero,
     );
   }
 
   void toggleShowThisMonth() {
     state = state.copyWith(showThisMonth: !state.showThisMonth);
-  }
-
-  void addLog(EmployeeTimeLogModel log) {
-    state = state.copyWith(logs: [log, ...state.logs]);
   }
 }

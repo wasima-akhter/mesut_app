@@ -11,6 +11,9 @@ class Project {
   final String address;
   final String owner;
   final String duration;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final double? durationDays;
   final ProjectPhase phase;
   final ProjectPriority priority;
   final ProjectStatus status;
@@ -22,6 +25,9 @@ class Project {
     required this.address,
     required this.owner,
     required this.duration,
+    this.startDate,
+    this.endDate,
+    this.durationDays,
     required this.phase,
     required this.priority,
     required this.status,

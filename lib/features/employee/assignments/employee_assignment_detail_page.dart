@@ -18,18 +18,26 @@ class AssignmentDetailsPage extends ConsumerWidget {
 
   void _startTimer(BuildContext context, WidgetRef ref) {
     final assignment = ref.read(assignmentDetailsProvider).assignment;
-    ref.read(employeeTimerProvider.notifier).startTimer(
-      project: EmployeeProjectModel(
-        id: assignment.project.split('·').first.trim(),
-        name: assignment.project,
-        address: assignment.address,
-        activity: assignment.activity,
-        startTime: '07:30 am',
-        endTime: '04:15 pm',
-        siteManager: assignment.siteManager,
-      ),
-      activity: assignment.activity,
-    );
+    ref
+        .read(employeeTimerProvider.notifier)
+        .startTimer(
+          project: EmployeeProjectModel(
+            id: assignment.project.split('·').first.trim(),
+            name: assignment.project,
+            address: assignment.address,
+            activity: assignment.activity,
+            startTime: '07:30 am',
+            endTime: '04:15 pm',
+            startTimeOfDay:
+                assignment.startTimeOfDay ??
+                const TimeOfDay(hour: 7, minute: 30),
+            endTimeOfDay:
+                assignment.endTimeOfDay ??
+                const TimeOfDay(hour: 16, minute: 15),
+            siteManager: assignment.siteManager,
+          ),
+          activity: assignment.activity,
+        );
     context.push(RouteConstants.employeeActiveTimerPage);
   }
 
@@ -179,7 +187,7 @@ class AssignmentDetailsPage extends ConsumerWidget {
 
           _infoRow(
             Icons.access_time_outlined,
-            'Today, ${assignment.schedule.replaceFirst('Start: ', '')} - 04:30 pm',
+            '${context.loc.today}, ${assignment.formattedSchedule}',
           ),
 
           SizedBox(height: 8.h),
@@ -503,8 +511,9 @@ class AssignmentDetailsPage extends ConsumerWidget {
                 color: task.isCompleted
                     ? AppColors.textTertiary
                     : AppColors.textSecondary,
-                decoration:
-                    task.isCompleted ? TextDecoration.lineThrough : null,
+                decoration: task.isCompleted
+                    ? TextDecoration.lineThrough
+                    : null,
               ),
             ),
           ),

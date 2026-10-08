@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
 import 'employee_enums.dart';
 
@@ -311,29 +312,15 @@ class _AddTimeEntrySheetState extends State<_AddTimeEntrySheet> {
   }
 
   String _formatDate(DateTime date) {
-    final day = date.day.toString().padLeft(2, '0');
-    final month = date.month.toString().padLeft(2, '0');
-    final year = date.year.toString();
-
-    return '$day-$month-$year';
+    return date.formatLocalized(style: 'numeric');
   }
 
   String _formatTime(TimeOfDay time) {
-    final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
-
-    final minute = time.minute.toString().padLeft(2, '0');
-
-    final period = time.period == DayPeriod.am ? 'am' : 'pm';
-
-    return '$hour:$minute $period';
+    return time.formatLocalized();
   }
 
   String _formatBreak() {
-    if (breakTime.inHours > 0) {
-      return '${breakTime.inHours}h ${breakTime.inMinutes.remainder(60)}m';
-    }
-
-    return '${breakTime.inMinutes}m';
+    return breakTime.formatCompactLocalized();
   }
 
   void _saveEntry() {

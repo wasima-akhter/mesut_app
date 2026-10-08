@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/constants/route_constants.dart';
 import '../../../app/theme/app_colors.dart';
+import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../helper/employee_enums.dart';
 import '../helper/employee_models.dart';
@@ -21,6 +22,8 @@ class EmployeeHomePage extends ConsumerWidget {
       address: 'Goltsteinstraße 12, 50968 Köln',
       activity: EmployeeActivityType.erection,
       schedule: 'Start: 07:30 am',
+      startTimeOfDay: TimeOfDay(hour: 7, minute: 30),
+      endTimeOfDay: TimeOfDay(hour: 16, minute: 15),
       scaffoldArea: '50m²',
       siteManager: 'Mesut Rahaman',
     ),
@@ -29,6 +32,8 @@ class EmployeeHomePage extends ConsumerWidget {
       address: 'Goltsteinstraße 12, 50968 Köln',
       activity: EmployeeActivityType.dismantling,
       schedule: 'Start: 07:30 am',
+      startTimeOfDay: TimeOfDay(hour: 7, minute: 30),
+      endTimeOfDay: TimeOfDay(hour: 16, minute: 15),
       scaffoldArea: '50m²',
       siteManager: 'Mesut Rahaman',
     ),
@@ -37,6 +42,8 @@ class EmployeeHomePage extends ConsumerWidget {
       address: 'Goltsteinstraße 12, 50968 Köln',
       activity: EmployeeActivityType.erection,
       schedule: 'Start: 07:30 am',
+      startTimeOfDay: TimeOfDay(hour: 7, minute: 30),
+      endTimeOfDay: TimeOfDay(hour: 16, minute: 15),
       scaffoldArea: '50m²',
       siteManager: 'Mesut Rahaman',
     ),
@@ -57,18 +64,24 @@ class EmployeeHomePage extends ConsumerWidget {
     EmployeeAssignmentModel assignment,
   ) {
     ref.read(assignmentDetailsProvider.notifier).setAssignment(assignment);
-    ref.read(employeeTimerProvider.notifier).startTimer(
-      project: EmployeeProjectModel(
-        id: assignment.project.split('·').first.trim(),
-        name: assignment.project,
-        address: assignment.address,
-        activity: assignment.activity,
-        startTime: '07:30 am',
-        endTime: '04:15 pm',
-        siteManager: assignment.siteManager,
-      ),
-      activity: assignment.activity,
-    );
+    ref
+        .read(employeeTimerProvider.notifier)
+        .startTimer(
+          project: EmployeeProjectModel(
+            id: assignment.project.split('·').first.trim(),
+            name: assignment.project,
+            address: assignment.address,
+            activity: assignment.activity,
+            startTime: '07:30 am',
+            endTime: '04:15 pm',
+            startTimeOfDay:
+                assignment.startTimeOfDay ?? const TimeOfDay(hour: 7, minute: 30),
+            endTimeOfDay:
+                assignment.endTimeOfDay ?? const TimeOfDay(hour: 16, minute: 15),
+            siteManager: assignment.siteManager,
+          ),
+          activity: assignment.activity,
+        );
     context.push(RouteConstants.employeeActiveTimerPage);
   }
 
@@ -87,7 +100,7 @@ class EmployeeHomePage extends ConsumerWidget {
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildDate()),
+              sliver: SliverToBoxAdapter(child: _buildDate(context)),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 18.h)),
@@ -183,11 +196,11 @@ class EmployeeHomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildDate() {
+  Widget _buildDate(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(top: 18.h),
       child: Text(
-        'Friday, September 18',
+        DateTime.now().formatLocalized(style: 'weekday_full'),
         style: TextStyle(
           fontSize: 17.sp,
           color: AppColors.textSecondary,
@@ -262,7 +275,7 @@ class EmployeeHomePage extends ConsumerWidget {
                 const Spacer(),
 
                 Text(
-                  assignment.schedule,
+                  assignment.formattedSchedule,
                   style: TextStyle(
                     fontSize: 15.sp,
                     color: AppColors.textSecondary,

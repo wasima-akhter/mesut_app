@@ -10,60 +10,66 @@ abstract class NotificationsDataSource {
 
 class NotificationsMockDataSourceImpl implements NotificationsDataSource {
   final List<AppNotification> _notifications = [
-    const AppNotification(
+    AppNotification(
       id: '1',
       title: 'New Assignment Assigned',
-      message: 'You have been assigned to Scaffold Erection at Goltsteins.Complex for tomorrow morning.',
-      time: '10:30 AM',
+      message:
+          'You have been assigned to Scaffold Erection at Goltsteins.Complex for tomorrow morning.',
+      timestamp: DateTime.utc(2026, 10, 8, 10, 30),
       dateGroup: 'today',
       projectTag: 'Goltsteins.Complex',
       type: NotificationCategory.schedule,
       isRead: false,
     ),
-    const AppNotification(
+    AppNotification(
       id: '2',
       title: 'Safety Inspection Due',
-      message: 'Routine safety audit required for Front Scaffold #3 at Lindenthal Business Center.',
-      time: '08:15 AM',
+      message:
+          'Routine safety audit required for Front Scaffold #3 at Lindenthal Business Center.',
+      timestamp: DateTime.utc(2026, 10, 8, 8, 15),
       dateGroup: 'today',
       projectTag: 'Lindenthal Center',
       type: NotificationCategory.safety,
       isRead: false,
     ),
-    const AppNotification(
+    AppNotification(
       id: '3',
       title: 'Time Entry Approved',
-      message: 'Your time log of 8.5 hours for Oct 6 has been reviewed and synced successfully.',
-      time: 'Yesterday, 05:45 PM',
+      message:
+          'Your time log of 8.5 hours for Oct 6 has been reviewed and synced successfully.',
+      timestamp: DateTime.utc(2026, 10, 7, 17, 45),
       dateGroup: 'yesterday',
       projectTag: 'Prj-0842',
       type: NotificationCategory.timeTracking,
       isRead: true,
     ),
-    const AppNotification(
+    AppNotification(
       id: '4',
       title: 'Phase Transition',
-      message: 'Project "Goldstein Complex" moved from Erection to Standing Scaffold phase.',
-      time: 'Yesterday, 02:10 PM',
+      message:
+          'Project "Goldstein Complex" moved from Erection to Standing Scaffold phase.',
+      timestamp: DateTime.utc(2026, 10, 7, 14, 10),
       dateGroup: 'yesterday',
       projectTag: 'Goltsteins.Complex',
       type: NotificationCategory.task,
       isRead: true,
     ),
-    const AppNotification(
+    AppNotification(
       id: '5',
       title: 'Weather Advisory',
-      message: 'High wind advisory (45 km/h) forecasted in Cologne region. Secure all loose scaffold planks.',
-      time: 'Oct 4, 09:00 AM',
+      message:
+          'High wind advisory (45 km/h) forecasted in Cologne region. Secure all loose scaffold planks.',
+      timestamp: DateTime.utc(2026, 10, 4, 9, 0),
       dateGroup: 'earlier',
       type: NotificationCategory.system,
       isRead: true,
     ),
-    const AppNotification(
+    AppNotification(
       id: '6',
       title: 'Inspection Survey Completed',
-      message: 'Technical field survey report submitted for Severinstraße 44.',
-      time: 'Oct 3, 04:30 PM',
+      message:
+          'Technical field survey report submitted for Severinstraße 44.',
+      timestamp: DateTime.utc(2026, 10, 3, 16, 30),
       dateGroup: 'earlier',
       projectTag: 'Severinstraße 44',
       type: NotificationCategory.inspection,

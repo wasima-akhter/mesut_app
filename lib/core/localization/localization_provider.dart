@@ -6,10 +6,9 @@ import 'app_localization.dart';
 import 'app_strings.dart';
 
 /// NotifierProvider for managing the current application language
-final appLanguageProvider =
-    NotifierProvider<AppLanguageNotifier, AppLanguage>(
-      AppLanguageNotifier.new,
-    );
+final appLanguageProvider = NotifierProvider<AppLanguageNotifier, AppLanguage>(
+  AppLanguageNotifier.new,
+);
 
 class AppLanguageNotifier extends Notifier<AppLanguage> {
   static const String _storageKey = 'selected_language_code';

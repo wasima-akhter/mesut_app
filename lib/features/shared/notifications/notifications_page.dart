@@ -474,7 +474,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                           SizedBox(width: 8.w),
                         ],
                         Text(
-                          item.time,
+                          item.displayTime,
                           style: TextStyle(
                             fontSize: 14.5.sp,
                             color: AppColors.textTertiary,

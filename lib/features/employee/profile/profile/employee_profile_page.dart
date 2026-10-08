@@ -207,7 +207,7 @@ class EmployeeProfilePage extends ConsumerWidget {
       width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 10.w),
       decoration: BoxDecoration(
-        color: AppColors.black,
+        color: AppColors.textPrimary,
         borderRadius: BorderRadius.circular(10.r),
       ),
       child: Row(
@@ -217,7 +217,10 @@ class EmployeeProfilePage extends ConsumerWidget {
           _divider(),
           _statItem(context.loc.completed, '14'),
           _divider(),
-          _statItem(context.loc.get('employee.hoursThisWeek', 'Hours this Week'), '35.5h'),
+          _statItem(
+            context.loc.get('employee.hoursThisWeek', 'Hours this Week'),
+            '35.5h',
+          ),
         ],
       ),
     );

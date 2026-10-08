@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/services/permission_service.dart';
 
@@ -15,7 +16,7 @@ class EmployeePhotoItem {
   final String category;
   final String? url;
   final IconData placeholderIcon;
-  final String timestamp;
+  final DateTime timestamp;
 
   const EmployeePhotoItem({
     required this.id,
@@ -25,6 +26,8 @@ class EmployeePhotoItem {
     this.placeholderIcon = Icons.business_outlined,
     required this.timestamp,
   });
+
+  String formattedTimestamp() => timestamp.formatRelative();
 }
 
 class EmployeeAssignmentPhotosPage extends StatefulWidget {
@@ -50,59 +53,59 @@ class _EmployeeAssignmentPhotosPageState
   ];
 
   final List<EmployeePhotoItem> _photos = [
-    const EmployeePhotoItem(
+    EmployeePhotoItem(
       id: 'photo-1',
       title: 'North Facade Scaffold Setup',
       category: 'Scaffold Setup',
       url:
           'https://images.unsplash.com/photo-1541888946425-d0fbb18f15f6?w=600&auto=format&fit=crop&q=80',
       placeholderIcon: Icons.business,
-      timestamp: 'Today, 08:30 AM',
+      timestamp: DateTime.utc(2026, 10, 8, 8, 30),
     ),
-    const EmployeePhotoItem(
+    EmployeePhotoItem(
       id: 'photo-2',
       title: 'Ground Frame & Base Jacks',
       category: 'Ground Level',
       url:
           'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&auto=format&fit=crop&q=80',
       placeholderIcon: Icons.construction,
-      timestamp: 'Today, 09:15 AM',
+      timestamp: DateTime.utc(2026, 10, 8, 9, 15),
     ),
-    const EmployeePhotoItem(
+    EmployeePhotoItem(
       id: 'photo-3',
       title: 'Safety Netting & Guard Rails',
       category: 'Safety Checks',
       url:
           'https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?w=600&auto=format&fit=crop&q=80',
       placeholderIcon: Icons.security,
-      timestamp: 'Yesterday, 04:45 PM',
+      timestamp: DateTime.utc(2026, 10, 7, 16, 45),
     ),
-    const EmployeePhotoItem(
+    EmployeePhotoItem(
       id: 'photo-4',
       title: 'Upper Section Assembly',
       category: 'Progress',
       url:
           'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&auto=format&fit=crop&q=80',
       placeholderIcon: Icons.apartment,
-      timestamp: 'Yesterday, 02:10 PM',
+      timestamp: DateTime.utc(2026, 10, 7, 14, 10),
     ),
-    const EmployeePhotoItem(
+    EmployeePhotoItem(
       id: 'photo-5',
       title: 'Anchor Wall Mount Details',
       category: 'Safety Checks',
       url:
           'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600&auto=format&fit=crop&q=80',
       placeholderIcon: Icons.hardware,
-      timestamp: 'Oct 04, 11:20 AM',
+      timestamp: DateTime.utc(2026, 10, 4, 11, 20),
     ),
-    const EmployeePhotoItem(
+    EmployeePhotoItem(
       id: 'photo-6',
       title: 'Material Delivery & Stockpile',
       category: 'Ground Level',
       url:
           'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=600&auto=format&fit=crop&q=80',
       placeholderIcon: Icons.local_shipping_outlined,
-      timestamp: 'Oct 03, 08:00 AM',
+      timestamp: DateTime.utc(2026, 10, 3, 8, 0),
     ),
   ];
 
@@ -145,7 +148,7 @@ class _EmployeeAssignmentPhotosPageState
             category: 'Scaffold Setup',
             url: image.path,
             placeholderIcon: Icons.photo_camera,
-            timestamp: 'Just now',
+            timestamp: DateTime.now().toUtc(),
           ),
         );
       });
@@ -426,7 +429,7 @@ class _EmployeeAssignmentPhotosPageState
                       SizedBox(width: 4.w),
                       Expanded(
                         child: Text(
-                          photo.timestamp,
+                          photo.formattedTimestamp(),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -677,7 +680,7 @@ class _FullScreenEmployeePhotoViewerState
                         ),
                         SizedBox(width: 8.w),
                         Text(
-                          currentPhoto.timestamp,
+                          currentPhoto.formattedTimestamp(),
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: 15.sp,

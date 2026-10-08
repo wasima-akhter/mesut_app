@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/extensions/date_time_extensions.dart';
 import '../../../../core/localization/context_extensions.dart';
 import 'enums.dart';
 
@@ -1333,22 +1334,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
   }
 
   String _formatDate(DateTime date) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
-    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+    return date.formatLocalized();
   }
 
   // ============================================================
