@@ -289,14 +289,11 @@ Future<void> _navigation() async {
 }
 
 void showMessage(String message) {
-  ScaffoldMessenger.of(appNavigatorKey.currentContext!)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(
-        content: Text(message, style: TextStyle(fontSize: 16.sp)),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+  AppSnackBar.showInfo(
+    null,
+    message,
+    icon: Icons.navigation_outlined,
+  );
 }
 
 Future<void> showPermissionDialog({

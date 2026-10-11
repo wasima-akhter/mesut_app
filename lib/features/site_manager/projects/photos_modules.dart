@@ -15,6 +15,7 @@ import 'models.dart';
 import 'overview_modules.dart';
 import 'pdf_plan_preview_screen.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import 'services/pdf_export_service.dart';
 
 class PhotosTab extends ConsumerStatefulWidget {
@@ -158,44 +159,18 @@ class _PhotosTabState extends ConsumerState<PhotosTab> {
       await PdfExportService.savePdfToDevice(bytes: bytes, filename: file.name);
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: const Color(0xFF12B76A),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          content: Row(
-            children: [
-              Icon(
-                Icons.check_circle_outline,
-                color: Colors.white,
-                size: 20.sp,
-              ),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: Text(
-                  'Downloaded: ${file.name}',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          action: SnackBarAction(
-            label: 'Open',
-            textColor: Colors.white,
-            onPressed: () => _previewPlan(file),
-          ),
-        ),
+      AppSnackBar.showSuccess(
+        context,
+        'Downloaded: ${file.name}',
+        actionLabel: 'Open',
+        onAction: () => _previewPlan(file),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      AppSnackBar.showError(
         context,
-      ).showSnackBar(SnackBar(content: Text('Download failed: $e')));
+        'Download failed: $e',
+      );
     }
   }
 
@@ -220,9 +195,10 @@ class _PhotosTabState extends ConsumerState<PhotosTab> {
                   .read(projectPhotosProvider.notifier)
                   .removePlanFile(file.name);
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(
+              AppSnackBar.showInfo(
                 context,
-              ).showSnackBar(SnackBar(content: Text('Removed ${file.name}')));
+                'Removed ${file.name}',
+              );
             },
             text: 'Delete',
           ),
@@ -985,18 +961,10 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
       }
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(loc.downloadStarted, style: TextStyle(fontSize: 16.sp)),
-        ),
-      );
+      AppSnackBar.showInfo(context, loc.downloadStarted);
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(loc.downloadStarted, style: TextStyle(fontSize: 16.sp)),
-        ),
-      );
+      AppSnackBar.showInfo(context, loc.downloadStarted);
     }
   }
 
@@ -1100,13 +1068,9 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
               icon: Icons.photo_camera_outlined,
               onTap: () {
                 widget.onSetCover();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      loc.coverPhotoUpdated,
-                      style: TextStyle(fontSize: 16.sp),
-                    ),
-                  ),
+                AppSnackBar.showSuccess(
+                  context,
+                  loc.coverPhotoUpdated,
                 );
               },
             ),

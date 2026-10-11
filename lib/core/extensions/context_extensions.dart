@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_colors.dart';
+import '../widgets/snack/app_snackbar.dart';
 
 extension ContextExtensions on BuildContext {
   // ---------------------------------------------------------------------------
@@ -53,17 +53,123 @@ extension ContextExtensions on BuildContext {
   // SnackBar
   // ---------------------------------------------------------------------------
 
-  void showAppSnackBar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(this)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          backgroundColor: isError ? AppColors.error : AppColors.neutral900,
-          content: Text(
-            message,
-            style: bodyMedium.copyWith(color: AppColors.white),
-          ),
-        ),
-      );
+  void showSuccessSnackBar(
+    String message, {
+    String? title,
+    IconData? icon,
+    bool showIcon = true,
+    Duration duration = const Duration(seconds: 4),
+    SnackBarAction? action,
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
+    AppSnackBar.showSuccess(
+      this,
+      message,
+      title: title,
+      icon: icon,
+      showIcon: showIcon,
+      duration: duration,
+      action: action,
+      actionLabel: actionLabel,
+      onAction: onAction,
+    );
+  }
+
+  void showErrorSnackBar(
+    String message, {
+    String? title,
+    IconData? icon,
+    bool showIcon = true,
+    Duration duration = const Duration(seconds: 4),
+    SnackBarAction? action,
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
+    AppSnackBar.showError(
+      this,
+      message,
+      title: title,
+      icon: icon,
+      showIcon: showIcon,
+      duration: duration,
+      action: action,
+      actionLabel: actionLabel,
+      onAction: onAction,
+    );
+  }
+
+  void showWarningSnackBar(
+    String message, {
+    String? title,
+    IconData? icon,
+    bool showIcon = true,
+    Duration duration = const Duration(seconds: 4),
+    SnackBarAction? action,
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
+    AppSnackBar.showWarning(
+      this,
+      message,
+      title: title,
+      icon: icon,
+      showIcon: showIcon,
+      duration: duration,
+      action: action,
+      actionLabel: actionLabel,
+      onAction: onAction,
+    );
+  }
+
+  void showInfoSnackBar(
+    String message, {
+    String? title,
+    IconData? icon,
+    bool showIcon = true,
+    Duration duration = const Duration(seconds: 4),
+    SnackBarAction? action,
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
+    AppSnackBar.showInfo(
+      this,
+      message,
+      title: title,
+      icon: icon,
+      showIcon: showIcon,
+      duration: duration,
+      action: action,
+      actionLabel: actionLabel,
+      onAction: onAction,
+    );
+  }
+
+  void showAppSnackBar(
+    String message, {
+    bool isError = false,
+    AppSnackBarType? type,
+    String? title,
+    IconData? icon,
+    bool showIcon = true,
+    Duration duration = const Duration(seconds: 4),
+    SnackBarAction? action,
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
+    final resolvedType = type ??
+        (isError ? AppSnackBarType.error : AppSnackBarType.info);
+    AppSnackBar.show(
+      context: this,
+      message: message,
+      type: resolvedType,
+      title: title,
+      icon: icon,
+      showIcon: showIcon,
+      duration: duration,
+      action: action,
+      actionLabel: actionLabel,
+      onAction: onAction,
+    );
   }
 }

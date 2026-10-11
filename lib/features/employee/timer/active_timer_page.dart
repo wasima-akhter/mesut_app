@@ -6,6 +6,7 @@ import '../../../app/theme/app_colors.dart';
 import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import '../helper/employee_enums.dart';
 import '../helper/employee_models.dart';
 import '../presentation/providers/employee_timer_provider.dart';
@@ -28,15 +29,7 @@ class ActiveTimerPage extends ConsumerWidget {
             Navigator.of(context).pop();
             Navigator.of(context).pop();
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  context.loc.entrySaved,
-                  style: TextStyle(fontSize: 17.sp),
-                ),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+            AppSnackBar.showSuccess(context, context.loc.entrySaved);
           },
         );
       },

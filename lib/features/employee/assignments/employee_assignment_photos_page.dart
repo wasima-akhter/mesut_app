@@ -9,6 +9,7 @@ import '../../../app/theme/app_colors.dart';
 import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/services/permission_service.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 
 class EmployeePhotoItem {
   final String id;
@@ -120,15 +121,11 @@ class _EmployeeAssignmentPhotosPageState
     final allowed = await AppPermissions.requestCamera();
     if (!allowed) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              context.loc.get(
-                'common.cameraPermissionDenied',
-                'Camera permission denied',
-              ),
-            ),
-            behavior: SnackBarBehavior.floating,
+        AppSnackBar.showWarning(
+          context,
+          context.loc.get(
+            'common.cameraPermissionDenied',
+            'Camera permission denied',
           ),
         );
       }
@@ -152,15 +149,11 @@ class _EmployeeAssignmentPhotosPageState
           ),
         );
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.loc.get(
-              'siteManager.photoAdded',
-              'Photo added successfully',
-            ),
-          ),
-          behavior: SnackBarBehavior.floating,
+      AppSnackBar.showSuccess(
+        context,
+        context.loc.get(
+          'siteManager.photoAdded',
+          'Photo added successfully',
         ),
       );
     }

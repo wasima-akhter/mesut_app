@@ -8,6 +8,7 @@ import '../../../app/constants/route_constants.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import '../helper/employee_enums.dart';
 import '../helper/employee_models.dart';
 import '../presentation/providers/employee_assignment_details_provider.dart';
@@ -367,17 +368,11 @@ class EmployeeHomePage extends ConsumerWidget {
   }
 
   void _showNavigationMessage(BuildContext context, String address) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            '${context.loc.navigation}: $address',
-            style: TextStyle(fontSize: 16.sp),
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+    AppSnackBar.showInfo(
+      context,
+      '${context.loc.navigation}: $address',
+      icon: Icons.navigation_outlined,
+    );
   }
 
   Widget _activityChip(EmployeeActivityType activity) {

@@ -7,6 +7,7 @@ import '../../../app/theme/app_radii.dart';
 import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import '../../../core/utils/app_date_time_formatter.dart';
 import '../helper/site_manager_enums.dart';
 import '../helper/site_manager_models.dart';
@@ -1531,8 +1532,6 @@ class _SiteManagerTimeTrackingPageState
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+    AppSnackBar.showInfo(context, message);
   }
 }

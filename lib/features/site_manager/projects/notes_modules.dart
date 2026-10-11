@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import 'enums.dart';
 import 'models.dart';
 
@@ -492,13 +493,9 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
     final details = _detailsController.text.trim();
 
     if (details.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.loc.pleaseEnterNoteDetails,
-            style: TextStyle(fontSize: 17.sp),
-          ),
-        ),
+      AppSnackBar.showWarning(
+        context,
+        context.loc.pleaseEnterNoteDetails,
       );
       return;
     }

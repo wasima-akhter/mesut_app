@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import '../presentation/providers/site_manager_project_details_provider.dart';
 import 'dates_modules.dart';
 import 'enums.dart';
@@ -661,10 +662,6 @@ class _EditProjectDetailsBottomSheetState
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: TextStyle(fontSize: 16.sp)),
-      ),
-    );
+    AppSnackBar.showError(context, message);
   }
 }

@@ -9,6 +9,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import '../presentation/providers/site_manager_project_details_provider.dart';
 import 'enums.dart';
 import 'models.dart';
@@ -610,11 +611,7 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: TextStyle(fontSize: 16.sp)),
-      ),
-    );
+    AppSnackBar.showError(context, message);
   }
 
   String _formatDate(DateTime date) {

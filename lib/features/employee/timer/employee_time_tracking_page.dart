@@ -9,6 +9,7 @@ import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/utils/app_date_time_formatter.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import '../helper/employee_bottom_sheets.dart' hide EmployeeProjectModel;
 import '../helper/employee_enums.dart';
 import '../helper/employee_models.dart';
@@ -18,14 +19,7 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
   const EmployeeTimeTrackingPage({super.key});
 
   void _showMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message, style: TextStyle(fontSize: 17.sp)),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+    AppSnackBar.showInfo(context, message);
   }
 
   void _finishTimer(

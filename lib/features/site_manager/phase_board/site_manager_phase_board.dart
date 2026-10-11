@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import '../presentation/providers/site_manager_phase_board_provider.dart';
 
 enum ProjectPhase { enquiry, erection, dismantling, standing }
@@ -500,16 +501,12 @@ class _SiteManagerPhaseBoardPageState
         ? context.loc.get('siteManager.completed', 'Completed')
         : (phase != null ? _phaseLabel(phase) : '');
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          context.loc.get(
-            'siteManager.projectMovedTo',
-            'Moved ${project.id} to $destination',
-            {'id': project.id, 'phase': destination},
-          ),
-        ),
-        behavior: SnackBarBehavior.floating,
+    AppSnackBar.showSuccess(
+      context,
+      context.loc.get(
+        'siteManager.projectMovedTo',
+        'Moved ${project.id} to $destination',
+        {'id': project.id, 'phase': destination},
       ),
     );
   }

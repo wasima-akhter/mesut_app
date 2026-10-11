@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import 'models.dart';
 import 'overview_modules.dart';
 
@@ -650,10 +651,6 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: TextStyle(fontSize: 16.sp)),
-      ),
-    );
+    AppSnackBar.showError(context, message);
   }
 }

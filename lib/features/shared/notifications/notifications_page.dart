@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import 'domain/entities/notification_entity.dart';
 import 'presentation/providers/notifications_provider.dart';
 
@@ -46,17 +47,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message, style: TextStyle(fontSize: 17.5.sp)),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-        ),
-      );
+    AppSnackBar.showInfo(context, message);
   }
 
   @override

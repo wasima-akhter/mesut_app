@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/services/launcher_service.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import '../helper/employee_enums.dart';
 import '../helper/employee_models.dart';
 import '../presentation/providers/employee_assignment_details_provider.dart';
@@ -606,14 +607,7 @@ class AssignmentDetailsPage extends ConsumerWidget {
   }
 
   void _showMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message, style: TextStyle(fontSize: 17.sp)),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+    AppSnackBar.showInfo(context, message);
   }
 }
 

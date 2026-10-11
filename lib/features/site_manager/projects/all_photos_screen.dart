@@ -13,6 +13,7 @@ import 'overview_modules.dart';
 import 'pdf_plan_preview_screen.dart';
 import 'photos_modules.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import 'services/pdf_export_service.dart';
 
 class AllPhotosScreen extends ConsumerStatefulWidget {
@@ -49,9 +50,7 @@ class _AllPhotosScreenState extends ConsumerState<AllPhotosScreen> {
         : state.photos;
 
     if (photosToExport.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No photos available to export')),
-      );
+      AppSnackBar.showWarning(context, 'No photos available to export');
 
       return;
     }
@@ -163,12 +162,9 @@ class _AllPhotosScreenState extends ConsumerState<AllPhotosScreen> {
 
       Navigator.of(context, rootNavigator: true).pop(); // dismiss dialog
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: const Color(0xFFD32F2F),
-
-          content: Text('Failed to generate PDF: ${e.toString()}'),
-        ),
+      AppSnackBar.showError(
+        context,
+        'Failed to generate PDF: ${e.toString()}',
       );
     }
   }

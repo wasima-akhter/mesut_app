@@ -1,11 +1,13 @@
-import 'package:construction_app/app/constants/route_constants.dart';
-import 'package:construction_app/core/widgets/buttons/buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/constants/route_constants.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/widgets/buttons/app_button.dart';
+import '../../../core/widgets/buttons/app_outlined_button.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import '../../entry/nav/navigation_provider.dart';
 import '../presentation/providers/site_manager_home_provider.dart';
 
@@ -13,14 +15,7 @@ class SiteManagerHomePage extends ConsumerWidget {
   const SiteManagerHomePage({super.key});
 
   void _showMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message, style: TextStyle(fontSize: 19.sp)),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+    AppSnackBar.showInfo(context, message);
   }
 
   void _openProject(BuildContext context, Map<String, dynamic> project) {

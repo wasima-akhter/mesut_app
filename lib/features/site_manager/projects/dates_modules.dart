@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 
 class DatesTab extends StatefulWidget {
   const DatesTab({super.key});
@@ -450,14 +451,9 @@ class _DatesTabState extends State<DatesTab> {
       _saving = false;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          context.loc.scheduleChangesSaved,
-          style: TextStyle(fontSize: 17.sp),
-        ),
-        behavior: SnackBarBehavior.floating,
-      ),
+    AppSnackBar.showSuccess(
+      context,
+      context.loc.scheduleChangesSaved,
     );
   }
 

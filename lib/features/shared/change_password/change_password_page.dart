@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/app_localization.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -182,8 +183,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     }
 
     if (_newPasswordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalization.current.passwordsDoNotMatch)),
+      AppSnackBar.showError(
+        context,
+        AppLocalization.current.passwordsDoNotMatch,
       );
       return;
     }

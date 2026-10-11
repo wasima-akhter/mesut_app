@@ -10,6 +10,7 @@ import '../../../../core/localization/app_language.dart';
 import '../../../../core/localization/context_extensions.dart';
 import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/services/launcher_service.dart';
+import '../../../../core/widgets/snack/app_snackbar.dart';
 import '../../../auth/logout/logout.dart';
 import '../../presentation/providers/employee_profile_provider.dart';
 
@@ -628,13 +629,6 @@ class EmployeeProfilePage extends ConsumerWidget {
   }
 
   void _showMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message, style: TextStyle(fontSize: 17.sp)),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+    AppSnackBar.showInfo(context, message);
   }
 }

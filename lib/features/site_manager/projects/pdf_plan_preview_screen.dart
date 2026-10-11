@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:printing/printing.dart';
 
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import 'models.dart';
 import 'services/pdf_export_service.dart';
 
@@ -67,43 +68,16 @@ class _PdfPlanPreviewScreenState extends State<PdfPlanPreviewScreen> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: const Color(0xFF12B76A),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          content: Row(
-            children: [
-              Icon(
-                Icons.check_circle_outline,
-                color: Colors.white,
-                size: 22.sp,
-              ),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: Text(
-                  'Downloaded: ${widget.planFile.name}',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          action: SnackBarAction(
-            label: 'Share',
-            textColor: Colors.white,
-            onPressed: () {
-              PdfExportService.sharePdf(
-                bytes: _pdfBytes!,
-                filename: widget.planFile.name,
-              );
-            },
-          ),
-        ),
+      AppSnackBar.showSuccess(
+        context,
+        'Downloaded: ${widget.planFile.name}',
+        actionLabel: 'Share',
+        onAction: () {
+          PdfExportService.sharePdf(
+            bytes: _pdfBytes!,
+            filename: widget.planFile.name,
+          );
+        },
       );
     } catch (_) {
       // Fallback to share sheet

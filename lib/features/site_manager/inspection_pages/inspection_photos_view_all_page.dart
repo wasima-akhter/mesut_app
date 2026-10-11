@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/services/permission_service.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 
 class InspectionPhotoItem {
   final String id;
@@ -113,15 +114,11 @@ class _InspectionPhotosViewAllPageState
     final allowed = await AppPermissions.requestCamera();
     if (!allowed) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              context.loc.get(
-                'common.cameraPermissionDenied',
-                'Camera permission denied',
-              ),
-            ),
-            behavior: SnackBarBehavior.floating,
+        AppSnackBar.showWarning(
+          context,
+          context.loc.get(
+            'common.cameraPermissionDenied',
+            'Camera permission denied',
           ),
         );
       }
@@ -143,13 +140,9 @@ class _InspectionPhotosViewAllPageState
           ),
         );
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.loc.get('siteManager.photoAdded', 'Photo added successfully'),
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
+      AppSnackBar.showSuccess(
+        context,
+        context.loc.get('siteManager.photoAdded', 'Photo added successfully'),
       );
     }
   }

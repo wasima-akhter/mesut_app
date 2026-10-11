@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/services/launcher_service.dart';
 import '../helper/site_manager_models.dart';
@@ -54,11 +55,7 @@ class _SiteManagerMapPageState extends ConsumerState<SiteManagerMapPage> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
-      );
+    AppSnackBar.showInfo(context, message);
   }
 
   void _handleRoute() {
