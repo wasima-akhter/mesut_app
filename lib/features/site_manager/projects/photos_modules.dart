@@ -14,6 +14,7 @@ import 'all_photos_screen.dart';
 import 'models.dart';
 import 'overview_modules.dart';
 import 'pdf_plan_preview_screen.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import 'services/pdf_export_service.dart';
 
 class PhotosTab extends ConsumerStatefulWidget {
@@ -208,15 +209,12 @@ class _PhotosTabState extends ConsumerState<PhotosTab> {
         title: const Text('Delete Plan'),
         content: Text('Are you sure you want to delete "${file.name}"?'),
         actions: [
-          TextButton(
+          AppTextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            text: 'Cancel',
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFC8102E),
-              foregroundColor: Colors.white,
-            ),
+          AppButton.danger(
+            fullWidth: false,
             onPressed: () {
               ref
                   .read(projectPhotosProvider.notifier)
@@ -226,7 +224,7 @@ class _PhotosTabState extends ConsumerState<PhotosTab> {
                 context,
               ).showSnackBar(SnackBar(content: Text('Removed ${file.name}')));
             },
-            child: const Text('Delete'),
+            text: 'Delete',
           ),
         ],
       ),
@@ -335,24 +333,14 @@ class _PhotosTabState extends ConsumerState<PhotosTab> {
             },
           ),
           SizedBox(width: 14.w),
-          SizedBox(
-            height: 36.h,
-            child: ElevatedButton.icon(
-              onPressed: _showUploadFilesBottomSheet,
-              icon: Icon(Icons.upload_outlined, size: 16.sp),
-              label: Text(
-                loc.uploadFiles,
-                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFC8102E),
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 9.w),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-              ),
-            ),
+          AppButton.small(
+            variant: AppButtonVariant.danger,
+            onPressed: _showUploadFilesBottomSheet,
+            leadingIcon: Icons.upload_outlined,
+            text: loc.uploadFiles,
+            borderRadius: 6.r,
+            padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 7.h),
+            textStyle: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700),
           ),
         ],
       ),
@@ -1146,24 +1134,15 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return SizedBox(
-      height: 38.h,
-      child: ElevatedButton.icon(
-        onPressed: onTap,
-        icon: Icon(icon, size: 15.sp),
-        label: Text(
-          label,
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.white,
-          padding: EdgeInsets.symmetric(horizontal: 7.w),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4.r),
-          ),
-        ),
-      ),
+    return AppButton.small(
+      onPressed: onTap,
+      leadingIcon: icon,
+      text: label,
+      backgroundColor: color,
+      foregroundColor: Colors.white,
+      borderRadius: 4.r,
+      padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 7.h),
+      textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
     );
   }
 
@@ -1172,22 +1151,16 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
     required String label,
     required VoidCallback onTap,
   }) {
-    return SizedBox(
-      height: 38.h,
-      child: OutlinedButton.icon(
-        onPressed: onTap,
-        icon: Icon(icon, size: 14.sp),
-        label: Text(label, style: TextStyle(fontSize: 12.5.sp)),
-        style: OutlinedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          side: BorderSide.none,
-          padding: EdgeInsets.symmetric(horizontal: 6.w),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4.r),
-          ),
-        ),
-      ),
+    return AppOutlinedButton.small(
+      onPressed: onTap,
+      leadingIcon: icon,
+      text: label,
+      backgroundColor: Colors.white,
+      foregroundColor: Colors.black,
+      borderColor: Colors.transparent,
+      borderRadius: 4.r,
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
+      textStyle: TextStyle(fontSize: 12.5.sp),
     );
   }
 

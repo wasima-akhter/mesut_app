@@ -1,4 +1,5 @@
 import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/widgets/buttons/buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -34,31 +35,29 @@ class LogoutConfirmation {
             style: TextStyle(fontSize: 17.sp, color: AppColors.textSecondary),
           ),
           actions: [
-            TextButton(
+            AppTextButton(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
-              child: Text(
-                loc.cancel,
-                style: TextStyle(
-                  fontSize: 17.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
+              text: loc.cancel,
+              foregroundColor: AppColors.textSecondary,
+              textStyle: TextStyle(
+                fontSize: 17.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
               ),
             ),
-            TextButton(
+            AppTextButton(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
                 onLogout();
               },
-              child: Text(
-                loc.logout,
-                style: TextStyle(
-                  fontSize: 17.sp,
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w700,
-                ),
+              text: loc.logout,
+              foregroundColor: AppColors.primary,
+              textStyle: TextStyle(
+                fontSize: 17.sp,
+                color: AppColors.primary,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],

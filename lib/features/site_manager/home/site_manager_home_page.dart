@@ -1,5 +1,5 @@
 import 'package:construction_app/app/constants/route_constants.dart';
-import 'package:construction_app/core/widgets/buttons/app_button.dart';
+import 'package:construction_app/core/widgets/buttons/buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -645,23 +645,16 @@ class SiteManagerHomePage extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
+                child: AppOutlinedButton(
                   onPressed: () => _openRoute(context, operation),
-                  icon: const Icon(Icons.location_on_outlined, size: 18),
-                  label: Text(
-                    context.loc.route,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF777777),
-                    side: const BorderSide(color: Color(0xFFD9D9D9)),
-                    minimumSize: Size(double.infinity, 42.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(7),
-                    ),
+                  leadingIcon: Icons.location_on_outlined,
+                  text: context.loc.route,
+                  foregroundColor: const Color(0xFF777777),
+                  borderColor: const Color(0xFFD9D9D9),
+                  borderRadius: 7.r,
+                  textStyle: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -672,7 +665,6 @@ class SiteManagerHomePage extends ConsumerWidget {
                 flex: 2,
                 child: AppButton(
                   onPressed: () => _openProject(context, operation),
-                  height: 42.h,
                   text: context.loc.openProject,
                 ),
               ),

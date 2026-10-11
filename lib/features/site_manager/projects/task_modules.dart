@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import '../presentation/providers/site_manager_project_details_provider.dart';
 import 'enums.dart';
 import 'models.dart';
@@ -90,24 +91,12 @@ class TasksTab extends ConsumerWidget {
             ],
           ),
           SizedBox(width: 10.w),
-          SizedBox(
-            height: 38.h,
-            child: ElevatedButton.icon(
-              onPressed: () => showAddTaskBottomSheet(context, ref),
-              icon: Icon(Icons.add, size: 17.sp),
-              label: Text(
-                context.loc.addNew,
-                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFC8102E),
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 10.w),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-              ),
-            ),
+          AppButton.small(
+            text: context.loc.addNew,
+            leadingIcon: Icons.add,
+            onPressed: () => showAddTaskBottomSheet(context, ref),
+            borderRadius: 6.r,
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
           ),
         ],
       ),
@@ -483,36 +472,19 @@ class _AddTaskBottomSheetState extends State<_AddTaskBottomSheet> {
                           ),
                         ),
                         SizedBox(height: 20.h),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _createTask,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFC8102E),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6.r),
-                              ),
-                              padding: EdgeInsets.symmetric(vertical: 12.h),
-                            ),
-                            child: Text(
-                              context.loc.createNewTask,
-                              style: TextStyle(
-                                fontSize: 17.sp,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
+                        AppButton(
+                          text: context.loc.createNewTask,
+                          onPressed: _createTask,
+                          borderRadius: 6.r,
                         ),
                         SizedBox(height: 7.h),
-                        TextButton(
+                        AppTextButton(
+                          text: context.loc.cancel,
                           onPressed: () => Navigator.pop(context),
-                          child: Text(
-                            context.loc.cancel,
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              color: const Color(0xFF555555),
-                            ),
+                          foregroundColor: const Color(0xFF555555),
+                          textStyle: TextStyle(
+                            fontSize: 16.sp,
+                            color: const Color(0xFF555555),
                           ),
                         ),
                       ]),

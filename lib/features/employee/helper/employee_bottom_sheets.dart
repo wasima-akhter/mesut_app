@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import 'employee_enums.dart';
 
 class EmployeeProjectModel {
@@ -656,39 +657,11 @@ class _FinishWorkSheetState extends State<_FinishWorkSheet> {
 
                   SizedBox(height: 20.h),
 
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: saving ? null : _save,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.white,
-                        disabledBackgroundColor: AppColors.primary.withValues(
-                          alpha: .55,
-                        ),
-                        minimumSize: Size.fromHeight(50.h),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(7.r),
-                        ),
-                      ),
-                      child: saving
-                          ? SizedBox(
-                              width: 22.w,
-                              height: 22.w,
-                              child: const CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : Text(
-                              context.loc.saveEntry,
-                              style: TextStyle(
-                                fontSize: 17.sp,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                    ),
+                  AppButton(
+                    text: context.loc.saveEntry,
+                    onPressed: _save,
+                    isLoading: saving,
+                    borderRadius: 7.r,
                   ),
 
                   SizedBox(height: 10.h),
@@ -910,33 +883,12 @@ class _PrimarySheetButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.white,
-          elevation: 0,
-          minimumSize: Size.fromHeight(50.h),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(7.r),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (icon != null) ...[
-              Icon(icon, size: 21.sp),
-              SizedBox(width: 7.w),
-            ],
-            Text(
-              text,
-              style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
-      ),
+    return AppButton(
+      text: text,
+      leadingIcon: icon,
+      onPressed: onTap,
+      borderRadius: 7.r,
+      textStyle: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600),
     );
   }
 }
@@ -954,16 +906,11 @@ class _CancelButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      child: TextButton(
+      child: AppTextButton(
+        text: context.loc.cancel,
         onPressed: onTap,
-        style: TextButton.styleFrom(
-          minimumSize: Size.fromHeight(48.h),
-          foregroundColor: AppColors.textSecondary,
-        ),
-        child: Text(
-          context.loc.cancel,
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
-        ),
+        foregroundColor: AppColors.textSecondary,
+        textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
       ),
     );
   }

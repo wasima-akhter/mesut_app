@@ -6,6 +6,7 @@ import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_radii.dart';
 import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import '../../../core/utils/app_date_time_formatter.dart';
 import '../helper/site_manager_enums.dart';
 import '../helper/site_manager_models.dart';
@@ -31,11 +32,9 @@ class _SiteManagerTimeTrackingPageState
   String get _selectedProject =>
       ref.watch(siteManagerTimeProvider).selectedProject;
 
-  bool get _isTimerRunning =>
-      ref.watch(siteManagerTimeProvider).isTimerRunning;
+  bool get _isTimerRunning => ref.watch(siteManagerTimeProvider).isTimerRunning;
 
-  List<String> get _projects =>
-      ref.watch(siteManagerTimeProvider).projects;
+  List<String> get _projects => ref.watch(siteManagerTimeProvider).projects;
 
   List<TimeEntryModel> get _entries =>
       ref.watch(siteManagerTimeProvider).entries;
@@ -120,21 +119,19 @@ class _SiteManagerTimeTrackingPageState
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            return SafeArea(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(24.r),
-                  ),
-                ),
-                padding: EdgeInsets.fromLTRB(
-                  20.w,
-                  12.h,
-                  20.w,
-                  MediaQuery.of(context).viewInsets.bottom + 20.h,
-                ),
-                child: SingleChildScrollView(
+            return Container(
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+              ),
+              padding: EdgeInsets.fromLTRB(
+                20.w,
+                12.h,
+                20.w,
+                MediaQuery.of(context).viewInsets.bottom + 20.h,
+              ),
+              child: SingleChildScrollView(
+                child: SafeArea(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,34 +241,32 @@ class _SiteManagerTimeTrackingPageState
 
                       SizedBox(height: 20.h),
 
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: selectedProject == null
-                              ? null
-                              : () {
-                                  ref
-                                      .read(siteManagerTimeProvider.notifier)
-                                      .toggleTimer();
+                      AppButton(
+                        text: context.loc.startNewTimer,
+                        onPressed: selectedProject == null
+                            ? null
+                            : () {
+                                ref
+                                    .read(siteManagerTimeProvider.notifier)
+                                    .toggleTimer();
 
-                                  Navigator.pop(sheetContext);
+                                Navigator.pop(sheetContext);
 
-                                  _showMessage(
-                                    context.loc.timerStartedFor(
-                                      selectedActivity.label,
-                                    ),
-                                  );
-                                },
-                          child: Text(context.loc.startNewTimer),
-                        ),
+                                _showMessage(
+                                  context.loc.timerStartedFor(
+                                    selectedActivity.label,
+                                  ),
+                                );
+                              },
+                        borderRadius: 8.r,
                       ),
 
                       SizedBox(height: 8.h),
 
                       Center(
-                        child: TextButton(
+                        child: AppTextButton(
+                          text: context.loc.cancel,
                           onPressed: () => Navigator.pop(sheetContext),
-                          child: Text(context.loc.cancel),
                         ),
                       ),
                     ],
@@ -319,8 +314,8 @@ class _SiteManagerTimeTrackingPageState
                 20.w,
                 MediaQuery.of(context).viewInsets.bottom + 20.h,
               ),
-              child: SafeArea(
-                child: SingleChildScrollView(
+              child: SingleChildScrollView(
+                child: SafeArea(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -570,37 +565,40 @@ class _SiteManagerTimeTrackingPageState
 
                       SizedBox(height: 20.h),
 
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            ref.read(siteManagerTimeProvider.notifier).addEntry(
-                                  TimeEntryModel(
-                                    id: DateTime.now().millisecondsSinceEpoch.toString(),
-                                    project: selectedProject ?? _selectedProject,
-                                    activity: selectedActivity,
-                                    date: DateTime.now(),
-                                    startTime: startTime.format(context),
-                                    endTime: endTime.format(context),
-                                    breakTime: '${breakTime.hour * 60 + breakTime.minute}m',
-                                    employee: 'Tim Muller',
-                                  ),
-                                );
+                      AppButton(
+                        text: context.loc.saveEntry,
+                        onPressed: () {
+                          ref
+                              .read(siteManagerTimeProvider.notifier)
+                              .addEntry(
+                                TimeEntryModel(
+                                  id: DateTime.now().millisecondsSinceEpoch
+                                      .toString(),
+                                  project:
+                                      selectedProject ?? _selectedProject,
+                                  activity: selectedActivity,
+                                  date: DateTime.now(),
+                                  startTime: startTime.format(context),
+                                  endTime: endTime.format(context),
+                                  breakTime:
+                                      '${breakTime.hour * 60 + breakTime.minute}m',
+                                  employee: 'Tim Muller',
+                                ),
+                              );
 
-                            Navigator.pop(sheetContext);
+                          Navigator.pop(sheetContext);
 
-                            _showMessage(context.loc.timeEntryAdded);
-                          },
-                          child: Text(context.loc.saveEntry),
-                        ),
+                          _showMessage(context.loc.timeEntryAdded);
+                        },
+                        borderRadius: 8.r,
                       ),
 
                       SizedBox(height: 8.h),
 
                       Center(
-                        child: TextButton(
+                        child: AppTextButton(
+                          text: context.loc.cancel,
                           onPressed: () => Navigator.pop(sheetContext),
-                          child: Text(context.loc.cancel),
                         ),
                       ),
                     ],
@@ -871,8 +869,10 @@ class _SiteManagerTimeTrackingPageState
               Expanded(
                 child: _summaryValue(
                   title: context.loc.today,
-                  value: const Duration(hours: 7, minutes: 30)
-                      .formatCompactLocalized(),
+                  value: const Duration(
+                    hours: 7,
+                    minutes: 30,
+                  ).formatCompactLocalized(),
                 ),
               ),
               Expanded(
@@ -880,8 +880,10 @@ class _SiteManagerTimeTrackingPageState
                   alignment: Alignment.centerRight,
                   child: _summaryValue(
                     title: context.loc.thisWeek,
-                    value: const Duration(hours: 35, minutes: 30)
-                        .formatCompactLocalized(),
+                    value: const Duration(
+                      hours: 35,
+                      minutes: 30,
+                    ).formatCompactLocalized(),
                     alignRight: true,
                   ),
                 ),
@@ -907,8 +909,7 @@ class _SiteManagerTimeTrackingPageState
             alignment: Alignment.centerLeft,
             child: Text(
               context.loc.loggedThisWeek(
-                const Duration(hours: 34, minutes: 15)
-                    .formatCompactLocalized(),
+                const Duration(hours: 34, minutes: 15).formatCompactLocalized(),
                 const Duration(hours: 40).formatCompactLocalized(),
               ),
               style: Theme.of(

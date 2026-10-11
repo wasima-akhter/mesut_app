@@ -8,7 +8,7 @@ import '../../../app/theme/app_colors.dart';
 import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/utils/app_date_time_formatter.dart';
-import '../../../core/widgets/buttons/app_button.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import '../helper/employee_bottom_sheets.dart' hide EmployeeProjectModel;
 import '../helper/employee_enums.dart';
 import '../helper/employee_models.dart';
@@ -160,26 +160,21 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
           ),
         ),
 
-        OutlinedButton.icon(
+        AppOutlinedButton(
+          fullWidth: false,
           onPressed: () => showAddTimeEntrySheet(
             context: context,
             onSaved: () {
               _showMessage(context, context.loc.entrySaved);
             },
           ),
-          icon: const Icon(Icons.add, size: 19),
-          label: Text(
-            context.loc.addTime,
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-          ),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.textSecondary,
-            side: const BorderSide(color: AppColors.border),
-            padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 10.h),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(7.r),
-            ),
-          ),
+          leadingIcon: Icons.add,
+          text: context.loc.addTime,
+          foregroundColor: AppColors.textSecondary,
+          borderColor: AppColors.border,
+          padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 10.h),
+          borderRadius: 7.r,
+          textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -188,8 +183,10 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
   Widget _buildWeekLabel(BuildContext context) {
     final weekStart = DateTime.utc(2026, 9, 14);
     final weekEnd = DateTime.utc(2026, 9, 20);
-    final formattedRange =
-        AppDateTimeFormatter.formatDateRange(weekStart, weekEnd);
+    final formattedRange = AppDateTimeFormatter.formatDateRange(
+      weekStart,
+      weekEnd,
+    );
     return Padding(
       padding: EdgeInsets.only(top: 4.h),
       child: Text(
@@ -302,7 +299,7 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
+                child: AppOutlinedButton(
                   onPressed: () {
                     if (state.isOnBreak) {
                       ref.read(employeeTimerProvider.notifier).resumeTimer();
@@ -310,26 +307,16 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
                       ref.read(employeeTimerProvider.notifier).pauseTimer();
                     }
                   },
-                  icon: Icon(
-                    state.isOnBreak ? Icons.play_arrow : Icons.pause,
-                    size: 20,
-                  ),
-                  label: Text(
-                    state.isOnBreak
-                        ? context.loc.resumeWork
-                        : context.loc.pauseBreak,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: BorderSide(color: Colors.white.withValues(alpha: .5)),
-                    minimumSize: Size(double.infinity, 46.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(7.r),
-                    ),
+                  leadingIcon: state.isOnBreak ? Icons.play_arrow : Icons.pause,
+                  text: state.isOnBreak
+                      ? context.loc.resumeWork
+                      : context.loc.pauseBreak,
+                  foregroundColor: Colors.white,
+                  borderColor: Colors.white.withValues(alpha: .5),
+                  borderRadius: 7.r,
+                  textStyle: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -339,7 +326,6 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
               Expanded(
                 child: AppButton(
                   onPressed: () => _finishTimer(context, ref, state),
-                  height: 46.h,
                   text: context.loc.finishWork,
                 ),
               ),
@@ -369,16 +355,20 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
               Expanded(
                 child: _summaryItem(
                   title: context.loc.today.toUpperCase(),
-                  value: const Duration(hours: 7, minutes: 30)
-                      .formatCompactLocalized(),
+                  value: const Duration(
+                    hours: 7,
+                    minutes: 30,
+                  ).formatCompactLocalized(),
                 ),
               ),
 
               Expanded(
                 child: _summaryItem(
                   title: context.loc.thisWeek.toUpperCase(),
-                  value: const Duration(hours: 35, minutes: 30)
-                      .formatCompactLocalized(),
+                  value: const Duration(
+                    hours: 35,
+                    minutes: 30,
+                  ).formatCompactLocalized(),
                 ),
               ),
             ],
@@ -402,8 +392,7 @@ class EmployeeTimeTrackingPage extends ConsumerWidget {
             alignment: Alignment.centerLeft,
             child: Text(
               context.loc.weekProgress(
-                const Duration(hours: 34, minutes: 15)
-                    .formatCompactLocalized(),
+                const Duration(hours: 34, minutes: 15).formatCompactLocalized(),
                 const Duration(hours: 40).formatCompactLocalized(),
               ),
               style: TextStyle(

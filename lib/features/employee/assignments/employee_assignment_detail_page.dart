@@ -1,5 +1,5 @@
 import 'package:construction_app/app/constants/route_constants.dart';
-import 'package:construction_app/core/widgets/buttons/app_button.dart';
+import 'package:construction_app/core/widgets/buttons/buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -130,23 +130,7 @@ class AssignmentDetailsPage extends ConsumerWidget {
   Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
-        GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Container(
-            width: 46.w,
-            height: 46.w,
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.border),
-            ),
-            child: const Icon(
-              Icons.arrow_back,
-              size: 23,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ),
+        const AppBackButton(),
 
         SizedBox(width: 14.w),
 
@@ -390,17 +374,16 @@ class AssignmentDetailsPage extends ConsumerWidget {
                   ),
                 ),
               ),
-              TextButton(
+              AppTextButton(
                 onPressed: () => context.push(
                   RouteConstants.employeeAssignmentPhotos,
                   extra: assignment.project,
                 ),
-                child: Text(
-                  '${context.loc.viewAll} →',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    color: AppColors.textSecondary,
-                  ),
+                text: '${context.loc.viewAll} →',
+                foregroundColor: AppColors.textSecondary,
+                textStyle: TextStyle(
+                  fontSize: 16.sp,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],

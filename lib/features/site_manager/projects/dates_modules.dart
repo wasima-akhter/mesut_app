@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 
 class DatesTab extends StatefulWidget {
   const DatesTab({super.key});
@@ -202,32 +203,20 @@ class _DatesTabState extends State<DatesTab> {
 
           SizedBox(height: 10.h),
 
-          SizedBox(
-            width: double.infinity,
-            height: 43.h,
-            child: ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _safetyInspectionCompleted = !_safetyInspectionCompleted;
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _safetyInspectionCompleted
-                    ? const Color(0xFF12B76A)
-                    : Colors.black,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-              ),
-              child: Text(
-                _safetyInspectionCompleted
-                    ? context.loc.inspectionCompleted
-                    : context.loc.markAsComplete,
-                style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700),
-              ),
-            ),
+          AppButton(
+            text: _safetyInspectionCompleted
+                ? context.loc.inspectionCompleted
+                : context.loc.markAsComplete,
+            onPressed: () {
+              setState(() {
+                _safetyInspectionCompleted = !_safetyInspectionCompleted;
+              });
+            },
+            variant: _safetyInspectionCompleted
+                ? AppButtonVariant.success
+                : AppButtonVariant.dark,
+            borderRadius: 6.r,
+            verticalPadding: 10.h,
           ),
         ],
       ),
@@ -239,33 +228,11 @@ class _DatesTabState extends State<DatesTab> {
   // ============================================================
 
   Widget _buildSaveButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _saving ? null : _saveChanges,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFC8102E),
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: const Color(0xFFE49AA6),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6.r),
-          ),
-        ),
-        child: _saving
-            ? SizedBox(
-                width: 20.w,
-                height: 20.w,
-                child: const CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            : Text(
-                context.loc.saveChanges,
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800),
-              ),
-      ),
+    return AppButton(
+      text: context.loc.saveChanges,
+      onPressed: _saveChanges,
+      isLoading: _saving,
+      borderRadius: 6.r,
     );
   }
 
@@ -383,13 +350,12 @@ class _DatesTabState extends State<DatesTab> {
     required IconData icon,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        width: 32.w,
-        height: 34.h,
-        child: Icon(icon, size: 16.sp, color: const Color(0xFF555555)),
-      ),
+    return AppIconButton(
+      icon: icon,
+      onPressed: onTap,
+      size: 32.w,
+      iconColor: const Color(0xFF555555),
+      iconSize: 16.sp,
     );
   }
 

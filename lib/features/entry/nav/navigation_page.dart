@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/enums/app_enum.dart';
-import '../../../core/localization/app_localization.dart';
+import '../../../core/localization/app_strings.dart';
+import '../../../core/localization/localization_provider.dart';
 import '../../../core/providers/common_provider.dart';
 import '../../employee/home/employee_home_page.dart';
 import '../../employee/plan/employee_plan_page.dart';
@@ -78,10 +79,12 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(appLanguageProvider);
+    final loc = ref.watch(appStringsProvider);
     final role = ref.watch(userRoleProvider);
 
     if (role == null) {
-      return Scaffold(body: Center(child: Text(AppLocalization.current.error)));
+      return Scaffold(body: Center(child: Text(loc.error)));
     }
 
     final selectedIndex = ref.watch(navigationProvider);
@@ -95,6 +98,7 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
       bottomNavigationBar: _buildBottomNavBar(
         tabs: tabs,
         selectedIndex: safeIndex,
+        loc: loc,
       ),
     );
   }
@@ -106,8 +110,8 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
   Widget _buildBottomNavBar({
     required List<AppBottomTab> tabs,
     required int selectedIndex,
+    required AppStrings loc,
   }) {
-    final loc = AppLocalization.current;
 
     return Container(
       padding: const EdgeInsets.only(top: 20, bottom: 4),

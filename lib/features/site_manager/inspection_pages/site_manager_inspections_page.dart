@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import '../presentation/providers/site_manager_inspections_provider.dart';
 
 // ============================================================
@@ -182,21 +183,14 @@ class _CircleIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(50.r),
-        child: Container(
-          width: 42.w,
-          height: 42.w,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Icon(icon, size: 24.sp, color: AppColors.textPrimary),
-        ),
-      ),
+    return AppIconButton.circle(
+      icon: icon,
+      onPressed: onTap,
+      size: 42.w,
+      border: Border.all(color: AppColors.border),
+      backgroundColor: Colors.transparent,
+      iconColor: AppColors.textPrimary,
+      iconSize: 24.sp,
     );
   }
 }
@@ -418,39 +412,4 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-// ============================================================
-// SMALL RED BUTTON
-// ============================================================
 
-class SmallRedButton extends StatelessWidget {
-  final String text;
-  final VoidCallback onTap;
-
-  const SmallRedButton({super.key, required this.text, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(6.r),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-          decoration: BoxDecoration(
-            color: AppColors.error,
-            borderRadius: BorderRadius.circular(6.r),
-          ),
-          child: Text(
-            text,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              fontSize: 16.sp,
-              color: AppColors.white,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

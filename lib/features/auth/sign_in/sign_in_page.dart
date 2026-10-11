@@ -4,7 +4,7 @@ import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:construction_app/app/theme/app_colors.dart';
 import 'package:construction_app/app/theme/app_text_styles.dart';
 import 'package:construction_app/core/providers/common_provider.dart';
-import 'package:construction_app/core/widgets/buttons/app_button.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -143,28 +143,23 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
           Align(
             alignment: Alignment.centerRight,
-            child: TextButton(
+            child: AppTextButton(
+              text: loc.forgotPassword,
               onPressed: () {
                 context.push(RouteConstants.forgotPassword);
               },
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.only(top: 4.h, bottom: 4.h),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              foregroundColor: const Color(0xFFE7193F),
+              textStyle: AppTextStyles.bodyMedium.copyWith(
+                color: const Color(0xFFE7193F),
               ),
-              child: Text(
-                loc.forgotPassword,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: const Color(0xFFE7193F),
-                ),
-              ),
+              padding: EdgeInsets.symmetric(vertical: 4.h),
             ),
           ),
 
           if (kDebugMode)
             Align(
               alignment: Alignment.centerRight,
-              child: TextButton(
+              child: AppTextButton(
                 onPressed: () {
                   context.push(
                     RouteConstants.otp,
@@ -174,16 +169,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     },
                   );
                 },
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.only(top: 4.h, bottom: 4.h),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  loc.verifyCode,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: const Color(0xFFE7193F),
-                  ),
+                text: loc.verifyCode,
+                foregroundColor: const Color(0xFFE7193F),
+                padding: EdgeInsets.symmetric(vertical: 4.h),
+                textStyle: AppTextStyles.bodyMedium.copyWith(
+                  color: const Color(0xFFE7193F),
                 ),
               ),
             ),
@@ -275,10 +265,7 @@ class _AuthButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: AppButton(onPressed: onPressed, text: text),
-    );
+    return AppButton(onPressed: onPressed, text: text);
   }
 }
 
@@ -299,34 +286,21 @@ class _DebugButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 56,
-      child: outlined
-          ? OutlinedButton.icon(
-              onPressed: onPressed,
-              icon: Icon(icon),
-              label: Text(title),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: color,
-                side: BorderSide(color: color, width: 1.2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            )
-          : ElevatedButton.icon(
-              onPressed: onPressed,
-              icon: Icon(icon),
-              label: Text(title),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: color,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-    );
+    return outlined
+        ? AppOutlinedButton(
+            text: title,
+            leadingIcon: icon,
+            onPressed: onPressed,
+            foregroundColor: color,
+            borderColor: color,
+            borderRadius: 12.r,
+          )
+        : AppButton(
+            text: title,
+            leadingIcon: icon,
+            onPressed: onPressed,
+            backgroundColor: color,
+            borderRadius: 12.r,
+          );
   }
 }

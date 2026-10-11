@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/services/launcher_service.dart';
 import '../helper/site_manager_models.dart';
@@ -101,16 +102,12 @@ class _SiteManagerMapPageState extends ConsumerState<SiteManagerMapPage> {
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 SizedBox(height: 20.h),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      // _showMessage('Project opened');
-                      context.push(RouteConstants.siteManagerProjectDetail);
-                    },
-                    child: Text(context.loc.openProject),
-                  ),
+                AppButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    context.push(RouteConstants.siteManagerProjectDetail);
+                  },
+                  text: context.loc.openProject,
                 ),
               ],
             ),
@@ -623,29 +620,34 @@ class _SiteManagerMapPageState extends ConsumerState<SiteManagerMapPage> {
     required VoidCallback onTap,
     bool filled = false,
   }) {
-    return SizedBox(
-      height: 34.h,
-      child: ElevatedButton.icon(
+    if (filled) {
+      return AppButton.small(
         onPressed: onTap,
-        icon: Icon(icon, size: 14.sp),
-        label: Text(
-          text,
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 13.5.sp,
-            fontWeight: FontWeight.w600,
-          ),
+        leadingIcon: icon,
+        text: text,
+        variant: AppButtonVariant.dark,
+        borderRadius: 7.r,
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+        textStyle: TextStyle(
+          fontFamily: 'Inter',
+          fontSize: 13.5.sp,
+          fontWeight: FontWeight.w600,
         ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: filled ? Colors.black : Colors.white,
-          foregroundColor: filled ? Colors.white : AppColors.textPrimary,
-          elevation: 0,
-          padding: EdgeInsets.symmetric(horizontal: 8.w),
-          side: filled ? BorderSide.none : BorderSide(color: AppColors.border),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(7.r),
-          ),
-        ),
+      );
+    }
+    return AppOutlinedButton.small(
+      onPressed: onTap,
+      leadingIcon: icon,
+      text: text,
+      foregroundColor: AppColors.textPrimary,
+      borderColor: AppColors.border,
+      backgroundColor: Colors.white,
+      borderRadius: 7.r,
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+      textStyle: TextStyle(
+        fontFamily: 'Inter',
+        fontSize: 13.5.sp,
+        fontWeight: FontWeight.w600,
       ),
     );
   }
@@ -654,20 +656,14 @@ class _SiteManagerMapPageState extends ConsumerState<SiteManagerMapPage> {
     required IconData icon,
     required VoidCallback onTap,
   }) {
-    return SizedBox(
-      width: 34.w,
-      height: 34.h,
-      child: OutlinedButton(
-        onPressed: onTap,
-        style: OutlinedButton.styleFrom(
-          padding: EdgeInsets.zero,
-          side: BorderSide(color: AppColors.border),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(7.r),
-          ),
-        ),
-        child: Icon(icon, size: 15.sp, color: AppColors.textPrimary),
-      ),
+    return AppIconButton(
+      icon: icon,
+      onPressed: onTap,
+      size: 34.w,
+      border: Border.all(color: AppColors.border),
+      borderRadius: 7.r,
+      iconColor: AppColors.textPrimary,
+      iconSize: 15.sp,
     );
   }
 }

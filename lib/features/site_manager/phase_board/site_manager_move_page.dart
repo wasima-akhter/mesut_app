@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import 'site_manager_phase_board.dart';
 
 enum MovePhase { standing, dismantling, completed }
@@ -106,22 +107,7 @@ class _SiteManagerMoveToPageState extends State<SiteManagerMoveToPage> {
   }
 
   Widget _buildBackButton() {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => context.pop(),
-        borderRadius: BorderRadius.circular(50.r),
-        child: Container(
-          width: 38.w,
-          height: 38.w,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Icon(Icons.arrow_back_rounded, size: 18.sp),
-        ),
-      ),
-    );
+    return const AppBackButton();
   }
 
   Widget _buildProjectTitle() {
@@ -212,28 +198,17 @@ class _SiteManagerMoveToPageState extends State<SiteManagerMoveToPage> {
   }
 
   Widget _buildMoveButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 46.h,
-      child: ElevatedButton(
-        onPressed: _selectedPhase == null ? null : _moveProject,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.white,
-          disabledBackgroundColor: AppColors.neutral200,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-        ),
-        child: Text(context.loc.moveProject),
-      ),
+    return AppButton(
+      text: context.loc.moveProject,
+      onPressed: _selectedPhase == null ? null : _moveProject,
+      borderRadius: 8.r,
     );
   }
 
   Widget _buildCancelButton() {
-    return TextButton(
+    return AppTextButton(
+      text: context.loc.cancel,
       onPressed: () => context.pop(),
-      child: Text(context.loc.cancel),
     );
   }
 

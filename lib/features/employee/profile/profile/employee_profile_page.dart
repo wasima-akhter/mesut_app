@@ -1,5 +1,6 @@
 import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/widgets/buttons/buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -469,24 +470,15 @@ class EmployeeProfilePage extends ConsumerWidget {
 
         SizedBox(height: 14.h),
 
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: () => _logout(context),
-            icon: const Icon(Icons.logout, size: 20),
-            label: Text(
-              context.loc.logout,
-              style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              side: const BorderSide(color: AppColors.primary),
-              minimumSize: Size(double.infinity, 50.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(7.r),
-              ),
-            ),
-          ),
+        AppOutlinedButton(
+          fullWidth: true,
+          onPressed: () => _logout(context),
+          leadingIcon: Icons.logout,
+          text: context.loc.logout,
+          foregroundColor: AppColors.primary,
+          borderColor: AppColors.primary,
+          borderRadius: 7.r,
+          textStyle: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -624,18 +616,14 @@ class EmployeeProfilePage extends ConsumerWidget {
   }
 
   Widget _circleButton(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 46.w,
-        height: 46.w,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.border),
-          color: AppColors.white,
-        ),
-        child: Icon(icon, size: 22, color: AppColors.textPrimary),
-      ),
+    return AppIconButton.circle(
+      icon: icon,
+      onPressed: onTap,
+      size: 46.w,
+      border: Border.all(color: AppColors.border),
+      backgroundColor: AppColors.white,
+      iconColor: AppColors.textPrimary,
+      iconSize: 22,
     );
   }
 

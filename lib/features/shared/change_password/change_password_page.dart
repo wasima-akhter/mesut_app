@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/app_localization.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -123,21 +123,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   }
 
   Widget _buildBackButton() {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => context.pop(),
-        borderRadius: BorderRadius.circular(50.r),
-        child: Container(
-          width: 38.w,
-          height: 38.w,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Icon(Icons.arrow_back_rounded, size: 19.sp),
-        ),
-      ),
+    return AppBackButton(
+      size: 38.w,
+      iconSize: 19.sp,
     );
   }
 
@@ -181,20 +169,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   }
 
   Widget _buildSaveButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 46.h,
-      child: ElevatedButton(
-        onPressed: _changePassword,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(7.r),
-          ),
-        ),
-        child: Text(AppLocalization.current.saveChanges),
-      ),
+    return AppButton(
+      text: AppLocalization.current.saveChanges,
+      onPressed: _changePassword,
+      borderRadius: 7.r,
     );
   }
 

@@ -12,6 +12,7 @@ import 'models.dart';
 import 'overview_modules.dart';
 import 'pdf_plan_preview_screen.dart';
 import 'photos_modules.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import 'services/pdf_export_service.dart';
 
 class AllPhotosScreen extends ConsumerStatefulWidget {
@@ -268,55 +269,29 @@ class _AllPhotosScreenState extends ConsumerState<AllPhotosScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.share_outlined),
-
-                        label: const Text('Share'),
-
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF333333),
-
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-
-                          side: const BorderSide(color: Color(0xFFD0D5DD)),
-
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                          ),
-                        ),
-
+                      child: AppOutlinedButton(
+                        leadingIcon: Icons.share_outlined,
+                        text: 'Share',
+                        foregroundColor: const Color(0xFF333333),
+                        borderColor: const Color(0xFFD0D5DD),
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                        borderRadius: 8.r,
                         onPressed: () {
                           Navigator.pop(ctx);
-
                           PdfExportService.sharePdf(
                             bytes: pdfBytes,
-
                             filename: filename,
                           );
                         },
                       ),
                     ),
-
                     SizedBox(width: 12.w),
-
                     Expanded(
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.visibility_outlined),
-
-                        label: const Text('Preview PDF'),
-
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFC8102E),
-
-                          foregroundColor: Colors.white,
-
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                          ),
-                        ),
-
+                      child: AppButton.danger(
+                        leadingIcon: Icons.visibility_outlined,
+                        text: 'Preview PDF',
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                        borderRadius: 8.r,
                         onPressed: () {
                           Navigator.pop(ctx);
 
@@ -652,32 +627,14 @@ class _AllPhotosScreenState extends ConsumerState<AllPhotosScreen> {
 
           SizedBox(width: 8.w),
 
-          ElevatedButton.icon(
+          AppButton.small(
+            variant: AppButtonVariant.danger,
             onPressed: () => _exportPhotosToPdf(selectedOnly: false),
-
-            icon: Icon(Icons.download_rounded, size: 16.sp),
-
-            label: Text(
-              'PDF',
-
-              style: TextStyle(fontSize: 15.5.sp, fontWeight: FontWeight.w700),
-            ),
-
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFC8102E),
-
-              foregroundColor: Colors.white,
-
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-
-              minimumSize: Size.zero,
-
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6.r),
-              ),
-            ),
+            leadingIcon: Icons.download_rounded,
+            text: 'PDF',
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+            borderRadius: 6.r,
+            textStyle: TextStyle(fontSize: 15.5.sp, fontWeight: FontWeight.w700),
           ),
         ],
       ),
@@ -707,7 +664,7 @@ class _AllPhotosScreenState extends ConsumerState<AllPhotosScreen> {
           const Spacer(),
 
           if (_isSelectionMode) ...[
-            TextButton.icon(
+            AppTextButton(
               onPressed: () {
                 if (isAllSelected) {
                   notifier.clearSelection();
@@ -715,35 +672,16 @@ class _AllPhotosScreenState extends ConsumerState<AllPhotosScreen> {
                   notifier.selectAllPhotos();
                 }
               },
-
-              icon: Icon(
-                isAllSelected
-                    ? Icons.check_box_rounded
-                    : Icons.check_box_outline_blank_rounded,
-
-                size: 19.sp,
-
+              leadingIcon: isAllSelected
+                  ? Icons.check_box_rounded
+                  : Icons.check_box_outline_blank_rounded,
+              text: isAllSelected ? 'Deselect All' : 'Select All',
+              foregroundColor: const Color(0xFFC8102E),
+              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+              textStyle: TextStyle(
+                fontSize: 15.5.sp,
+                fontWeight: FontWeight.w600,
                 color: const Color(0xFFC8102E),
-              ),
-
-              label: Text(
-                isAllSelected ? 'Deselect All' : 'Select All',
-
-                style: TextStyle(
-                  fontSize: 15.5.sp,
-
-                  fontWeight: FontWeight.w600,
-
-                  color: const Color(0xFFC8102E),
-                ),
-              ),
-
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
-
-                minimumSize: Size.zero,
-
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
           ] else ...[
@@ -1131,72 +1069,38 @@ class _AllPhotosScreenState extends ConsumerState<AllPhotosScreen> {
           children: [
             Expanded(
               flex: 1,
-
-              child: OutlinedButton.icon(
+              child: AppOutlinedButton(
                 onPressed: _showUploadBottomSheet,
-
-                icon: Icon(Icons.add_a_photo_outlined, size: 18.sp),
-
-                label: Text(
-                  'Add Photo',
-
-                  style: TextStyle(
-                    fontSize: 15.5.sp,
-
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF333333),
-
-                  padding: EdgeInsets.symmetric(vertical: 11.h),
-
-                  side: const BorderSide(color: Color(0xFFD0D5DD)),
-
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
+                leadingIcon: Icons.add_a_photo_outlined,
+                text: 'Add Photo',
+                foregroundColor: const Color(0xFF333333),
+                borderColor: const Color(0xFFD0D5DD),
+                padding: EdgeInsets.symmetric(vertical: 11.h),
+                borderRadius: 8.r,
+                textStyle: TextStyle(
+                  fontSize: 15.5.sp,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-
             SizedBox(width: 10.w),
-
             Expanded(
               flex: 2,
-
-              child: ElevatedButton.icon(
+              child: AppButton.danger(
                 onPressed: () {
                   _exportPhotosToPdf(
                     selectedOnly: _isSelectionMode && selectedCount > 0,
                   );
                 },
-
-                icon: Icon(Icons.picture_as_pdf_outlined, size: 20.sp),
-
-                label: Text(
-                  _isSelectionMode && selectedCount > 0
-                      ? 'Download $selectedCount as PDF'
-                      : 'Download All in 1 PDF',
-
-                  style: TextStyle(
-                    fontSize: 16.sp,
-
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFC8102E),
-
-                  foregroundColor: Colors.white,
-
-                  padding: EdgeInsets.symmetric(vertical: 11.h),
-
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
+                leadingIcon: Icons.picture_as_pdf_outlined,
+                text: _isSelectionMode && selectedCount > 0
+                    ? 'Download $selectedCount as PDF'
+                    : 'Download All in 1 PDF',
+                padding: EdgeInsets.symmetric(vertical: 11.h),
+                borderRadius: 8.r,
+                textStyle: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),

@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../app/theme/app_colors.dart';
 import '../../../../../app/theme/app_radii.dart';
 import '../../../../../app/theme/app_text_styles.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 
 class OnboardingContent extends StatelessWidget {
   const OnboardingContent({super.key});
@@ -47,29 +48,13 @@ class OnboardingContent extends StatelessWidget {
             ),
           ),
           SizedBox(height: 10.h),
-          SizedBox(
-            width: double.infinity,
-            height: 28.h,
-            child: ElevatedButton(
-              onPressed: () {
-                // context.pushReplacement(
-                //   MaterialPageRoute<void>(builder: (_) => const LoginPage()),
-                // );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary400,
-                foregroundColor: AppColors.white,
-                elevation: 0,
-                padding: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadii.sm),
-                ),
-              ),
-              child: Text(
-                'Next  →',
-                style: AppTextStyles.button.copyWith(fontSize: 9.sp),
-              ),
-            ),
+          AppButton(
+            onPressed: () {},
+            backgroundColor: AppColors.primary400,
+            borderRadius: AppRadii.sm,
+            verticalPadding: 6.h,
+            text: 'Next  →',
+            textStyle: AppTextStyles.button.copyWith(fontSize: 9.sp),
           ),
           SizedBox(height: 7.h),
           Center(

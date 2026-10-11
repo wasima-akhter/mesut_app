@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import 'enums.dart';
 import 'models.dart';
 
@@ -64,25 +65,12 @@ class _NotesTabState extends State<NotesTab> {
       children: [
         const Spacer(),
 
-        SizedBox(
-          height: 38.h,
-          child: ElevatedButton.icon(
-            onPressed: _showAddNoteBottomSheet,
-            icon: Icon(Icons.add, size: 17.sp),
-            label: Text(
-              context.loc.addNote,
-              style: TextStyle(fontSize: 16.5.sp, fontWeight: FontWeight.w800),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFC8102E),
-              foregroundColor: Colors.white,
-              elevation: 0,
-              padding: EdgeInsets.symmetric(horizontal: 12.w),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6.r),
-              ),
-            ),
-          ),
+        AppButton.small(
+          text: context.loc.addNote,
+          leadingIcon: Icons.add,
+          onPressed: _showAddNoteBottomSheet,
+          borderRadius: 6.r,
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
         ),
       ],
     );
@@ -261,22 +249,19 @@ class _NotesTabState extends State<NotesTab> {
             style: TextStyle(fontSize: 17.sp),
           ),
           actions: [
-            TextButton(
+            AppTextButton(
+              text: context.loc.cancel,
               onPressed: () => Navigator.pop(context, false),
-              child: Text(
-                context.loc.cancel,
-                style: TextStyle(fontSize: 17.sp),
-              ),
+              textStyle: TextStyle(fontSize: 17.sp),
             ),
-            TextButton(
+            AppTextButton(
+              text: context.loc.delete,
               onPressed: () => Navigator.pop(context, true),
-              child: Text(
-                context.loc.delete,
-                style: TextStyle(
-                  fontSize: 17.sp,
-                  color: const Color(0xFFE00025),
-                  fontWeight: FontWeight.w700,
-                ),
+              foregroundColor: const Color(0xFFE00025),
+              textStyle: TextStyle(
+                fontSize: 17.sp,
+                color: const Color(0xFFE00025),
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
@@ -383,46 +368,24 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
 
                           SizedBox(height: 18.h),
 
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _save,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFC8102E),
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6.r),
-                                ),
-                              ),
-                              child: Text(
-                                _isEdit
-                                    ? context.loc.saveChanges
-                                    : context.loc.saveNotes,
-                                style: TextStyle(
-                                  fontSize: 17.5.sp,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
+                          AppButton(
+                            text: _isEdit
+                                ? context.loc.saveChanges
+                                : context.loc.saveNotes,
+                            onPressed: _save,
+                            borderRadius: 6.r,
                           ),
 
                           SizedBox(height: 3.h),
 
-                          SizedBox(
-                            width: double.infinity,
-                            child: TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: Text(
-                                context.loc.cancel,
-                                style: TextStyle(
-                                  fontSize: 16.5.sp,
-                                  color: const Color(0xFF555555),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                          AppTextButton(
+                            text: context.loc.cancel,
+                            onPressed: () => Navigator.pop(context),
+                            foregroundColor: const Color(0xFF555555),
+                            textStyle: TextStyle(
+                              fontSize: 16.5.sp,
+                              color: const Color(0xFF555555),
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],

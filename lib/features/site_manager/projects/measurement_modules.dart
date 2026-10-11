@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import 'models.dart';
 import 'overview_modules.dart';
 
@@ -95,26 +96,16 @@ class _MeasurementTabState extends State<MeasurementTab> {
 
               SizedBox(width: 8.w),
 
-              SizedBox(
-                height: 36.h,
-                child: ElevatedButton.icon(
-                  onPressed: _showAddMeasurementBottomSheet,
-                  icon: Icon(Icons.add, size: 15.sp),
-                  label: Text(
-                    context.loc.addLine,
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFC8102E),
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 9.w),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.r),
-                    ),
-                  ),
+              AppButton.small(
+                text: context.loc.addLine,
+                leadingIcon: Icons.add,
+                onPressed: _showAddMeasurementBottomSheet,
+                borderRadius: 5.r,
+                padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 7.h),
+                textStyle: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -443,35 +434,19 @@ class _MeasurementBottomSheetState extends State<MeasurementBottomSheet> {
 
                         SizedBox(height: 20.h),
 
-                        SizedBox(
-                          width: double.infinity, 
-                          child: ElevatedButton(
-                            onPressed: _save,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFC8102E),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6.r),
-                              ),
-                            ),
-                            child: Text(
-                              widget.buttonText,
-                              style: TextStyle(
-                                fontSize: 17.sp,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
+                        AppButton(
+                          text: widget.buttonText,
+                          onPressed: _save,
+                          borderRadius: 6.r,
                         ),
 
-                        TextButton(
+                        AppTextButton(
+                          text: context.loc.cancel,
                           onPressed: () => Navigator.pop(context),
-                          child: Text(
-                            context.loc.cancel,
-                            style: TextStyle(
-                              fontSize: 17.sp,
-                              color: const Color(0xFF555555),
-                            ),
+                          foregroundColor: const Color(0xFF555555),
+                          textStyle: TextStyle(
+                            fontSize: 17.sp,
+                            color: const Color(0xFF555555),
                           ),
                         ),
                       ]),

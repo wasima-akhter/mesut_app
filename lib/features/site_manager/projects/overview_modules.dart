@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/localization/app_localization.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import '../../../core/services/launcher_service.dart';
 import '../../../core/services/permission_service.dart';
 import '../../../core/utils/app_date_time_formatter.dart';
@@ -189,27 +190,12 @@ Widget buildMapCard([BuildContext? context]) {
                 ],
               ),
               SizedBox(height: 8.h),
-              SizedBox(
-                width: double.infinity,
-                height: 42.h,
-                child: ElevatedButton.icon(
-                  onPressed: _navigation,
-                  icon: Icon(Icons.navigation_outlined, size: 18.sp),
-                  label: Text(
-                    AppLocalization.current.navigation,
-                    style: TextStyle(
-                      fontSize: 17.sp,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(7.r),
-                    ),
-                  ),
-                ),
+              AppButton.dark(
+                text: AppLocalization.current.navigation,
+                leadingIcon: Icons.navigation_outlined,
+                onPressed: _navigation,
+                borderRadius: 7.r,
+                verticalPadding: 10.h,
               ),
             ],
           ),
@@ -329,23 +315,19 @@ Future<void> showPermissionDialog({
         ),
         content: Text(message, style: TextStyle(fontSize: 17.sp)),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, false);
-            },
-            child: Text(loc.cancel, style: TextStyle(fontSize: 17.sp)),
+          AppTextButton(
+            text: loc.cancel,
+            onPressed: () => Navigator.pop(context, false),
+            textStyle: TextStyle(fontSize: 17.sp),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, true);
-            },
-            child: Text(
-              loc.settings,
-              style: TextStyle(
-                fontSize: 17.sp,
-                color: const Color(0xFFC8102E),
-                fontWeight: FontWeight.w700,
-              ),
+          AppTextButton(
+            text: loc.settings,
+            onPressed: () => Navigator.pop(context, true),
+            foregroundColor: const Color(0xFFC8102E),
+            textStyle: TextStyle(
+              fontSize: 17.sp,
+              color: const Color(0xFFC8102E),
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -470,22 +452,15 @@ Widget _outlineButton({
   required String label,
   required VoidCallback onTap,
 }) {
-  return SizedBox(
-    height: 38.h,
-    child: OutlinedButton.icon(
-      onPressed: onTap,
-      icon: Icon(icon, size: 15.sp),
-      label: Text(
-        label,
-        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-      ),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF333333),
-        side: const BorderSide(color: Color(0xFFD8D8D8)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.r)),
-        padding: EdgeInsets.symmetric(horizontal: 5.w),
-      ),
-    ),
+  return AppOutlinedButton(
+    text: label,
+    leadingIcon: icon,
+    onPressed: onTap,
+    foregroundColor: const Color(0xFF333333),
+    borderColor: const Color(0xFFD8D8D8),
+    borderRadius: 6.r,
+    padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 7.h),
+    size: AppButtonSize.small,
   );
 }
 

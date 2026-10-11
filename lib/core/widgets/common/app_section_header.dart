@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_spacing.dart';
+import '../buttons/buttons.dart';
 
 class AppSectionHeader extends StatelessWidget {
   final String title;
@@ -30,7 +31,7 @@ class AppSectionHeader extends StatelessWidget {
         if (trailing != null)
           trailing!
         else if (actionText != null)
-          TextButton(onPressed: onAction, child: Text(actionText!)),
+          AppTextButton(onPressed: onAction, text: actionText!),
       ],
     );
   }

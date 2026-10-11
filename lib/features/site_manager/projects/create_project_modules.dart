@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/extensions/date_time_extensions.dart';
 import '../../../../core/localization/context_extensions.dart';
+import '../../../../core/widgets/buttons/buttons.dart';
 import 'enums.dart';
 
 // Import your existing enums file.
@@ -1229,27 +1230,15 @@ class _NewProjectPageState extends State<NewProjectPage> {
   // ============================================================
 
   Widget _nextButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () {
-          setState(() {
-            _currentStep++;
-          });
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFC8102E),
-          foregroundColor: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6.r),
-          ),
-        ),
-        child: Text(
-          context.loc.next,
-          style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w700),
-        ),
-      ),
+    return AppButton(
+      text: context.loc.next,
+      onPressed: () {
+        setState(() {
+          _currentStep++;
+        });
+      },
+      borderRadius: 6.r,
+      textStyle: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w700),
     );
   }
 
@@ -1262,24 +1251,16 @@ class _NewProjectPageState extends State<NewProjectPage> {
     return Row(
       children: [
         Expanded(
-          child: SizedBox(
-            height: 48.h,
-            child: OutlinedButton(
-              onPressed: onPrevious,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF333333),
-                side: const BorderSide(color: Color(0xFFAAAAAA)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-              ),
-              child: Text(
-                previousText ?? context.loc.previous,
-                style: TextStyle(
-                  fontSize: 16.5.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+          child: AppOutlinedButton(
+            text: previousText ?? context.loc.previous,
+            onPressed: onPrevious,
+            foregroundColor: const Color(0xFF333333),
+            borderColor: const Color(0xFFAAAAAA),
+            borderRadius: 6.r,
+            textStyle: TextStyle(
+              fontSize: 16.5.sp,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF333333),
             ),
           ),
         ),
@@ -1287,25 +1268,14 @@ class _NewProjectPageState extends State<NewProjectPage> {
         SizedBox(width: 10.w),
 
         Expanded(
-          child: SizedBox(
-            height: 48.h,
-            child: ElevatedButton(
-              onPressed: onNext,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFC8102E),
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-              ),
-              child: Text(
-                nextText ?? context.loc.next,
-                style: TextStyle(
-                  fontSize: 16.5.sp,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+          child: AppButton(
+            text: nextText ?? context.loc.next,
+            onPressed: onNext,
+            borderRadius: 6.r,
+            textStyle: TextStyle(
+              fontSize: 16.5.sp,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
           ),
         ),

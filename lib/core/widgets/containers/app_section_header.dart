@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_text_styles.dart';
 
+import '../buttons/buttons.dart';
+
 class AppSectionHeader extends StatelessWidget {
   const AppSectionHeader({
     super.key,
@@ -20,7 +22,7 @@ class AppSectionHeader extends StatelessWidget {
       children: [
         Expanded(child: Text(title, style: AppTextStyles.titleMedium)),
         if (actionText != null)
-          TextButton(onPressed: onAction, child: Text(actionText!)),
+          AppTextButton(onPressed: onAction, text: actionText!),
       ],
     );
   }

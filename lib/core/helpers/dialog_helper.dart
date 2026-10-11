@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme/app_radii.dart';
 import '../../app/theme/app_spacing.dart';
 
+import '../widgets/buttons/buttons.dart';
+
 abstract final class DialogHelper {
   static Future<T?> showAppDialog<T>(
     BuildContext context, {
@@ -38,13 +40,14 @@ abstract final class DialogHelper {
           title: Text(title),
           content: Text(message),
           actions: [
-            TextButton(
+            AppTextButton(
               onPressed: () => context.pop(false),
-              child: Text(cancelText),
+              text: cancelText,
             ),
-            FilledButton(
+            AppButton(
+              fullWidth: false,
               onPressed: () => context.pop(true),
-              child: Text(confirmText),
+              text: confirmText,
             ),
           ],
         );

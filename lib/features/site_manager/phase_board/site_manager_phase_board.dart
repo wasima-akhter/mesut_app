@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import '../presentation/providers/site_manager_phase_board_provider.dart';
 
 enum ProjectPhase { enquiry, erection, dismantling, standing }
@@ -101,40 +102,16 @@ class _SiteManagerPhaseBoardPageState
   }
 
   Widget _buildBackButton() {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => context.pop(),
-        borderRadius: BorderRadius.circular(50.r),
-        child: Container(
-          width: 38.w,
-          height: 38.w,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Icon(Icons.arrow_back_rounded, size: 18.sp),
-        ),
-      ),
-    );
+    return const AppBackButton();
   }
 
   Widget _headerIcon(IconData icon, {required VoidCallback onTap}) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(50.r),
-        child: Container(
-          width: 38.w,
-          height: 38.w,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Icon(icon, size: 18.sp, color: AppColors.textPrimary),
-        ),
-      ),
+    return AppIconButton.circle(
+      iconData: icon,
+      onPressed: onTap,
+      borderColor: AppColors.border,
+      size: 38.w,
+      iconSize: 18.sp,
     );
   }
 

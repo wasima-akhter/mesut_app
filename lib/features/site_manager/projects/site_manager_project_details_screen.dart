@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import '../presentation/providers/site_manager_project_details_provider.dart';
 import 'dates_modules.dart';
 import 'enums.dart';
@@ -210,18 +211,13 @@ class ProjectDetailsScreen extends ConsumerWidget {
     required IconData icon,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 34.w,
-        height: 34.w,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: const Color(0xFFE5E5E5)),
-        ),
-        alignment: Alignment.center,
-        child: Icon(icon, size: 17.sp, color: const Color(0xFF333333)),
-      ),
+    return AppIconButton.circle(
+      icon: icon,
+      onPressed: onTap,
+      size: 34.w,
+      border: Border.all(color: const Color(0xFFE5E5E5)),
+      iconColor: const Color(0xFF333333),
+      iconSize: 17.sp,
     );
   }
 
@@ -517,41 +513,21 @@ class _EditProjectDetailsBottomSheetState
                     SizedBox(height: 20.h),
 
                     // Save button
-                    SizedBox(
-                      width: double.infinity,
-
-                      child: ElevatedButton(
-                        onPressed: _save,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFC8102E),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6.r),
-                          ),
-                        ),
-                        child: Text(
-                          widget.buttonText,
-                          style: TextStyle(
-                            fontSize: 17.sp,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
+                    AppButton(
+                      text: widget.buttonText,
+                      onPressed: _save,
+                      borderRadius: 6.r,
                     ),
 
-                    // Cancel
-                    SizedBox(
-                      width: double.infinity,
-                      child: TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(
-                          context.loc.cancel,
-                          style: TextStyle(
-                            fontSize: 17.sp,
-                            color: const Color(0xFF555555),
-                          ),
-                        ),
+                    SizedBox(height: 6.h),
+
+                    AppTextButton(
+                      text: context.loc.cancel,
+                      onPressed: () => Navigator.pop(context),
+                      foregroundColor: const Color(0xFF555555),
+                      textStyle: TextStyle(
+                        fontSize: 17.sp,
+                        color: const Color(0xFF555555),
                       ),
                     ),
                   ],

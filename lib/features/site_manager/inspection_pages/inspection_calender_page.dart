@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import '../presentation/providers/site_manager_inspections_provider.dart';
 import 'site_manager_inspections_page.dart';
 
@@ -442,39 +443,6 @@ class _InspectionCalendarPageState
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class SmallRedButton extends StatelessWidget {
-  final String text;
-  final VoidCallback onTap;
-
-  const SmallRedButton({super.key, required this.text, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(4.r),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 6.h),
-          decoration: BoxDecoration(
-            color: AppColors.error,
-            borderRadius: BorderRadius.circular(4.r),
-          ),
-          child: Text(
-            text,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontSize: 14.sp,
-              color: AppColors.white,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
       ),
     );
   }

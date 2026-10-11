@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:printing/printing.dart';
 
+import '../../../core/widgets/buttons/buttons.dart';
 import 'models.dart';
 import 'services/pdf_export_service.dart';
 
@@ -237,14 +238,11 @@ class _PdfPlanPreviewScreenState extends State<PdfPlanPreviewScreen> {
                 ),
               ),
               SizedBox(height: 16.h),
-              ElevatedButton.icon(
+              AppButton.danger(
                 onPressed: _loadPdf,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFC8102E),
-                  foregroundColor: Colors.white,
-                ),
+                leadingIcon: Icons.refresh,
+                text: 'Retry',
+                fullWidth: false,
               ),
             ],
           ),

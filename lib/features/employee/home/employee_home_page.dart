@@ -1,4 +1,4 @@
-import 'package:construction_app/core/widgets/buttons/app_button.dart';
+import 'package:construction_app/core/widgets/buttons/buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -75,9 +75,11 @@ class EmployeeHomePage extends ConsumerWidget {
             startTime: '07:30 am',
             endTime: '04:15 pm',
             startTimeOfDay:
-                assignment.startTimeOfDay ?? const TimeOfDay(hour: 7, minute: 30),
+                assignment.startTimeOfDay ??
+                const TimeOfDay(hour: 7, minute: 30),
             endTimeOfDay:
-                assignment.endTimeOfDay ?? const TimeOfDay(hour: 16, minute: 15),
+                assignment.endTimeOfDay ??
+                const TimeOfDay(hour: 16, minute: 15),
             siteManager: assignment.siteManager,
           ),
           activity: assignment.activity,
@@ -331,25 +333,18 @@ class EmployeeHomePage extends ConsumerWidget {
               children: [
                 Expanded(
                   flex: 5,
-                  child: OutlinedButton.icon(
+                  child: AppOutlinedButton(
                     onPressed: () {
                       _showNavigationMessage(context, assignment.address);
                     },
-                    icon: const Icon(Icons.directions_outlined, size: 21),
-                    label: Text(
-                      context.loc.navigation,
-                      style: TextStyle(
-                        fontSize: 17.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.textSecondary,
-                      side: const BorderSide(color: AppColors.border),
-                      minimumSize: Size(double.infinity, 48.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
+                    leadingIcon: Icons.directions_outlined,
+                    text: context.loc.navigation,
+                    foregroundColor: AppColors.textSecondary,
+                    borderColor: AppColors.border,
+                    borderRadius: 8.r,
+                    textStyle: TextStyle(
+                      fontSize: 17.sp,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),

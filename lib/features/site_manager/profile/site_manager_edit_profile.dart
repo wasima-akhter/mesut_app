@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -78,9 +79,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
       padding: EdgeInsets.fromLTRB(12.w, 14.h, 12.w, 0),
       child: Row(
         children: [
-          _circleButton(
-            icon: Icons.arrow_back_rounded,
-            onTap: () => context.pop(),
+          AppBackButton(
+            size: 39.w,
+            iconSize: 19.sp,
+            onPressed: () => context.pop(),
           ),
 
           Expanded(
@@ -101,24 +103,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  Widget _circleButton({required IconData icon, required VoidCallback onTap}) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(50.r),
-        child: Container(
-          width: 39.w,
-          height: 39.w,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Icon(icon, size: 19.sp),
-        ),
-      ),
-    );
-  }
+
 
   // ============================================================
   // NAME
@@ -238,24 +223,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
   // ============================================================
 
   Widget _buildSaveButton() {
-    return SizedBox(
-      width: double.infinity,
-
-      child: ElevatedButton(
-        onPressed: _saveChanges,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.error,
-          foregroundColor: AppColors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(7.r),
-          ),
-        ),
-        child: Text(
-          context.loc.saveChanges,
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-        ),
-      ),
+    return AppButton.danger(
+      text: context.loc.saveChanges,
+      onPressed: _saveChanges,
+      borderRadius: 7.r,
+      textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
     );
   }
 

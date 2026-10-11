@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
-import '../../../core/widgets/buttons/app_button.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import '../helper/employee_enums.dart';
 import '../helper/employee_models.dart';
 import '../presentation/providers/employee_timer_provider.dart';
@@ -82,19 +82,7 @@ class ActiveTimerPage extends ConsumerWidget {
   Widget _buildHeader(BuildContext context, EmployeeTimerState timerState) {
     return Row(
       children: [
-        GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Container(
-            width: 46.w,
-            height: 46.w,
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.border),
-            ),
-            child: const Icon(Icons.arrow_back, size: 23),
-          ),
-        ),
+        const AppBackButton(),
 
         SizedBox(width: 14.w),
 
@@ -270,46 +258,32 @@ class ActiveTimerPage extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
+                child: AppOutlinedButton(
                   onPressed: () {
                     ref.read(employeeTimerProvider.notifier).toggleBreak();
                   },
-                  icon: Icon(
-                    timerState.isOnBreak ? Icons.play_arrow : Icons.pause,
-                    size: 22,
-                  ),
-                  label: Text(
-                    timerState.isOnBreak
-                        ? context.loc.resumeWork
-                        : context.loc.pauseBreak,
-                    style: TextStyle(
-                      fontSize: 17.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: timerState.isOnBreak
-                        ? AppColors.primary
-                        : AppColors.textSecondary,
-                    side: BorderSide(
-                      color: timerState.isOnBreak
-                          ? AppColors.primary
-                          : AppColors.borderDark,
-                    ),
-                    minimumSize: Size(double.infinity, 48.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
+                  leadingIcon:
+                      timerState.isOnBreak ? Icons.play_arrow : Icons.pause,
+                  text: timerState.isOnBreak
+                      ? context.loc.resumeWork
+                      : context.loc.pauseBreak,
+                  foregroundColor: timerState.isOnBreak
+                      ? AppColors.primary
+                      : AppColors.textSecondary,
+                  borderColor: timerState.isOnBreak
+                      ? AppColors.primary
+                      : AppColors.borderDark,
+                  borderRadius: 8.r,
+                  textStyle: TextStyle(
+                    fontSize: 17.sp,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-
               SizedBox(width: 10.w),
-
               Expanded(
                 child: AppButton(
                   onPressed: () => _finishWork(context, ref, timerState),
-                  height: 48.h,
                   text: context.loc.finishWork,
                 ),
               ),
@@ -393,26 +367,18 @@ class _FinishWorkDialog extends StatelessWidget {
 
             SizedBox(height: 20.h),
 
-            SizedBox(
-              width: double.infinity,
-              child: AppButton(
-                onPressed: onSave,
-                height: 48.h,
-                text: context.loc.saveEntry,
-              ),
+            AppButton(
+              onPressed: onSave,
+              text: context.loc.saveEntry,
             ),
-
             SizedBox(height: 5.h),
-
-            TextButton(
+            AppTextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                context.loc.cancel,
-                style: TextStyle(
-                  fontSize: 17.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
-                ),
+              text: context.loc.cancel,
+              textStyle: TextStyle(
+                fontSize: 17.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
               ),
             ),
           ],

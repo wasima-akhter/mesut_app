@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import '../presentation/providers/site_manager_projects_provider.dart';
 import 'models.dart';
 
@@ -918,27 +919,10 @@ class _ProjectFilterBottomSheetState extends State<ProjectFilterBottomSheet> {
                     // -------------------------
                     // Apply button
                     // -------------------------
-                    SizedBox(
-                      width: double.infinity,
-                      height: 46.h,
-                      child: ElevatedButton(
-                        onPressed: _applyFilters,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFC8102E),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6.r),
-                          ),
-                        ),
-                        child: Text(
-                          context.loc.applyFilters,
-                          style: TextStyle(
-                            fontSize: 17.sp,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
+                    AppButton(
+                      text: context.loc.applyFilters,
+                      onPressed: _applyFilters,
+                      borderRadius: 6.r,
                     ),
                   ],
                 ),
