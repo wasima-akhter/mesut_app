@@ -126,7 +126,10 @@ class _DatesTabState extends State<DatesTab> {
 
         SizedBox(height: 8.h),
 
-        _dateValueRow(label: context.loc.endDate, value: _formatDate(_erectionEnd)),
+        _dateValueRow(
+          label: context.loc.endDate,
+          value: _formatDate(_erectionEnd),
+        ),
       ],
     );
   }

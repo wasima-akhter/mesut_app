@@ -2,6 +2,8 @@
 // PROJECT MODEL
 // ============================================================
 
+import 'dart:typed_data';
+
 import 'enums.dart';
 
 class Project {
@@ -87,17 +89,71 @@ class PhotoItem {
 }
 
 class ProjectPhoto {
-  ProjectPhoto({required this.id, required this.url, this.isCover = false});
+  ProjectPhoto({
+    required this.id,
+    required this.url,
+    this.isCover = false,
+    this.title,
+    this.caption,
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
 
   final String id;
   final String url;
   bool isCover;
+  final String? title;
+  final String? caption;
+  final DateTime createdAt;
+
+  ProjectPhoto copyWith({
+    String? id,
+    String? url,
+    bool? isCover,
+    String? title,
+    String? caption,
+    DateTime? createdAt,
+  }) {
+    return ProjectPhoto(
+      id: id ?? this.id,
+      url: url ?? this.url,
+      isCover: isCover ?? this.isCover,
+      title: title ?? this.title,
+      caption: caption ?? this.caption,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }
 
 class ProjectPlanFile {
-  ProjectPlanFile({required this.name});
+  ProjectPlanFile({
+    required this.name,
+    this.path,
+    this.fileBytes,
+    this.size = '1.8 MB',
+    DateTime? uploadDate,
+  }) : uploadDate = uploadDate ?? DateTime.now();
 
   final String name;
+  final String? path;
+  final Uint8List? fileBytes;
+  final String size;
+  final DateTime uploadDate;
+
+  ProjectPlanFile copyWith({
+    String? name,
+    String? path,
+    Uint8List? fileBytes,
+    String? size,
+    DateTime? uploadDate,
+  }) {
+    return ProjectPlanFile(
+      name: name ?? this.name,
+      path: path ?? this.path,
+      fileBytes: fileBytes ?? this.fileBytes,
+      size: size ?? this.size,
+      uploadDate: uploadDate ?? this.uploadDate,
+    );
+  }
 }
 
 class MeasurementItem {

@@ -263,7 +263,10 @@ class _NotesTabState extends State<NotesTab> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text(context.loc.cancel, style: TextStyle(fontSize: 17.sp)),
+              child: Text(
+                context.loc.cancel,
+                style: TextStyle(fontSize: 17.sp),
+              ),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
@@ -393,7 +396,9 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
                                 ),
                               ),
                               child: Text(
-                                _isEdit ? context.loc.saveChanges : context.loc.saveNotes,
+                                _isEdit
+                                    ? context.loc.saveChanges
+                                    : context.loc.saveNotes,
                                 style: TextStyle(
                                   fontSize: 17.5.sp,
                                   fontWeight: FontWeight.w800,
@@ -449,7 +454,7 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 17.sp,
+        fontSize: 19.sp,
         fontWeight: FontWeight.w800,
         color: const Color(0xFF333333),
       ),
@@ -484,7 +489,7 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
             child: Text(
               category.label,
               style: TextStyle(
-                fontSize: 14.5.sp,
+                fontSize: 16.5.sp,
                 color: selected ? Colors.white : const Color(0xFF777777),
                 fontWeight: FontWeight.w600,
               ),

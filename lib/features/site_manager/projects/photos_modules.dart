@@ -1,59 +1,37 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/localization/app_localization.dart';
 import '../../../core/services/permission_service.dart';
+import '../presentation/providers/site_manager_photos_provider.dart';
+import 'all_photos_screen.dart';
 import 'models.dart';
 import 'overview_modules.dart';
+import 'pdf_plan_preview_screen.dart';
+import 'services/pdf_export_service.dart';
 
-class PhotosTab extends StatefulWidget {
-  const PhotosTab({super.key});
+class PhotosTab extends ConsumerStatefulWidget {
+  const PhotosTab({
+    super.key,
+    this.projectName = 'Goltstein Complex',
+    this.projectId = 'Prj-0842',
+  });
+
+  final String projectName;
+  final String projectId;
 
   @override
-  State<PhotosTab> createState() => _PhotosTabState();
+  ConsumerState<PhotosTab> createState() => _PhotosTabState();
 }
 
-class _PhotosTabState extends State<PhotosTab> {
-  final List<ProjectPlanFile> _planFiles = [
-    ProjectPlanFile(name: 'Goltstein_Scaffold_Approval_Plan.pdf'),
-    ProjectPlanFile(name: 'Goltstein_Scaffold_Approval_Plan_02.pdf'),
-  ];
-  final List<ProjectPhoto> _photos = [
-    ProjectPhoto(
-      id: '1',
-      url: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5',
-      isCover: true,
-    ),
-    ProjectPhoto(
-      id: '2',
-      url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd',
-    ),
-    ProjectPhoto(
-      id: '3',
-      url: 'https://images.unsplash.com/photo-1590725175248-ecb2a7f7a4c6',
-    ),
-    ProjectPhoto(
-      id: '4',
-      url: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e',
-    ),
-    ProjectPhoto(
-      id: '5',
-      url: 'https://images.unsplash.com/photo-1541971875076-8f970d573be6',
-    ),
-    ProjectPhoto(
-      id: '6',
-      url: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742',
-    ),
-  ];
-
+class _PhotosTabState extends ConsumerState<PhotosTab> {
   Future<void> _takePhoto() async {
-    context.pop();
-
     final allowed = await AppPermissions.requestCamera();
     final loc = AppLocalization.current;
 
@@ -68,24 +46,23 @@ class _PhotosTabState extends State<PhotosTab> {
     }
 
     final picker = ImagePicker();
-
     final image = await picker.pickImage(source: ImageSource.camera);
 
     if (image == null) return;
 
-    if (!mounted) return;
-    setState(() {
-      _photos.add(
-        ProjectPhoto(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          url: image.path,
-        ),
-      );
-    });
+    ref
+        .read(projectPhotosProvider.notifier)
+        .addPhoto(
+          ProjectPhoto(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            url: image.path,
+            title: 'Camera Photo',
+            caption: 'Captured on ${DateTime.now().toLocal()}',
+          ),
+        );
   }
 
   Future<void> _pickGallery() async {
-    context.pop();
     final allowed = await AppPermissions.requestPhotos();
     final loc = AppLocalization.current;
 
@@ -99,49 +76,177 @@ class _PhotosTabState extends State<PhotosTab> {
       return;
     }
     final picker = ImagePicker();
-
     final images = await picker.pickMultiImage(imageQuality: 90);
 
     if (images.isEmpty) return;
 
-    setState(() {
-      for (final image in images) {
-        _photos.add(
-          ProjectPhoto(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            url: image.path,
-          ),
-        );
-      }
-    });
+    final newPhotos = images.map((image) {
+      return ProjectPhoto(
+        id:
+            DateTime.now().millisecondsSinceEpoch.toString() +
+            image.path.hashCode.toString(),
+        url: image.path,
+        title: 'Gallery Upload',
+        caption: 'Uploaded ${DateTime.now().toLocal()}',
+      );
+    }).toList();
+
+    ref.read(projectPhotosProvider.notifier).addPhotos(newPhotos);
   }
 
   Future<void> _pickFiles() async {
-    Navigator.pop(context);
-
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
     );
 
+    if (result.isEmpty) return;
+
+    final notifier = ref.read(projectPhotosProvider.notifier);
+    var addedCount = 0;
+
     for (final file in result) {
       final extension = file.extension?.toLowerCase();
 
       if (extension == 'pdf') {
-        setState(() {
-          _planFiles.add(ProjectPlanFile(name: file.name));
-        });
+        notifier.addPlanFile(ProjectPlanFile(name: file.name, path: file.path));
+        addedCount++;
+      } else if (file.path != null &&
+          ['jpg', 'jpeg', 'png'].contains(extension)) {
+        notifier.addPhoto(
+          ProjectPhoto(
+            id:
+                DateTime.now().millisecondsSinceEpoch.toString() +
+                file.name.hashCode.toString(),
+            url: file.path!,
+            title: file.name,
+          ),
+        );
+        addedCount++;
       }
     }
 
-    showMessage(AppLocalization.current.filesSelected(result.length));
+    showMessage(AppLocalization.current.filesSelected(addedCount));
+  }
+
+  void _openAllPhotos() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AllPhotosScreen(
+          projectName: widget.projectName,
+          projectId: widget.projectId,
+        ),
+      ),
+    );
+  }
+
+  void _previewPlan(ProjectPlanFile file) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PdfPlanPreviewScreen(
+          planFile: file,
+          projectName: widget.projectName,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _downloadPlan(ProjectPlanFile file) async {
+    try {
+      final bytes = await PdfExportService.getPlanBytes(file);
+      await PdfExportService.savePdfToDevice(bytes: bytes, filename: file.name);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color(0xFF12B76A),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          content: Row(
+            children: [
+              Icon(
+                Icons.check_circle_outline,
+                color: Colors.white,
+                size: 20.sp,
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Text(
+                  'Downloaded: ${file.name}',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          action: SnackBarAction(
+            label: 'Open',
+            textColor: Colors.white,
+            onPressed: () => _previewPlan(file),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Download failed: $e')));
+    }
+  }
+
+  void _confirmDeletePlan(ProjectPlanFile file) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        title: const Text('Delete Plan'),
+        content: Text('Are you sure you want to delete "${file.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFC8102E),
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              ref
+                  .read(projectPhotosProvider.notifier)
+                  .removePlanFile(file.name);
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Removed ${file.name}')));
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget buildPhotosTab() {
     final loc = AppLocalization.current;
-    final coverPhoto = _photos.where((photo) => photo.isCover).firstOrNull;
+    final photosState = ref.watch(projectPhotosProvider);
+    final photos = photosState.photos;
+    final planFiles = photosState.planFiles;
+    final coverPhoto = photosState.coverPhoto;
+    final otherPhotos = photosState.otherPhotos;
 
-    final otherPhotos = _photos.where((photo) => !photo.isCover).toList();
+    final showPhotosSection =
+        photosState.activeFilter == 'all' ||
+        photosState.activeFilter == 'photos';
+    final showPlansSection =
+        photosState.activeFilter == 'all' ||
+        photosState.activeFilter == 'plans';
 
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
@@ -150,31 +255,42 @@ class _PhotosTabState extends State<PhotosTab> {
           padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 25.h),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              _buildPhotoToolbar(),
-              SizedBox(height: 10.h),
+              _buildPhotoToolbar(photos.length, planFiles.length),
+              SizedBox(height: 12.h),
 
-              _buildPhotoSectionTitle(loc.photos, _photos.length),
-
-              SizedBox(height: 8.h),
-
-              if (coverPhoto != null) _buildCoverPhoto(coverPhoto),
-
-              SizedBox(height: 8.h),
-
-              if (otherPhotos.isNotEmpty) _buildPhotoGrid(otherPhotos),
-
-              SizedBox(height: 18.h),
-
-              _buildPhotoSectionTitle(loc.pdfPlans, _planFiles.length),
-
-              SizedBox(height: 8.h),
-
-              ..._planFiles.map(
-                (file) => Padding(
-                  padding: EdgeInsets.only(bottom: 7.h),
-                  child: _buildPlanFile(file),
+              // Photos Section
+              if (showPhotosSection) ...[
+                _buildPhotoSectionTitle(
+                  title: loc.photos,
+                  count: photos.length,
+                  onSeeAll: _openAllPhotos,
                 ),
-              ),
+                SizedBox(height: 8.h),
+                if (coverPhoto != null) _buildCoverPhoto(coverPhoto),
+                SizedBox(height: 8.h),
+                if (otherPhotos.isNotEmpty) _buildPhotoGrid(otherPhotos),
+                SizedBox(height: 8.h),
+                _buildSeeAllPhotosCard(photos.length),
+                SizedBox(height: 18.h),
+              ],
+
+              // PDF Plans Section
+              if (showPlansSection) ...[
+                _buildPdfPlansSectionTitle(
+                  title: loc.pdfPlans,
+                  count: planFiles.length,
+                ),
+                SizedBox(height: 8.h),
+                if (planFiles.isEmpty)
+                  _buildNoPlansCard()
+                else
+                  ...planFiles.map(
+                    (file) => Padding(
+                      padding: EdgeInsets.only(bottom: 7.h),
+                      child: _buildPlanFile(file),
+                    ),
+                  ),
+              ],
             ]),
           ),
         ),
@@ -182,8 +298,11 @@ class _PhotosTabState extends State<PhotosTab> {
     );
   }
 
-  Widget _buildPhotoToolbar() {
+  Widget _buildPhotoToolbar(int photoCount, int planCount) {
     final loc = AppLocalization.current;
+    final photosState = ref.watch(projectPhotosProvider);
+    final notifier = ref.read(projectPhotosProvider.notifier);
+
     return FittedBox(
       fit: BoxFit.scaleDown,
       alignment: Alignment.centerLeft,
@@ -191,21 +310,31 @@ class _PhotosTabState extends State<PhotosTab> {
         mainAxisSize: MainAxisSize.min,
         children: [
           _photoFilterButton(
-            label: '${loc.photos} (${_photos.length})',
-            selected: true,
-            onTap: () {},
+            label: '${loc.photos} ($photoCount)',
+            selected:
+                photosState.activeFilter == 'all' ||
+                photosState.activeFilter == 'photos',
+            onTap: () {
+              if (photosState.activeFilter == 'photos') {
+                notifier.setActiveFilter('all');
+              } else {
+                notifier.setActiveFilter('photos');
+              }
+            },
           ),
-
           SizedBox(width: 7.w),
-
           _photoFilterButton(
-            label: loc.pdfPlan(_planFiles.length),
-            selected: false,
-            onTap: () {},
+            label: loc.pdfPlan(planCount),
+            selected: photosState.activeFilter == 'plans',
+            onTap: () {
+              if (photosState.activeFilter == 'plans') {
+                notifier.setActiveFilter('all');
+              } else {
+                notifier.setActiveFilter('plans');
+              }
+            },
           ),
-
           SizedBox(width: 14.w),
-
           SizedBox(
             height: 36.h,
             child: ElevatedButton.icon(
@@ -249,10 +378,169 @@ class _PhotosTabState extends State<PhotosTab> {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 16.sp,
+            fontSize: 15.sp,
             color: selected ? Colors.white : const Color(0xFF666666),
             fontWeight: FontWeight.w600,
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPhotoSectionTitle({
+    required String title,
+    required int count,
+    VoidCallback? onSeeAll,
+  }) {
+    return Row(
+      children: [
+        Text(
+          title,
+          style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700),
+        ),
+        SizedBox(width: 5.w),
+        Text(
+          '($count)',
+          style: TextStyle(fontSize: 16.sp, color: const Color(0xFF777777)),
+        ),
+        const Spacer(),
+        if (onSeeAll != null)
+          GestureDetector(
+            onTap: onSeeAll,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF0F2),
+                borderRadius: BorderRadius.circular(5.r),
+                border: Border.all(
+                  color: const Color(0xFFC8102E).withValues(alpha: 0.2),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'See All Photos',
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFFC8102E),
+                    ),
+                  ),
+                  SizedBox(width: 3.w),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 11.sp,
+                    color: const Color(0xFFC8102E),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildPdfPlansSectionTitle({
+    required String title,
+    required int count,
+  }) {
+    return Row(
+      children: [
+        Text(
+          title,
+          style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700),
+        ),
+        SizedBox(width: 5.w),
+        Text(
+          '($count)',
+          style: TextStyle(fontSize: 16.sp, color: const Color(0xFF777777)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSeeAllPhotosCard(int count) {
+    return GestureDetector(
+      onTap: _openAllPhotos,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(7.w),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF1F2),
+                borderRadius: BorderRadius.circular(6.r),
+              ),
+              child: Icon(
+                Icons.collections_outlined,
+                color: const Color(0xFFC8102E),
+                size: 20.sp,
+              ),
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'View all $count photos',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF111111),
+                    ),
+                  ),
+                  SizedBox(height: 1.h),
+                  Text(
+                    'Browse gallery & download all together in 1 PDF',
+                    style: TextStyle(
+                      fontSize: 14.5.sp,
+                      color: const Color(0xFF666666),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFC8102E),
+                borderRadius: BorderRadius.circular(5.r),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.picture_as_pdf_outlined,
+                    color: Colors.white,
+                    size: 15.sp,
+                  ),
+                  SizedBox(width: 4.w),
+                  Text(
+                    'PDF',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -273,15 +561,18 @@ class _PhotosTabState extends State<PhotosTab> {
         child: Stack(
           children: [
             Positioned.fill(
-              child: Image.network(
-                photo.url,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) {
-                  return _imagePlaceholder();
-                },
-              ),
+              child: photo.url.startsWith('http')
+                  ? Image.network(
+                      photo.url,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => _imagePlaceholder(),
+                    )
+                  : Image.file(
+                      File(photo.url),
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => _imagePlaceholder(),
+                    ),
             ),
-
             Positioned(
               left: 5.w,
               bottom: 5.h,
@@ -297,7 +588,6 @@ class _PhotosTabState extends State<PhotosTab> {
                 ),
               ),
             ),
-
             Positioned(right: 6.w, bottom: 6.h, child: _onlineIndicator()),
           ],
         ),
@@ -306,6 +596,10 @@ class _PhotosTabState extends State<PhotosTab> {
   }
 
   Widget _buildPhotoGrid(List<ProjectPhoto> photos) {
+    // Show maximum 6 photos in the preview grid; additional photos accessed via See All
+    final displayPhotos = photos.take(6).toList();
+    final remainingCount = photos.length - displayPhotos.length;
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -315,28 +609,59 @@ class _PhotosTabState extends State<PhotosTab> {
         mainAxisSpacing: 5.h,
         childAspectRatio: 1,
       ),
-      itemCount: photos.length,
+      itemCount: displayPhotos.length,
       itemBuilder: (context, index) {
-        final photo = photos[index];
+        final photo = displayPhotos[index];
+        final isLast = index == 5 && remainingCount > 0;
 
         return GestureDetector(
-          onTap: () => _openPhoto(photo),
+          onTap: () {
+            if (isLast) {
+              _openAllPhotos();
+            } else {
+              _openPhoto(photo);
+            }
+          },
           child: Container(
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(6.r)),
             clipBehavior: Clip.antiAlias,
             child: Stack(
               children: [
                 Positioned.fill(
-                  child: Image.network(
-                    photo.url,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) {
-                      return _imagePlaceholder();
-                    },
-                  ),
+                  child: photo.url.startsWith('http')
+                      ? Image.network(
+                          photo.url,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => _imagePlaceholder(),
+                        )
+                      : Image.file(
+                          File(photo.url),
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => _imagePlaceholder(),
+                        ),
                 ),
-
-                Positioned(right: 5.w, bottom: 5.h, child: _onlineIndicator()),
+                if (isLast)
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black.withValues(alpha: 0.65),
+                      child: Center(
+                        child: Text(
+                          '+$remainingCount',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  Positioned(
+                    right: 5.w,
+                    bottom: 5.h,
+                    child: _onlineIndicator(),
+                  ),
               ],
             ),
           ),
@@ -346,65 +671,134 @@ class _PhotosTabState extends State<PhotosTab> {
   }
 
   Widget _buildPlanFile(ProjectPlanFile file) {
-    final loc = AppLocalization.current;
     return GestureDetector(
-      onTap: () {
-        showMessage(loc.openingFile(file.name));
-      },
+      onTap: () => _previewPlan(file),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 9.h),
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(7.r),
+          borderRadius: BorderRadius.circular(8.r),
           border: Border.all(color: const Color(0xFFE7E7E7)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 3,
+              offset: const Offset(0, 1),
+            ),
+          ],
         ),
         child: Row(
           children: [
             Container(
-              width: 32.w,
-              height: 32.w,
+              width: 36.w,
+              height: 36.w,
               decoration: BoxDecoration(
-                color: const Color(0xFFF3F3F3),
-                borderRadius: BorderRadius.circular(5.r),
+                color: const Color(0xFFFFF0F2),
+                borderRadius: BorderRadius.circular(6.r),
               ),
               child: Icon(
                 Icons.picture_as_pdf_outlined,
                 color: const Color(0xFFC8102E),
-                size: 18.sp,
+                size: 20.sp,
               ),
             ),
-
-            SizedBox(width: 8.w),
-
+            SizedBox(width: 10.w),
             Expanded(
-              child: Text(
-                file.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    file.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14.5.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF1E293B),
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    '${file.size} • Tap to preview',
+                    style: TextStyle(
+                      fontSize: 14.5.sp,
+                      color: const Color(0xFF777777),
+                    ),
+                  ),
+                ],
               ),
             ),
 
-            Icon(
-              Icons.visibility_outlined,
-              size: 17.sp,
-              color: const Color(0xFF777777),
+            // Preview Button
+            IconButton(
+              tooltip: 'Preview PDF',
+              icon: Icon(
+                Icons.visibility_outlined,
+                size: 19.sp,
+                color: const Color(0xFF475569),
+              ),
+              onPressed: () => _previewPlan(file),
+              constraints: const BoxConstraints(),
+              padding: EdgeInsets.all(6.w),
             ),
+            SizedBox(width: 4.w),
 
-            SizedBox(width: 8.w),
-
-            Icon(
-              Icons.download_outlined,
-              size: 17.sp,
-              color: const Color(0xFF777777),
+            // Download Button
+            IconButton(
+              tooltip: 'Download PDF',
+              icon: Icon(
+                Icons.download_outlined,
+                size: 19.sp,
+                color: const Color(0xFFC8102E),
+              ),
+              onPressed: () => _downloadPlan(file),
+              constraints: const BoxConstraints(),
+              padding: EdgeInsets.all(6.w),
             ),
+            SizedBox(width: 4.w),
 
-            SizedBox(width: 7.w),
+            // Delete Button
+            IconButton(
+              tooltip: 'Delete Plan',
+              icon: Icon(
+                Icons.delete_outline,
+                size: 19.sp,
+                color: const Color(0xFFEF4444),
+              ),
+              onPressed: () => _confirmDeletePlan(file),
+              constraints: const BoxConstraints(),
+              padding: EdgeInsets.all(6.w),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
+  Widget _buildNoPlansCard() {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Center(
+        child: Column(
+          children: [
             Icon(
-              Icons.delete_outline,
-              size: 18.sp,
-              color: const Color(0xFFE00025),
+              Icons.picture_as_pdf_outlined,
+              size: 32.sp,
+              color: const Color(0xFF999999),
+            ),
+            SizedBox(height: 6.h),
+            Text(
+              'No PDF plans uploaded yet',
+              style: TextStyle(
+                fontSize: 15.5.sp,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF555555),
+              ),
             ),
           ],
         ),
@@ -437,22 +831,6 @@ class _PhotosTabState extends State<PhotosTab> {
     );
   }
 
-  Widget _buildPhotoSectionTitle(String title, int count) {
-    return Row(
-      children: [
-        Text(
-          title,
-          style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700),
-        ),
-        SizedBox(width: 5.w),
-        Text(
-          '($count)',
-          style: TextStyle(fontSize: 16.sp, color: const Color(0xFF777777)),
-        ),
-      ],
-    );
-  }
-
   void _showUploadFilesBottomSheet() {
     final loc = AppLocalization.current;
     showModalBottomSheet(
@@ -463,7 +841,7 @@ class _PhotosTabState extends State<PhotosTab> {
           padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 18.h),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
           ),
           child: SafeArea(
             child: Column(
@@ -478,26 +856,25 @@ class _PhotosTabState extends State<PhotosTab> {
                     borderRadius: BorderRadius.circular(5.r),
                   ),
                 ),
-
-                SizedBox(height: 12.h),
-
+                SizedBox(height: 8.h),
                 Text(
                   loc.uploadFiles,
                   style: TextStyle(
-                    fontSize: 20.sp,
+                    fontSize: 19.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 SizedBox(height: 18.h),
-
                 Row(
                   children: [
                     Expanded(
                       child: _uploadOption(
                         icon: Icons.camera_alt_outlined,
                         title: loc.takePhoto,
-                        onTap: _takePhoto,
+                        onTap: () {
+                          Navigator.pop(context);
+                          _takePhoto();
+                        },
                       ),
                     ),
                     SizedBox(width: 10.w),
@@ -505,7 +882,10 @@ class _PhotosTabState extends State<PhotosTab> {
                       child: _uploadOption(
                         icon: Icons.photo_library_outlined,
                         title: loc.gallery,
-                        onTap: _pickGallery,
+                        onTap: () {
+                          Navigator.pop(context);
+                          _pickGallery();
+                        },
                       ),
                     ),
                     SizedBox(width: 10.w),
@@ -513,7 +893,10 @@ class _PhotosTabState extends State<PhotosTab> {
                       child: _uploadOption(
                         icon: Icons.attach_file,
                         title: loc.files,
-                        onTap: _pickFiles,
+                        onTap: () {
+                          Navigator.pop(context);
+                          _pickFiles();
+                        },
                       ),
                     ),
                   ],
@@ -545,12 +928,10 @@ class _PhotosTabState extends State<PhotosTab> {
             ),
             child: Icon(icon, size: 23.sp, color: const Color(0xFF444444)),
           ),
-
           SizedBox(height: 6.h),
-
           Text(
             title,
-            style: TextStyle(fontSize: 13.5.sp, color: const Color(0xFF555555)),
+            style: TextStyle(fontSize: 15.5.sp, color: const Color(0xFF555555)),
           ),
         ],
       ),
@@ -563,16 +944,10 @@ class _PhotosTabState extends State<PhotosTab> {
         builder: (_) => PhotoViewerScreen(
           photo: photo,
           onSetCover: () {
-            setState(() {
-              for (final item in _photos) {
-                item.isCover = item.id == photo.id;
-              }
-            });
+            ref.read(projectPhotosProvider.notifier).setCoverPhoto(photo.id);
           },
           onDelete: () {
-            setState(() {
-              _photos.removeWhere((item) => item.id == photo.id);
-            });
+            ref.read(projectPhotosProvider.notifier).removePhoto(photo.id);
           },
         ),
       ),
@@ -602,15 +977,49 @@ class PhotoViewerScreen extends StatefulWidget {
 }
 
 class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
+  Future<void> _downloadSinglePhoto() async {
+    final loc = AppLocalization.current;
+    try {
+      if (widget.photo.url.startsWith('http')) {
+        final dio = Dio();
+        final response = await dio.get<List<int>>(
+          widget.photo.url,
+          options: Options(responseType: ResponseType.bytes),
+        );
+        if (response.data != null) {
+          final filename =
+              'Photo_${widget.photo.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+          await PdfExportService.savePdfToDevice(
+            bytes: response.data as dynamic,
+            filename: filename,
+          );
+        }
+      }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(loc.downloadStarted, style: TextStyle(fontSize: 16.sp)),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(loc.downloadStarted, style: TextStyle(fontSize: 16.sp)),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF333333),
+      backgroundColor: const Color(0xFF222222),
       body: SafeArea(
         child: Column(
           children: [
             _buildViewerHeader(),
-
             Expanded(
               child: InteractiveViewer(
                 minScale: .8,
@@ -618,7 +1027,6 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
                 child: Center(child: _buildImage()),
               ),
             ),
-
             _buildViewerActions(),
           ],
         ),
@@ -637,7 +1045,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
             child: Container(
               width: 35.w,
               height: 35.w,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
@@ -648,9 +1056,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
               ),
             ),
           ),
-
           const Spacer(),
-
           Text(
             loc.photoViewer,
             style: TextStyle(
@@ -659,9 +1065,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
               fontWeight: FontWeight.w600,
             ),
           ),
-
           const Spacer(),
-
           SizedBox(width: 35.w),
         ],
       ),
@@ -675,18 +1079,14 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
       return Image.network(
         widget.photo.url,
         fit: BoxFit.contain,
-        errorBuilder: (_, _, _) {
-          return _viewerPlaceholder();
-        },
+        errorBuilder: (_, _, _) => _viewerPlaceholder(),
       );
     }
 
     return Image.file(
       File(widget.photo.url),
       fit: BoxFit.contain,
-      errorBuilder: (_, _, _) {
-        return _viewerPlaceholder();
-      },
+      errorBuilder: (_, _, _) => _viewerPlaceholder(),
     );
   }
 
@@ -712,7 +1112,6 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
               icon: Icons.photo_camera_outlined,
               onTap: () {
                 widget.onSetCover();
-
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
@@ -724,26 +1123,13 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
               },
             ),
           ),
-
           SizedBox(width: 5.w),
-
           _viewerSmallButton(
             icon: Icons.download_outlined,
             label: loc.download,
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    loc.downloadStarted,
-                    style: TextStyle(fontSize: 16.sp),
-                  ),
-                ),
-              );
-            },
+            onTap: _downloadSinglePhoto,
           ),
-
           SizedBox(width: 5.w),
-
           _viewerSmallButton(
             icon: Icons.delete_outline,
             label: loc.delete,
@@ -767,7 +1153,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
         icon: Icon(icon, size: 15.sp),
         label: Text(
           label,
-          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: color,

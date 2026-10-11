@@ -254,7 +254,7 @@
   "siteManager.endDate": "Enddatum",
   "siteManager.safetyInspection": "Sicherheitsprüfung",
   "siteManager.nextDueDate": "Nächster Fälligkeitstermin",
-  "siteManager.nextSafetyInspection": "Nächste Sicherheitsprüfung: {duration}",
+  "siteManager.nextSafetyInspection": "Nächste Sicherheitsprüfung: {date}",
   "siteManager.siteAccessAndPhotos": "Baustellenzugang & Fotos",
   "siteManager.noteCategory": "Notizkategorie",
   "siteManager.siteAccess": "Baustellenzugang",

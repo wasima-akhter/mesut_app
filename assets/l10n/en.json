@@ -254,7 +254,7 @@
   "siteManager.endDate": "End date",
   "siteManager.safetyInspection": "Safety Inspection",
   "siteManager.nextDueDate": "Next Due Date",
-  "siteManager.nextSafetyInspection": "Next Safety Inspection: {duration}",
+  "siteManager.nextSafetyInspection": "Next Safety Inspection: {date}",
   "siteManager.siteAccessAndPhotos": "Site Access & Photos",
   "siteManager.noteCategory": "Note Category",
   "siteManager.siteAccess": "Site Access",

@@ -341,8 +341,7 @@ class AppStrings {
     '{logged} of {total} logged this week',
     {'logged': logged, 'total': total},
   );
-  String get hoursThisWeek =>
-      get('employee.hoursThisWeek', 'Hours this Week');
+  String get hoursThisWeek => get('employee.hoursThisWeek', 'Hours this Week');
   String get myPlan => get('employee.myPlan', 'My Plan');
   String get noAssignments =>
       get('employee.noAssignments', 'No assignments found for this date');
@@ -421,10 +420,13 @@ class AppStrings {
   String get safetyInspection =>
       get('siteManager.safetyInspection', 'Safety Inspection');
   String get nextDueDate => get('siteManager.nextDueDate', 'Next Due Date');
-  String nextSafetyInspection(String duration) => get(
+  String nextSafetyInspection(String date) => get(
     'siteManager.nextSafetyInspection',
-    'Next Safety Inspection: {duration}',
-    {'duration': duration},
+    'Next Safety Inspection: {date}',
+    {
+      'date': date,
+      'duration': date,
+    },
   );
   String get siteAccessAndPhotos =>
       get('siteManager.siteAccessAndPhotos', 'Site Access & Photos');
@@ -778,8 +780,7 @@ class AppStrings {
   // ============================================================
   // NOTIFICATIONS
   // ============================================================
-  String get notificationsTitle =>
-      get('notifications.title', 'Notifications');
+  String get notificationsTitle => get('notifications.title', 'Notifications');
   String get notificationsAll => get('notifications.all', 'All');
   String get notificationsUnread => get('notifications.unread', 'Unread');
   String get markAllAsRead =>
