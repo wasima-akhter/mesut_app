@@ -1124,6 +1124,38 @@ class _SiteManagerTimeTrackingPageState
   }
 
   Widget _buildCrewSummary() {
+    String projectTotalHours = '142.5h';
+    String targetBudget = '160h';
+    String erectionHours = '82.5h';
+    String dismantlingHours = '36.0h';
+    String otherHours = '24.0h';
+    double erectionProgress = 0.58;
+    double dismantlingProgress = 0.25;
+    double otherProgress = 0.17;
+    bool isProfitable = true;
+
+    if (_selectedProject.contains('0912')) {
+      projectTotalHours = '85.0h';
+      targetBudget = '120h';
+      erectionHours = '50.0h';
+      dismantlingHours = '20.0h';
+      otherHours = '15.0h';
+      erectionProgress = 0.59;
+      dismantlingProgress = 0.24;
+      otherProgress = 0.17;
+      isProfitable = true;
+    } else if (_selectedProject.contains('0731')) {
+      projectTotalHours = '114.5h';
+      targetBudget = '100h';
+      erectionHours = '65.0h';
+      dismantlingHours = '30.0h';
+      otherHours = '19.5h';
+      erectionProgress = 0.57;
+      dismantlingProgress = 0.26;
+      otherProgress = 0.17;
+      isProfitable = false;
+    }
+
     return Container(
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
@@ -1133,40 +1165,77 @@ class _SiteManagerTimeTrackingPageState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            context.loc.totalProjectHours,
-            style: Theme.of(
-              context,
-            ).textTheme.labelMedium?.copyWith(color: AppColors.neutral400),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                context.loc.totalProjectHours,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(color: AppColors.neutral400),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                decoration: BoxDecoration(
+                  color: isProfitable
+                      ? AppColors.success.withValues(alpha: .2)
+                      : AppColors.error.withValues(alpha: .2),
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                child: Text(
+                  isProfitable ? context.loc.profitable : context.loc.lossRisk,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: isProfitable ? AppColors.success : AppColors.error,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ),
+            ],
           ),
 
-          SizedBox(height: 3.h),
+          SizedBox(height: 5.h),
 
-          Text(
-            const Duration(hours: 7, minutes: 30).formatCompactLocalized(),
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(color: AppColors.white),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                projectTotalHours,
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineSmall?.copyWith(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                '/ $targetBudget budget',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.neutral400),
+              ),
+            ],
           ),
 
           SizedBox(height: 14.h),
 
           _crewProgress(
             activity: ActivityType.erection,
-            hours: const Duration(hours: 2).formatCompactLocalized(),
-            progress: .65,
+            hours: erectionHours,
+            progress: erectionProgress,
           ),
 
           _crewProgress(
             activity: ActivityType.dismantling,
-            hours: const Duration(hours: 2).formatCompactLocalized(),
-            progress: .45,
+            hours: dismantlingHours,
+            progress: dismantlingProgress,
           ),
 
           _crewProgress(
             activity: ActivityType.others,
-            hours: const Duration(hours: 2).formatCompactLocalized(),
-            progress: .35,
+            hours: otherHours,
+            progress: otherProgress,
           ),
         ],
       ),

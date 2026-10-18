@@ -181,6 +181,14 @@ class AssignmentDetailsPage extends ConsumerWidget {
             Icons.straighten_outlined,
             '${context.loc.scaffoldArea}: ${assignment.scaffoldArea}',
           ),
+
+          if (assignment.totalProjectHours != null) ...[
+            SizedBox(height: 8.h),
+            _infoRow(
+              Icons.timelapse_rounded,
+              '${context.loc.totalProjectHours}: ${assignment.totalProjectHours}',
+            ),
+          ],
         ],
       ),
     );

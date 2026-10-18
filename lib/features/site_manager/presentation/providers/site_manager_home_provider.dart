@@ -24,6 +24,8 @@ class SiteManagerHomeState {
         'client': 'Mesut Rahaman',
         'planned': 14,
         'running': 5,
+        'loggedHours': 142.5,
+        'budgetHours': 160.0,
       },
       {
         'type': 'Dismantling',
@@ -33,6 +35,8 @@ class SiteManagerHomeState {
         'client': 'David Miller',
         'planned': 8,
         'running': 3,
+        'loggedHours': 85.0,
+        'budgetHours': 120.0,
       },
       {
         'type': 'Erection',
@@ -42,6 +46,8 @@ class SiteManagerHomeState {
         'client': 'Thomas Weber',
         'planned': 15,
         'running': 7,
+        'loggedHours': 114.5,
+        'budgetHours': 100.0,
       },
     ],
   });

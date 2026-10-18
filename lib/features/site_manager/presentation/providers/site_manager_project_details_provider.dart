@@ -12,6 +12,10 @@ class ProjectDetailsState {
   final List<String> voiceNotes;
   final String selectedPhotoCategory;
   final List<PhotoItem> photos;
+  final double totalLoggedHours;
+  final double budgetHours;
+  final List<EmployeeLaborSummary> crewHours;
+  final Map<String, double> activityHours;
 
   const ProjectDetailsState({
     this.selectedTab = ProjectDetailsTab.overview,
@@ -46,7 +50,54 @@ class ProjectDetailsState {
         imagePath: 'assets/images/project_preview.jpg',
       ),
     ],
+    this.totalLoggedHours = 142.5,
+    this.budgetHours = 160.0,
+    this.crewHours = const [
+      EmployeeLaborSummary(
+        employeeName: 'Tim Müller',
+        role: 'Lead Scaffolder',
+        loggedHours: 54.5,
+        recentActivity: 'Erection Phase',
+      ),
+      EmployeeLaborSummary(
+        employeeName: 'Alex Brown',
+        role: 'Scaffolder',
+        loggedHours: 46.0,
+        recentActivity: 'Erection & Anchoring',
+      ),
+      EmployeeLaborSummary(
+        employeeName: 'John Smith',
+        role: 'Scaffolder',
+        loggedHours: 32.0,
+        recentActivity: 'Material Handling',
+      ),
+      EmployeeLaborSummary(
+        employeeName: 'Mesut Yilmaz',
+        role: 'Site Manager',
+        loggedHours: 10.0,
+        recentActivity: 'Safety Inspection',
+      ),
+    ],
+    this.activityHours = const {
+      'Erection': 82.5,
+      'Dismantling': 36.0,
+      'Standing & Inspection': 24.0,
+    },
   });
+
+  bool get isProfitable =>
+      budgetHours > 0 ? totalLoggedHours <= budgetHours : true;
+
+  double get remainingHours => budgetHours - totalLoggedHours;
+
+  double get budgetProgress =>
+      budgetHours > 0 ? (totalLoggedHours / budgetHours).clamp(0.0, 1.5) : 0.0;
+
+  String get formattedTotalHours =>
+      '${totalLoggedHours.toStringAsFixed(totalLoggedHours.truncateToDouble() == totalLoggedHours ? 0 : 1)}h';
+
+  String get formattedBudgetHours =>
+      '${budgetHours.toStringAsFixed(budgetHours.truncateToDouble() == budgetHours ? 0 : 1)}h';
 
   List<ProjectTask> get filteredTasks {
     return tasks.where((t) {
@@ -64,6 +115,10 @@ class ProjectDetailsState {
     List<String>? voiceNotes,
     String? selectedPhotoCategory,
     List<PhotoItem>? photos,
+    double? totalLoggedHours,
+    double? budgetHours,
+    List<EmployeeLaborSummary>? crewHours,
+    Map<String, double>? activityHours,
   }) {
     return ProjectDetailsState(
       selectedTab: selectedTab ?? this.selectedTab,
@@ -75,6 +130,10 @@ class ProjectDetailsState {
       selectedPhotoCategory:
           selectedPhotoCategory ?? this.selectedPhotoCategory,
       photos: photos ?? this.photos,
+      totalLoggedHours: totalLoggedHours ?? this.totalLoggedHours,
+      budgetHours: budgetHours ?? this.budgetHours,
+      crewHours: crewHours ?? this.crewHours,
+      activityHours: activityHours ?? this.activityHours,
     );
   }
 }

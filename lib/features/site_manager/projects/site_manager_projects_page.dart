@@ -28,21 +28,24 @@ class SiteManagerProjectsPage extends ConsumerWidget {
       backgroundColor: Colors.transparent,
       builder: (_) {
         return ProjectFilterBottomSheet(
-          onApply: ({
-            required List<String> phases,
-            required List<String> cities,
-            required String priority,
-            required String customerCategory,
-            required String sortBy,
-          }) {
-            ref.read(siteManagerProjectsProvider.notifier).setFilter(
-                  phases: phases,
-                  cities: cities,
-                  priority: priority,
-                  customerCategory: customerCategory,
-                  sortBy: sortBy,
-                );
-          },
+          onApply:
+              ({
+                required List<String> phases,
+                required List<String> cities,
+                required String priority,
+                required String customerCategory,
+                required String sortBy,
+              }) {
+                ref
+                    .read(siteManagerProjectsProvider.notifier)
+                    .setFilter(
+                      phases: phases,
+                      cities: cities,
+                      priority: priority,
+                      customerCategory: customerCategory,
+                      sortBy: sortBy,
+                    );
+              },
         );
       },
     );
@@ -335,6 +338,110 @@ class SiteManagerProjectsPage extends ConsumerWidget {
             const SizedBox(height: 6),
 
             // -----------------------------------------------
+            // TOTAL LOGGED HOURS & BUDGET STATUS
+            // -----------------------------------------------
+            if (project.totalLoggedHours > 0)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+                margin: const EdgeInsets.only(bottom: 6),
+                decoration: BoxDecoration(
+                  color: project.isProfitable
+                      ? const Color(0xFFF0FDF4)
+                      : const Color(0xFFFEF2F2),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(
+                    color: project.isProfitable
+                        ? const Color(0xFFBBF7D0)
+                        : const Color(0xFFFECACA),
+                    width: 0.8,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.access_time_filled_rounded,
+                      size: 20.sp,
+                      color: project.isProfitable
+                          ? const Color(0xFF15803D)
+                          : const Color(0xFFB91C1C),
+                    ),
+                    SizedBox(width: 7.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.loc.totalProjectHours,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF4B5563),
+                            ),
+                          ),
+                          SizedBox(height: 1.h),
+                          Row(
+                            children: [
+                              Text(
+                                project.formattedTotalHours,
+                                style: TextStyle(
+                                  fontSize: 15.5.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF111827),
+                                ),
+                              ),
+                              if (project.budgetHours > 0) ...[
+                                Flexible(
+                                  child: Text(
+                                    ' / ${project.formattedBudgetHours}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 14.5.sp,
+                                      color: const Color(0xFF6B7280),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (project.budgetHours > 0) ...[
+                      SizedBox(width: 8.w),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: project.isProfitable
+                              ? const Color(0xFFDCFCE7)
+                              : const Color(0xFFFEE2E2),
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                        child: Text(
+                          project.isProfitable
+                              ? context.loc.profitable
+                              : context.loc.lossRisk,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w700,
+                            color: project.isProfitable
+                                ? const Color(0xFF15803D)
+                                : const Color(0xFFB91C1C),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
+            // -----------------------------------------------
             // OWNER
             // -----------------------------------------------
             _InfoRow(icon: Icons.person_outline, text: project.owner),
@@ -497,7 +604,6 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
-
 
 // ============================================================
 // SEARCH DELEGATE

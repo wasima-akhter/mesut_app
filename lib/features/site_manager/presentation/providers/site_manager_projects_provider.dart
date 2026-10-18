@@ -57,6 +57,8 @@ class SiteManagerProjectsState {
         phase: ProjectPhase.erection,
         priority: ProjectPriority.high,
         status: ProjectStatus.inProgress,
+        totalLoggedHours: 142.5,
+        budgetHours: 160.0,
       ),
       Project(
         id: 'Prj-0842',
@@ -68,6 +70,8 @@ class SiteManagerProjectsState {
         phase: ProjectPhase.dismantling,
         priority: ProjectPriority.medium,
         status: ProjectStatus.notStarted,
+        totalLoggedHours: 45.0,
+        budgetHours: 80.0,
       ),
       Project(
         id: 'Prj-0842',
@@ -79,6 +83,8 @@ class SiteManagerProjectsState {
         phase: ProjectPhase.standingScaffold,
         priority: ProjectPriority.medium,
         status: ProjectStatus.postponed,
+        totalLoggedHours: 24.0,
+        budgetHours: 30.0,
       ),
       Project(
         id: 'Prj-0842',
@@ -90,6 +96,8 @@ class SiteManagerProjectsState {
         phase: ProjectPhase.completed,
         priority: ProjectPriority.low,
         status: ProjectStatus.inProgress,
+        totalLoggedHours: 210.0,
+        budgetHours: 220.0,
       ),
       Project(
         id: 'Prj-0851',
@@ -101,6 +109,8 @@ class SiteManagerProjectsState {
         phase: ProjectPhase.erection,
         priority: ProjectPriority.low,
         status: ProjectStatus.inProgress,
+        totalLoggedHours: 85.0,
+        budgetHours: 120.0,
       ),
       Project(
         id: 'Prj-0858',
@@ -112,6 +122,8 @@ class SiteManagerProjectsState {
         phase: ProjectPhase.dismantling,
         priority: ProjectPriority.high,
         status: ProjectStatus.notStarted,
+        totalLoggedHours: 114.5,
+        budgetHours: 100.0,
       ),
     ],
     this.filterState = const ProjectFilterState(),

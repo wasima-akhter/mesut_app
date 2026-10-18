@@ -12,6 +12,7 @@ class EmployeeAssignmentModel {
   final TimeOfDay? endTimeOfDay;
   final String scaffoldArea;
   final String siteManager;
+  final String? totalProjectHours;
 
   const EmployeeAssignmentModel({
     required this.project,
@@ -22,6 +23,7 @@ class EmployeeAssignmentModel {
     this.endTimeOfDay,
     required this.scaffoldArea,
     required this.siteManager,
+    this.totalProjectHours = '142.5h',
   });
 
   String get formattedSchedule {

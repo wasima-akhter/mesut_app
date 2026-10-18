@@ -19,6 +19,8 @@ class Project {
   final ProjectPhase phase;
   final ProjectPriority priority;
   final ProjectStatus status;
+  final double totalLoggedHours;
+  final double budgetHours;
 
   const Project({
     required this.id,
@@ -33,8 +35,44 @@ class Project {
     required this.phase,
     required this.priority,
     required this.status,
+    this.totalLoggedHours = 0.0,
+    this.budgetHours = 0.0,
   });
+
+  bool get isProfitable =>
+      budgetHours > 0 ? totalLoggedHours <= budgetHours : true;
+
+  double get remainingHours => budgetHours - totalLoggedHours;
+
+  double get budgetProgress =>
+      budgetHours > 0 ? (totalLoggedHours / budgetHours).clamp(0.0, 1.5) : 0.0;
+
+  String get formattedTotalHours =>
+      '${totalLoggedHours.toStringAsFixed(totalLoggedHours.truncateToDouble() == totalLoggedHours ? 0 : 1)}h';
+
+  String get formattedBudgetHours =>
+      '${budgetHours.toStringAsFixed(budgetHours.truncateToDouble() == budgetHours ? 0 : 1)}h';
 }
+
+class EmployeeLaborSummary {
+  final String employeeName;
+  final String role;
+  final double loggedHours;
+  final String? avatar;
+  final String recentActivity;
+
+  const EmployeeLaborSummary({
+    required this.employeeName,
+    required this.role,
+    required this.loggedHours,
+    this.avatar,
+    this.recentActivity = 'Erection',
+  });
+
+  String get formattedHours =>
+      '${loggedHours.toStringAsFixed(loggedHours.truncateToDouble() == loggedHours ? 0 : 1)}h';
+}
+
 
 /// ===============================================================
 /// MODELS

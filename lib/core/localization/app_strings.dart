@@ -533,6 +533,87 @@ class AppStrings {
       get('siteManager.crewBreakdown', 'Crew Breakdown');
   String get totalProjectHours =>
       get('siteManager.totalProjectHours', 'Total Project Hours');
+  String get projectHoursLabor =>
+      get('siteManager.projectHoursLabor', 'Project Hours & Labor');
+  String get hoursLoggedByCrew => get(
+    'siteManager.hoursLoggedByCrew',
+    'Total hours logged across all assigned employees',
+  );
+  String get targetBudget =>
+      get('siteManager.targetBudget', 'Target Budget');
+  String get budgetStatus =>
+      get('siteManager.budgetStatus', 'Budget Status');
+  String get profitable =>
+      get('siteManager.profitable', 'Profitable');
+  String profitableUnderBudget(String hours) => get(
+    'siteManager.profitableUnderBudget',
+    'Profitable ({hours}h under budget)',
+    {'hours': hours},
+  );
+  String get lossRisk =>
+      get('siteManager.lossRisk', 'Loss Risk');
+  String lossRiskOverBudget(String hours) => get(
+    'siteManager.lossRiskOverBudget',
+    'Over Budget (+{hours}h)',
+    {'hours': hours},
+  );
+  String budgetConsumedPercent(String percent) => get(
+    'siteManager.budgetConsumedPercent',
+    '{percent}% of labor budget consumed',
+    {'percent': percent},
+  );
+  String get loggedByAssignedCrew =>
+      get('siteManager.loggedByAssignedCrew', 'Logged by Assigned Crew');
+  String get hoursByActivity =>
+      get('siteManager.hoursByActivity', 'Hours by Activity');
+  String get viewTimeLogs =>
+      get('siteManager.viewTimeLogs', 'View Detailed Time Logs');
+  String get hoursLogged =>
+      get('siteManager.hoursLogged', 'Hours Logged');
+  String get consumedHours =>
+      get('siteManager.consumedHours', 'Consumed Hours');
+  String loggedAcrossEmployees(String hours, int count) => get(
+    'siteManager.loggedAcrossEmployees',
+    '{hours} logged across {count} employees',
+    {'hours': hours, 'count': '$count'},
+  );
+  String get profitabilityHealthy => get(
+    'siteManager.profitabilityHealthy',
+    'Project Profitability: Healthy',
+  );
+  String get profitabilityAtRisk => get(
+    'siteManager.profitabilityAtRisk',
+    'Project Profitability: At Risk',
+  );
+  String remainingUnderLaborBudget(String hours, String budget) => get(
+    'siteManager.remainingUnderLaborBudget',
+    '{hours}h remaining under the {budget} labor budget.',
+    {'hours': hours, 'budget': budget},
+  );
+  String exceedingBudgetLimit(String hours, String budget) => get(
+    'siteManager.exceedingBudgetLimit',
+    '{hours}h exceeding the allocated {budget} target.',
+    {'hours': hours, 'budget': budget},
+  );
+  String get itemizedTimeLogsByCrew => get(
+    'siteManager.itemizedTimeLogsByCrew',
+    'Itemized Time Logs by Crew',
+  );
+  String primaryTask(String task) => get(
+    'siteManager.primaryTask',
+    'Primary task: {task}',
+    {'task': task},
+  );
+  String get scaffolder => get('siteManager.scaffolder', 'Scaffolder');
+  String get leadScaffolder =>
+      get('siteManager.leadScaffolder', 'Lead Scaffolder');
+  String get erectionAndAnchoring =>
+      get('siteManager.erectionAndAnchoring', 'Erection & Anchoring');
+  String get materialHandling =>
+      get('siteManager.materialHandling', 'Material Handling');
+  String get underBudget => get('siteManager.underBudget', 'Under Budget');
+  String get overBudget => get('siteManager.overBudget', 'Over Budget');
+
   String get smTimeTracking => get('siteManager.timeTracking', 'Time Tracking');
   String get timeTracking => get('siteManager.timeTracking', 'Time Tracking');
   String get addTime => get('siteManager.addTime', 'Add Time');

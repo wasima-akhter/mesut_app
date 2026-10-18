@@ -34,11 +34,9 @@ class ProjectDetailsScreen extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            _buildFixedHeader(context),
+            _buildFixedHeader(context, detailsState),
             _buildFixedTabs(ref, detailsState.selectedTab),
-            Expanded(
-              child: _buildScrollableTabContent(detailsState.selectedTab),
-            ),
+            Expanded(child: _buildScrollableTabContent(context, detailsState)),
           ],
         ),
       ),
@@ -49,11 +47,15 @@ class ProjectDetailsScreen extends ConsumerWidget {
   /// FIXED HEADER
   /// =============================================================
 
-  Widget _buildFixedHeader(BuildContext context) {
+  Widget _buildFixedHeader(
+    BuildContext context,
+    ProjectDetailsState detailsState,
+  ) {
     return Container(
       color: Colors.white,
       padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
@@ -88,7 +90,9 @@ class ProjectDetailsScreen extends ConsumerWidget {
             ),
           ),
           SizedBox(height: 7.h),
-          Row(
+          Wrap(
+            runSpacing: 6.h,
+
             children: [
               _statusTag(
                 context.loc.erectionPhase,
@@ -101,6 +105,13 @@ class ProjectDetailsScreen extends ConsumerWidget {
               ),
               SizedBox(width: 6.w),
               _statusTag(context.loc.high, color: const Color(0xFFE00025)),
+              SizedBox(width: 6.w),
+              _statusTag(
+                '⏱ ${detailsState.formattedTotalHours} Total',
+                color: detailsState.isProfitable
+                    ? const Color(0xFF027A48)
+                    : const Color(0xFFB42318),
+              ),
             ],
           ),
           SizedBox(height: 8.h),
@@ -180,10 +191,13 @@ class ProjectDetailsScreen extends ConsumerWidget {
   /// SCROLLABLE CONTENT
   /// =============================================================
 
-  Widget _buildScrollableTabContent(ProjectDetailsTab selectedTab) {
-    switch (selectedTab) {
+  Widget _buildScrollableTabContent(
+    BuildContext context,
+    ProjectDetailsState detailsState,
+  ) {
+    switch (detailsState.selectedTab) {
       case ProjectDetailsTab.overview:
-        return buildOverviewTab();
+        return buildOverviewTab(context, detailsState);
 
       case ProjectDetailsTab.tasks:
         return const TasksTab();

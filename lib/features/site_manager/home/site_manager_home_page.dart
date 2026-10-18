@@ -635,6 +635,127 @@ class SiteManagerHomePage extends ConsumerWidget {
             style: TextStyle(fontSize: 17.sp, color: const Color(0xFF888888)),
           ),
 
+          if (operation['loggedHours'] != null) ...[
+            const SizedBox(height: 8),
+            Builder(
+              builder: (context) {
+                final double loggedHours = (operation['loggedHours'] as num)
+                    .toDouble();
+                final double budgetHours =
+                    (operation['budgetHours'] as num?)?.toDouble() ?? 0.0;
+                final bool isProfitable = budgetHours > 0
+                    ? loggedHours <= budgetHours
+                    : true;
+                final String formattedLogged =
+                    '${loggedHours.toStringAsFixed(loggedHours.truncateToDouble() == loggedHours ? 0 : 1)}h';
+                final String formattedBudget =
+                    '${budgetHours.toStringAsFixed(budgetHours.truncateToDouble() == budgetHours ? 0 : 1)}h';
+
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isProfitable
+                        ? const Color(0xFFF0FDF4)
+                        : const Color(0xFFFEF2F2),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: isProfitable
+                          ? const Color(0xFFBBF7D0)
+                          : const Color(0xFFFECACA),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.access_time_filled_rounded,
+                        size: 20.sp,
+                        color: isProfitable
+                            ? const Color(0xFF15803D)
+                            : const Color(0xFFB91C1C),
+                      ),
+                      SizedBox(width: 7.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              context.loc.totalProjectHours,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF4B5563),
+                              ),
+                            ),
+                            SizedBox(height: 1.h),
+                            Row(
+                              children: [
+                                Text(
+                                  formattedLogged,
+                                  style: TextStyle(
+                                    fontSize: 15.5.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF111827),
+                                  ),
+                                ),
+                                if (budgetHours > 0) ...[
+                                  Flexible(
+                                    child: Text(
+                                      ' / $formattedBudget',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 14.5.sp,
+                                        color: const Color(0xFF6B7280),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (budgetHours > 0) ...[
+                        SizedBox(width: 8.w),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isProfitable
+                                ? const Color(0xFFDCFCE7)
+                                : const Color(0xFFFEE2E2),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                          child: Text(
+                            isProfitable
+                                ? context.loc.profitable
+                                : context.loc.lossRisk,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                              color: isProfitable
+                                  ? const Color(0xFF15803D)
+                                  : const Color(0xFFB91C1C),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+
           const SizedBox(height: 14),
 
           Row(
