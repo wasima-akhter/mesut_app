@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 <uses-permission android:name="android.permission.CAMERA" />
 
 <!-- Location -->
@@ -23,7 +25,7 @@
         <!-- Google Maps API Key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyC_VZJ6gG4_2UlQx4_-QrpjpX5W2xDQ-P8" />
+            android:value="AIzaSyDtGdFfKuCpxyamYzEIEhSiPZPsdaboioE" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

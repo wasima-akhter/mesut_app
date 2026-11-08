@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,6 +9,7 @@ import '../../../../app/constants/route_constants.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/enums/app_enum.dart';
 import '../../../../core/localization/context_extensions.dart';
+import '../../../../core/utils/logger.dart';
 import '../../../../core/widgets/buttons/app_back_button.dart';
 import '../../domain/entities/map_location_entity.dart';
 import '../../domain/entities/map_request_entity.dart';
@@ -32,6 +34,8 @@ class CentralMapScreen extends ConsumerStatefulWidget {
 class _CentralMapScreenState extends ConsumerState<CentralMapScreen> {
   final TextEditingController _searchController = TextEditingController();
   GoogleMapController? _localMapController;
+  bool _isMapInitialized = false;
+  Timer? _diagnosticTimer;
 
   static const List<String> _filterCategories = [
     'All',
@@ -44,6 +48,15 @@ class _CentralMapScreenState extends ConsumerState<CentralMapScreen> {
   @override
   void initState() {
     super.initState();
+    _diagnosticTimer = Timer(const Duration(seconds: 8), () {
+      if (mounted && !_isMapInitialized) {
+        AppLogger.warning(
+          'Google Maps view has not attached after 8s. Check API key enablement and device network.',
+          name: 'MAP',
+        );
+      }
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final request =
           widget.initialRequest ??
@@ -57,6 +70,7 @@ class _CentralMapScreenState extends ConsumerState<CentralMapScreen> {
 
   @override
   void dispose() {
+    _diagnosticTimer?.cancel();
     _searchController.dispose();
     super.dispose();
   }

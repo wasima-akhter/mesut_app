@@ -104,13 +104,20 @@ class MapNotifier extends Notifier<MapState> {
       if (route == null &&
           request.showRoute &&
           request.destination != null) {
+        // If user coordinate is very far away (> 100km, e.g. Android Emulator in California),
+        // fallback to Cologne starting point so the route and camera stay focused on Cologne
+        final isUserNearby = userCoord != null &&
+            userCoord.isValid &&
+            userCoord.distanceTo(request.destination!.coordinate) < 100.0;
+
         final originCoord = request.origin?.coordinate ??
-            userCoord ??
-            const MapCoordinate(
-              latitude: 50.9355,
-              longitude: 6.9531,
-              name: 'Köln Startpunkt',
-            );
+            (isUserNearby
+                ? userCoord
+                : const MapCoordinate(
+                    latitude: 50.9355,
+                    longitude: 6.9531,
+                    name: 'Köln Startpunkt (Neumarkt)',
+                  ));
 
         route = await repository.getRoute(
           origin: originCoord,
@@ -263,12 +270,17 @@ class MapNotifier extends Notifier<MapState> {
     if (_isDisposed) return;
     try {
       final repository = ref.read(mapRepositoryProvider);
-      final origin = state.userLocation ??
-          const MapCoordinate(
-            latitude: 50.9355,
-            longitude: 6.9531,
-            name: 'Köln Startpunkt',
-          );
+      final isUserNearby = state.userLocation != null &&
+          state.userLocation!.isValid &&
+          state.userLocation!.distanceTo(destination.coordinate) < 100.0;
+
+      final origin = isUserNearby
+          ? state.userLocation!
+          : const MapCoordinate(
+              latitude: 50.9355,
+              longitude: 6.9531,
+              name: 'Köln Startpunkt (Neumarkt)',
+            );
 
       final route = await repository.getRoute(
         origin: origin,
@@ -403,8 +415,15 @@ class MapNotifier extends Notifier<MapState> {
         coords.add(state.selectedLocation!.coordinate);
       }
 
+      // Only include user location if user is within 100km of the project sites
+      // Prevents Android emulator in California from zooming the camera to the entire globe
       if (state.userLocation != null && state.userLocation!.isValid) {
-        coords.add(state.userLocation!);
+        final reference = state.selectedLocation?.coordinate ??
+            state.activeRoute?.destination ??
+            const MapCoordinate(latitude: 50.9375, longitude: 6.9603);
+        if (state.userLocation!.distanceTo(reference) < 100.0) {
+          coords.add(state.userLocation!);
+        }
       }
 
       if (coords.isNotEmpty) {
