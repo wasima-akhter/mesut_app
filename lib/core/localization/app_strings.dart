@@ -880,4 +880,51 @@ class AppStrings {
       get('notifications.markedAsRead', 'All notifications marked as read');
   String get allCleared =>
       get('notifications.allCleared', 'All notifications cleared');
+
+  // ============================================================
+  // MAP
+  // ============================================================
+  String get mapActiveSitesMap =>
+      get('map.activeSitesMap', 'Active Sites Map');
+  String get mapSiteManagerMap =>
+      get('map.siteManagerMap', 'Site Manager Map');
+  String get mapAssignmentNavigation =>
+      get('map.assignmentNavigation', 'Assignment Navigation');
+  String get mapSearchHint =>
+      get('map.searchHint', 'Search sites, addresses in Köln...');
+  String get mapFilterAll => get('map.filterAll', 'All');
+  String get mapFilterErection => get('map.filterErection', 'Erection');
+  String get mapFilterDismantling =>
+      get('map.filterDismantling', 'Dismantling');
+  String get mapFilterStanding => get('map.filterStanding', 'Standing');
+  String get mapFilterInspection => get('map.filterInspection', 'Inspection');
+  String get mapRoleSiteManager => get('map.roleSiteManager', 'Site Manager');
+  String get mapRoleEmployee => get('map.roleEmployee', 'Employee');
+  String get mapPermissionNotice => get(
+        'map.permissionNotice',
+        'Showing Cologne locations. Enable GPS for live positioning.',
+      );
+  String get mapEnable => get('map.enable', 'Enable');
+  String get mapSampleRouteBadge =>
+      get('map.sampleRouteBadge', 'SAMPLE ROUTE (MOCK)');
+  String get mapStartNavigation =>
+      get('map.startNavigation', 'Start Navigation');
+  String get mapShowRoute => get('map.showRoute', 'Show Route');
+  String get mapOpenProject => get('map.openProject', 'Open Project');
+  String get mapTurnByTurn => get('map.turnByTurn', 'Navigation');
+  String get mapCall => get('map.call', 'Call');
+  String get mapStyle => get('map.mapStyle', 'Map Style');
+  String get mapTraffic => get('map.traffic', 'Traffic');
+  String get mapZoomIn => get('map.zoomIn', 'Zoom In');
+  String get mapZoomOut => get('map.zoomOut', 'Zoom Out');
+  String get mapMyLocation => get('map.myLocation', 'My Location');
+  String get mapLoadingData =>
+      get('map.loadingData', 'Loading map data...');
+  String get mapUnavailable =>
+      get('map.mapUnavailable', 'Map Unavailable');
+  String get mapErrorDescription => get(
+        'map.errorDescription',
+        'Unable to load map or route data. Please verify network and location settings.',
+      );
+  String get mapRetry => get('map.retry', 'Retry');
 }

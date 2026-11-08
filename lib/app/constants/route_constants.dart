@@ -52,6 +52,7 @@ abstract final class RouteConstants {
   static const employeeActiveTimerPage = '/employee-active-timer';
 
   // Shared
+  static const String map = '/map';
   static const String jobDetails = '/job-details';
   static const String changePassword = '/change-password';
   static const String privacyPolicy = '/privacy-policy';

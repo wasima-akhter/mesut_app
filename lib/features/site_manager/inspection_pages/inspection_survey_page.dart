@@ -6,7 +6,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/constants/route_constants.dart';
 import '../../../app/theme/app_colors.dart';
+import '../../../core/enums/app_enum.dart';
 import '../../../core/services/launcher_service.dart';
+import '../../map/domain/entities/map_location_entity.dart';
+import '../../map/domain/entities/map_request_entity.dart';
+import '../../map/utils/map_coordinate_resolver.dart';
 import 'site_manager_inspections_page.dart';
 
 class InspectionSurveyPage extends StatefulWidget {
@@ -164,6 +168,21 @@ class _InspectionSurveyPageState extends State<InspectionSurveyPage> {
       onTap: () {
         if (icon == Icons.phone_outlined) {
           AppLauncherService.makePhoneCall('+49 221 555 0192');
+        } else if (icon == Icons.navigation_outlined) {
+          final destination = MapLocationEntity(
+            id: 'survey_${text.hashCode}',
+            title: 'Inspection Survey Site',
+            address: text,
+            coordinate: MapCoordinateResolver.resolve(text),
+            type: 'Inspection',
+          );
+          context.push(
+            RouteConstants.map,
+            extra: MapRequestEntity.routeNavigation(
+              role: UserRole.siteManager,
+              destination: destination,
+            ),
+          );
         }
       },
       borderRadius: BorderRadius.circular(4.r),

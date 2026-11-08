@@ -44,6 +44,34 @@ class AppLauncherService {
     return false;
   }
 
+  /// Opens external map application (Google Maps / Apple Maps)
+  /// navigating to the given [latitude], [longitude] or [address].
+  static Future<bool> openMapNavigation({
+    double? latitude,
+    double? longitude,
+    String? address,
+    String? label,
+  }) async {
+    Uri uri;
+    if (latitude != null && longitude != null) {
+      final query = label != null
+          ? '$latitude,$longitude(${Uri.encodeComponent(label)})'
+          : '$latitude,$longitude';
+      uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
+    } else if (address != null && address.trim().isNotEmpty) {
+      uri = Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(address.trim())}',
+      );
+    } else {
+      return false;
+    }
+
+    if (await canLaunchUrl(uri)) {
+      return launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+    return false;
+  }
+
   static String? _encodeQueryParameters(Map<String, String> params) {
     if (params.isEmpty) return null;
     return params.entries

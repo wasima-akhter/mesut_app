@@ -19,6 +19,8 @@ import '../../features/shared/change_password/change_password_page.dart';
 import '../../features/shared/legal/privacy_policy.dart';
 import '../../features/shared/legal/terms_conditions.dart';
 import '../../features/shared/notifications/notifications_page.dart';
+import '../../features/map/domain/entities/map_request_entity.dart';
+import '../../features/map/presentation/screens/central_map_screen.dart';
 import '../../features/site_manager/inspection_pages/inspection_calender_page.dart';
 import '../../features/site_manager/inspection_pages/inspection_photos_view_all_page.dart';
 import '../../features/site_manager/inspection_pages/inspection_survey_page.dart';
@@ -201,6 +203,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RouteConstants.notifications,
         builder: (context, state) {
           return const NotificationsPage();
+        },
+      ),
+      GoRoute(
+        path: RouteConstants.map,
+        builder: (context, state) {
+          final request = state.extra as MapRequestEntity?;
+          return CentralMapScreen(initialRequest: request);
         },
       ),
     ],

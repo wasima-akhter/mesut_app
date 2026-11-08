@@ -8,7 +8,11 @@ import '../../../core/localization/context_extensions.dart';
 import '../../../core/widgets/buttons/app_button.dart';
 import '../../../core/widgets/buttons/app_outlined_button.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
+import '../../../core/enums/app_enum.dart';
 import '../../entry/nav/navigation_provider.dart';
+import '../../map/domain/entities/map_location_entity.dart';
+import '../../map/domain/entities/map_request_entity.dart';
+import '../../map/utils/map_coordinate_resolver.dart';
 import '../presentation/providers/site_manager_home_provider.dart';
 
 class SiteManagerHomePage extends ConsumerWidget {
@@ -23,7 +27,26 @@ class SiteManagerHomePage extends ConsumerWidget {
   }
 
   void _openRoute(BuildContext context, Map<String, dynamic> project) {
-    _showMessage(context, context.loc.navigation);
+    final title = project['title'] as String? ?? 'Site Location';
+    final address =
+        project['address'] as String? ?? 'Goltsteinstraße 12, 50968 Köln';
+    final type = project['type'] as String? ?? 'Erection';
+
+    final destination = MapLocationEntity(
+      id: project['id']?.toString() ?? 'op_${title.hashCode}',
+      title: title,
+      address: address,
+      coordinate: MapCoordinateResolver.resolve(address),
+      type: type,
+    );
+
+    context.push(
+      RouteConstants.map,
+      extra: MapRequestEntity.routeNavigation(
+        role: UserRole.siteManager,
+        destination: destination,
+      ),
+    );
   }
 
   String _localizeOperationType(BuildContext context, String type) {
@@ -60,7 +83,7 @@ class SiteManagerHomePage extends ConsumerWidget {
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 18),
               sliver: SliverToBoxAdapter(
-                child: _buildMapCard(context, homeState.activeSites),
+                child: _buildMapCard(context, ref, homeState.activeSites),
               ),
             ),
 
@@ -188,7 +211,7 @@ class SiteManagerHomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildMapCard(BuildContext context, int activeSites) {
+  Widget _buildMapCard(BuildContext context, WidgetRef ref, int activeSites) {
     return Container(
       height: 148,
       decoration: BoxDecoration(
@@ -251,7 +274,7 @@ class SiteManagerHomePage extends ConsumerWidget {
             right: 9,
             bottom: 8,
             child: GestureDetector(
-              onTap: () => _showMessage(context, context.loc.navMap),
+              onTap: () => ref.read(navigationProvider.notifier).changeTab(2),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 11,

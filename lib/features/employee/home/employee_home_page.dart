@@ -9,6 +9,10 @@ import '../../../app/theme/app_colors.dart';
 import '../../../core/extensions/date_time_extensions.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
+import '../../../core/enums/app_enum.dart';
+import '../../map/domain/entities/map_location_entity.dart';
+import '../../map/domain/entities/map_request_entity.dart';
+import '../../map/utils/map_coordinate_resolver.dart';
 import '../helper/employee_enums.dart';
 import '../helper/employee_models.dart';
 import '../presentation/providers/employee_assignment_details_provider.dart';
@@ -336,7 +340,7 @@ class EmployeeHomePage extends ConsumerWidget {
                   flex: 5,
                   child: AppOutlinedButton(
                     onPressed: () {
-                      _showNavigationMessage(context, assignment.address);
+                      _showNavigationMessage(context, assignment.address, assignment.project);
                     },
                     leadingIcon: Icons.directions_outlined,
                     text: context.loc.navigation,
@@ -367,11 +371,21 @@ class EmployeeHomePage extends ConsumerWidget {
     );
   }
 
-  void _showNavigationMessage(BuildContext context, String address) {
-    AppSnackBar.showInfo(
-      context,
-      '${context.loc.navigation}: $address',
-      icon: Icons.navigation_outlined,
+  void _showNavigationMessage(BuildContext context, String address, [String? title]) {
+    final destination = MapLocationEntity(
+      id: 'assignment_${address.hashCode}',
+      title: title ?? 'Project Assignment',
+      address: address,
+      coordinate: MapCoordinateResolver.resolve(address),
+      type: 'Erection',
+    );
+
+    context.push(
+      RouteConstants.map,
+      extra: MapRequestEntity.routeNavigation(
+        role: UserRole.employee,
+        destination: destination,
+      ),
     );
   }
 

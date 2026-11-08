@@ -16,9 +16,14 @@
 <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
 
     <application
-        android:label="construction_app"
+        android:label="Gerüstbau"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
+        <!-- Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyC_VZJ6gG4_2UlQx4_-QrpjpX5W2xDQ-P8" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

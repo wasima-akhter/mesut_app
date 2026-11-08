@@ -45,3 +45,6 @@ app.*.map.json
 /android/app/release
 # Widget Preview related
 .widget_preview/
+
+# Google Maps API Key
+google_map_api_key.txt

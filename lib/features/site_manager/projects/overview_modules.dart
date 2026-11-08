@@ -9,6 +9,12 @@ import '../../../core/services/launcher_service.dart';
 import '../../../core/services/permission_service.dart';
 import '../../../core/utils/app_date_time_formatter.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import 'package:go_router/go_router.dart';
+import '../../../app/constants/route_constants.dart';
+import '../../../core/enums/app_enum.dart';
+import '../../map/domain/entities/map_location_entity.dart';
+import '../../map/domain/entities/map_request_entity.dart';
+import '../../map/utils/map_coordinate_resolver.dart';
 import '../presentation/providers/site_manager_project_details_provider.dart';
 
 /// =============================================================
@@ -280,19 +286,26 @@ class _MapPlaceholderPainter extends CustomPainter {
   }
 }
 
-Future<void> _navigation() async {
-  final allowed = await AppPermissions.requestLocation();
-  final loc = AppLocalization.current;
-
-  if (!allowed) {
-    await showPermissionDialog(
-      title: loc.locationPermissionRequired,
-      message: loc.locationPermissionMessage,
-      context: appNavigatorKey.currentContext!,
+Future<void> _navigation([String? address, String? title]) async {
+  final ctx = appNavigatorKey.currentContext;
+  if (ctx != null) {
+    final addr = address ?? 'Goltsteinstraße 12, 50968 Köln';
+    final destination = MapLocationEntity(
+      id: 'proj_${addr.hashCode}',
+      title: title ?? 'Goltsteins.Complex',
+      address: addr,
+      coordinate: MapCoordinateResolver.resolve(addr),
+      type: 'Erection',
     );
-    return;
+
+    ctx.push(
+      RouteConstants.map,
+      extra: MapRequestEntity.routeNavigation(
+        role: UserRole.siteManager,
+        destination: destination,
+      ),
+    );
   }
-  showMessage(loc.startingNavigation);
 }
 
 void showMessage(String message) {

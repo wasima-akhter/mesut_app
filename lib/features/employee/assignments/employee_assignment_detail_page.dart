@@ -9,6 +9,10 @@ import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/services/launcher_service.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
+import '../../../core/enums/app_enum.dart';
+import '../../map/domain/entities/map_location_entity.dart';
+import '../../map/domain/entities/map_request_entity.dart';
+import '../../map/utils/map_coordinate_resolver.dart';
 import '../helper/employee_enums.dart';
 import '../helper/employee_models.dart';
 import '../presentation/providers/employee_assignment_details_provider.dart';
@@ -264,7 +268,20 @@ class AssignmentDetailsPage extends ConsumerWidget {
             width: double.infinity,
             child: AppButton(
               onPressed: () {
-                _showMessage(context, context.loc.navigation);
+                final destination = MapLocationEntity(
+                  id: 'assignment_${assignment.project.hashCode}',
+                  title: assignment.project,
+                  address: assignment.address,
+                  coordinate: MapCoordinateResolver.resolve(assignment.address),
+                  type: assignment.activity.name,
+                );
+                context.push(
+                  RouteConstants.map,
+                  extra: MapRequestEntity.routeNavigation(
+                    role: UserRole.employee,
+                    destination: destination,
+                  ),
+                );
               },
               height: 48.h,
               text: context.loc.navigation,
