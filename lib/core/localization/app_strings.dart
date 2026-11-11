@@ -18,6 +18,7 @@ class AppStrings {
   // ============================================================
   // COMMON
   // ============================================================
+  String get localeCode => get('locale.code', 'en');
   String get ok => get('common.ok', 'OK');
   String get call => get('common.call', 'Call');
   String get home => get('common.home', 'Home');
@@ -103,6 +104,13 @@ class AppStrings {
   );
   String get fullName => get('auth.fullName', 'Full Name');
   String get enterFullName => get('auth.enterFullName', 'Enter your full name');
+  String get firstName => get('auth.firstName', 'First Name');
+  String get enterFirstName => get('auth.enterFirstName', 'Enter your first name');
+  String get lastName => get('auth.lastName', 'Last Name');
+  String get enterLastName => get('auth.enterLastName', 'Enter your last name');
+  String get selectRole => get('auth.selectRole', 'Select Role');
+  String get roleEmployee => get('auth.roleEmployee', 'Employee');
+  String get roleSiteManager => get('auth.roleSiteManager', 'Site Manager');
   String get phone => get('auth.phone', 'Phone Number');
   String get enterPhone => get('auth.enterPhone', 'Enter your phone number');
   String get createPassword => get('auth.createPassword', 'Create Password');
@@ -122,11 +130,24 @@ class AppStrings {
   String get enterOtp => get('auth.enterOtp', 'Enter OTP Code');
   String enterOtpSubtitle(String email) => get(
     'auth.enterOtpSubtitle',
-    'We have sent a 4-digit verification code to {email}',
+    'We have sent a 6-digit verification code to {email}',
     {'email': email},
   );
   String get verifyCode => get('auth.verifyCode', 'Verify Code');
   String get resendCode => get('auth.resendCode', 'Resend Code');
+  String resendInSeconds(String seconds) => get(
+    'auth.resendInSeconds',
+    'Resend in {seconds}s',
+    {'seconds': seconds},
+  );
+  String get otpSentSuccess => get(
+    'auth.otpSentSuccess',
+    'Verification code sent to your email',
+  );
+  String get verificationResentSuccess => get(
+    'auth.verificationResentSuccess',
+    'Verification code resent successfully',
+  );
   String get didNotReceiveCode =>
       get('auth.didNotReceiveCode', "Didn't receive the code? ");
   String get newPassword => get('auth.newPassword', 'New Password');
@@ -153,10 +174,30 @@ class AppStrings {
   String get passwordsDoNotMatch =>
       get('auth.passwordsDoNotMatch', 'Passwords do not match');
   String get nameRequired => get('auth.nameRequired', 'Name is required');
+  String get firstNameRequired =>
+      get('auth.firstNameRequired', 'First name is required');
+  String get lastNameRequired =>
+      get('auth.lastNameRequired', 'Last name is required');
   String get phoneRequired =>
       get('auth.phoneRequired', 'Phone number is required');
+  String get invalidPhoneFormat =>
+      get('auth.invalidPhoneFormat', 'Please enter a valid phone number');
+  String phoneTooShort(String country, String min) => get(
+    'auth.phoneTooShort',
+    'Phone number for {country} must be at least {min} digits',
+    {'country': country, 'min': min},
+  );
+  String phoneTooLong(String country, String max) => get(
+    'auth.phoneTooLong',
+    'Phone number for {country} cannot exceed {max} digits',
+    {'country': country, 'max': max},
+  );
+  String get phoneRepeatingDigits =>
+      get('auth.phoneRepeatingDigits', 'Please enter a realistic phone number');
+  String get searchCountry =>
+      get('auth.searchCountry', 'Search country or code');
   String get otpRequired =>
-      get('auth.otpRequired', 'Please enter the full 4-digit code');
+      get('auth.otpRequired', 'Please enter the full 6-digit code');
   String get logout => get('auth.logout', 'Log Out');
   String get logoutTitle => get('auth.logoutTitle', 'Log Out?');
   String get logoutConfirmation => get(

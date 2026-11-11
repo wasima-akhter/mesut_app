@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl_phone_field/countries.dart';
 
 import '../../../../core/extensions/date_time_extensions.dart';
+import '../../../../core/helpers/phone_helper.dart';
 import '../../../../core/localization/context_extensions.dart';
 import '../../../../core/widgets/buttons/buttons.dart';
+import '../../../../core/widgets/fields/app_phone_field.dart';
 import '../../../../core/widgets/snack/app_snackbar.dart';
 import 'enums.dart';
 
@@ -30,6 +33,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
       TextEditingController();
 
   final TextEditingController _phoneController = TextEditingController();
+  Country _selectedPhoneCountry =
+      PhoneHelper.findCountryByIso(PhoneHelper.defaultCountryCode);
 
   final TextEditingController _emailController = TextEditingController();
 
@@ -285,10 +290,16 @@ class _NewProjectPageState extends State<NewProjectPage> {
 
               SizedBox(height: 7.h),
 
-              _textField(
+              AppPhoneField(
                 controller: _phoneController,
-                hint: '+0325454514',
-                keyboardType: TextInputType.phone,
+                initialCountryCode: _selectedPhoneCountry.code,
+                hint: context.loc.enterPhone,
+                borderRadius: 6.r,
+                borderColor: const Color(0xFFDCDCDC),
+                focusedBorderColor: const Color(0xFF444444),
+                onCountryChanged: (country) {
+                  setState(() => _selectedPhoneCountry = country);
+                },
               ),
 
               SizedBox(height: 17.h),
@@ -1234,6 +1245,15 @@ class _NewProjectPageState extends State<NewProjectPage> {
     return AppButton(
       text: context.loc.next,
       onPressed: () {
+        final phoneError = PhoneHelper.validate(
+          nationalNumber: _phoneController.text,
+          country: _selectedPhoneCountry,
+          languageCode: context.loc.localeCode,
+        );
+        if (phoneError != null) {
+          AppSnackBar.showError(context, phoneError);
+          return;
+        }
         setState(() {
           _currentStep++;
         });
@@ -1351,7 +1371,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
       Client: $_selectedClient
       Priority: ${_priority.label}
       Contact: ${_contactPersonController.text}
-      Phone: ${_phoneController.text}
+      Phone: ${PhoneHelper.formatCompleteNumber(_selectedPhoneCountry, _phoneController.text)}
       Email: ${_emailController.text}
 
       SITE

@@ -1,0 +1,1990 @@
+Servers
+
+https://allround.localbox.online - Local development server
+
+Health
+System health and status endpoints
+
+
+
+GET
+/health
+Health check endpoint
+
+
+Reports the health status of the application and its dependencies (Database, Redis).
+
+Parameters
+Try it out
+No parameters
+
+Responses
+Code	Description	Links
+200	
+Service is healthy
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "status": "ok",
+  "success": true,
+  "message": "Server Is Running",
+  "dependencies": {
+    "database": "up",
+    "redis": "up"
+  },
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+503	
+Service is degraded
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "status": "ok",
+  "success": true,
+  "message": "Server Is Running",
+  "dependencies": {
+    "database": "up",
+    "redis": "up"
+  },
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+Auth
+Authentication and user registration endpoints
+
+
+
+POST
+/api/v1/auth/signup
+Register a new user
+
+
+Creates a new user account, sends a 6-digit OTP verification code via email, and returns an OTP verification page token.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "phone": "1234567890",
+  "role": "EMPLOYEE",
+  "password": "SecretP@ssw0rd"
+}
+Responses
+Code	Description	Links
+201	
+User successfully registered
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Signup successful, Please check your email for verification code to verify your account",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": {
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "role": "EMPLOYEE",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+No links
+400	
+Malformed JSON payload
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Invalid JSON Payload",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+409	
+User with email already exists
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "User with this email already exist",
+  "errorType": "DUPLICATE_DATA",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+422	
+Request payload validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Request body validation failed",
+  "errorType": "string",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "errors": [
+    {
+      "field": "string",
+      "message": "string"
+    }
+  ]
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "errorType": "SERVER_ERROR",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+
+POST
+/api/v1/auth/resend
+Resend signup verification OTP
+
+
+
+Resends a new 6-digit OTP verification code to the registered user's email using their temporary OTP page token.
+
+Parameters
+Try it out
+No parameters
+
+Responses
+Code	Description	Links
+200	
+Verification OTP resent successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Signup verification otp resend successful!",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+400	
+Malformed JSON payload
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Invalid JSON Payload",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+401	
+Authentication token missing, expired, revoked, or invalid
+
+Media type
+
+application/json
+Examples
+
+Authentication token missing
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Authentication token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+404	
+User not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "User not found",
+  "errorType": "USER_NOT_FOUND",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "errorType": "SERVER_ERROR",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+
+POST
+/api/v1/auth/verify
+Verify signup OTP and activate account
+
+
+
+Verifies the 6-digit OTP code against the temporary OTP page token, marks the user account ACTIVE, creates a new active device session, and issues a JWT access token.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "otp": "123456",
+  "deviceIdentifier": "d8e8fca2-dc0f-48d8-993d-82d8c399b662",
+  "fcmToken": "fcm-device-push-token-xyz",
+  "platform": "ANDROID",
+  "lat": 52.52,
+  "lng": 13.405
+}
+Responses
+Code	Description	Links
+200	
+Email verified successfully and access token issued
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Email verified successfully.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "isProfileSetup": false,
+    "role": "EMPLOYEE",
+    "accountStatus": "ACTIVE",
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "fullName": "John Doe",
+    "avatarUrl": null
+  }
+}
+No links
+400	
+Malformed JSON payload
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Invalid JSON Payload",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+401	
+Unauthorized - Invalid/expired OTP or authentication token
+
+Media type
+
+application/json
+Examples
+
+Invalid OTP code
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Invalid OTP, please check and try again",
+  "errorType": "INVALID_OTP",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+404	
+User not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "User not found",
+  "errorType": "USER_NOT_FOUND",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+422	
+Request payload validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Request body validation failed",
+  "errorType": "string",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "errors": [
+    {
+      "field": "string",
+      "message": "string"
+    }
+  ]
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "errorType": "SERVER_ERROR",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+
+POST
+/api/v1/auth/check
+Validate user access token and device session
+
+
+
+Validates the user JWT access token, verifies account active status, validates device session status and expiry, and updates device last-seen timestamp and GPS coordinates.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "deviceIdentifier": "d8e8fca2-dc0f-48d8-993d-82d8c399b662",
+  "lat": 52.52,
+  "lng": 13.405,
+  "platform": "ANDROID",
+  "fcmToken": "fcm-device-push-token-xyz"
+}
+Responses
+Code	Description	Links
+200	
+User access token and device session are valid
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "User is authenticated",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+400	
+Malformed JSON payload
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Invalid JSON Payload",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+401	
+Unauthorized - Invalid token or expired/revoked device session
+
+Media type
+
+application/json
+Examples
+
+Token not found
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Forbidden - Account is suspended or inactive
+
+Media type
+
+application/json
+Examples
+
+Account suspended
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Your account has been suspended. Please contact the academy.",
+  "errorType": "USER_SUSPENDED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+404	
+User not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "User not found",
+  "errorType": "USER_NOT_FOUND",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+422	
+Request payload validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Request body validation failed",
+  "errorType": "string",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "errors": [
+    {
+      "field": "string",
+      "message": "string"
+    }
+  ]
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "errorType": "SERVER_ERROR",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+
+POST
+/api/v1/auth/login
+User login
+
+
+Authenticates user credentials against the specified role, verifies active account status, initializes a new device session, updates last login time and location coordinates, and returns a JWT access token and user session data.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "email": "john.doe@example.com",
+  "password": "SecretP@ssw0rd",
+  "role": "EMPLOYEE",
+  "deviceIdentifier": "d8e8fca2-dc0f-48d8-993d-82d8c399b662",
+  "fcmToken": "fcm-device-push-token-xyz",
+  "platform": "ANDROID",
+  "lat": 52.52,
+  "lng": 13.405,
+  "rememberMe": false
+}
+Responses
+Code	Description	Links
+200	
+User successfully authenticated
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "User login successful.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "fullName": "John Doe",
+      "email": "john.doe@example.com",
+      "phone": "+1234567890",
+      "avatarUrl": null,
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "isProfileSetup": true,
+      "language": "EN"
+    }
+  }
+}
+No links
+400	
+Malformed JSON payload
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Invalid JSON Payload",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+401	
+Unauthorized - Invalid email, role, or password
+
+Media type
+
+application/json
+Examples
+
+Invalid credentials
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Invalid Credential,Check Your Email And Password",
+  "errorType": "INVALID_CREDENTIALS",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Forbidden - Account is suspended or inactive
+
+Media type
+
+application/json
+Examples
+
+Account suspended
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Your account has been suspended. Please contact the academy.",
+  "errorType": "USER_SUSPENDED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422	
+Request payload validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Request body validation failed",
+  "errorType": "string",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "errors": [
+    {
+      "field": "string",
+      "message": "string"
+    }
+  ]
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "errorType": "SERVER_ERROR",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+
+POST
+/api/v1/auth/logout
+User logout
+
+
+
+Logs out the current device session, marks device status as LOGGED_OUT, clears the FCM push token, and blacklists the current user access JWT in Redis for its remaining time-to-live.
+
+Parameters
+Try it out
+No parameters
+
+Responses
+Code	Description	Links
+200	
+Logout successful
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Logout successful.",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+401	
+Authentication or device session error
+
+Media type
+
+application/json
+Examples
+
+Token not found
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Account status error
+
+Media type
+
+application/json
+Examples
+
+Account suspended
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Your account has been suspended. Please contact the academy.",
+  "errorType": "USER_SUSPENDED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+404	
+User not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "User not found",
+  "errorType": "USER_NOT_FOUND",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "errorType": "SERVER_ERROR",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+
+
+Recover
+Password recovery endpoints for user and admin
+
+
+
+POST
+/api/v1/recover/find
+Find user for password recovery
+
+
+Verifies user existence by email, generates a password reset OTP, caches it in Redis, dispatches the OTP email via queue, and returns the user details with a reset password page token.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "email": "user@example.com"
+}
+Responses
+Code	Description	Links
+200	
+Recover user found and OTP sent successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Recover user found and otp send to user email.",
+  "data": {
+    "fullName": "John Doe",
+    "email": "john.doe@example.com",
+    "role": "EMPLOYEE",
+    "status": "ACTIVE",
+    "avatar": "https://example.com/avatar.jpg",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  },
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+400	
+Invalid JSON payload
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Invalid JSON Payload",
+  "errorType": "INVALID_JSON",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+401	
+User with the email is not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "User with the email is not found,Please check your email address!",
+  "errorType": "USER_NOT_FOUND",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Account status forbidden
+
+Media type
+
+application/json
+Examples
+
+Account suspended
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Your account has been suspended. Please contact the academy.",
+  "errorType": "USER_SUSPENDED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422	
+Request body validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Request body validation failed",
+  "errors": [
+    {
+      "field": "email",
+      "message": "Invalid email address"
+    }
+  ],
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+500	
+Internal Server Error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "errorType": "SERVER_ERROR",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+
+POST
+/api/v1/recover/resend
+Resend password recovery OTP
+
+
+
+Generates and sends a new password recovery OTP to the user's email, invalidating the previous OTP code. Expects the reset password page token in the Authorization Bearer header.
+
+Parameters
+Try it out
+No parameters
+
+Responses
+Code	Description	Links
+200	
+Password recovery OTP resent successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Recover user otp resend successful!",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+401	
+Authentication failed
+
+Media type
+
+application/json
+Examples
+
+Token expired
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token has been expired",
+  "errorType": "TOKEN_EXPIRED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Account status forbidden
+
+Media type
+
+application/json
+Examples
+
+Account suspended
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Your account has been suspended. Please contact the academy.",
+  "errorType": "USER_SUSPENDED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+404	
+User not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "User not found",
+  "errorType": "USER_NOT_FOUND",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+500	
+Internal Server Error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "errorType": "SERVER_ERROR",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+
+POST
+/api/v1/recover/verify
+Verify password recovery OTP
+
+
+
+Verifies the 6-digit OTP code sent to the user's email during password recovery. Expects the reset password page token in the Authorization Bearer header.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "otp": "123456"
+}
+Responses
+Code	Description	Links
+200	
+Password recovery OTP verified successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Recover user otp verification successful!",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+400	
+Invalid JSON payload
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Invalid JSON Payload",
+  "errorType": "INVALID_JSON",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+401	
+Authentication or OTP verification failed
+
+Media type
+
+application/json
+Examples
+
+Token expired
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token has been expired",
+  "errorType": "TOKEN_EXPIRED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Account status forbidden
+
+Media type
+
+application/json
+Examples
+
+Account suspended
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Your account has been suspended. Please contact the academy.",
+  "errorType": "USER_SUSPENDED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+404	
+User not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "User not found",
+  "errorType": "USER_NOT_FOUND",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422	
+Request body validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Request body validation failed",
+  "errors": [
+    {
+      "field": "otp",
+      "message": "Otp must be 6 digits"
+    }
+  ],
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+500	
+Internal Server Error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "errorType": "SERVER_ERROR",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+
+POST
+/api/v1/recover/reset
+Reset user password
+
+
+
+Resets the user password using the reset password page token. Validates password constraints, ensures it differs from the previous password, updates password hash, blacklists the token in Redis, and emits a password reset confirmation email.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "password": "NewStrongP@ss1",
+  "confirmPassword": "NewStrongP@ss1"
+}
+Responses
+Code	Description	Links
+200	
+Password reset successful
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Recover user password reset successful!",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+400	
+Invalid JSON payload or bad request
+
+Media type
+
+application/json
+Examples
+
+Invalid JSON payload
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Invalid JSON Payload",
+  "errorType": "INVALID_JSON",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+401	
+Authentication failed
+
+Media type
+
+application/json
+Examples
+
+Token expired
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token has been expired",
+  "errorType": "TOKEN_EXPIRED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Account status forbidden
+
+Media type
+
+application/json
+Examples
+
+Account suspended
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Your account has been suspended. Please contact the academy.",
+  "errorType": "USER_SUSPENDED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+404	
+User not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "User not found",
+  "errorType": "USER_NOT_FOUND",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422	
+Request body validation failed
+
+Media type
+
+application/json
+Examples
+
+Password does not meet requirements
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Request body validation failed",
+  "errors": [
+    {
+      "field": "password",
+      "message": "Password must contain at least one special character"
+    }
+  ],
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+500	
+Internal Server Error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "errorType": "SERVER_ERROR",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+
+POST
+/api/v1/admin/recover/find
+Find admin user for password recovery
+
+
+Verifies admin user existence by email, verifies account status and role, generates a password reset OTP, caches it in Redis, dispatches the OTP email via queue, and sets the recover_page_token HTTP-only cookie.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "email": "user@example.com"
+}
+Responses
+Code	Description	Links
+200	
+Recover admin user found and OTP sent successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Recover user found and otp send successfully",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+Headers:
+Name	Description	Type
+Set-Cookie	
+Sets the recover_page_token HTTP-only cookie for password recovery flow.
+
+string
+Example: recover_page_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; Path=/; HttpOnly; SameSite=Strict
+No links
+400	
+Invalid JSON payload
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Invalid JSON Payload",
+  "errorType": "INVALID_JSON",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+401	
+User with the email is not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "User with the email is not found,Please check your email address!",
+  "errorType": "USER_NOT_FOUND",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Account status forbidden or insufficient role
+
+Media type
+
+application/json
+Examples
+
+Account suspended
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Your account has been suspended. Please contact the academy.",
+  "errorType": "USER_SUSPENDED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422	
+Request body validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Request body validation failed",
+  "errors": [
+    {
+      "field": "email",
+      "message": "Invalid email address"
+    }
+  ],
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+500	
+Internal Server Error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "errorType": "SERVER_ERROR",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+
+POST
+/api/v1/admin/recover/resend
+Resend admin password recovery OTP
+
+
+
+Generates and sends a new password recovery OTP to the admin's email, invalidating the previous OTP code. Expects the reset password page token in the recover_page_token cookie or Authorization Bearer header.
+
+Parameters
+Try it out
+No parameters
+
+Responses
+Code	Description	Links
+200	
+Admin password recovery OTP resent successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Otp resend successful to admin email!",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+401	
+Authentication failed
+
+Media type
+
+application/json
+Examples
+
+Token expired
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token has been expired",
+  "errorType": "TOKEN_EXPIRED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Account status forbidden or insufficient role
+
+Media type
+
+application/json
+Examples
+
+Account suspended
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Your account has been suspended. Please contact the academy.",
+  "errorType": "USER_SUSPENDED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+404	
+User not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "User not found",
+  "errorType": "USER_NOT_FOUND",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+500	
+Internal Server Error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "errorType": "SERVER_ERROR",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+
+POST
+/api/v1/admin/recover/verify
+Verify admin password recovery OTP
+
+
+
+Verifies the 6-digit OTP code sent to the admin's email during password recovery. Expects the reset password page token in the recover_page_token cookie or Authorization Bearer header.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "otp": "123456"
+}
+Responses
+Code	Description	Links
+200	
+Admin password recovery OTP verified successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Otp verification successful for recover admin account!",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+400	
+Invalid JSON payload
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Invalid JSON Payload",
+  "errorType": "INVALID_JSON",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+401	
+Authentication or OTP verification failed
+
+Media type
+
+application/json
+Examples
+
+Token expired
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token has been expired",
+  "errorType": "TOKEN_EXPIRED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Account status forbidden or insufficient role
+
+Media type
+
+application/json
+Examples
+
+Account suspended
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Your account has been suspended. Please contact the academy.",
+  "errorType": "USER_SUSPENDED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+404	
+User not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "User not found",
+  "errorType": "USER_NOT_FOUND",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422	
+Request body validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Request body validation failed",
+  "errors": [
+    {
+      "field": "otp",
+      "message": "OTP must be 6 digits"
+    }
+  ],
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+500	
+Internal Server Error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "errorType": "SERVER_ERROR",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+
+POST
+/api/v1/admin/recover/reset
+Reset admin password
+
+
+
+Resets the admin's password after OTP verification, updates the credentials in the database, blacklists the recovery token, dispatches a confirmation email via queue, and clears the recover_page_token cookie. Expects the reset password page token in the recover_page_token cookie or Authorization Bearer header.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "password": "NewStrongP@ss1",
+  "confirmPassword": "NewStrongP@ss1"
+}
+Responses
+Code	Description	Links
+200	
+Admin password reset successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Password reset successful",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+Headers:
+Name	Description	Type
+Set-Cookie	
+Clears the recover_page_token HTTP-only cookie.
+
+string
+Example: recover_page_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly
+No links
+400	
+Invalid JSON payload or bad request
+
+Media type
+
+application/json
+Examples
+
+Invalid JSON payload
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Invalid JSON Payload",
+  "errorType": "INVALID_JSON",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+401	
+Authentication failed
+
+Media type
+
+application/json
+Examples
+
+Token expired
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token has been expired",
+  "errorType": "TOKEN_EXPIRED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Account status forbidden or insufficient role
+
+Media type
+
+application/json
+Examples
+
+Account suspended
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Your account has been suspended. Please contact the academy.",
+  "errorType": "USER_SUSPENDED",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+404	
+User not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "User not found",
+  "errorType": "USER_NOT_FOUND",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422	
+Request body validation failed
+
+Media type
+
+application/json
+Examples
+
+Password does not meet requirements
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Request body validation failed",
+  "errors": [
+    {
+      "field": "password",
+      "message": "Password must contain at least one special character"
+    }
+  ],
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+500	
+Internal Server Error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "errorType": "SERVER_ERROR",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+
+
+
+Media
+Media attachment upload and deletion endpoints
+
+
+
+POST
+/api/v1/media
+Upload media attachments
+
+
+Uploads up to 10 media attachment files to S3 and returns their public URLs. Uses multipart field files via uploadAttachmentArray(max 10, required) and handleAttachmentMulterError.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+multipart/form-data
+files *
+array<string>
+Up to 10 media/attachment files to upload (max 50MB per file).
+
+Responses
+Code	Description	Links
+200	
+Media uploads successful
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Media uploads successful",
+  "data": [
+    "https://allround-bucket.s3.amazonaws.com/attachments/123e4567-e89b-12d3-a456-426614174000-1697280000000.jpg"
+  ],
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+400	
+Upload validation or limits error
+
+Media type
+
+application/json
+Examples
+
+Files required
+Example Value
+Schema
+{
+  "success": false,
+  "status": 400,
+  "message": "'files' attachments are required.",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "errorType": "SERVER_ERROR",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+
+DELETE
+/api/v1/media
+Delete media attachments
+
+
+Deletes media attachments from S3 by their URLs. Body validated by deleteMediaSchema (urls string array, strict).
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "urls": [
+    "https://allround-bucket.s3.amazonaws.com/attachments/123e4567-e89b-12d3-a456-426614174000-1697280000000.jpg"
+  ]
+}
+Responses
+Code	Description	Links
+200	
+Media deletion successful
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Media items deletion successful!",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+400	
+Invalid JSON payload
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Invalid JSON Payload",
+  "errorType": "INVALID_JSON",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422	
+Request body validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Request body validation failed",
+  "errors": [
+    {
+      "field": "urls",
+      "message": "Media url is required"
+    }
+  ],
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Internal Server Error",
+  "errorType": "SERVER_ERROR",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+

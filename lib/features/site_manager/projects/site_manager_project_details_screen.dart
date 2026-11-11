@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl_phone_field/countries.dart';
 
+import '../../../core/helpers/phone_helper.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/fields/app_phone_field.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
 import '../presentation/providers/site_manager_project_details_provider.dart';
 import 'dates_modules.dart';
@@ -344,6 +347,7 @@ class _EditProjectDetailsBottomSheetState
   late final TextEditingController _contactNameController;
   late final TextEditingController _phoneNumberController;
   late final TextEditingController _emailController;
+  late Country _selectedPhoneCountry;
 
   late String _projectPhase;
   late String _operationalStatus;
@@ -380,8 +384,12 @@ class _EditProjectDetailsBottomSheetState
       text: widget.initialContactName ?? '',
     );
 
+    final parsedPhone = PhoneHelper.parseInitialPhone(
+      widget.initialPhoneNumber,
+    );
+    _selectedPhoneCountry = parsedPhone.country;
     _phoneNumberController = TextEditingController(
-      text: widget.initialPhoneNumber ?? '',
+      text: parsedPhone.nationalNumber,
     );
 
     _emailController = TextEditingController(text: widget.initialEmail ?? '');
@@ -507,10 +515,16 @@ class _EditProjectDetailsBottomSheetState
 
                     SizedBox(height: 6.h),
 
-                    _textField(
+                    AppPhoneField(
                       controller: _phoneNumberController,
-                      hint: '+0325455414',
-                      textInputType: TextInputType.phone,
+                      initialCountryCode: _selectedPhoneCountry.code,
+                      hint: context.loc.enterPhone,
+                      borderRadius: 6.r,
+                      borderColor: const Color(0xFFDCDCDC),
+                      focusedBorderColor: const Color(0xFF444444),
+                      onCountryChanged: (country) {
+                        setState(() => _selectedPhoneCountry = country);
+                      },
                     ),
 
                     SizedBox(height: 14.h),
@@ -653,8 +667,13 @@ class _EditProjectDetailsBottomSheetState
       return;
     }
 
-    if (phoneNumber.isEmpty) {
-      _showError(context.loc.pleaseEnterPhoneNumber);
+    final phoneError = PhoneHelper.validate(
+      nationalNumber: phoneNumber,
+      country: _selectedPhoneCountry,
+      languageCode: context.loc.localeCode,
+    );
+    if (phoneError != null) {
+      _showError(phoneError);
       return;
     }
 
@@ -663,15 +682,21 @@ class _EditProjectDetailsBottomSheetState
       return;
     }
 
+    final formattedPhone = PhoneHelper.formatCompleteNumber(
+      _selectedPhoneCountry,
+      phoneNumber,
+    );
+
     widget.onSave(
       projectPhase: _projectPhase,
       operationalStatus: _operationalStatus,
       priority: _priority,
       contactName: contactName,
-      phoneNumber: phoneNumber,
+      phoneNumber: formattedPhone,
       email: email,
     );
 
+    AppSnackBar.showSuccess(context, context.loc.success);
     Navigator.pop(context);
   }
 

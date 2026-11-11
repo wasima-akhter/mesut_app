@@ -9,7 +9,8 @@ import '../../../app/theme/app_radii.dart';
 import '../../../core/localization/app_language.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/localization/localization_provider.dart';
-import '../../auth/logout/logout.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
+import '../../auth/presentation/widgets/logout_dialog.dart';
 import '../projects/overview_modules.dart';
 
 class SiteManagerMorePage extends ConsumerStatefulWidget {
@@ -394,9 +395,12 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
   void _logout() {
     LogoutConfirmation.show(
       context: context,
-      onLogout: () {
-        showMessage(context.loc.loggedOutSuccess);
-        context.go(RouteConstants.signIn);
+      onLogout: () async {
+        await ref.read(authProvider.notifier).logout();
+        if (mounted) {
+          showMessage(context.loc.loggedOutSuccess);
+          context.go(RouteConstants.signIn);
+        }
       },
     );
   }

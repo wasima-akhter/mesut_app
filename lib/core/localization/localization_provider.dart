@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../constants/storage_keys.dart';
 import 'app_language.dart';
 import 'app_localization.dart';
 import 'app_strings.dart';
@@ -11,7 +12,8 @@ final appLanguageProvider = NotifierProvider<AppLanguageNotifier, AppLanguage>(
 );
 
 class AppLanguageNotifier extends Notifier<AppLanguage> {
-  static const String _storageKey = 'selected_language_code';
+  static const String _storageKey = StorageKeys.selectedLanguage;
+  static String activeLanguageCode = 'en';
 
   @override
   AppLanguage build() {
@@ -25,17 +27,21 @@ class AppLanguageNotifier extends Notifier<AppLanguage> {
       final code = prefs.getString(_storageKey);
       if (code != null) {
         final language = AppLanguage.fromCode(code);
+        activeLanguageCode = language.code;
         await AppLocalization.load(language);
         state = language;
       } else {
+        activeLanguageCode = AppLanguage.english.code;
         await AppLocalization.load(AppLanguage.english);
       }
     } catch (_) {
+      activeLanguageCode = AppLanguage.english.code;
       await AppLocalization.load(AppLanguage.english);
     }
   }
 
   Future<void> setLanguage(AppLanguage language) async {
+    activeLanguageCode = language.code;
     if (state == language) return;
     await AppLocalization.load(language);
     state = language;

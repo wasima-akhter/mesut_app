@@ -1,41 +1,69 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../app/theme/app_colors.dart';
-import '../../../../app/theme/app_text_styles.dart';
 import '../../../app/constants/asset_constants.dart';
 import '../../../app/constants/route_constants.dart';
+import '../../../app/theme/app_colors.dart';
+import '../../../app/theme/app_text_styles.dart';
+import '../../../core/storage/storage_provider.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
 
-class SplashPage extends StatefulWidget {
+class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
   @override
-  State<SplashPage> createState() => _SplashPageState();
+  ConsumerState<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage> {
-  Timer? _timer;
-
+class _SplashPageState extends ConsumerState<SplashPage> {
   @override
   void initState() {
     super.initState();
-
-    _timer = Timer(const Duration(milliseconds: 1800), _continue);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _bootstrapNavigation();
+      }
+    });
   }
 
-  void _continue() {
+  Future<void> _bootstrapNavigation() async {
+    bool isAuthenticated = false;
+    bool onboardingCompleted = false;
+
+    try {
+      onboardingCompleted =
+          ref.read(storageServiceProvider).onboardingCompleted;
+
+      final results = await Future.wait([
+        Future<void>.delayed(const Duration(milliseconds: 1600)),
+        ref
+            .read(authProvider.notifier)
+            .checkSession()
+            .timeout(const Duration(seconds: 6), onTimeout: () => false),
+      ]);
+
+      isAuthenticated = results[1] as bool;
+    } catch (e, st) {
+      debugPrint('[SPLASH] Bootstrap check error: $e\n$st');
+      isAuthenticated = false;
+    }
+
     if (!mounted) return;
 
-    context.go(RouteConstants.chooseLanguage);
-  }
+    if (isAuthenticated) {
+      context.go(RouteConstants.mainNav);
+      return;
+    }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
+    if (onboardingCompleted) {
+      context.go(RouteConstants.signIn);
+    } else {
+      context.go(RouteConstants.chooseLanguage);
+    }
   }
 
   @override

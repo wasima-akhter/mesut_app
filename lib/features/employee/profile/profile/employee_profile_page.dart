@@ -11,7 +11,8 @@ import '../../../../core/localization/context_extensions.dart';
 import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/services/launcher_service.dart';
 import '../../../../core/widgets/snack/app_snackbar.dart';
-import '../../../auth/logout/logout.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/presentation/widgets/logout_dialog.dart';
 import '../../presentation/providers/employee_profile_provider.dart';
 
 class EmployeeProfilePage extends ConsumerWidget {
@@ -68,7 +69,9 @@ class EmployeeProfilePage extends ConsumerWidget {
 
             SliverPadding(
               padding: EdgeInsets.fromLTRB(18.w, 0, 18.w, 30.h),
-              sliver: SliverToBoxAdapter(child: _buildLegalAndLogout(context)),
+              sliver: SliverToBoxAdapter(
+                child: _buildLegalAndLogout(context, ref),
+              ),
             ),
           ],
         ),
@@ -444,7 +447,7 @@ class EmployeeProfilePage extends ConsumerWidget {
   // LEGAL
   // ============================================================
 
-  Widget _buildLegalAndLogout(BuildContext context) {
+  Widget _buildLegalAndLogout(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
         _section(
@@ -473,7 +476,7 @@ class EmployeeProfilePage extends ConsumerWidget {
 
         AppOutlinedButton(
           fullWidth: true,
-          onPressed: () => _logout(context),
+          onPressed: () => _logout(context, ref),
           leadingIcon: Icons.logout,
           text: context.loc.logout,
           foregroundColor: AppColors.primary,
@@ -485,11 +488,15 @@ class EmployeeProfilePage extends ConsumerWidget {
     );
   }
 
-  void _logout(BuildContext context) {
+  void _logout(BuildContext context, WidgetRef ref) {
     LogoutConfirmation.show(
       context: context,
-      onLogout: () {
-        context.go(RouteConstants.signIn);
+      onLogout: () async {
+        await ref.read(authProvider.notifier).logout();
+        if (context.mounted) {
+          AppSnackBar.success(context.loc.loggedOutSuccess);
+          context.go(RouteConstants.signIn);
+        }
       },
     );
   }

@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/constants/route_constants.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/services/launcher_service.dart';
+import '../presentation/providers/site_manager_profile_provider.dart';
 
-class SiteManagerProfile extends StatelessWidget {
+class SiteManagerProfile extends ConsumerWidget {
   const SiteManagerProfile({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileState = ref.watch(siteManagerProfileProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
 
@@ -25,7 +30,7 @@ class SiteManagerProfile extends StatelessWidget {
 
               SizedBox(height: 25.h),
 
-              _buildProfileHeader(context),
+              _buildProfileHeader(context, profileState),
 
               SizedBox(height: 22.h),
 
@@ -33,7 +38,7 @@ class SiteManagerProfile extends StatelessWidget {
 
               SizedBox(height: 14.h),
 
-              _buildContactInformation(context),
+              _buildContactInformation(context, profileState),
             ],
           ),
         ),
@@ -66,12 +71,12 @@ class SiteManagerProfile extends StatelessWidget {
           ),
         ),
 
-        // _CircleButton(
-        //   icon: Icons.edit_outlined,
-        //   onTap: () {
-        //     // context.push(RouteConstants.edit);
-        //   },
-        // ),
+        _CircleButton(
+          icon: Icons.edit_outlined,
+          onTap: () {
+            context.push(RouteConstants.siteManagerProfileEdit);
+          },
+        ),
       ],
     );
   }
@@ -80,7 +85,10 @@ class SiteManagerProfile extends StatelessWidget {
   // PROFILE
   // ============================================================
 
-  Widget _buildProfileHeader(BuildContext context) {
+  Widget _buildProfileHeader(
+    BuildContext context,
+    SiteManagerProfileState profileState,
+  ) {
     return Column(
       children: [
         Stack(
@@ -131,7 +139,7 @@ class SiteManagerProfile extends StatelessWidget {
         SizedBox(height: 12.h),
 
         Text(
-          'Mesut Rahman',
+          profileState.name,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             fontSize: 21.sp,
             fontWeight: FontWeight.w600,
@@ -257,7 +265,10 @@ class SiteManagerProfile extends StatelessWidget {
   // CONTACT INFORMATION
   // ============================================================
 
-  Widget _buildContactInformation(BuildContext context) {
+  Widget _buildContactInformation(
+    BuildContext context,
+    SiteManagerProfileState profileState,
+  ) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 4.h),
@@ -281,13 +292,13 @@ class SiteManagerProfile extends StatelessWidget {
           _contactRow(
             context,
             icon: Icons.phone_outlined,
-            text: '+49 170 1234567',
+            text: profileState.phone,
           ),
 
           _contactRow(
             context,
             icon: Icons.mail_outline_rounded,
-            text: 'tim.mueller@allround.de',
+            text: profileState.email,
           ),
 
           _contactRow(

@@ -52,4 +52,8 @@ class EmployeeProfileNotifier extends Notifier<EmployeeProfileState> {
   void toggleNotifications() {
     state = state.copyWith(notificationsEnabled: !state.notificationsEnabled);
   }
+
+  void updateProfile({required String name, required String phone}) {
+    state = state.copyWith(name: name, phone: phone);
+  }
 }

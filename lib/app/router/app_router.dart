@@ -1,8 +1,8 @@
-import 'package:construction_app/features/auth/forgot_password/forgot_password_page.dart';
-import 'package:construction_app/features/auth/otp/otp_page.dart';
-import 'package:construction_app/features/auth/reset_password/reset_password_page.dart';
-import 'package:construction_app/features/auth/sign_in/sign_in_page.dart';
-import 'package:construction_app/features/auth/sign_up/sign_up_page.dart';
+import 'package:construction_app/features/auth/presentation/screens/forgot_password_page.dart';
+import 'package:construction_app/features/auth/presentation/screens/otp_page.dart';
+import 'package:construction_app/features/auth/presentation/screens/reset_password_page.dart';
+import 'package:construction_app/features/auth/presentation/screens/sign_in_page.dart';
+import 'package:construction_app/features/auth/presentation/screens/sign_up_page.dart';
 import 'package:construction_app/features/employee/assignments/employee_assignment_detail_page.dart';
 import 'package:construction_app/features/employee/assignments/employee_assignment_photos_page.dart';
 import 'package:construction_app/features/employee/timer/active_timer_page.dart';
@@ -11,6 +11,7 @@ import 'package:construction_app/features/site_manager/profile/site_manager_prof
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/session/session_manager.dart';
 import '../../core/widgets/snack/app_snackbar.dart';
 import '../../features/entry/language_selection/choose_language_page.dart';
 import '../../features/entry/nav/navigation_page.dart';
@@ -32,7 +33,7 @@ import '../../features/site_manager/projects/site_manager_project_details_screen
 import '../constants/route_constants.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  return GoRouter(
+  final router = GoRouter(
     navigatorKey: appNavigatorKey,
     initialLocation: RouteConstants.splash,
     routes: [
@@ -76,18 +77,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RouteConstants.otp,
         builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>;
+          final extra = state.extra as Map<String, dynamic>? ?? const {};
 
           return OtpVerifyScreen(
-            email: extra['email'] as String,
+            email: extra['email'] as String? ?? '',
             purpose: extra['purpose'] as OtpPurpose? ?? OtpPurpose.signUp,
+            otpPageToken: extra['otpPageToken'] as String?,
+            recoveryToken: extra['recoveryToken'] as String?,
           );
         },
       ),
       GoRoute(
         path: RouteConstants.resetPassword,
         builder: (context, state) {
-          return const ResetPasswordScreen(email: "email");
+          final extra = state.extra as Map<String, dynamic>? ?? const {};
+          return ResetPasswordScreen(
+            email: extra['email'] as String? ?? '',
+            recoveryToken: extra['recoveryToken'] as String?,
+          );
         },
       ),
 
@@ -214,4 +221,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+  ref.read(sessionManagerProvider).attachRouter(router);
+  return router;
 });
