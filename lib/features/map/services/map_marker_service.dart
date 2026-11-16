@@ -1,12 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import '../../../../core/utils/logger.dart';
 import '../domain/entities/map_coordinate_entity.dart';
 import '../domain/entities/map_location_entity.dart';
+import '../domain/entities/map_request_entity.dart';
+import '../domain/entities/map_route_entity.dart';
 
 /// Service responsible for generating Google Maps [Marker]s with role and status color-coding.
 class MapMarkerService {
   const MapMarkerService();
+
+  /// Builds the complete set of markers for locations, route start, participants, and manager.
+  Set<Marker> buildMapMarkers({
+    required List<MapLocationEntity> locations,
+    required MapRequestEntity request,
+    String? selectedLocationId,
+    MapRouteEntity? route,
+    MapCoordinate? userCoord,
+    ValueChanged<MapLocationEntity>? onLocationTap,
+  }) {
+    final markers = createMarkers(
+      locations: locations,
+      selectedLocationId: selectedLocationId,
+      onLocationTap: onLocationTap,
+    );
+
+    if (userCoord != null && userCoord.isValid) {
+      markers.add(
+        createManagerMarker(
+          coordinate: userCoord,
+          title: 'My Location (Site Manager)',
+        ),
+      );
+    }
+
+    if (route != null && route.start.isValid) {
+      markers.add(
+        createOriginMarker(
+          coordinate: route.start,
+          title: userCoord != null ? 'Your Location' : 'Start Point',
+        ),
+      );
+    }
+
+    if (request.participantLocation != null &&
+        request.participantLocation!.hasValidCoordinates) {
+      markers.add(
+        createParticipantMarker(
+          participant: request.participantLocation!,
+          onTap: onLocationTap != null
+              ? () => onLocationTap(request.participantLocation!)
+              : null,
+        ),
+      );
+    }
+
+    return markers;
+  }
 
   /// Converts a list of [MapLocationEntity] into a set of Google Maps [Marker]s.
   Set<Marker> createMarkers({

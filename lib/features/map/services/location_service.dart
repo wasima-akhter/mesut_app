@@ -48,7 +48,14 @@ class LocationService {
   /// Checks if GPS / location service is enabled on the device.
   Future<bool> isLocationServiceEnabled() async {
     try {
-      return await Geolocator.isLocationServiceEnabled();
+      final enabled = await Geolocator.isLocationServiceEnabled();
+      if (!enabled) {
+        AppLogger.warning(
+          '[MAP_LOCATION] Device GPS service is DISABLED in device system settings',
+          name: 'MAP_LOCATION',
+        );
+      }
+      return enabled;
     } catch (e) {
       AppLogger.warning('Location service check failed: $e', name: 'MAP_LOCATION');
       return false;
@@ -64,7 +71,7 @@ class LocationService {
       final isServiceEnabled = await isLocationServiceEnabled();
       if (!isServiceEnabled) {
         AppLogger.warning(
-          'Device location service is disabled',
+          '[MAP_LOCATION] Location unavailable: Device location service (GPS) is turned OFF.',
           name: 'MAP_LOCATION',
         );
         return null;
@@ -72,14 +79,14 @@ class LocationService {
 
       final isGranted = await hasLocationPermission();
       if (!isGranted) {
-        AppLogger.info(
-          'Location permission not granted, skipping GPS lookup',
+        AppLogger.warning(
+          '[MAP_LOCATION] Location unavailable: Location permission is NOT GRANTED.',
           name: 'MAP_LOCATION',
         );
         return null;
       }
 
-      AppLogger.info('Retrieving current device position...', name: 'MAP_LOCATION');
+      AppLogger.info('[MAP_LOCATION] Requesting GPS coordinates from hardware sensor...', name: 'MAP_LOCATION');
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.medium,
@@ -94,19 +101,19 @@ class LocationService {
       );
 
       AppLogger.info(
-        'Current position acquired: ${coordinate.latitude}, ${coordinate.longitude}',
+        '[MAP_LOCATION] Location ACQUIRED: lat=${coordinate.latitude}, lng=${coordinate.longitude}',
         name: 'MAP_LOCATION',
       );
       return coordinate;
     } on TimeoutException {
       AppLogger.warning(
-        'Current position retrieval timed out',
+        '[MAP_LOCATION] Location unavailable: GPS sensor lookup TIMED OUT after ${timeout.inSeconds}s.',
         name: 'MAP_LOCATION',
       );
       return null;
     } catch (e, st) {
       AppLogger.error(
-        'Error retrieving current location',
+        '[MAP_LOCATION] Location unavailable: Unexpected error while acquiring position',
         error: e,
         stackTrace: st,
         name: 'MAP_LOCATION',
@@ -118,5 +125,14 @@ class LocationService {
   /// Opens application system settings when permanently denied.
   Future<void> openSettings() async {
     await AppPermissions.openSettings();
+  }
+
+  /// Opens device location / GPS system settings when GPS is disabled.
+  Future<void> openLocationSettings() async {
+    try {
+      await Geolocator.openLocationSettings();
+    } catch (_) {
+      await AppPermissions.openSettings();
+    }
   }
 }

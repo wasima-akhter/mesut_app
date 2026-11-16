@@ -8,13 +8,13 @@ import '../../../../../core/widgets/buttons/buttons.dart';
 import '../../../../../core/widgets/states/app_data_state.dart';
 import '../../../../../core/widgets/states/app_empty_widget.dart';
 import '../../../../../core/widgets/states/app_screen_state_view.dart';
+import '../../../project_attachments/presentation/widgets/project_photos_tab_view.dart';
+import '../../../project_measurements/presentation/widgets/project_measurement_tab_view.dart';
+import '../../../project_notes/presentation/widgets/project_notes_tab_view.dart';
 import '../../../project_tasks/presentation/widgets/project_tasks_tab_view.dart';
-import '../../../projects/dates_modules.dart';
+import '../../../project_dates/presentation/widgets/project_dates_tab_view.dart';
 import '../../../projects/enums.dart';
-import '../../../projects/history_modules.dart';
-import '../../../projects/measurement_modules.dart';
-import '../../../projects/notes_modules.dart';
-import '../../../projects/photos_modules.dart';
+import '../../../project_history/presentation/widgets/project_history_tab_view.dart';
 import '../providers/project_details_provider.dart';
 import '../widgets/project_details_header.dart';
 import '../widgets/project_details_overview_tab.dart';
@@ -169,15 +169,18 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
       case ProjectDetailsTab.tasks:
         return ProjectTasksTabView(projectId: widget.projectId);
       case ProjectDetailsTab.photos:
-        return const PhotosTab();
+        return ProjectPhotosTabView(
+          projectId: widget.projectId,
+          projectName: state.details?.name ?? '',
+        );
       case ProjectDetailsTab.measurement:
-        return const MeasurementTab();
+        return ProjectMeasurementTabView(projectId: widget.projectId);
       case ProjectDetailsTab.dates:
-        return DatesTab();
+        return ProjectDatesTabView(projectId: widget.projectId);
       case ProjectDetailsTab.notes:
-        return NotesTab();
+        return ProjectNotesTabView(projectId: widget.projectId);
       case ProjectDetailsTab.history:
-        return HistoryTab();
+        return ProjectHistoryTabView(projectId: widget.projectId);
     }
   }
 

@@ -11,12 +11,15 @@ class MobileDashboardRepositoryImpl implements MobileDashboardRepository {
   final MobileDashboardRemoteDataSource remoteDataSource;
 
   @override
-  Future<MobileDashboardEntity> getDashboard() =>
-      remoteDataSource.getDashboard();
+  Future<MobileDashboardEntity> getDashboard({int page = 1, int limit = 10}) =>
+      remoteDataSource.getDashboard(page: page, limit: limit);
 
   @override
-  Future<List<MobileProjectEntity>> getProjects() =>
-      remoteDataSource.getProjects();
+  Future<List<MobileProjectEntity>> getProjects({
+    int page = 1,
+    int limit = 50,
+  }) =>
+      remoteDataSource.getProjects(page: page, limit: limit);
 
   @override
   Future<MobileProfileEntity> getProfile() => remoteDataSource.getProfile();

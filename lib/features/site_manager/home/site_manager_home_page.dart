@@ -16,7 +16,8 @@ import '../../map/utils/map_coordinate_resolver.dart';
 import '../../shared/mobile_dashboard/domain/entities/mobile_dashboard_entity.dart';
 import '../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
 import '../../shared/notifications/presentation/providers/notifications_provider.dart';
-import '../presentation/providers/site_manager_home_provider.dart';
+import '../projects/enums.dart';
+import '../projects/presentation/providers/site_manager_projects_provider.dart';
 import 'widgets/site_manager_home_header.dart';
 import 'widgets/site_manager_home_map_card.dart';
 import 'widgets/site_manager_home_operation_card.dart';
@@ -31,7 +32,7 @@ class SiteManagerHomePage extends ConsumerWidget {
     List<MobileMapPinEntity> pins,
   ) {
     final pin = pins.where((p) => p.id == task.project.id).firstOrNull;
-    final coordinate = pin != null
+    final coordinate = pin != null && pin.latitude != 0 && pin.longitude != 0
         ? MapCoordinate(latitude: pin.latitude, longitude: pin.longitude)
         : MapCoordinateResolver.resolve(task.project.address);
 
@@ -55,7 +56,6 @@ class SiteManagerHomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(appLanguageProvider);
-    final homeState = ref.watch(siteManagerHomeProvider);
     final dashboardAsync = ref.watch(mobileDashboardProvider);
     final unreadCount = ref.watch(unreadNotificationsCountProvider);
     final currentUser = ref.watch(currentUserProvider);
@@ -82,7 +82,7 @@ class SiteManagerHomePage extends ConsumerWidget {
             ),
             slivers: [
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 8),
                 sliver: SliverToBoxAdapter(
                   child: SiteManagerHomeHeader(
                     userName: userName,
@@ -119,15 +119,18 @@ class SiteManagerHomePage extends ConsumerWidget {
                   ),
                 ],
                 data: (dashboard) {
-                  final tasks = homeState.showAllOperations
-                      ? dashboard.upcomingTasks
-                      : dashboard.upcomingTasks.take(3).toList();
+                  final activeSites = dashboard.stats.standingActiveSites > 0
+                      ? dashboard.stats.standingActiveSites
+                      : dashboard.mapPins.length;
+                  final tasks = dashboard.upcomingTasks;
+
                   return [
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 18),
                       sliver: SliverToBoxAdapter(
                         child: SiteManagerHomeMapCard(
-                          activeSitesCount: dashboard.mapPins.length,
+                          activeSitesCount: activeSites,
+                          pins: dashboard.mapPins,
                           onTap: () => ref
                               .read(navigationProvider.notifier)
                               .changeTab(2),
@@ -140,52 +143,77 @@ class SiteManagerHomePage extends ConsumerWidget {
                       sliver: SliverToBoxAdapter(
                         child: SiteManagerHomeStats(
                           stats: dashboard.stats,
-                          onTapProjects: () => ref
-                              .read(navigationProvider.notifier)
-                              .changeTab(1),
+                          onTapStandingSites: () {
+                            ref
+                                .read(navigationProvider.notifier)
+                                .goToTabProjects();
+                            ref
+                                .read(siteManagerProjectsProvider.notifier)
+                                .selectTab(ProjectTab.active);
+                            ref
+                                .read(siteManagerProjectsProvider.notifier)
+                                .loadInitial(isRefresh: true);
+                          },
                           onTapInspections: () => context.push(
                             RouteConstants.siteManagerSiteInspection,
                           ),
-                          onTapSchedule: () =>
-                              context.push(RouteConstants.siteManagerSchedule),
+                          onTapErection: () => ref
+                              .read(navigationProvider.notifier)
+                              .goToTabProjects(),
+                          onTapDismantling: () => ref
+                              .read(navigationProvider.notifier)
+                              .goToTabProjects(),
                         ),
                       ),
                     ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 18)),
                     SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(18, 18, 18, 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
                       sliver: SliverToBoxAdapter(
                         child: Row(
                           children: [
                             Expanded(
                               child: Text(
-                                context.loc.upcomingTasks,
+                                "${context.loc.upcomingTasks} (${tasks.length})",
                                 style: TextStyle(
-                                  fontSize: 19.sp,
+                                  fontSize: 25.sp,
                                   fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF1F2937),
+                                  color: const Color(0xFF171717),
                                 ),
                               ),
                             ),
-                            if (dashboard.upcomingTasks.length > 3)
-                              TextButton(
-                                onPressed: () => ref
-                                    .read(siteManagerHomeProvider.notifier)
-                                    .toggleShowAllOperations(),
-                                child: Text(
-                                  homeState.showAllOperations
-                                      ? context.loc.showLess
-                                      : context.loc.viewAll,
-                                ),
+                            GestureDetector(
+                              onTap: () => ref
+                                  .read(navigationProvider.notifier)
+                                  .goToTabProjects(),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    context.loc.viewAll,
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      color: const Color(0xFF888888),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 3),
+                                  const Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: 13,
+                                    color: Color(0xFF888888),
+                                  ),
+                                ],
                               ),
+                            ),
                           ],
                         ),
                       ),
                     ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 10)),
                     if (tasks.isEmpty)
                       SliverPadding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 18,
-                          vertical: 20,
+                          vertical: 24,
                         ),
                         sliver: SliverToBoxAdapter(
                           child: Center(
@@ -206,14 +234,20 @@ class SiteManagerHomePage extends ConsumerWidget {
                           itemCount: tasks.length,
                           itemBuilder: (context, index) {
                             final task = tasks[index];
-                            return SiteManagerHomeOperationCard(
-                              task: task,
-                              onOpenProject: () => context.push(
-                                RouteConstants.siteManagerProjectDetail,
-                                extra: task.project.id,
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 14),
+                              child: SiteManagerHomeOperationCard(
+                                task: task,
+                                onOpenProject: () => context.push(
+                                  RouteConstants.siteManagerProjectDetail,
+                                  extra: task.project.id,
+                                ),
+                                onOpenRoute: () => _openRoute(
+                                  context,
+                                  task,
+                                  dashboard.mapPins,
+                                ),
                               ),
-                              onOpenRoute: () =>
-                                  _openRoute(context, task, dashboard.mapPins),
                             );
                           },
                         ),

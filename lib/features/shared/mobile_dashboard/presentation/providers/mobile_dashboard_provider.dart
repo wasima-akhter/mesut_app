@@ -57,13 +57,26 @@ final mobileDashboardProvider =
     );
 
 class MobileProjectsNotifier extends AsyncNotifier<List<MobileProjectEntity>> {
+  int _page = 1;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+
+  int get currentPage => _page;
+  bool get hasMore => _hasMore;
+  bool get isLoadingMore => _isLoadingMore;
+
   @override
   Future<List<MobileProjectEntity>> build() async {
     final hasToken = await ref
         .read(storageServiceProvider)
         .hasValidAccessToken();
     if (!hasToken) return const [];
-    return ref.watch(mobileDashboardRepositoryProvider).getProjects();
+    _page = 1;
+    final items = await ref
+        .watch(mobileDashboardRepositoryProvider)
+        .getProjects(page: 1, limit: 20);
+    _hasMore = items.length >= 20;
+    return items;
   }
 
   Future<void> refresh() async {
@@ -74,9 +87,31 @@ class MobileProjectsNotifier extends AsyncNotifier<List<MobileProjectEntity>> {
       state = const AsyncValue.data([]);
       return;
     }
-    state = await AsyncValue.guard(
-      () => ref.read(mobileDashboardRepositoryProvider).getProjects(),
-    );
+    _page = 1;
+    state = await AsyncValue.guard(() async {
+      final items = await ref
+          .read(mobileDashboardRepositoryProvider)
+          .getProjects(page: 1, limit: 20);
+      _hasMore = items.length >= 20;
+      return items;
+    });
+  }
+
+  Future<void> loadMore() async {
+    if (!_hasMore || _isLoadingMore) return;
+    final currentList = state.asData?.value ?? [];
+    _isLoadingMore = true;
+    try {
+      final nextPage = _page + 1;
+      final nextItems = await ref
+          .read(mobileDashboardRepositoryProvider)
+          .getProjects(page: nextPage, limit: 20);
+      _page = nextPage;
+      _hasMore = nextItems.length >= 20;
+      state = AsyncValue.data([...currentList, ...nextItems]);
+    } finally {
+      _isLoadingMore = false;
+    }
   }
 }
 

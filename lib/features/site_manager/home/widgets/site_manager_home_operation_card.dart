@@ -19,126 +19,144 @@ class SiteManagerHomeOperationCard extends StatelessWidget {
   final VoidCallback onOpenProject;
   final VoidCallback onOpenRoute;
 
+  String _localizeOperationType(BuildContext context, String type) {
+    switch (type.toLowerCase()) {
+      case 'erection':
+        return context.loc.erectionPhase;
+      case 'dismantling':
+        return context.loc.dismantlingPhase;
+      case 'standing':
+      case 'standing scaffold':
+        return context.loc.standingScaffold;
+      default:
+        return MobilePhaseLocalizer.phaseType(context, type);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final typeColor = MobilePhaseLocalizer.phaseColor(task.type);
     final priorityColor = MobilePhaseLocalizer.priorityColor(task.priority);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE5E5E5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              _Pill(
-                text: MobilePhaseLocalizer.phaseType(context, task.type),
-                color: typeColor,
-              ),
-              const SizedBox(width: 8),
-              _Pill(
-                text: MobilePhaseLocalizer.priority(context, task.priority),
-                color: priorityColor,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                decoration: BoxDecoration(
+                  color: typeColor.withValues(alpha: .10),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Text(
+                  _localizeOperationType(context, task.type),
+                  style: TextStyle(
+                    color: typeColor,
+                    fontSize: 17.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
               const Spacer(),
-              Flexible(
-                child: Text(
+              if (task.startDate != null)
+                Text(
                   MobilePhaseLocalizer.formatDateRange(
                     task.startDate,
                     task.endDate,
                   ),
-                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 12.sp,
-                    color: const Color(0xFF6B7280),
+                    fontSize: 14.sp,
+                    color: const Color(0xFF888888),
                   ),
                 ),
-              ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 9),
           Text(
-            task.project.name.isEmpty ? task.phaseId : task.project.name,
+            task.project.name.isNotEmpty ? task.project.name : task.phaseId,
             style: TextStyle(
-              fontSize: 17.sp,
+              fontSize: 19.sp,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF1F2937),
+              color: const Color(0xFF171717),
             ),
           ),
           if (task.project.address.isNotEmpty) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: 7),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(
                   Icons.location_on_outlined,
-                  size: 16,
-                  color: Color(0xFF6B7280),
+                  size: 17,
+                  color: Color(0xFF999999),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 5),
                 Expanded(
                   child: Text(
                     task.project.address,
                     style: TextStyle(
-                      fontSize: 14.sp,
-                      color: const Color(0xFF6B7280),
+                      fontSize: 17.sp,
+                      color: const Color(0xFF8A8A8A),
                     ),
                   ),
                 ),
               ],
             ),
           ],
-          const SizedBox(height: 12),
+          if (task.priority.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: priorityColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                MobilePhaseLocalizer.priority(context, task.priority),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: priorityColor,
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 14),
           Row(
             children: [
               Expanded(
                 child: AppOutlinedButton(
                   onPressed: onOpenRoute,
-                  leadingIcon: Icons.directions_outlined,
-                  text: context.loc.navigation,
+                  leadingIcon: Icons.location_on_outlined,
+                  text: context.loc.route,
+                  foregroundColor: const Color(0xFF777777),
+                  borderColor: const Color(0xFFD9D9D9),
+                  borderRadius: 7.r,
+                  textStyle: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
+                flex: 2,
                 child: AppButton(
                   onPressed: onOpenProject,
-                  text: context.loc.mapOpenProject,
+                  text: context.loc.openProject,
                 ),
               ),
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _Pill extends StatelessWidget {
-  const _Pill({required this.text, required this.color});
-
-  final String text;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
       ),
     );
   }

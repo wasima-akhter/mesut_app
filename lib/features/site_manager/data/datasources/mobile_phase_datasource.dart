@@ -4,7 +4,11 @@ import '../../domain/entities/mobile_phase_entity.dart';
 import '../models/mobile_phase_model.dart';
 
 abstract class MobilePhaseRemoteDataSource {
-  Future<List<MobilePhaseEntity>> getManagedPhases();
+  Future<List<MobilePhaseEntity>> getManagedPhases({
+    String? column,
+    int page = 1,
+    int limit = 50,
+  });
 
   Future<MobilePhaseEntity> updatePhaseStatus(String phaseId, String status);
 }
@@ -15,9 +19,22 @@ class MobilePhaseRemoteDataSourceImpl implements MobilePhaseRemoteDataSource {
   final ApiClient apiClient;
 
   @override
-  Future<List<MobilePhaseEntity>> getManagedPhases() async {
+  Future<List<MobilePhaseEntity>> getManagedPhases({
+    String? column,
+    int page = 1,
+    int limit = 50,
+  }) async {
+    final queryParams = <String, dynamic>{
+      'page': page,
+      'limit': limit,
+    };
+    if (column != null && column.isNotEmpty && column != 'ALL') {
+      queryParams['column'] = column;
+    }
+
     final response = await apiClient.get<Map<String, dynamic>>(
       ApiConstants.mobilePhases,
+      queryParameters: queryParams,
     );
     final body = response.data ?? const <String, dynamic>{};
     return MobilePhaseModel.fromList(body['data']);

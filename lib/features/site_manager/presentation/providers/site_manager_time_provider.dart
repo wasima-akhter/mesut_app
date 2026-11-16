@@ -46,40 +46,11 @@ class SiteManagerTimeState {
 class SiteManagerTimeNotifier extends Notifier<SiteManagerTimeState> {
   @override
   SiteManagerTimeState build() {
-    final now = DateTime.now();
-    return SiteManagerTimeState(
-      entries: [
-        TimeEntryModel(
-          id: '1',
-          project: 'PRJ-0842 • Goldsteins Complex',
-          activity: ActivityType.erection,
-          date: now,
-          startTime: '07:30 am',
-          endTime: '04:15 pm',
-          breakTime: '45m',
-          employee: 'Tim Muller',
-        ),
-        TimeEntryModel(
-          id: '2',
-          project: 'PRJ-0842 • Goldsteins Complex',
-          activity: ActivityType.dismantling,
-          date: now.subtract(const Duration(days: 1)),
-          startTime: '07:30 am',
-          endTime: '04:15 pm',
-          breakTime: '45m',
-          employee: 'Tim Muller',
-        ),
-        TimeEntryModel(
-          id: '3',
-          project: 'PRJ-0912 • Riverside Tower',
-          activity: ActivityType.standing,
-          date: now.subtract(const Duration(days: 2)),
-          startTime: '08:00 am',
-          endTime: '04:00 pm',
-          breakTime: '30m',
-          employee: 'John Smith',
-        ),
-      ],
+    return const SiteManagerTimeState(
+      projects: [],
+      selectedProject: '',
+      crewMembers: [],
+      entries: [],
     );
   }
 

@@ -8,8 +8,16 @@ class MobilePhaseRepositoryImpl implements MobilePhaseRepository {
   final MobilePhaseRemoteDataSource remoteDataSource;
 
   @override
-  Future<List<MobilePhaseEntity>> getManagedPhases() =>
-      remoteDataSource.getManagedPhases();
+  Future<List<MobilePhaseEntity>> getManagedPhases({
+    String? column,
+    int page = 1,
+    int limit = 50,
+  }) =>
+      remoteDataSource.getManagedPhases(
+        column: column,
+        page: page,
+        limit: limit,
+      );
 
   @override
   Future<MobilePhaseEntity> updatePhaseStatus(String phaseId, String status) =>

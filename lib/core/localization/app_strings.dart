@@ -40,6 +40,7 @@ class AppStrings {
   String get error => get('common.error', 'Error');
   String get success => get('common.success', 'Success');
   String get retry => get('common.retry', 'Retry');
+  String get loadMore => get('common.loadMore', 'Load More');
   String get confirm => get('common.confirm', 'Confirm');
   String get settings => get('common.settings', 'Settings');
   String get download => get('common.download', 'Download');
@@ -421,6 +422,11 @@ class AppStrings {
   String get notes => get('siteManager.notes', 'Notes');
   String get smHistory => get('siteManager.history', 'History');
   String get history => get('siteManager.history', 'History');
+  String get noHistory => get('siteManager.noHistory', 'No history available');
+  String get noHistoryDesc => get(
+    'siteManager.noHistoryDesc',
+    'Project activities and audit logs will appear here.',
+  );
   String get phaseBoard => get('siteManager.phaseBoard', 'Phase Board');
   String get moveTo => get('siteManager.moveTo', 'Move to...');
   String get moveProject => get('siteManager.moveProject', 'Move Project');
@@ -512,6 +518,37 @@ class AppStrings {
       get('siteManager.downloadStarted', 'Download started');
   String get pdfPlans => get('siteManager.pdfPlans', 'PDF Plans');
   String get photoViewer => get('siteManager.photoViewer', 'Photo');
+  String get deletePhoto => get('siteManager.deletePhoto', 'Delete Photo');
+  String get deletePhotoConfirmation => get(
+    'siteManager.deletePhotoConfirmation',
+    'Are you sure you want to delete this photo?',
+  );
+  String get deletePlan => get('siteManager.deletePlan', 'Delete Plan');
+  String get deletePlanConfirmation => get(
+    'siteManager.deletePlanConfirmation',
+    'Are you sure you want to delete this plan?',
+  );
+  String get photoDeleted =>
+      get('siteManager.photoDeleted', 'Photo deleted successfully');
+  String get attachmentDeleted =>
+      get('siteManager.attachmentDeleted', 'Attachment deleted successfully');
+  String get photoUploaded =>
+      get('siteManager.photoUploaded', 'Photo uploaded successfully');
+  String get planUploaded =>
+      get('siteManager.planUploaded', 'Plan uploaded successfully');
+  String get noPhotos =>
+      get('siteManager.noPhotos', 'No photos available');
+  String get noPhotosDesc => get(
+    'siteManager.noPhotosDesc',
+    'Upload photos from camera or gallery to track progress.',
+  );
+  String get noPdfPlans =>
+      get('siteManager.noPdfPlans', 'No PDF plans available');
+  String get noPdfPlansDesc => get(
+    'siteManager.noPdfPlansDesc',
+    'Upload PDF plans for this project.',
+  );
+  String get coverPhoto => get('siteManager.coverPhoto', 'Cover Photo');
   String get projectNotes => get('siteManager.projectNotes', 'Project Notes');
   String get addNote => get('siteManager.addNote', 'Add Note');
   String get editNote => get('siteManager.editNote', 'Edit Project Note');
@@ -527,6 +564,12 @@ class AppStrings {
     'Add a note to keep important project information.',
   );
   String get saveNotes => get('siteManager.saveNotes', 'Save Notes');
+  String get noteCreated =>
+      get('siteManager.noteCreated', 'Note created successfully');
+  String get noteUpdated =>
+      get('siteManager.noteUpdated', 'Note updated successfully');
+  String get noteDeleted =>
+      get('siteManager.noteDeleted', 'Note deleted successfully');
   String get totalCalculatedArea =>
       get('siteManager.totalCalculatedArea', 'Total Calculated Area');
   String get addLine => get('siteManager.addLine', 'Add Line');
@@ -551,6 +594,24 @@ class AppStrings {
     'Line {index}. {position}',
     {'index': '$index', 'position': position},
   );
+  String get deleteMeasurement =>
+      get('siteManager.deleteMeasurement', 'Delete Measurement');
+  String get deleteMeasurementConfirm => get(
+    'siteManager.deleteMeasurementConfirm',
+    'Are you sure you want to delete this measurement line item?',
+  );
+  String get noMeasurements =>
+      get('siteManager.noMeasurements', 'No measurements recorded');
+  String get noMeasurementsSubtitle => get(
+    'siteManager.noMeasurementsSubtitle',
+    'Tap "+ Add Line" to add your first scaffold measurement.',
+  );
+  String get measurementCreated =>
+      get('siteManager.measurementCreated', 'Measurement created successfully');
+  String get measurementUpdated =>
+      get('siteManager.measurementUpdated', 'Measurement updated successfully');
+  String get measurementDeleted =>
+      get('siteManager.measurementDeleted', 'Measurement deleted successfully');
   String openTasks(int count) =>
       get('siteManager.openTasks', 'Open ({count})', {'count': '$count'});
   String completedTasks(int count) => get(
@@ -691,6 +752,11 @@ class AppStrings {
       get('siteManager.markAsComplete', 'Mark as Complete');
   String get scheduleChangesSaved =>
       get('siteManager.scheduleChangesSaved', 'Schedule changes saved');
+  String get noPhases => get('siteManager.noPhases', 'No phase dates available');
+  String get noPhasesDesc => get(
+    'siteManager.noPhasesDesc',
+    'Schedule data for project phases will appear here.',
+  );
   String get route => get('siteManager.route', 'Route');
   String get openAction => get('siteManager.open', 'Open');
   String get callingContact =>
@@ -727,6 +793,14 @@ class AppStrings {
   String get lengthHeightGreaterThanZero => get(
     'siteManager.lengthHeightGreaterThanZero',
     'Length and height must be greater than 0.',
+  );
+  String get pleaseEnterLength => get(
+    'siteManager.pleaseEnterLength',
+    'Please enter a valid length greater than 0.',
+  );
+  String get pleaseEnterHeight => get(
+    'siteManager.pleaseEnterHeight',
+    'Please enter a valid height greater than 0.',
   );
   String get pleaseEnterTaskDescription => get(
     'siteManager.pleaseEnterTaskDescription',
@@ -892,6 +966,7 @@ class AppStrings {
       get('siteManager.pleaseEnterPhone', 'Please enter phone number.');
   String get standing => get('siteManager.standing', 'Standing');
   String get enquiry => get('siteManager.enquiry', 'Enquiry');
+  String get quotation => get('siteManager.quotation', 'Quotation');
   String get siteManager => get('siteManager.siteManager', 'Site Manager');
   String timerStartedFor(String activity) => get(
     'siteManager.timerStartedFor',
@@ -1010,6 +1085,8 @@ class AppStrings {
   String get priorityLow => get('mobile.priorityLow', 'Low');
   String get somethingWentWrong =>
       get('common.somethingWentWrong', 'Something went wrong');
+  String get operationFailed =>
+      get('common.operationFailed', 'Operation failed. Please try again.');
   String get showLess => get('common.showLess', 'Show less');
 
   // ============================================================
@@ -1027,6 +1104,11 @@ class AppStrings {
   String get manualLabel => get('time.manual', 'Manual');
   String get timerLabel => get('time.timer', 'Timer');
   String get breakLabel => get('time.breakLabel', 'Break');
+  String get status => get('common.status', 'Status');
+  String get loggedTime => get('time.loggedTime', 'Logged Time');
+  String get crewMember => get('siteManager.crewMember', 'Crew Member');
+  String get noRecentLogs => get('time.noRecentLogs', 'No recent logs found');
+  String get timeLogsLabel => get('time.timeLogsLabel', 'Time Logs');
 
   // ============================================================
   // MOBILE INSPECTIONS & PHASES

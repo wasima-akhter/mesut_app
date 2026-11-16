@@ -7,32 +7,54 @@ import '../../domain/entities/map_coordinate_entity.dart';
 import '../../domain/entities/map_location_entity.dart';
 import '../../domain/entities/map_route_entity.dart';
 import '../../domain/repositories/map_repository.dart';
+import '../datasources/mock_map_datasource.dart';
 
-/// Concrete implementation of [MapRepository] backed by real mobile APIs.
+/// Concrete implementation of [MapRepository] backed by real mobile APIs with mock fallback.
 class MapRepositoryImpl implements MapRepository {
-  final ApiClient _client;
+  final ApiClient? _client;
 
-  const MapRepositoryImpl(this._client);
+  const MapRepositoryImpl([this._client]);
 
   @override
   Future<List<MapLocationEntity>> getLocations({
     UserRole? role,
     String? category,
+    String? search,
   }) async {
+    if (_client == null) {
+      var result = MockMapDataSource.sampleLocations;
+      if (category != null && category.isNotEmpty && category != 'All') {
+        result = result.where((loc) => loc.type == category).toList();
+      }
+      return result;
+    }
+
     AppLogger.info(
-      'Fetching real project locations: role=$role, category=$category',
+      'Fetching real project locations: role=$role, category=$category, search=$search',
       name: 'MAP',
     );
 
     final locations = <MapLocationEntity>[];
 
     try {
+      final queryParams = <String, dynamic>{
+        'tab': 'ALL',
+        'limit': 100,
+      };
+
+      if (category != null &&
+          category.isNotEmpty &&
+          category.toUpperCase() != 'ALL') {
+        queryParams['phaseTypes'] = category.toUpperCase();
+      }
+
+      if (search != null && search.trim().isNotEmpty) {
+        queryParams['search'] = search.trim();
+      }
+
       final response = await _client.get(
         ApiConstants.mobileProjects,
-        queryParameters: {
-          'tab': 'ALL',
-          'limit': 50,
-        },
+        queryParameters: queryParams,
       );
 
       final rawData = response.data;
@@ -86,7 +108,9 @@ class MapRepositoryImpl implements MapRepository {
       }
 
       // Fallback: Query /mobile/map pins if no coordinates found from projects
-      if (locations.isEmpty) {
+      if (locations.isEmpty &&
+          (search == null || search.trim().isEmpty) &&
+          (category == null || category.toUpperCase() == 'ALL')) {
         final mapResponse = await _client.get(ApiConstants.mobileMap);
         final mapData = mapResponse.data;
         if (mapData is Map<String, dynamic> && mapData['data'] is List) {
@@ -122,7 +146,10 @@ class MapRepositoryImpl implements MapRepository {
       }
 
       if (category != null && category.isNotEmpty && category != 'All') {
-        return locations.where((loc) => loc.type == category).toList();
+        final lowerCat = category.toLowerCase();
+        return locations
+            .where((loc) => (loc.type ?? '').toLowerCase().contains(lowerCat))
+            .toList();
       }
 
       return locations;
@@ -139,6 +166,12 @@ class MapRepositoryImpl implements MapRepository {
 
   @override
   Future<MapLocationEntity?> getLocationById(String id) async {
+    if (_client == null) {
+      return MockMapDataSource.sampleLocations
+          .where((loc) => loc.id == id)
+          .firstOrNull;
+    }
+
     AppLogger.info('Fetching real location by ID: $id', name: 'MAP');
     try {
       final response = await _client.get(ApiConstants.mobileProjectById(id));
@@ -176,6 +209,14 @@ class MapRepositoryImpl implements MapRepository {
     required MapCoordinate destination,
     String? title,
   }) async {
+    if (_client == null) {
+      return MockMapDataSource.createSampleRoute(
+        origin: origin,
+        destination: destination,
+        title: title,
+      );
+    }
+
     final distanceKm = origin.distanceTo(destination);
     final durationMinutes = (distanceKm / 40.0 * 60).round().clamp(1, 9999);
 
@@ -194,20 +235,13 @@ class MapRepositoryImpl implements MapRepository {
 
     return MapRouteEntity(
       id: 'route_${origin.latitude}_${destination.latitude}',
-      title: title ?? 'Route',
-      origin: origin,
+      title: title ?? 'Route (${distanceKm.toStringAsFixed(1)} km)',
+      start: origin,
       destination: destination,
       waypoints: waypoints,
+      isMockData: false,
       distanceKm: double.parse(distanceKm.toStringAsFixed(1)),
       durationMinutes: durationMinutes,
-      steps: [
-        MapRouteStep(
-          instruction: 'Navigate towards ${destination.name.isNotEmpty ? destination.name : 'Destination'}',
-          distance: '${distanceKm.toStringAsFixed(1)} km',
-          duration: '$durationMinutes min',
-          coordinate: origin,
-        ),
-      ],
     );
   }
 

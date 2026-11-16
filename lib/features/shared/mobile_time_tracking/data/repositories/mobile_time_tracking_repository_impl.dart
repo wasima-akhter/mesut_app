@@ -55,5 +55,12 @@ class MobileTimeTrackingRepositoryImpl implements MobileTimeTrackingRepository {
   Future<MobileCrewTimeEntity> getCrewTime({
     required String projectId,
     DateTime? date,
-  }) => remoteDataSource.getCrewTime(projectId: projectId, date: date);
+    int page = 1,
+    int limit = 10,
+  }) => remoteDataSource.getCrewTime(
+        projectId: projectId,
+        date: date,
+        page: page,
+        limit: limit,
+      );
 }

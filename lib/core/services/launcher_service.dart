@@ -44,20 +44,33 @@ class AppLauncherService {
     return false;
   }
 
-  /// Opens external map application (Google Maps / Apple Maps)
-  /// navigating to the given [latitude], [longitude] or [address].
+  /// Opens external map application (Google Maps / Apple Maps).
+  /// If [originLatitude] and [originLongitude] are provided, displays directions between user coordinates and project coordinates.
+  /// If origin is unavailable, displays only the project's exact coordinates.
   static Future<bool> openMapNavigation({
     double? latitude,
     double? longitude,
+    double? originLatitude,
+    double? originLongitude,
     String? address,
     String? label,
   }) async {
+    final destLat = latitude;
+    final destLng = longitude;
     Uri uri;
-    if (latitude != null && longitude != null) {
-      final query = label != null
-          ? '$latitude,$longitude(${Uri.encodeComponent(label)})'
-          : '$latitude,$longitude';
-      uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
+    if (destLat != null && destLng != null && destLat != 0 && destLng != 0) {
+      if (originLatitude != null &&
+          originLongitude != null &&
+          originLatitude != 0 &&
+          originLongitude != 0) {
+        // Directions display between user coords and project coords
+        uri = Uri.parse(
+          'https://www.google.com/maps/dir/?api=1&origin=$originLatitude,$originLongitude&destination=$destLat,$destLng',
+        );
+      } else {
+        // Only project coords
+        uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$destLat,$destLng');
+      }
     } else if (address != null && address.trim().isNotEmpty) {
       uri = Uri.parse(
         'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(address.trim())}',

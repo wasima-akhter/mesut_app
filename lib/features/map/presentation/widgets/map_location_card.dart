@@ -5,11 +5,13 @@ import '../../../../core/localization/context_extensions.dart';
 import '../../../../core/services/launcher_service.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/buttons/app_outlined_button.dart';
+import '../../domain/entities/map_coordinate_entity.dart';
 import '../../domain/entities/map_location_entity.dart';
 
 /// Card displayed at the bottom of the map when a location marker is selected.
 class MapLocationCard extends StatelessWidget {
   final MapLocationEntity location;
+  final MapCoordinate? userLocation;
   final VoidCallback onRoute;
   final VoidCallback? onOpenDetails;
   final VoidCallback onClose;
@@ -17,6 +19,7 @@ class MapLocationCard extends StatelessWidget {
   const MapLocationCard({
     super.key,
     required this.location,
+    this.userLocation,
     required this.onRoute,
     this.onOpenDetails,
     required this.onClose,
@@ -153,11 +156,12 @@ class MapLocationCard extends StatelessWidget {
                 icon: Icons.navigation_outlined,
                 tooltip: context.loc.mapTurnByTurn,
                 onTap: () {
+                  final origin = userLocation != null && userLocation!.isValid ? userLocation : null;
                   AppLauncherService.openMapNavigation(
                     latitude: location.latitude,
                     longitude: location.longitude,
-                    address: location.address,
-                    label: location.title,
+                    originLatitude: origin?.latitude,
+                    originLongitude: origin?.longitude,
                   );
                 },
               ),

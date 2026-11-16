@@ -31,9 +31,21 @@ Map<String, dynamic> _asMap(dynamic value) {
 class MobileDashboardModel {
   static MobileDashboardEntity fromJson(Map<String, dynamic> json) {
     final statsJson = _asMap(json['stats']);
+    final erectionJson = _asMap(statsJson['erection']);
+    final dismantlingJson = _asMap(statsJson['dismantling']);
+
     final stats = DashboardStatsEntity(
       pendingInspections: _asInt(statsJson['pendingInspections']),
       assignedProjects: _asInt(statsJson['assignedProjects']),
+      standingActiveSites: _asInt(statsJson['standingActiveSites']),
+      erection: DashboardPhaseStatsEntity(
+        planned: _asInt(erectionJson['planned']),
+        running: _asInt(erectionJson['running']),
+      ),
+      dismantling: DashboardPhaseStatsEntity(
+        planned: _asInt(dismantlingJson['planned']),
+        running: _asInt(dismantlingJson['running']),
+      ),
     );
 
     final rawTasks = json['upcomingTasks'];
@@ -73,11 +85,19 @@ class MobileDashboardModel {
 
 class MobileMapPinModel {
   static MobileMapPinEntity fromJson(Map<String, dynamic> json) {
+    final coords = _asMap(json['coordinates']);
+    final lat = coords.containsKey('lat')
+        ? _asDouble(coords['lat'])
+        : _asDouble(json['latitude'], _asDouble(json['lat']));
+    final lng = coords.containsKey('lng')
+        ? _asDouble(coords['lng'])
+        : _asDouble(json['longitude'], _asDouble(json['lng']));
+
     return MobileMapPinEntity(
       id: (json['id'] ?? '').toString(),
       name: (json['name'] ?? '').toString(),
-      latitude: _asDouble(json['latitude']),
-      longitude: _asDouble(json['longitude']),
+      latitude: lat,
+      longitude: lng,
       activePhaseType: (json['activePhaseType'] ?? '').toString(),
     );
   }
@@ -98,7 +118,7 @@ class MobileMapPinModel {
 class MobileProjectModel {
   static MobileProjectEntity fromJson(Map<String, dynamic> json) {
     final customerMap = _asMap(json['customer']);
-    final rawPhases = json['phases'];
+    final rawPhases = json['phases'] ?? json['scheduleData'];
     final phases = <MobileProjectPhaseEntity>[];
     if (rawPhases is List) {
       for (final item in rawPhases) {
@@ -106,7 +126,7 @@ class MobileProjectModel {
         if (p.isEmpty) continue;
         phases.add(
           MobileProjectPhaseEntity(
-            id: (p['id'] ?? '').toString(),
+            id: (p['id'] ?? p['phaseId'] ?? '').toString(),
             type: (p['type'] ?? '').toString(),
             status: (p['status'] ?? '').toString(),
             priority: (p['priority'] ?? '').toString(),
@@ -115,11 +135,25 @@ class MobileProjectModel {
           ),
         );
       }
+    } else if (json.containsKey('phaseId')) {
+      phases.add(
+        MobileProjectPhaseEntity(
+          id: (json['phaseId'] ?? '').toString(),
+          type: (json['type'] ?? '').toString(),
+          status: (json['status'] ?? '').toString(),
+          priority: (json['priority'] ?? '').toString(),
+          startDate: _asDateTime(json['startDate']),
+          endDate: _asDateTime(json['endDate']),
+        ),
+      );
     }
 
+    final id = (json['id'] ?? json['projectId'] ?? '').toString().trim();
+    final name = (json['name'] ?? json['projectName'] ?? '').toString().trim();
+
     return MobileProjectEntity(
-      id: (json['id'] ?? '').toString(),
-      name: (json['name'] ?? '').toString(),
+      id: id,
+      name: name.isNotEmpty ? name : (id.isNotEmpty ? id : 'Project'),
       address: (json['address'] ?? '').toString(),
       customer: MobileProjectCustomerEntity(
         id: (customerMap['id'] ?? '').toString(),
@@ -136,14 +170,36 @@ class MobileProjectModel {
 
   static List<MobileProjectEntity> fromList(dynamic rawList) {
     if (rawList is! List) return const [];
-    final result = <MobileProjectEntity>[];
+    final projectMap = <String, MobileProjectEntity>{};
     for (final item in rawList) {
       final map = _asMap(item);
-      if (map.isNotEmpty) {
-        result.add(fromJson(map));
+      if (map.isEmpty) continue;
+      final parsed = fromJson(map);
+      if (parsed.id.isEmpty) continue;
+
+      if (!projectMap.containsKey(parsed.id)) {
+        projectMap[parsed.id] = parsed;
+      } else {
+        final existing = projectMap[parsed.id]!;
+        final mergedPhases = <MobileProjectPhaseEntity>[...existing.phases];
+        for (final ph in parsed.phases) {
+          if (!mergedPhases.any((p) => p.id == ph.id)) {
+            mergedPhases.add(ph);
+          }
+        }
+        projectMap[parsed.id] = MobileProjectEntity(
+          id: existing.id,
+          name: existing.name.isNotEmpty ? existing.name : parsed.name,
+          address: existing.address.isNotEmpty ? existing.address : parsed.address,
+          customer: existing.customer.id.isNotEmpty ? existing.customer : parsed.customer,
+          phases: mergedPhases,
+          budgetedHours: existing.budgetedHours > 0 ? existing.budgetedHours : parsed.budgetedHours,
+          totalLoggedHours: existing.totalLoggedHours > 0 ? existing.totalLoggedHours : parsed.totalLoggedHours,
+          isProfitable: existing.isProfitable && parsed.isProfitable,
+        );
       }
     }
-    return result;
+    return projectMap.values.toList();
   }
 }
 

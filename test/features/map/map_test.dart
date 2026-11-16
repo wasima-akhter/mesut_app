@@ -1,5 +1,4 @@
 import 'package:construction_app/core/enums/app_enum.dart';
-import 'package:construction_app/features/map/data/datasources/mock_map_datasource.dart';
 import 'package:construction_app/features/map/data/repositories/map_repository_impl.dart';
 import 'package:construction_app/features/map/domain/entities/map_coordinate_entity.dart';
 import 'package:construction_app/features/map/domain/entities/map_location_entity.dart';
@@ -65,13 +64,18 @@ void main() {
   });
 
   group('MapRequestEntity Factory Tests', () {
-    test('siteManagerOverview factory creates correct multiLocation request', () {
-      final req = MapRequestEntity.siteManagerOverview(initialFilter: 'Erection');
-      expect(req.role, equals(UserRole.siteManager));
-      expect(req.purpose, equals(MapPurpose.multiLocation));
-      expect(req.filterCategory, equals('Erection'));
-      expect(req.initialCameraTarget?.latitude, closeTo(50.9375, 0.01));
-    });
+    test(
+      'siteManagerOverview factory creates correct multiLocation request',
+      () {
+        final req = MapRequestEntity.siteManagerOverview(
+          initialFilter: 'Erection',
+        );
+        expect(req.role, equals(UserRole.siteManager));
+        expect(req.purpose, equals(MapPurpose.multiLocation));
+        expect(req.filterCategory, equals('Erection'));
+        expect(req.initialCameraTarget?.latitude, closeTo(50.9375, 0.01));
+      },
+    );
 
     test('routeNavigation factory creates correct route request', () {
       const dest = MapLocationEntity(
@@ -132,20 +136,27 @@ void main() {
 
   group('MapCoordinateResolver Tests', () {
     test('resolves known Cologne addresses to realistic coordinates', () {
-      final goltstein = MapCoordinateResolver.resolve('Goltsteinstraße 12, 50968 Köln');
+      final goltstein = MapCoordinateResolver.resolve(
+        'Goltsteinstraße 12, 50968 Köln',
+      );
       expect(goltstein.latitude, closeTo(50.9082, 0.001));
       expect(goltstein.longitude, closeTo(6.9723, 0.001));
 
-      final severin = MapCoordinateResolver.resolve('Severinstraße 44, 50678 Köln');
+      final severin = MapCoordinateResolver.resolve(
+        'Severinstraße 44, 50678 Köln',
+      );
       expect(severin.latitude, closeTo(50.9288, 0.001));
       expect(severin.longitude, closeTo(6.9587, 0.001));
     });
 
-    test('falls back gracefully to Cologne center on empty or unknown address', () {
-      final fallback = MapCoordinateResolver.resolve('');
-      expect(fallback.latitude, closeTo(50.9375, 0.001));
-      expect(fallback.longitude, closeTo(6.9603, 0.001));
-    });
+    test(
+      'falls back gracefully to Cologne center on empty or unknown address',
+      () {
+        final fallback = MapCoordinateResolver.resolve('');
+        expect(fallback.latitude, closeTo(50.9375, 0.001));
+        expect(fallback.longitude, closeTo(6.9603, 0.001));
+      },
+    );
   });
 
   group('RouteService Tests', () {
@@ -181,7 +192,10 @@ void main() {
           id: 'invalid_1',
           title: 'Invalid Site',
           address: 'Bad',
-          coordinate: MapCoordinate(latitude: 100.0, longitude: 200.0), // Invalid
+          coordinate: MapCoordinate(
+            latitude: 100.0,
+            longitude: 200.0,
+          ), // Invalid
         ),
       ];
 

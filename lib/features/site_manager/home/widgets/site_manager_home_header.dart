@@ -20,18 +20,8 @@ class SiteManagerHomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        CircleAvatar(
-          radius: 26,
-          backgroundColor: const Color(0xFFE5E7EB),
-          backgroundImage: (avatarUrl != null && avatarUrl!.isNotEmpty)
-              ? NetworkImage(avatarUrl!)
-              : null,
-          child: (avatarUrl == null || avatarUrl!.isEmpty)
-              ? const Icon(Icons.person, color: Color(0xFF6B7280), size: 28)
-              : null,
-        ),
-        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,39 +29,60 @@ class SiteManagerHomeHeader extends StatelessWidget {
               Text(
                 context.loc.welcomeBack,
                 style: TextStyle(
-                  fontSize: 15.sp,
-                  color: const Color(0xFF6B7280),
+                  fontSize: 19.sp,
+                  color: const Color(0xFF777777),
+                  fontWeight: FontWeight.w400,
                 ),
               ),
+              const SizedBox(height: 4),
               Text(
                 userName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 21.sp,
+                  fontSize: 28.sp,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF1F2937),
+                  color: const Color(0xFF171717),
                 ),
               ),
             ],
           ),
         ),
+        Container(
+          width: 43,
+          height: 43,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 2),
+          ),
+          child: CircleAvatar(
+            backgroundColor: const Color(0xFFE5E7EB),
+            backgroundImage: (avatarUrl != null && avatarUrl!.isNotEmpty)
+                ? NetworkImage(avatarUrl!)
+                : null,
+            child: (avatarUrl == null || avatarUrl!.isEmpty)
+                ? const Icon(Icons.person, color: Color(0xFF6B7280), size: 22)
+                : null,
+          ),
+        ),
+        const SizedBox(width: 9),
         GestureDetector(
           onTap: () => context.push(RouteConstants.notifications),
           child: Stack(
             clipBehavior: Clip.none,
             children: [
               Container(
-                width: 46,
-                height: 46,
+                width: 43,
+                height: 43,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                  border: Border.all(color: const Color(0xFFE4E4E4)),
                 ),
                 child: const Icon(
                   Icons.notifications_none_outlined,
-                  color: Color(0xFF374151),
+                  size: 21,
+                  color: Color(0xFF777777),
                 ),
               ),
               if (unreadCount > 0)
@@ -84,11 +95,11 @@ class SiteManagerHomeHeader extends StatelessWidget {
                       vertical: 2,
                     ),
                     constraints: const BoxConstraints(
-                      minWidth: 18,
-                      minHeight: 18,
+                      minWidth: 16,
+                      minHeight: 16,
                     ),
                     decoration: const BoxDecoration(
-                      color: Color(0xFFFF6600),
+                      color: Color(0xFFE22B3B),
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,

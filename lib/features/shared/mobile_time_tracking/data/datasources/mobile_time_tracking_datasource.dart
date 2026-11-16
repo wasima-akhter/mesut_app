@@ -31,6 +31,8 @@ abstract class MobileTimeTrackingRemoteDataSource {
   Future<MobileCrewTimeEntity> getCrewTime({
     required String projectId,
     DateTime? date,
+    int page = 1,
+    int limit = 10,
   });
 }
 
@@ -125,12 +127,16 @@ class MobileTimeTrackingRemoteDataSourceImpl
   Future<MobileCrewTimeEntity> getCrewTime({
     required String projectId,
     DateTime? date,
+    int page = 1,
+    int limit = 10,
   }) async {
     final response = await apiClient.get<Map<String, dynamic>>(
       ApiConstants.mobileCrewTime,
       queryParameters: {
         'projectId': projectId,
         if (date != null) 'date': date.toUtc().toIso8601String(),
+        'page': page,
+        'limit': limit,
       },
     );
     final body = response.data ?? const <String, dynamic>{};

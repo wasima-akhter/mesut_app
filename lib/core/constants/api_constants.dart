@@ -43,6 +43,24 @@ abstract final class ApiConstants {
   static String mobileProjectTasks(String id) => '/mobile/projects/$id/tasks';
   static String mobileTaskToggle(String taskId) => '/mobile/tasks/$taskId/toggle';
   static String mobileTaskDelete(String taskId) => '/mobile/tasks/$taskId';
+  static String mobileProjectMeasurements(String projectId) =>
+      '/mobile/projects/$projectId/measurements';
+  static String mobileProjectMeasurementById(String projectId, String id) =>
+      '/mobile/projects/$projectId/measurements/$id';
+  static String mobileProjectNotes(String projectId) =>
+      '/mobile/projects/$projectId/notes';
+  static String mobileProjectNoteById(String projectId, String id) =>
+      '/mobile/projects/$projectId/notes/$id';
+  static String mobileProjectAttachments(String projectId) =>
+      '/mobile/projects/$projectId/attachments';
+  static String mobileProjectAttachmentById(String projectId, String id) =>
+      '/mobile/projects/$projectId/attachments/$id';
+  static String mobileProjectAttachmentCover(String projectId, String id) =>
+      '/mobile/projects/$projectId/attachments/$id/cover';
+  static String mobileProjectHistory(String projectId) =>
+      '/mobile/projects/$projectId/history';
+  static String mobileProjectPhaseDates(String projectId, String phaseId) =>
+      '/mobile/projects/$projectId/phases/$phaseId/dates';
   static const String mobileProfile = '/mobile/profile';
   static const String mobileSchedule = '/mobile/schedule';
   static const String mobileMap = '/mobile/map';

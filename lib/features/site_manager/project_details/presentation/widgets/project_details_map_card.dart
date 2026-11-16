@@ -13,11 +13,13 @@ import '../../../../map/domain/entities/map_request_entity.dart';
 import '../../domain/entities/project_details_entity.dart';
 
 class ProjectDetailsMapCard extends StatelessWidget {
+  final String? projectId;
   final ProjectCoordinates coordinates;
   final String title;
 
   const ProjectDetailsMapCard({
     super.key,
+    this.projectId,
     required this.coordinates,
     required this.title,
   });
@@ -112,7 +114,7 @@ class ProjectDetailsMapCard extends StatelessWidget {
                       leadingIcon: Icons.navigation_outlined,
                       onPressed: () {
                         final destination = MapLocationEntity(
-                          id: 'proj_${resolvedAddress.hashCode}',
+                          id: projectId ?? 'proj_${resolvedAddress.hashCode}',
                           title: title.isNotEmpty ? title : context.loc.project,
                           address: resolvedAddress,
                           coordinate: MapCoordinate(

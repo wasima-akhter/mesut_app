@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../app/constants/route_constants.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/errors/app_error_resolver.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/localization/localization_provider.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
 import '../../../core/widgets/states/app_empty_widget.dart';
-import '../../shared/mobile_dashboard/presentation/utils/mobile_phase_localizer.dart';
 import '../domain/entities/mobile_phase_entity.dart';
 import '../presentation/providers/mobile_phase_provider.dart';
-
-enum ProjectPhase { enquiry, erection, dismantling, standing }
+import 'models/backend_phase_status.dart';
+import 'widgets/site_manager_phase_card.dart';
+import 'widgets/site_manager_phase_status_sheet.dart';
+import 'widgets/site_manager_phase_tabs.dart';
 
 class SiteManagerPhaseBoardPage extends ConsumerStatefulWidget {
   const SiteManagerPhaseBoardPage({super.key});
@@ -24,45 +28,31 @@ class SiteManagerPhaseBoardPage extends ConsumerStatefulWidget {
 
 class _SiteManagerPhaseBoardPageState
     extends ConsumerState<SiteManagerPhaseBoardPage> {
-  String _selectedType = 'ALL';
+  String _selectedColumn = 'ALL';
+  bool _isSearchOpen = false;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickAndUpdateStatus(MobilePhaseEntity phase) async {
-    const statuses = ['ENQUIRY', 'PLANNED', 'IN_PROGRESS', 'ON_HOLD', 'COMPLETED'];
-    final chosen = await showModalBottomSheet<String>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: EdgeInsets.all(14.w),
-              child: Text(
-                context.loc.updateStatus,
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
-              ),
-            ),
-            for (final status in statuses)
-              ListTile(
-                title: Text(status),
-                trailing: phase.status == status
-                    ? const Icon(Icons.check, color: AppColors.primary)
-                    : null,
-                onTap: () => Navigator.of(ctx).pop(status),
-              ),
-          ],
-        ),
-      ),
-    );
-
+    final chosen = await SiteManagerPhaseStatusSheet.show(context, phase);
     if (chosen == null || chosen == phase.status) return;
+
     try {
       await ref
           .read(mobilePhasesProvider.notifier)
           .updateStatus(phase.id, chosen);
       if (!mounted) return;
+      final newStatusName =
+          BackendPhaseStatus.fromString(chosen).localizedName(context);
       AppSnackBar.showSuccess(
         context,
-        context.loc.phaseChanged(phase.status, chosen),
+        context.loc.phaseChanged(phase.status, newStatusName),
       );
     } catch (e) {
       if (!mounted) return;
@@ -72,189 +62,186 @@ class _SiteManagerPhaseBoardPageState
     }
   }
 
+  void _onTabSelected(String code) {
+    setState(() => _selectedColumn = code);
+    ref.read(mobilePhasesProvider.notifier).setColumn(code);
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.watch(appLanguageProvider);
     final phasesAsync = ref.watch(mobilePhasesProvider);
 
-    final filters = <(String, String)>[
+    final tabs = <(String, String)>[
       ('ALL', context.loc.mapFilterAll),
+      ('ENQUIRY', context.loc.enquiry),
       ('ERECTION', context.loc.erectionPhase),
-      ('DISMANTLING', context.loc.dismantlingPhase),
       ('STANDING', context.loc.standing),
-      ('MAINTENANCE', context.loc.maintenancePhase),
+      ('DISMANTLING', context.loc.dismantlingPhase),
     ];
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text(context.loc.phaseBoard)),
-      body: Column(
-        children: [
-          SizedBox(
-            height: 50.h,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
-              itemCount: filters.length,
-              separatorBuilder: (_, __) => SizedBox(width: 8.w),
-              itemBuilder: (_, index) {
-                final (code, label) = filters[index];
-                return ChoiceChip(
-                  label: Text(label),
-                  selected: _selectedType == code,
-                  onSelected: (_) => setState(() => _selectedType = code),
-                );
-              },
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(14.w, 16.h, 14.w, 0),
+              child: _buildHeader(),
             ),
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () =>
-                  ref.read(mobilePhasesProvider.notifier).refresh(),
-              child: phasesAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(context.loc.somethingWentWrong),
-                      SizedBox(height: 10.h),
-                      ElevatedButton(
-                        onPressed: () =>
-                            ref.read(mobilePhasesProvider.notifier).refresh(),
-                        child: Text(context.loc.mapRetry),
-                      ),
-                    ],
+            if (_isSearchOpen)
+              Padding(
+                padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 0),
+                child: TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: context.loc.search,
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                          )
+                        : null,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 14.w,
+                      vertical: 8.h,
+                    ),
                   ),
+                  onChanged: (q) => setState(() => _searchQuery = q.trim()),
                 ),
-                data: (phases) {
-                  final visible = _selectedType == 'ALL'
-                      ? phases
-                      : phases
-                            .where(
-                              (p) =>
-                                  p.type.trim().toUpperCase() == _selectedType,
-                            )
-                            .toList();
-
-                  if (visible.isEmpty) {
-                    return ListView(
+              ),
+            SizedBox(height: 12.h),
+            SiteManagerPhaseTabs(
+              tabs: tabs,
+              selectedColumn: _selectedColumn,
+              onTabSelected: _onTabSelected,
+            ),
+            SizedBox(height: 10.h),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () => ref
+                    .read(mobilePhasesProvider.notifier)
+                    .refresh(column: _selectedColumn),
+                child: phasesAsync.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (_, __) => Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        SizedBox(height: 72.h),
-                        AppEmptyWidget(
-                          icon: Icons.view_kanban_outlined,
-                          title: context.loc.noPhasesFound,
-                          onRetry: () => ref
+                        Text(context.loc.somethingWentWrong),
+                        SizedBox(height: 10.h),
+                        ElevatedButton(
+                          onPressed: () => ref
                               .read(mobilePhasesProvider.notifier)
-                              .refresh(),
+                              .refresh(column: _selectedColumn),
+                          child: Text(context.loc.mapRetry),
                         ),
                       ],
-                    );
-                  }
-
-                  return ListView.builder(
-                    padding: EdgeInsets.all(14.w),
-                    itemCount: visible.length,
-                    itemBuilder: (_, index) => _PhaseBoardCard(
-                      phase: visible[index],
-                      onUpdateStatus: () =>
-                          _pickAndUpdateStatus(visible[index]),
                     ),
-                  );
-                },
+                  ),
+                  data: (phases) {
+                    var visible = phases;
+                    if (_searchQuery.isNotEmpty) {
+                      final q = _searchQuery.toLowerCase();
+                      visible = visible
+                          .where(
+                            (p) =>
+                                p.project.name.toLowerCase().contains(q) ||
+                                p.project.address.toLowerCase().contains(q) ||
+                                p.type.toLowerCase().contains(q) ||
+                                p.status.toLowerCase().contains(q),
+                          )
+                          .toList();
+                    }
+
+                    if (visible.isEmpty) {
+                      return ListView(
+                        children: [
+                          SizedBox(height: 72.h),
+                          AppEmptyWidget(
+                            icon: Icons.view_kanban_outlined,
+                            title: context.loc.noPhasesFound,
+                            onRetry: () => ref
+                                .read(mobilePhasesProvider.notifier)
+                                .refresh(column: _selectedColumn),
+                          ),
+                        ],
+                      );
+                    }
+
+                    return ListView.builder(
+                      padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 20.h),
+                      itemCount: visible.length,
+                      itemBuilder: (_, index) {
+                        final phase = visible[index];
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 12.h),
+                          child: SiteManagerPhaseCard(
+                            phase: phase,
+                            onTapProject: () => context.push(
+                              RouteConstants.siteManagerProjectDetail,
+                              extra: phase.project.id,
+                            ),
+                            onUpdateStatus: () => _pickAndUpdateStatus(phase),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
-}
 
-class _PhaseBoardCard extends StatelessWidget {
-  const _PhaseBoardCard({
-    required this.phase,
-    required this.onUpdateStatus,
-  });
-
-  final MobilePhaseEntity phase;
-  final VoidCallback onUpdateStatus;
-
-  @override
-  Widget build(BuildContext context) {
-    final typeColor = MobilePhaseLocalizer.phaseColor(phase.type);
-    return RepaintBoundary(
-      child: Card(
-        elevation: 0,
-        margin: EdgeInsets.only(bottom: 12.h),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.r),
-          side: const BorderSide(color: AppColors.border),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(14.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.w,
-                      vertical: 4.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: typeColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(6.r),
-                    ),
-                    child: Text(
-                      MobilePhaseLocalizer.phaseType(context, phase.type),
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                        color: typeColor,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    phase.status,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: onUpdateStatus,
-                    child: Text(context.loc.updateStatus),
-                  ),
-                ],
-              ),
-              SizedBox(height: 6.h),
-              Text(
-                phase.project.name.isEmpty ? phase.id : phase.project.name,
-                style: TextStyle(
-                  fontSize: 16.sp,
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        const AppBackButton(),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: Text(
+            context.loc.phaseBoard,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
                 ),
-              ),
-              if (phase.project.address.isNotEmpty) ...[
-                SizedBox(height: 4.h),
-                Text(
-                  phase.project.address,
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    color: AppColors.textTertiary,
-                  ),
-                ),
-              ],
-            ],
           ),
         ),
-      ),
+        AppIconButton.circle(
+          iconData: _isSearchOpen ? Icons.close : Icons.search_rounded,
+          onPressed: () {
+            setState(() {
+              _isSearchOpen = !_isSearchOpen;
+              if (!_isSearchOpen) {
+                _searchController.clear();
+                _searchQuery = '';
+              }
+            });
+          },
+          borderColor: AppColors.border,
+          size: 38.w,
+          iconSize: 18.sp,
+        ),
+        SizedBox(width: 8.w),
+        AppIconButton.circle(
+          iconData: Icons.refresh_rounded,
+          onPressed: () => ref
+              .read(mobilePhasesProvider.notifier)
+              .refresh(column: _selectedColumn),
+          borderColor: AppColors.border,
+          size: 38.w,
+          iconSize: 18.sp,
+        ),
+      ],
     );
   }
 }

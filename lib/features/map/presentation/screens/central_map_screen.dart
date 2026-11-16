@@ -10,18 +10,18 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../core/enums/app_enum.dart';
 import '../../../../core/localization/context_extensions.dart';
 import '../../../../core/utils/logger.dart';
-import '../../../../core/widgets/buttons/app_back_button.dart';
 import '../../domain/entities/map_location_entity.dart';
 import '../../domain/entities/map_request_entity.dart';
 import '../providers/map_provider.dart';
-import '../providers/map_state.dart';
 import '../widgets/map_controls.dart';
 import '../widgets/map_error_view.dart';
+import '../widgets/map_header_bar.dart';
 import '../widgets/map_info_panel.dart';
 import '../widgets/map_loading_view.dart';
 import '../widgets/map_location_card.dart';
+import '../widgets/map_permission_banner.dart';
 
-/// Centralized, production-oriented Google Maps screen supporting all roles and map modes.
+/// Centralized, production-ready Google Maps screen supporting all roles and map modes.
 class CentralMapScreen extends ConsumerStatefulWidget {
   final MapRequestEntity? initialRequest;
 
@@ -37,14 +37,6 @@ class _CentralMapScreenState extends ConsumerState<CentralMapScreen> {
   bool _isMapInitialized = false;
   Timer? _diagnosticTimer;
 
-  static const List<String> _filterCategories = [
-    'All',
-    'Erection',
-    'Dismantling',
-    'Standing',
-    'Inspection',
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -58,8 +50,7 @@ class _CentralMapScreenState extends ConsumerState<CentralMapScreen> {
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final request =
-          widget.initialRequest ??
+      final request = widget.initialRequest ??
           MapRequestEntity(
             role: UserRole.siteManager,
             purpose: MapPurpose.multiLocation,
@@ -79,19 +70,75 @@ class _CentralMapScreenState extends ConsumerState<CentralMapScreen> {
     context.push(RouteConstants.siteManagerProjectDetail, extra: location.id);
   }
 
+  Future<void> _handleShowRoute(MapLocationEntity location) async {
+    final success = await ref.read(mapProvider.notifier).loadRouteTo(location);
+    if (!success && mounted) {
+      _showEnableLocationDialog();
+    }
+  }
+
+  void _showEnableLocationDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        icon: Icon(Icons.location_off_outlined, size: 36.sp, color: AppColors.primary),
+        title: Text(
+          context.loc.locationPermissionRequired,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          context.loc.locationPermissionMessage,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 13.5.sp, color: AppColors.textSecondary),
+        ),
+        actionsAlignment: MainAxisAlignment.spaceEvenly,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: Text(context.loc.cancel, style: TextStyle(fontSize: 14.sp)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(dialogCtx).pop();
+              final locationService = ref.read(locationServiceProvider);
+              final isGpsOn = await locationService.isLocationServiceEnabled();
+              if (!isGpsOn) {
+                await locationService.openLocationSettings();
+              } else {
+                await locationService.openSettings();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+            ),
+            child: Text(context.loc.settings, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final mapState = ref.watch(mapProvider);
     final notifier = ref.read(mapProvider.notifier);
     final isMulti = mapState.request.purpose == MapPurpose.multiLocation;
+    final canPop = Navigator.of(context).canPop();
+    final hasSelection =
+        mapState.selectedLocation != null || mapState.activeRoute != null;
+    final onBack = hasSelection
+        ? () => notifier.clearRouteOrSelection()
+        : (canPop ? () => context.pop() : null);
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // ------------------------------------------------------------------
           // 1. Google Map View
-          // ------------------------------------------------------------------
           GoogleMap(
             initialCameraPosition: mapState.initialCameraPosition,
             markers: mapState.markers,
@@ -115,37 +162,26 @@ class _CentralMapScreenState extends ConsumerState<CentralMapScreen> {
               notifier.attachMapController(controller);
             },
             onTap: (_) {
-              if (mapState.activeRoute == null) {
-                notifier.selectLocation(null);
+              if (hasSelection) {
+                notifier.clearRouteOrSelection();
               }
             },
           ),
 
-          // ------------------------------------------------------------------
           // 2. Top Header & Search / Filters
-          // ------------------------------------------------------------------
-          SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTopBar(mapState),
-                  if (isMulti) ...[
-                    SizedBox(height: 10.h),
-                    _buildSearchBar(notifier),
-                    SizedBox(height: 8.h),
-                    _buildFilterChips(mapState, notifier),
-                  ],
-                ],
-              ),
-            ),
+          MapHeaderBar(
+            state: mapState,
+            searchController: _searchController,
+            onSearchChanged: notifier.setSearchQuery,
+            onSearchClear: () {
+              _searchController.clear();
+              notifier.setSearchQuery('');
+            },
+            onFilterChanged: notifier.setFilter,
+            onBack: onBack,
           ),
 
-          // ------------------------------------------------------------------
           // 3. Map Floating Controls (Recenter, Zoom, Map Type, Traffic)
-          // ------------------------------------------------------------------
           Positioned(
             right: 16.w,
             top: isMulti ? 200.h : 130.h,
@@ -162,20 +198,16 @@ class _CentralMapScreenState extends ConsumerState<CentralMapScreen> {
             ),
           ),
 
-          // ------------------------------------------------------------------
-          // 4. Informative Location Permission Banner (Non-blocking)
-          // ------------------------------------------------------------------
+          // 4. Location Permission Banner (Non-blocking, visible when GPS is off or denied)
           if (!mapState.hasLocationPermission && !mapState.isLoading)
             Positioned(
               left: 16.w,
               right: 16.w,
               top: isMulti ? 195.h : 95.h,
-              child: _buildPermissionNotice(notifier),
+              child: MapPermissionBanner(onEnable: notifier.recenterOnUser),
             ),
 
-          // ------------------------------------------------------------------
           // 5. Bottom Overlay: Route Info Panel OR Selected Location Card
-          // ------------------------------------------------------------------
           Positioned(
             left: 16.w,
             right: 16.w,
@@ -186,44 +218,34 @@ class _CentralMapScreenState extends ConsumerState<CentralMapScreen> {
                   ? MapInfoPanel(
                       key: const ValueKey('route_panel'),
                       route: mapState.activeRoute!,
-                      destination:
-                          mapState.selectedLocation ??
+                      destination: mapState.selectedLocation ??
                           mapState.request.destination,
-                      onClose: () {
-                        notifier.initialize(
-                          mapState.request.copyWith(showRoute: false),
-                        );
-                      },
+                      onClose: () => notifier.clearRouteOrSelection(),
                     )
                   : (mapState.selectedLocation != null
-                        ? MapLocationCard(
-                            key: ValueKey(
-                              'card_${mapState.selectedLocation!.id}',
-                            ),
-                            location: mapState.selectedLocation!,
-                            onRoute: () => notifier.loadRouteTo(
-                              mapState.selectedLocation!,
-                            ),
-                            onOpenDetails: () => _onOpenProjectDetails(
-                              mapState.selectedLocation!,
-                            ),
-                            onClose: () => notifier.selectLocation(null),
-                          )
-                        : const SizedBox.shrink()),
+                      ? MapLocationCard(
+                          key: ValueKey('card_${mapState.selectedLocation!.id}'),
+                          location: mapState.selectedLocation!,
+                          userLocation: mapState.userLocation,
+                          onRoute: () => _handleShowRoute(
+                            mapState.selectedLocation!,
+                          ),
+                          onOpenDetails: () => _onOpenProjectDetails(
+                            mapState.selectedLocation!,
+                          ),
+                          onClose: () => notifier.selectLocation(null),
+                        )
+                      : const SizedBox.shrink()),
             ),
           ),
 
-          // ------------------------------------------------------------------
           // 6. Loading Indicator
-          // ------------------------------------------------------------------
           if (mapState.isLoading)
             Positioned.fill(
               child: MapLoadingView(message: context.loc.mapLoadingData),
             ),
 
-          // ------------------------------------------------------------------
           // 7. Error State
-          // ------------------------------------------------------------------
           if (mapState.hasError)
             Positioned.fill(
               child: MapErrorView(
@@ -234,230 +256,5 @@ class _CentralMapScreenState extends ConsumerState<CentralMapScreen> {
         ],
       ),
     );
-  }
-
-  Widget _buildTopBar(MapState state) {
-    final canPop = Navigator.of(context).canPop();
-    final title =
-        state.request.title ??
-        (state.request.role == UserRole.siteManager
-            ? context.loc.mapSiteManagerMap
-            : context.loc.mapAssignmentNavigation);
-
-    return Row(
-      children: [
-        if (canPop) ...[
-          AppBackButton(onPressed: () => context.pop()),
-          SizedBox(width: 10.w),
-        ],
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-              border: Border.all(color: AppColors.border, width: 0.8),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.location_city,
-                  size: 20.sp,
-                  color: AppColors.primary,
-                ),
-                SizedBox(width: 8.w),
-                Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-                _roleBadge(state.request.role),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSearchBar(MapNotifier notifier) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-        border: Border.all(color: AppColors.border, width: 0.8),
-      ),
-      child: TextField(
-        controller: _searchController,
-        onChanged: notifier.setSearchQuery,
-        decoration: InputDecoration(
-          hintText: context.loc.mapSearchHint,
-          hintStyle: TextStyle(fontSize: 14.sp, color: AppColors.textTertiary),
-          prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear, size: 18),
-                  onPressed: () {
-                    _searchController.clear();
-                    notifier.setSearchQuery('');
-                  },
-                )
-              : null,
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 12.h),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterChips(MapState state, MapNotifier notifier) {
-    return SizedBox(
-      height: 34.h,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: _filterCategories.length,
-        separatorBuilder: (_, _) => SizedBox(width: 6.w),
-        itemBuilder: (context, index) {
-          final cat = _filterCategories[index];
-          final isSelected = state.selectedFilter == cat;
-
-          return GestureDetector(
-            onTap: () => notifier.setFilter(cat),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : Colors.white,
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.border,
-                ),
-                boxShadow: [
-                  if (isSelected)
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.25),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                ],
-              ),
-              child: Text(
-                _localizeFilter(context, cat),
-                style: TextStyle(
-                  fontSize: 12.5.sp,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected ? Colors.white : AppColors.textSecondary,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildPermissionNotice(MapNotifier notifier) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFF9E6),
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: const Color(0xFFFFD54F)),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 6),
-        ],
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.info_outline, size: 16, color: Color(0xFFF57F17)),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: Text(
-              context.loc.mapPermissionNotice,
-              style: TextStyle(
-                fontSize: 11.5.sp,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFFE65100),
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: notifier.recenterOnUser,
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(40, 24),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              context.loc.mapEnable,
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.primary,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _roleBadge(UserRole role) {
-    final isSM = role == UserRole.siteManager;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
-      decoration: BoxDecoration(
-        color: isSM
-            ? AppColors.primary.withValues(alpha: 0.1)
-            : AppColors.info.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6.r),
-      ),
-      child: Text(
-        isSM ? context.loc.mapRoleSiteManager : context.loc.mapRoleEmployee,
-        style: TextStyle(
-          fontSize: 11.sp,
-          fontWeight: FontWeight.w700,
-          color: isSM ? AppColors.primary : AppColors.info,
-        ),
-      ),
-    );
-  }
-
-  String _localizeFilter(BuildContext context, String cat) {
-    switch (cat) {
-      case 'All':
-        return context.loc.mapFilterAll;
-      case 'Erection':
-        return context.loc.mapFilterErection;
-      case 'Dismantling':
-        return context.loc.mapFilterDismantling;
-      case 'Standing':
-        return context.loc.mapFilterStanding;
-      case 'Inspection':
-        return context.loc.mapFilterInspection;
-      default:
-        return cat;
-    }
   }
 }

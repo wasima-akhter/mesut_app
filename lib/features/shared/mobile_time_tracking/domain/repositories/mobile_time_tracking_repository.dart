@@ -28,5 +28,7 @@ abstract class MobileTimeTrackingRepository {
   Future<MobileCrewTimeEntity> getCrewTime({
     required String projectId,
     DateTime? date,
+    int page = 1,
+    int limit = 10,
   });
 }

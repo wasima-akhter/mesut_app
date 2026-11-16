@@ -7,9 +7,9 @@ import '../../domain/entities/mobile_schedule_entity.dart';
 import '../models/mobile_dashboard_models.dart';
 
 abstract class MobileDashboardRemoteDataSource {
-  Future<MobileDashboardEntity> getDashboard();
+  Future<MobileDashboardEntity> getDashboard({int page = 1, int limit = 10});
 
-  Future<List<MobileProjectEntity>> getProjects();
+  Future<List<MobileProjectEntity>> getProjects({int page = 1, int limit = 50});
 
   Future<MobileProfileEntity> getProfile();
 
@@ -28,9 +28,13 @@ class MobileDashboardRemoteDataSourceImpl
   final ApiClient apiClient;
 
   @override
-  Future<MobileDashboardEntity> getDashboard() async {
+  Future<MobileDashboardEntity> getDashboard({
+    int page = 1,
+    int limit = 10,
+  }) async {
     final response = await apiClient.get<Map<String, dynamic>>(
       ApiConstants.mobileDashboard,
+      queryParameters: {'page': page, 'limit': limit},
     );
     final body = response.data ?? const <String, dynamic>{};
     final data = body['data'] is Map
@@ -40,9 +44,13 @@ class MobileDashboardRemoteDataSourceImpl
   }
 
   @override
-  Future<List<MobileProjectEntity>> getProjects() async {
+  Future<List<MobileProjectEntity>> getProjects({
+    int page = 1,
+    int limit = 50,
+  }) async {
     final response = await apiClient.get<Map<String, dynamic>>(
       ApiConstants.mobileProjects,
+      queryParameters: {'page': page, 'limit': limit},
     );
     final body = response.data ?? const <String, dynamic>{};
     return MobileProjectModel.fromList(body['data']);

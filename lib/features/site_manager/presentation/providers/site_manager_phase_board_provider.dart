@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../phase_board/site_manager_phase_board.dart';
+import '../../projects/enums.dart';
 
 class ProjectBoardModel {
   final String id;
@@ -63,5 +63,5 @@ class PhaseBoardNotifier extends Notifier<PhaseBoardState> {
 
 final phaseBoardProvider =
     NotifierProvider<PhaseBoardNotifier, PhaseBoardState>(
-  PhaseBoardNotifier.new,
-);
+      PhaseBoardNotifier.new,
+    );

@@ -43,7 +43,7 @@ class MapInfoPanel extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with sample data badge and close button
+            // Header with navigation badge and close button
             Row(
               children: [
                 Container(
@@ -60,13 +60,13 @@ class MapInfoPanel extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        Icons.info_outline,
+                        Icons.navigation_outlined,
                         size: 13.sp,
                         color: AppColors.primary,
                       ),
                       SizedBox(width: 4.w),
                       Text(
-                        context.loc.mapSampleRouteBadge,
+                        context.loc.navigation,
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w700,
@@ -173,14 +173,15 @@ class MapInfoPanel extends StatelessWidget {
                 Expanded(
                   child: AppButton(
                     onPressed: () {
-                      final lat = destination?.latitude ?? route.destination.latitude;
-                      final lon = destination?.longitude ?? route.destination.longitude;
-                      final label = destination?.title ?? 'Destination';
+                      final destLat = destination?.latitude ?? route.destination.latitude;
+                      final destLon = destination?.longitude ?? route.destination.longitude;
+                      final originLat = route.start.isValid ? route.start.latitude : null;
+                      final originLon = route.start.isValid ? route.start.longitude : null;
                       AppLauncherService.openMapNavigation(
-                        latitude: lat,
-                        longitude: lon,
-                        address: destination?.address,
-                        label: label,
+                        latitude: destLat,
+                        longitude: destLon,
+                        originLatitude: originLat,
+                        originLongitude: originLon,
                       );
                     },
                     text: context.loc.mapStartNavigation,

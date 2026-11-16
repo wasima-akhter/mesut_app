@@ -22,6 +22,10 @@ final mobilePhaseRepositoryProvider = Provider<MobilePhaseRepository>((ref) {
 });
 
 class MobilePhasesNotifier extends AsyncNotifier<List<MobilePhaseEntity>> {
+  String? _column;
+
+  String? get currentColumn => _column;
+
   @override
   Future<List<MobilePhaseEntity>> build() async {
     final hasToken = await ref
@@ -29,10 +33,25 @@ class MobilePhasesNotifier extends AsyncNotifier<List<MobilePhaseEntity>> {
         .hasValidAccessToken();
     final role = ref.watch(userRoleProvider);
     if (!hasToken || role != UserRole.siteManager) return const [];
-    return ref.watch(mobilePhaseRepositoryProvider).getManagedPhases();
+    return ref.watch(mobilePhaseRepositoryProvider).getManagedPhases(
+      column: _column,
+    );
   }
 
-  Future<void> refresh() async {
+  Future<void> setColumn(String? column) async {
+    _column = (column == null || column == 'ALL') ? null : column;
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => ref.read(mobilePhaseRepositoryProvider).getManagedPhases(
+        column: _column,
+      ),
+    );
+  }
+
+  Future<void> refresh({String? column}) async {
+    if (column != null) {
+      _column = column == 'ALL' ? null : column;
+    }
     final hasToken = await ref
         .read(storageServiceProvider)
         .hasValidAccessToken();
@@ -43,7 +62,9 @@ class MobilePhasesNotifier extends AsyncNotifier<List<MobilePhaseEntity>> {
     }
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
-      () => ref.read(mobilePhaseRepositoryProvider).getManagedPhases(),
+      () => ref.read(mobilePhaseRepositoryProvider).getManagedPhases(
+        column: _column,
+      ),
     );
   }
 

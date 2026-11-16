@@ -1,46 +1,30 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import '../../../../core/utils/logger.dart';
-import '../../data/repositories/map_repository_impl.dart';
-import '../../domain/entities/map_coordinate_entity.dart';
 import '../../domain/entities/map_location_entity.dart';
 import '../../domain/entities/map_request_entity.dart';
 import '../../domain/entities/map_route_entity.dart';
-import '../../domain/repositories/map_repository.dart';
-import '../../services/location_service.dart';
-import '../../services/map_marker_service.dart';
-import '../../services/route_service.dart';
+import '../../services/map_camera_service.dart';
+import '../../utils/map_filter_helper.dart';
+import 'map_di_providers.dart';
 import 'map_state.dart';
 
-final mapRepositoryProvider = Provider<MapRepository>((ref) {
-  return const MapRepositoryImpl();
-});
+export 'map_di_providers.dart';
 
-final locationServiceProvider = Provider<LocationService>((ref) {
-  return const LocationService();
-});
-
-final mapMarkerServiceProvider = Provider<MapMarkerService>((ref) {
-  return const MapMarkerService();
-});
-
-final routeServiceProvider = Provider<RouteService>((ref) {
-  return const RouteService();
-});
-
-final mapProvider = NotifierProvider<MapNotifier, MapState>(
-  MapNotifier.new,
-);
+final mapProvider = NotifierProvider<MapNotifier, MapState>(MapNotifier.new);
 
 class MapNotifier extends Notifier<MapState> {
   GoogleMapController? _controller;
+  Timer? _searchDebounce;
   bool _isDisposed = false;
 
   @override
   MapState build() {
     ref.onDispose(() {
       _isDisposed = true;
+      _searchDebounce?.cancel();
       _controller = null;
     });
     return MapState.initial();
@@ -55,70 +39,39 @@ class MapNotifier extends Notifier<MapState> {
   /// Primary initialization entry point with configurable [MapRequestEntity].
   Future<void> initialize(MapRequestEntity request) async {
     if (_isDisposed) return;
+    AppLogger.info('Init Map: role=${request.role}, purpose=${request.purpose}', name: 'MAP');
 
-    AppLogger.info(
-      'Initializing Map: role=${request.role}, purpose=${request.purpose}, title="${request.title}"',
-      name: 'MAP',
-    );
+    final target = request.initialCameraTarget?.toLatLng() ??
+        request.destination?.coordinate.toLatLng() ??
+        MapCameraService.cologneCityCenter;
 
     state = state.copyWith(
       status: MapStatus.loading,
       request: request,
       errorMessage: null,
       selectedFilter: request.filterCategory ?? 'All',
-      initialCameraPosition: CameraPosition(
-        target: request.initialCameraTarget?.toLatLng() ??
-            request.destination?.coordinate.toLatLng() ??
-            const LatLng(50.9375, 6.9603),
-        zoom: request.initialZoom,
-      ),
+      clearActiveRoute: request.route == null,
+      clearSelectedLocation: request.destination == null,
+      initialCameraPosition: CameraPosition(target: target, zoom: request.initialZoom),
     );
 
     try {
       final locationService = ref.read(locationServiceProvider);
       final repository = ref.read(mapRepositoryProvider);
 
-      // Check location permission safely
-      final hasPerm = await locationService.hasLocationPermission();
-      MapCoordinate? userCoord;
+      final hasPerm = await locationService.hasLocationPermission() ||
+          await locationService.requestLocationPermission();
+      final userCoord = (hasPerm || request.enableUserTracking) ? await locationService.getCurrentLocation() : null;
 
-      if (hasPerm || request.enableUserTracking) {
-        userCoord = await locationService.getCurrentLocation();
-      }
+      final locations = request.locations.isNotEmpty
+          ? request.locations
+          : (request.destination != null
+              ? [request.destination!]
+              : await repository.getLocations(role: request.role, category: request.filterCategory, search: state.searchQuery));
 
-      // Fetch or use provided locations
-      List<MapLocationEntity> locations;
-      if (request.locations.isNotEmpty) {
-        locations = request.locations;
-      } else if (request.destination != null) {
-        locations = [request.destination!];
-      } else {
-        locations = await repository.getLocations(
-          role: request.role,
-          category: request.filterCategory,
-        );
-      }
-
-      // Compute or assign route if requested
       MapRouteEntity? route = request.route;
-      if (route == null &&
-          request.showRoute &&
-          request.destination != null) {
-        // If user coordinate is very far away (> 100km, e.g. Android Emulator in California),
-        // fallback to Cologne starting point so the route and camera stay focused on Cologne
-        final isUserNearby = userCoord != null &&
-            userCoord.isValid &&
-            userCoord.distanceTo(request.destination!.coordinate) < 100.0;
-
-        final originCoord = request.origin?.coordinate ??
-            (isUserNearby
-                ? userCoord
-                : const MapCoordinate(
-                    latitude: 50.9355,
-                    longitude: 6.9531,
-                    name: 'Köln Startpunkt (Neumarkt)',
-                  ));
-
+      final originCoord = request.origin?.coordinate ?? (userCoord != null && userCoord.isValid ? userCoord : null);
+      if (route == null && request.showRoute && request.destination != null && originCoord != null) {
         route = await repository.getRoute(
           origin: originCoord,
           destination: request.destination!.coordinate,
@@ -126,20 +79,20 @@ class MapNotifier extends Notifier<MapState> {
         );
       }
 
-      final filtered = _applyFilterAndSearch(
+      final filtered = MapFilterHelper.applyFilterAndSearch(
         locations,
         state.selectedFilter,
         state.searchQuery,
       );
 
-      final markers = _generateMarkers(
-        locations: filtered,
-        request: request,
-        route: route,
-        userCoord: userCoord,
-      );
-
-      final polylines = _generatePolylines(route);
+      final markers = ref.read(mapMarkerServiceProvider).buildMapMarkers(
+            locations: filtered,
+            request: request,
+            route: route,
+            userCoord: userCoord,
+            selectedLocationId: state.selectedLocation?.id,
+            onLocationTap: selectLocation,
+          );
 
       if (!_isDisposed) {
         state = state.copyWith(
@@ -148,292 +101,196 @@ class MapNotifier extends Notifier<MapState> {
           hasLocationPermission: hasPerm,
           allLocations: locations,
           filteredLocations: filtered,
-          selectedLocation: request.destination ??
-              (locations.length == 1 ? locations.first : null),
+          selectedLocation: request.destination ?? (locations.length == 1 ? locations.first : null),
           activeRoute: route,
           markers: markers,
-          polylines: polylines,
+          polylines: _generatePolylines(route),
         );
-
         _fitCameraToContent();
       }
     } catch (e, st) {
-      AppLogger.error(
-        'Failed to initialize map',
-        error: e,
-        stackTrace: st,
-        name: 'MAP',
-      );
+      AppLogger.error('Failed to init map', error: e, stackTrace: st, name: 'MAP');
       if (!_isDisposed) {
-        state = state.copyWith(
-          status: MapStatus.error,
-          errorMessage: e.toString(),
-        );
+        state = state.copyWith(status: MapStatus.error, errorMessage: e.toString());
       }
     }
   }
 
-  /// Selects a location on the map and recenters camera.
+  /// Selects a location on the map. Passing null resets back to all sites.
   void selectLocation(MapLocationEntity? location) {
     if (_isDisposed) return;
     AppLogger.info('Selected location: ${location?.title}', name: 'MAP');
     state = state.copyWith(
       selectedLocation: location,
       clearSelectedLocation: location == null,
+      clearActiveRoute: location == null,
+      polylines: location == null ? const {} : state.polylines,
     );
-
     _updateMarkers();
 
     if (location != null && location.hasValidCoordinates && _controller != null) {
-      _controller?.animateCamera(
-        CameraUpdate.newLatLngZoom(location.coordinate.toLatLng(), 15.0),
-      );
+      _controller?.animateCamera(CameraUpdate.newLatLngZoom(location.coordinate.toLatLng(), 15.0));
+    } else if (location == null) {
+      _fitCameraToContent();
     }
   }
 
-  /// Sets category filter chip.
-  void setFilter(String filter) {
+  /// Clears active route and selected location, resetting view back to all projects.
+  void clearRouteOrSelection() {
     if (_isDisposed) return;
-    AppLogger.info('Filter changed to: $filter', name: 'MAP');
-    final filtered = _applyFilterAndSearch(
-      state.allLocations,
-      filter,
-      state.searchQuery,
-    );
-
-    // If selected location doesn't match new filter, deselect it
-    final keepSelection = state.selectedLocation != null &&
-        (filter == 'All' || state.selectedLocation!.type == filter);
-
-    state = state.copyWith(
-      selectedFilter: filter,
-      filteredLocations: filtered,
-      clearSelectedLocation: !keepSelection,
-    );
-
+    AppLogger.info('Reset map: clear route and selection', name: 'MAP');
+    state = state.copyWith(clearActiveRoute: true, clearSelectedLocation: true, polylines: const {});
     _updateMarkers();
     _fitCameraToContent();
   }
 
-  /// Updates search query filter.
+  /// Sets category filter chip and fetches matching projects from API.
+  Future<void> setFilter(String filter) async {
+    if (_isDisposed) return;
+    AppLogger.info('Filter changed to: $filter', name: 'MAP');
+    state = state.copyWith(selectedFilter: filter, clearSelectedLocation: true);
+    await _reloadLocations();
+  }
+
+  /// Updates search query and fetches matching projects from API with debounce.
   void setSearchQuery(String query) {
     if (_isDisposed) return;
-    final filtered = _applyFilterAndSearch(
-      state.allLocations,
-      state.selectedFilter,
-      query,
-    );
+    state = state.copyWith(searchQuery: query);
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () async {
+      if (_isDisposed) return;
+      await _reloadLocations();
+    });
+  }
 
-    state = state.copyWith(
-      searchQuery: query,
-      filteredLocations: filtered,
-    );
+  Future<void> _reloadLocations() async {
+    try {
+      final repository = ref.read(mapRepositoryProvider);
+      final locations = state.request.locations.isNotEmpty
+          ? MapFilterHelper.applyFilterAndSearch(state.request.locations, state.selectedFilter, state.searchQuery)
+          : await repository.getLocations(
+              role: state.request.role,
+              category: state.selectedFilter,
+              search: state.searchQuery,
+            );
 
-    _updateMarkers();
+      if (_isDisposed) return;
+      final markers = ref.read(mapMarkerServiceProvider).buildMapMarkers(
+            locations: locations,
+            request: state.request,
+            route: state.activeRoute,
+            userCoord: state.userLocation,
+            selectedLocationId: state.selectedLocation?.id,
+            onLocationTap: selectLocation,
+          );
+
+      state = state.copyWith(
+        allLocations: locations,
+        filteredLocations: locations,
+        markers: markers,
+      );
+
+      if (state.selectedLocation == null) {
+        _fitCameraToContent();
+      }
+    } catch (e, st) {
+      AppLogger.error('Failed to reload map', error: e, stackTrace: st, name: 'MAP');
+    }
   }
 
   /// Requests current GPS position and recenters camera.
   Future<void> recenterOnUser() async {
     if (_isDisposed) return;
-    AppLogger.info('Recentering on user GPS...', name: 'MAP_LOCATION');
-    final locationService = ref.read(locationServiceProvider);
-
     var coord = state.userLocation;
     if (coord == null || !coord.isValid) {
-      final granted = await locationService.requestLocationPermission();
+      final locService = ref.read(locationServiceProvider);
+      final granted = await locService.requestLocationPermission();
       state = state.copyWith(hasLocationPermission: granted);
-      if (granted) {
-        coord = await locationService.getCurrentLocation();
-        if (coord != null && !_isDisposed) {
+      if (granted && !_isDisposed) {
+        coord = await locService.getCurrentLocation();
+        if (coord != null) {
           state = state.copyWith(userLocation: coord);
+          _updateMarkers();
         }
       }
     }
 
-    if (coord != null && coord.isValid && _controller != null) {
-      _controller?.animateCamera(
-        CameraUpdate.newLatLngZoom(coord.toLatLng(), 15.5),
-      );
-    } else if (_controller != null) {
-      // Fallback to Cologne center
-      _controller?.animateCamera(
-        CameraUpdate.newLatLngZoom(
-          const LatLng(50.9375, 6.9603),
-          13.0,
-        ),
-      );
-    }
+    await ref.read(mapCameraServiceProvider).recenterOnUserOrFallback(
+          controller: _controller,
+          userLocation: coord,
+          fallbackLocations: state.filteredLocations,
+        );
   }
 
   /// Loads turn-by-turn route to a specific destination.
-  Future<void> loadRouteTo(MapLocationEntity destination) async {
-    if (_isDisposed) return;
+  /// Requests location permission and queries GPS sensor if not yet acquired.
+  Future<bool> loadRouteTo(MapLocationEntity destination) async {
+    if (_isDisposed) return false;
     try {
-      final repository = ref.read(mapRepositoryProvider);
-      final isUserNearby = state.userLocation != null &&
-          state.userLocation!.isValid &&
-          state.userLocation!.distanceTo(destination.coordinate) < 100.0;
-
-      final origin = isUserNearby
-          ? state.userLocation!
-          : const MapCoordinate(
-              latitude: 50.9355,
-              longitude: 6.9531,
-              name: 'Köln Startpunkt (Neumarkt)',
-            );
-
-      final route = await repository.getRoute(
-        origin: origin,
-        destination: destination.coordinate,
-        title: 'Route to ${destination.title}',
-      );
-
-      final polylines = _generatePolylines(route);
-
-      state = state.copyWith(
-        activeRoute: route,
-        selectedLocation: destination,
-        polylines: polylines,
-      );
-
-      _updateMarkers();
-      _fitCameraToContent();
-    } catch (e, st) {
-      AppLogger.error('Failed to load route', error: e, stackTrace: st, name: 'MAP_ROUTE');
-    }
-  }
-
-  /// Retries map initialization.
-  void retry() {
-    initialize(state.request);
-  }
-
-  /// Toggles satellite / normal map type.
-  void toggleMapType() {
-    state = state.copyWith(
-      mapType: state.mapType == MapType.normal
-          ? MapType.hybrid
-          : MapType.normal,
-    );
-  }
-
-  /// Toggles real-time traffic layer.
-  void toggleTraffic() {
-    state = state.copyWith(isTrafficEnabled: !state.isTrafficEnabled);
-  }
-
-  // --- Private Helpers ---
-
-  List<MapLocationEntity> _applyFilterAndSearch(
-    List<MapLocationEntity> list,
-    String filter,
-    String query,
-  ) {
-    var result = list;
-    if (filter != 'All') {
-      result = result.where((loc) => loc.type == filter).toList();
-    }
-    if (query.trim().isNotEmpty) {
-      final q = query.trim().toLowerCase();
-      result = result
-          .where(
-            (loc) =>
-                loc.title.toLowerCase().contains(q) ||
-                loc.address.toLowerCase().contains(q) ||
-                (loc.company?.toLowerCase().contains(q) ?? false),
-          )
-          .toList();
-    }
-    return result;
-  }
-
-  void _updateMarkers() {
-    final markers = _generateMarkers(
-      locations: state.filteredLocations,
-      request: state.request,
-      route: state.activeRoute,
-      userCoord: state.userLocation,
-    );
-    state = state.copyWith(markers: markers);
-  }
-
-  Set<Marker> _generateMarkers({
-    required List<MapLocationEntity> locations,
-    required MapRequestEntity request,
-    MapRouteEntity? route,
-    MapCoordinate? userCoord,
-  }) {
-    final markerService = ref.read(mapMarkerServiceProvider);
-    final markers = markerService.createMarkers(
-      locations: locations,
-      selectedLocationId: state.selectedLocation?.id,
-      onLocationTap: (loc) => selectLocation(loc),
-    );
-
-    // Add origin / user marker if route is active
-    if (route != null && route.start.isValid) {
-      markers.add(
-        markerService.createOriginMarker(
-          coordinate: route.start,
-          title: userCoord != null ? 'Your Location' : 'Start Point',
-        ),
-      );
-    }
-
-    // Add participant marker for live tracking
-    if (request.participantLocation != null &&
-        request.participantLocation!.hasValidCoordinates) {
-      markers.add(
-        markerService.createParticipantMarker(
-          participant: request.participantLocation!,
-          onTap: () => selectLocation(request.participantLocation),
-        ),
-      );
-    }
-
-    return markers;
-  }
-
-  Set<Polyline> _generatePolylines(MapRouteEntity? route) {
-    if (route == null || route.isEmpty) return const {};
-    final routeService = ref.read(routeServiceProvider);
-    return {routeService.createPolyline(route: route)};
-  }
-
-  void _fitCameraToContent() {
-    if (_controller == null || _isDisposed) return;
-    try {
-      final routeService = ref.read(routeServiceProvider);
-      final coords = <MapCoordinate>[];
-
-      // If active route is present, fit to route waypoints
-      if (state.activeRoute != null && state.activeRoute!.waypoints.isNotEmpty) {
-        coords.addAll(state.activeRoute!.waypoints);
-      } else if (state.filteredLocations.isNotEmpty) {
-        coords.addAll(state.filteredLocations.map((l) => l.coordinate));
-      } else if (state.selectedLocation != null) {
-        coords.add(state.selectedLocation!.coordinate);
-      }
-
-      // Only include user location if user is within 100km of the project sites
-      // Prevents Android emulator in California from zooming the camera to the entire globe
-      if (state.userLocation != null && state.userLocation!.isValid) {
-        final reference = state.selectedLocation?.coordinate ??
-            state.activeRoute?.destination ??
-            const MapCoordinate(latitude: 50.9375, longitude: 6.9603);
-        if (state.userLocation!.distanceTo(reference) < 100.0) {
-          coords.add(state.userLocation!);
+      var userCoord = state.userLocation;
+      if (userCoord == null || !userCoord.isValid) {
+        final locService = ref.read(locationServiceProvider);
+        final hasPerm = await locService.hasLocationPermission() ||
+            await locService.requestLocationPermission();
+        state = state.copyWith(hasLocationPermission: hasPerm);
+        if (hasPerm) {
+          userCoord = await locService.getCurrentLocation();
+          if (userCoord != null && userCoord.isValid && !_isDisposed) {
+            state = state.copyWith(userLocation: userCoord);
+            _updateMarkers();
+          }
         }
       }
 
-      if (coords.isNotEmpty) {
-        final bounds = routeService.calculateBounds(coords);
-        _controller?.animateCamera(
-          CameraUpdate.newLatLngBounds(bounds, 65.0),
-        );
-      }
-    } catch (e) {
-      AppLogger.warning('Camera fit adjustment skipped: $e', name: 'MAP');
+      if (userCoord == null || !userCoord.isValid) return false;
+
+      final route = await ref.read(mapRepositoryProvider).getRoute(
+            origin: userCoord,
+            destination: destination.coordinate,
+            title: 'Route to ${destination.title}',
+          );
+      state = state.copyWith(activeRoute: route, selectedLocation: destination, polylines: _generatePolylines(route));
+
+      _updateMarkers();
+      _fitCameraToContent();
+      return true;
+    } catch (e, st) {
+      AppLogger.error('Failed to load route', error: e, stackTrace: st, name: 'MAP_ROUTE');
+      return false;
     }
+  }
+
+  void retry() => initialize(state.request);
+
+  void toggleMapType() => state = state.copyWith(
+        mapType: state.mapType == MapType.normal ? MapType.hybrid : MapType.normal,
+      );
+
+  void toggleTraffic() => state = state.copyWith(isTrafficEnabled: !state.isTrafficEnabled);
+
+  void _updateMarkers() => state = state.copyWith(
+        markers: ref.read(mapMarkerServiceProvider).buildMapMarkers(
+              locations: state.filteredLocations,
+              request: state.request,
+              route: state.activeRoute,
+              userCoord: state.userLocation,
+              selectedLocationId: state.selectedLocation?.id,
+              onLocationTap: selectLocation,
+            ),
+      );
+
+  Set<Polyline> _generatePolylines(MapRouteEntity? route) =>
+      route == null || route.isEmpty ? const {} : {ref.read(routeServiceProvider).createPolyline(route: route)};
+
+  void _fitCameraToContent() {
+    if (_controller == null || _isDisposed) return;
+    ref.read(mapCameraServiceProvider).fitToContent(
+          controller: _controller,
+          routeService: ref.read(routeServiceProvider),
+          locations: state.filteredLocations,
+          userLocation: state.userLocation,
+          activeRoute: state.activeRoute,
+          selectedLocation: state.selectedLocation,
+        );
   }
 }

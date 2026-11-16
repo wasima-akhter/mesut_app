@@ -1,11 +1,27 @@
+class DashboardPhaseStatsEntity {
+  const DashboardPhaseStatsEntity({
+    this.planned = 0,
+    this.running = 0,
+  });
+
+  final int planned;
+  final int running;
+}
+
 class DashboardStatsEntity {
   const DashboardStatsEntity({
     this.pendingInspections = 0,
     this.assignedProjects = 0,
+    this.standingActiveSites = 0,
+    this.erection = const DashboardPhaseStatsEntity(),
+    this.dismantling = const DashboardPhaseStatsEntity(),
   });
 
   final int pendingInspections;
   final int assignedProjects;
+  final int standingActiveSites;
+  final DashboardPhaseStatsEntity erection;
+  final DashboardPhaseStatsEntity dismantling;
 }
 
 class DashboardProjectSummaryEntity {

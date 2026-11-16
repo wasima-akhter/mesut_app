@@ -6,10 +6,11 @@ import '../entities/map_route_entity.dart';
 /// Abstract repository defining the contract for map locations and route data.
 /// Switching to [RemoteMapRepository] later requires ZERO UI changes.
 abstract class MapRepository {
-  /// Fetches all active locations for the specified role and optional category filter.
+  /// Fetches all active locations for the specified role, optional category filter, and search query.
   Future<List<MapLocationEntity>> getLocations({
     UserRole? role,
     String? category,
+    String? search,
   });
 
   /// Fetches a specific location by its unique ID.

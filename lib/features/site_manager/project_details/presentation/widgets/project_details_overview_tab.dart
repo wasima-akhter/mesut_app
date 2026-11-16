@@ -36,6 +36,7 @@ class ProjectDetailsOverviewTab extends StatelessWidget {
           ProjectDetailsCustomerCard(customer: details.customer),
           SizedBox(height: 10.h),
           ProjectDetailsMapCard(
+            projectId: details.id,
             coordinates: details.coordinates,
             title: details.name,
           ),
