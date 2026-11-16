@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../../core/localization/app_localization.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/context_extensions.dart';
+import '../config/presentation/providers/mobile_config_provider.dart';
 import '../legal_web_page.dart';
 
-class TermsAndConditionsPage extends StatelessWidget {
+class TermsAndConditionsPage extends ConsumerWidget {
   const TermsAndConditionsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final remoteHtml = ref.watch(termsConditionsHtmlProvider);
     const String termsAndConditionsHtml = '''
 <div style="font-family: Arial, sans-serif; line-height: 1.7; color: #333;">
 
@@ -242,8 +245,11 @@ class TermsAndConditionsPage extends StatelessWidget {
 ''';
 
     return LegalWebPage(
-      title: AppLocalization.current.termsAndConditions,
-      html: termsAndConditionsHtml,
+      title: context.loc.termsAndConditions,
+      html: (remoteHtml != null && remoteHtml.trim().isNotEmpty)
+          ? remoteHtml
+          : termsAndConditionsHtml,
+      onRefresh: () => ref.read(mobileConfigProvider.notifier).refresh(),
     );
   }
 }

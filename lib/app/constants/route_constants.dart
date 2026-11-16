@@ -45,6 +45,7 @@ abstract final class RouteConstants {
       '/site-manager-inspection-calendar';
   static const siteManagerProfile = '/site-manager-profile';
   static const siteManagerProfileEdit = '/site-manager-profile-edit';
+  static const siteManagerSchedule = '/site-manager-schedule';
 
   // Employee Individual
   static const employeeAssignmentDetails = '/employee-assignment-details';

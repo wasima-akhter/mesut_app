@@ -1,17 +1,16 @@
-import 'package:construction_app/app/constants/route_constants.dart';
-import 'package:construction_app/core/localization/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/constants/route_constants.dart';
 import '../../../app/theme/app_colors.dart';
-import '../../../core/widgets/buttons/buttons.dart';
-import '../presentation/providers/site_manager_inspections_provider.dart';
-
-// ============================================================
-// MODELS
-// ============================================================
+import '../../../core/localization/context_extensions.dart';
+import '../../../core/localization/localization_provider.dart';
+import '../../../core/widgets/states/app_empty_widget.dart';
+import '../../shared/mobile_dashboard/presentation/utils/mobile_phase_localizer.dart';
+import '../domain/entities/mobile_inspection_entity.dart';
+import '../presentation/providers/mobile_inspection_provider.dart';
 
 enum InspectionStatus { pending, completed }
 
@@ -59,11 +58,7 @@ class CalendarEventModel {
   });
 }
 
-// ============================================================
-// 1. SITE INSPECTION - PENDING
-// ============================================================
-
-class SiteInspectionPage extends ConsumerWidget {
+class SiteInspectionPage extends ConsumerStatefulWidget {
   const SiteInspectionPage({
     super.key,
     this.initialStatus = InspectionStatus.pending,
@@ -72,344 +67,219 @@ class SiteInspectionPage extends ConsumerWidget {
   final InspectionStatus initialStatus;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final inspectionState = ref.watch(siteInspectionProvider);
-    final items = inspectionState.filteredInspections;
+  ConsumerState<SiteInspectionPage> createState() => _SiteInspectionPageState();
+}
+
+class _SiteInspectionPageState extends ConsumerState<SiteInspectionPage> {
+  late InspectionStatus _selectedStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedStatus = widget.initialStatus;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.watch(appLanguageProvider);
+    final inspectionsAsync = ref.watch(mobileInspectionsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            InspectionHeader(title: context.loc.siteInspection),
-
-            SizedBox(height: 12.h),
-
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12.w),
-              child: InspectionStatusTabs(
-                selected: inspectionState.selectedStatus,
-                onChanged: (status) {
-                  ref.read(siteInspectionProvider.notifier).setStatus(status);
-                },
-              ),
+      appBar: AppBar(
+        title: Text(context.loc.siteInspection),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_month_outlined),
+            onPressed: () =>
+                context.push(RouteConstants.siteManagerInspectionCalendarPage),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
+            child: SegmentedButton<InspectionStatus>(
+              segments: [
+                ButtonSegment(
+                  value: InspectionStatus.pending,
+                  label: Text(context.loc.pending),
+                ),
+                ButtonSegment(
+                  value: InspectionStatus.completed,
+                  label: Text(context.loc.surveyDone),
+                ),
+              ],
+              selected: {_selectedStatus},
+              onSelectionChanged: (s) =>
+                  setState(() => _selectedStatus = s.first),
             ),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () =>
+                  ref.read(mobileInspectionsProvider.notifier).refresh(),
+              child: inspectionsAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(context.loc.somethingWentWrong),
+                      SizedBox(height: 10.h),
+                      ElevatedButton(
+                        onPressed: () => ref
+                            .read(mobileInspectionsProvider.notifier)
+                            .refresh(),
+                        child: Text(context.loc.mapRetry),
+                      ),
+                    ],
+                  ),
+                ),
+                data: (items) {
+                  final filtered = items.where((item) {
+                    return _selectedStatus == InspectionStatus.pending
+                        ? item.isPending
+                        : item.isSurveyDone;
+                  }).toList();
 
-            SizedBox(height: 12.h),
+                  if (filtered.isEmpty) {
+                    return ListView(
+                      children: [
+                        SizedBox(height: 72.h),
+                        AppEmptyWidget(
+                          icon: Icons.assignment_outlined,
+                          title: context.loc.noInspections,
+                          onRetry: () => ref
+                              .read(mobileInspectionsProvider.notifier)
+                              .refresh(),
+                        ),
+                      ],
+                    );
+                  }
 
-            Expanded(
-              child: ListView.separated(
-                physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 20.h),
-                itemCount: items.length,
-                separatorBuilder: (_, _) => SizedBox(height: 12.h),
-                itemBuilder: (context, index) {
-                  final item = items[index];
-
-                  return SiteInspectionCard(
-                    inspection: item,
-                    onPrimaryAction: () {
-                      if (item.status == InspectionStatus.pending) {
+                  return ListView.builder(
+                    padding: EdgeInsets.all(16.w),
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) => _InspectionCard(
+                      inspection: filtered[index],
+                      onTap: () {
+                        ref
+                            .read(selectedInspectionIdProvider.notifier)
+                            .select(filtered[index].id);
                         context.push(
                           RouteConstants.siteManagerInspectionSurveyPage,
                         );
-                      } else {
-                        context.push(RouteConstants.siteManagerProjectDetail);
-                      }
-                    },
+                      },
+                    ),
                   );
                 },
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ============================================================
-// COMMON HEADER
-// ============================================================
-
-class InspectionHeader extends StatelessWidget {
-  final String title;
-  final VoidCallback? onBack;
-  final List<Widget> actions;
-
-  const InspectionHeader({
-    super.key,
-    required this.title,
-    this.onBack,
-    this.actions = const [],
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(12.w, 18.h, 12.w, 0),
-      child: Row(
-        children: [
-          _CircleIconButton(
-            icon: Icons.arrow_back_rounded,
-            onTap: onBack ?? () => context.pop(),
           ),
-
-          SizedBox(width: 12.w),
-
-          Expanded(
-            child: Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontSize: 19.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-
-          ...actions,
         ],
       ),
     );
   }
 }
 
-class _CircleIconButton extends StatelessWidget {
-  final IconData icon;
+class _InspectionCard extends StatelessWidget {
+  const _InspectionCard({required this.inspection, required this.onTap});
+
+  final MobileInspectionEntity inspection;
   final VoidCallback onTap;
 
-  const _CircleIconButton({required this.icon, required this.onTap});
-
   @override
   Widget build(BuildContext context) {
-    return AppIconButton.circle(
-      icon: icon,
-      onPressed: onTap,
-      size: 42.w,
-      border: Border.all(color: AppColors.border),
-      backgroundColor: Colors.transparent,
-      iconColor: AppColors.textPrimary,
-      iconSize: 24.sp,
-    );
-  }
-}
+    final badgeColor = inspection.isPending
+        ? const Color(0xFFD97706)
+        : const Color(0xFF16A34A);
 
-// ============================================================
-// PENDING / COMPLETED TABS
-// ============================================================
-
-class InspectionStatusTabs extends StatelessWidget {
-  final InspectionStatus selected;
-  final ValueChanged<InspectionStatus> onChanged;
-
-  const InspectionStatusTabs({
-    super.key,
-    required this.selected,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 44.h,
-      padding: EdgeInsets.all(3.w),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          _tab(context, context.loc.pending, InspectionStatus.pending),
-          _tab(context, context.loc.completed, InspectionStatus.completed),
-        ],
-      ),
-    );
-  }
-
-  Widget _tab(BuildContext context, String title, InspectionStatus value) {
-    final selectedValue = selected == value;
-
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => onChanged(value),
-        child: Container(
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: selectedValue ? AppColors.black : Colors.transparent,
-            borderRadius: BorderRadius.circular(6.r),
-          ),
-          child: Text(
-            title,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w500,
-              color: selectedValue ? AppColors.white : AppColors.textSecondary,
-            ),
-          ),
+    return RepaintBoundary(
+      child: Card(
+        elevation: 0,
+        margin: EdgeInsets.only(bottom: 12.h),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          side: const BorderSide(color: AppColors.border),
         ),
-      ),
-    );
-  }
-}
-
-// ============================================================
-// SITE INSPECTION CARD
-// ============================================================
-
-class SiteInspectionCard extends StatelessWidget {
-  final SiteInspectionModel inspection;
-  final VoidCallback? onPrimaryAction;
-
-  const SiteInspectionCard({
-    super.key,
-    required this.inspection,
-    this.onPrimaryAction,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final completed = inspection.status == InspectionStatus.completed;
-
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(10.r),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _StatusBadge(
-            text: completed ? context.loc.completed : inspection.appointment,
-            color: completed ? AppColors.success : AppColors.warning,
-          ),
-
-          SizedBox(height: 12.h),
-
-          Text(
-            inspection.projectName,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-
-          SizedBox(height: 9.h),
-
-          _InfoRow(
-            icon: Icons.business_outlined,
-            text: '${inspection.company} • ${inspection.type}',
-          ),
-
-          SizedBox(height: 8.h),
-
-          _InfoRow(icon: Icons.location_on_outlined, text: inspection.address),
-
-          SizedBox(height: 14.h),
-
-          Divider(height: 1, color: AppColors.border),
-
-          SizedBox(height: 11.h),
-
-          Row(
-            children: [
-              Icon(
-                Icons.person_outline_rounded,
-                size: 19.sp,
-                color: AppColors.textSecondary,
-              ),
-
-              SizedBox(width: 7.w),
-
-              Expanded(
-                child: Text(
-                  inspection.inspector,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 18.sp,
-                    color: AppColors.textSecondary,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12.r),
+          child: Padding(
+            padding: EdgeInsets.all(14.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 4.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: badgeColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      child: Text(
+                        inspection.isPending
+                            ? context.loc.pending
+                            : context.loc.surveyDone,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                          color: badgeColor,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      MobilePhaseLocalizer.formatDateRange(
+                        inspection.appointmentDate,
+                        null,
+                      ),
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10.h),
+                Text(
+                  inspection.siteTitle,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-              ),
-
-              if (onPrimaryAction != null)
-                SmallRedButton(
-                  text: completed
-                      ? context.loc.openProject
-                      : context.loc.startSurvey,
-                  onTap: onPrimaryAction!,
+                if (inspection.customer.name.isNotEmpty) ...[
+                  SizedBox(height: 4.h),
+                  Text(
+                    inspection.customer.name,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+                SizedBox(height: 6.h),
+                Text(
+                  '${inspection.address}, ${inspection.postalCode} ${inspection.city}'
+                      .trim(),
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: AppColors.textTertiary,
+                  ),
                 ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ============================================================
-// STATUS BADGE
-// ============================================================
-
-class _StatusBadge extends StatelessWidget {
-  final String text;
-  final Color color;
-
-  const _StatusBadge({required this.text, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 5.h),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: .08),
-        borderRadius: BorderRadius.circular(5.r),
-      ),
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          fontSize: 16.sp,
-          color: color,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-}
-
-// ============================================================
-// INFO ROW
-// ============================================================
-
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const _InfoRow({required this.icon, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 18.sp, color: AppColors.textSecondary),
-
-        SizedBox(width: 7.w),
-
-        Expanded(
-          child: Text(
-            text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontSize: 16.sp,
-              color: AppColors.textSecondary,
+              ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }
-
-

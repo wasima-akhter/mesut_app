@@ -1,13 +1,14 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:construction_app/core/localization/app_strings.dart';
 import 'package:construction_app/features/employee/helper/employee_enums.dart';
 import 'package:construction_app/features/employee/helper/employee_models.dart';
+import 'package:construction_app/features/site_manager/projects/domain/entities/project_phase_card_entity.dart';
 import 'package:construction_app/features/site_manager/presentation/providers/site_manager_home_provider.dart';
 import 'package:construction_app/features/site_manager/presentation/providers/site_manager_project_details_provider.dart';
-import 'package:construction_app/features/site_manager/presentation/providers/site_manager_projects_provider.dart';
+import 'package:construction_app/features/site_manager/projects/presentation/providers/site_manager_projects_provider.dart';
 import 'package:construction_app/features/site_manager/projects/enums.dart';
 import 'package:construction_app/features/site_manager/projects/models.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Project Model Hours & Profitability Tests', () {
@@ -71,11 +72,16 @@ void main() {
       expect(state.remainingHours, equals(17.5));
       expect(state.crewHours.length, equals(4));
 
-      final tim = state.crewHours.firstWhere((c) => c.employeeName == 'Tim Müller');
+      final tim = state.crewHours.firstWhere(
+        (c) => c.employeeName == 'Tim Müller',
+      );
       expect(tim.loggedHours, equals(54.5));
       expect(tim.formattedHours, equals('54.5h'));
 
-      final sumCrew = state.crewHours.fold<double>(0.0, (acc, c) => acc + c.loggedHours);
+      final sumCrew = state.crewHours.fold<double>(
+        0.0,
+        (acc, c) => acc + c.loggedHours,
+      );
       expect(sumCrew, equals(state.totalLoggedHours));
 
       expect(state.activityHours.containsKey('Erection'), isTrue);
@@ -96,38 +102,69 @@ void main() {
   });
 
   group('SiteManagerProjectsProvider Hours Data Tests', () {
-    test('All projects have non-zero total logged hours and budget configured', () {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+    test(
+      'Initial state has no dummy projects and tracks empty list before fetch',
+      () {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
 
-      final projects = container.read(siteManagerProjectsProvider).allProjects;
-      expect(projects.isNotEmpty, isTrue);
+        final state = container.read(siteManagerProjectsProvider);
+        expect(state.items, isEmpty);
+      },
+    );
 
-      for (final project in projects) {
-        expect(project.totalLoggedHours, greaterThan(0));
-        expect(project.budgetHours, greaterThan(0));
-        expect(project.formattedTotalHours.endsWith('h'), isTrue);
-      }
+    test('ProjectPhaseCardEntity hours and profitability calculation', () {
+      const card = ProjectPhaseCardEntity(
+        phaseId: 'phase-1',
+        type: 'ERECTION',
+        status: 'IN_PROGRESS',
+        priority: 'HIGH',
+        durationDays: 3,
+        projectId: 'prj-0842',
+        projectName: 'Goltstein Complex',
+        coordinates: ProjectPhaseCoordinates(lat: 50.9082, lng: 6.9723),
+        customer: ProjectPhaseCustomer(
+          id: 'c-1',
+          name: 'Hochtief AG',
+          category: 'COMMERCIAL',
+        ),
+        assigneeName: 'Mesut Yilmaz',
+        budgetedHours: 160.0,
+        totalLoggedHours: 142.5,
+        isProfitable: true,
+      );
+
+      expect(card.totalLoggedHours, equals(142.5));
+      expect(card.budgetedHours, equals(160.0));
+      expect(card.isProfitable, isTrue);
+      expect(card.hasHoursLogged, isTrue);
+      expect(card.hasBudget, isTrue);
+      expect(card.formattedLoggedHours, equals('142.5'));
+      expect(card.formattedBudgetHours, equals('160.0'));
+      expect(card.formattedAddress, contains('Goltsteinstraße'));
     });
   });
 
   group('SiteManagerHomeState Operations Hours Tests', () {
-    test('Operation cards in home dashboard contain loggedHours and budgetHours', () {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+    test(
+      'Operation cards in home dashboard contain loggedHours and budgetHours',
+      () {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
 
-      final homeState = container.read(siteManagerHomeProvider);
-      expect(homeState.operations.isNotEmpty, isTrue);
+        final homeState = container.read(siteManagerHomeProvider);
+        expect(homeState.operations.isNotEmpty, isTrue);
 
-      for (final op in homeState.operations) {
-        expect(op.containsKey('loggedHours'), isTrue);
-        expect(op.containsKey('budgetHours'), isTrue);
-        final logged = (op['loggedHours'] as num).toDouble();
-        final budget = (op['budgetHours'] as num).toDouble();
-        expect(logged, greaterThan(0));
-        expect(budget, greaterThan(0));
-      }
-    });
+        for (final op in homeState.operations) {
+          expect(op.containsKey('loggedHours'), isTrue);
+          expect(op.containsKey('budgetHours'), isTrue);
+          final logged = (op['loggedHours'] as num).toDouble();
+          final budget = (op['budgetHours'] as num).toDouble();
+          expect(logged, greaterThan(0));
+          expect(budget, greaterThan(0));
+        }
+      },
+    );
   });
 
   group('EmployeeAssignmentModel Hours Tests', () {
@@ -147,23 +184,47 @@ void main() {
   });
 
   group('Project Time Logs Sheet Localization Tests', () {
-    test('AppStrings provides correct project time logs strings and interpolation', () {
-      const strings = AppStrings({});
+    test(
+      'AppStrings provides correct project time logs strings and interpolation',
+      () {
+        const strings = AppStrings({});
 
-      expect(strings.totalProjectHours, equals('Total Project Hours'));
-      expect(strings.loggedAcrossEmployees('142.5h', 4), equals('142.5h logged across 4 employees'));
-      expect(strings.profitabilityHealthy, equals('Project Profitability: Healthy'));
-      expect(strings.profitabilityAtRisk, equals('Project Profitability: At Risk'));
-      expect(strings.remainingUnderLaborBudget('17.5', '160h'), equals('17.5h remaining under the 160h labor budget.'));
-      expect(strings.exceedingBudgetLimit('14.5', '100h'), equals('14.5h exceeding the allocated 100h target.'));
-      expect(strings.itemizedTimeLogsByCrew, equals('Itemized Time Logs by Crew'));
-      expect(strings.primaryTask('Erection Phase'), equals('Primary task: Erection Phase'));
-      expect(strings.underBudget, equals('Under Budget'));
-      expect(strings.overBudget, equals('Over Budget'));
-      expect(strings.leadScaffolder, equals('Lead Scaffolder'));
-      expect(strings.scaffolder, equals('Scaffolder'));
-      expect(strings.erectionAndAnchoring, equals('Erection & Anchoring'));
-      expect(strings.materialHandling, equals('Material Handling'));
-    });
+        expect(strings.totalProjectHours, equals('Total Project Hours'));
+        expect(
+          strings.loggedAcrossEmployees('142.5h', 4),
+          equals('142.5h logged across 4 employees'),
+        );
+        expect(
+          strings.profitabilityHealthy,
+          equals('Project Profitability: Healthy'),
+        );
+        expect(
+          strings.profitabilityAtRisk,
+          equals('Project Profitability: At Risk'),
+        );
+        expect(
+          strings.remainingUnderLaborBudget('17.5', '160h'),
+          equals('17.5h remaining under the 160h labor budget.'),
+        );
+        expect(
+          strings.exceedingBudgetLimit('14.5', '100h'),
+          equals('14.5h exceeding the allocated 100h target.'),
+        );
+        expect(
+          strings.itemizedTimeLogsByCrew,
+          equals('Itemized Time Logs by Crew'),
+        );
+        expect(
+          strings.primaryTask('Erection Phase'),
+          equals('Primary task: Erection Phase'),
+        );
+        expect(strings.underBudget, equals('Under Budget'));
+        expect(strings.overBudget, equals('Over Budget'));
+        expect(strings.leadScaffolder, equals('Lead Scaffolder'));
+        expect(strings.scaffolder, equals('Scaffolder'));
+        expect(strings.erectionAndAnchoring, equals('Erection & Anchoring'));
+        expect(strings.materialHandling, equals('Material Handling'));
+      },
+    );
   });
 }

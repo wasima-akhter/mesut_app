@@ -1,110 +1,99 @@
+import '../../../../../core/constants/api_constants.dart';
+import '../../../../../core/network/api_client.dart';
 import '../../domain/entities/notification_entity.dart';
 
 abstract class NotificationsDataSource {
-  Future<List<AppNotification>> getNotifications();
+  Future<NotificationsFeedPage> getNotifications({
+    int page = 1,
+    int limit = 20,
+  });
   Future<void> markAsRead(String id);
   Future<void> markAllAsRead();
   Future<void> deleteNotification(String id);
   Future<void> clearAll();
 }
 
-class NotificationsMockDataSourceImpl implements NotificationsDataSource {
-  final List<AppNotification> _notifications = [
-    AppNotification(
-      id: '1',
-      title: 'New Assignment Assigned',
-      message:
-          'You have been assigned to Scaffold Erection at Goltsteins.Complex for tomorrow morning.',
-      timestamp: DateTime.utc(2026, 10, 8, 10, 30),
-      dateGroup: 'today',
-      projectTag: 'Goltsteins.Complex',
-      type: NotificationCategory.schedule,
-      isRead: false,
-    ),
-    AppNotification(
-      id: '2',
-      title: 'Safety Inspection Due',
-      message:
-          'Routine safety audit required for Front Scaffold #3 at Lindenthal Business Center.',
-      timestamp: DateTime.utc(2026, 10, 8, 8, 15),
-      dateGroup: 'today',
-      projectTag: 'Lindenthal Center',
-      type: NotificationCategory.safety,
-      isRead: false,
-    ),
-    AppNotification(
-      id: '3',
-      title: 'Time Entry Approved',
-      message:
-          'Your time log of 8.5 hours for Oct 6 has been reviewed and synced successfully.',
-      timestamp: DateTime.utc(2026, 10, 7, 17, 45),
-      dateGroup: 'yesterday',
-      projectTag: 'Prj-0842',
-      type: NotificationCategory.timeTracking,
-      isRead: true,
-    ),
-    AppNotification(
-      id: '4',
-      title: 'Phase Transition',
-      message:
-          'Project "Goldstein Complex" moved from Erection to Standing Scaffold phase.',
-      timestamp: DateTime.utc(2026, 10, 7, 14, 10),
-      dateGroup: 'yesterday',
-      projectTag: 'Goltsteins.Complex',
-      type: NotificationCategory.task,
-      isRead: true,
-    ),
-    AppNotification(
-      id: '5',
-      title: 'Weather Advisory',
-      message:
-          'High wind advisory (45 km/h) forecasted in Cologne region. Secure all loose scaffold planks.',
-      timestamp: DateTime.utc(2026, 10, 4, 9, 0),
-      dateGroup: 'earlier',
-      type: NotificationCategory.system,
-      isRead: true,
-    ),
-    AppNotification(
-      id: '6',
-      title: 'Inspection Survey Completed',
-      message:
-          'Technical field survey report submitted for Severinstraße 44.',
-      timestamp: DateTime.utc(2026, 10, 3, 16, 30),
-      dateGroup: 'earlier',
-      projectTag: 'Severinstraße 44',
-      type: NotificationCategory.inspection,
-      isRead: true,
-    ),
-  ];
+class NotificationsRemoteDataSourceImpl implements NotificationsDataSource {
+  NotificationsRemoteDataSourceImpl({required this.apiClient});
+
+  final ApiClient apiClient;
 
   @override
-  Future<List<AppNotification>> getNotifications() async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    return List.unmodifiable(_notifications);
+  Future<NotificationsFeedPage> getNotifications({
+    int page = 1,
+    int limit = 20,
+  }) async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      ApiConstants.mobileNotifications,
+      queryParameters: {'page': page, 'limit': limit},
+    );
+
+    final body = response.data ?? const <String, dynamic>{};
+    final data = body['data'] is Map
+        ? Map<String, dynamic>.from(body['data'] as Map)
+        : body;
+    final meta = body['meta'] is Map
+        ? Map<String, dynamic>.from(body['meta'] as Map)
+        : const <String, dynamic>{};
+
+    final rawItems = data['items'] is List
+        ? data['items'] as List
+        : (body['data'] is List ? body['data'] as List : const []);
+
+    final items = rawItems
+        .whereType<Map>()
+        .map((m) => AppNotification.fromJson(Map<String, dynamic>.from(m)))
+        .toList();
+
+    final rawUnread = data['unreadCount'];
+    final unreadCount = rawUnread is int
+        ? rawUnread
+        : (int.tryParse(rawUnread?.toString() ?? '') ??
+              items.where((n) => !n.isRead).length);
+
+    final currentPage = _parseInt(meta['page'], fallback: page);
+    final totalPages = _parseInt(meta['totalPages'], fallback: 1);
+    final hasMore = meta.containsKey('totalPages')
+        ? currentPage < totalPages
+        : items.length >= limit;
+
+    return NotificationsFeedPage(
+      items: items,
+      unreadCount: unreadCount,
+      page: currentPage,
+      totalPages: totalPages,
+      hasMore: hasMore,
+    );
   }
 
   @override
   Future<void> markAsRead(String id) async {
-    final index = _notifications.indexWhere((n) => n.id == id);
-    if (index != -1) {
-      _notifications[index] = _notifications[index].copyWith(isRead: true);
-    }
+    if (id.trim().isEmpty) return;
+    await apiClient.patch<Map<String, dynamic>>(
+      ApiConstants.mobileNotificationRead(id),
+    );
   }
 
   @override
   Future<void> markAllAsRead() async {
-    for (int i = 0; i < _notifications.length; i++) {
-      _notifications[i] = _notifications[i].copyWith(isRead: true);
-    }
+    await apiClient.patch<Map<String, dynamic>>(
+      ApiConstants.mobileNotificationsReadAll,
+    );
   }
 
   @override
   Future<void> deleteNotification(String id) async {
-    _notifications.removeWhere((n) => n.id == id);
+    // No delete endpoint in /mobile/notifications; locally hidden if dismissed.
   }
 
   @override
   Future<void> clearAll() async {
-    _notifications.clear();
+    await markAllAsRead();
+  }
+
+  static int _parseInt(dynamic val, {required int fallback}) {
+    if (val is int) return val;
+    if (val == null) return fallback;
+    return int.tryParse(val.toString()) ?? fallback;
   }
 }

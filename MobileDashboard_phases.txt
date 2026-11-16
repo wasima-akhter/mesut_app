@@ -1,0 +1,324 @@
+MobilePhase
+Mobile site-manager phase board endpoints
+
+
+
+GET
+/api/v1/mobile/phases
+List managed phases
+
+
+
+Site Manager only. Returns ProjectPhases for projects where the user has a ProjectManagerAssignment.
+
+Parameters
+Try it out
+No parameters
+
+Responses
+Code	Description	Links
+200
+Phases fetched successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Phases fetched successfully.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "type": "ERECTION",
+      "status": "ENQUIRY",
+      "priority": "HIGH",
+      "startDate": "2026-11-12T09:18:26.972Z",
+      "endDate": "2026-11-12T09:18:26.972Z",
+      "project": {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "name": "string",
+        "address": "string"
+      }
+    }
+  ]
+}
+No links
+401
+Authentication or device session failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403
+Forbidden (not site manager / not assigned)
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Only site managers can access this resource",
+  "errorType": "FORBIDDEN",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+500
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+
+PATCH
+/api/v1/mobile/phases/{id}/status
+Update managed phase status
+
+
+
+Site Manager only. Updates phase status on a managed project, sets endDate when COMPLETED, and writes AuditLog MOBILE_PHASE_STATUS_UPDATED.
+
+Parameters
+Try it out
+Name	Description
+id *
+string($uuid)
+(path)
+id
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "status": "COMPLETED"
+}
+Responses
+Code	Description	Links
+200
+Phase status updated successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Phase status updated successfully.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "type": "ERECTION",
+    "status": "ENQUIRY",
+    "priority": "HIGH",
+    "startDate": "2026-11-12T09:18:27.012Z",
+    "endDate": "2026-11-12T09:18:27.012Z",
+    "project": {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "address": "string"
+    }
+  }
+}
+No links
+401
+Authentication or device session failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403
+Forbidden (not site manager / not assigned)
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Only site managers can access this resource",
+  "errorType": "FORBIDDEN",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+404
+Phase not found (checkPhaseExistenceMiddleware)
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Phase not found",
+  "errorType": "PHASE_NOT_FOUND",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422
+Request validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "string",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "errors": [
+    {
+      "field": "string",
+      "message": "string"
+    }
+  ]
+}
+No links
+500
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+
+
+
+-->
+MobileConfig
+Mobile app configuration, languages, and legal content
+
+
+
+GET
+/api/v1/mobile/config
+Get mobile app configuration
+
+
+
+Returns company default/enabled languages, allowEmployeeManualTime, and LegalContent rows for Settings and Legal screens. Uses mobile bearerAuth chain.
+
+Parameters
+Try it out
+No parameters
+
+Responses
+Code	Description	Links
+200
+Mobile config fetched successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Mobile config fetched successfully.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": {
+    "defaultLanguage": "DE",
+    "enabledLanguages": [
+      "DE"
+    ],
+    "allowEmployeeManualTime": true,
+    "legalContents": [
+      {
+        "legalContentType": "ABOUT_US",
+        "content": "string",
+        "updatedAt": "2026-11-12T09:28:57.589Z"
+      }
+    ]
+  }
+}
+No links
+401
+Authentication or device session failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403
+Forbidden or inactive account
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Account is inactive",
+  "errorType": "ACCOUNT_INACTIVE",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+500
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}

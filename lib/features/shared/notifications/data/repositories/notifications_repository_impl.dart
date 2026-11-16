@@ -8,8 +8,11 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   const NotificationsRepositoryImpl(this._dataSource);
 
   @override
-  Future<List<AppNotification>> getNotifications() {
-    return _dataSource.getNotifications();
+  Future<NotificationsFeedPage> getNotifications({
+    int page = 1,
+    int limit = 20,
+  }) {
+    return _dataSource.getNotifications(page: page, limit: limit);
   }
 
   @override

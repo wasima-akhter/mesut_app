@@ -45,6 +45,9 @@ abstract final class FailureMapper {
       case ApiErrorType.tokenExpired:
       case ApiErrorType.tokenBlacklisted:
       case ApiErrorType.sessionExpired:
+      case ApiErrorType.sessionRevoked:
+      case ApiErrorType.deviceNotFound:
+      case ApiErrorType.deviceNotOwned:
         return UnauthorizedFailure(
           title: msg.title,
           message: msg.message,
@@ -52,6 +55,7 @@ abstract final class FailureMapper {
           code: msg.errorType.serializedName,
         );
       case ApiErrorType.forbidden:
+      case ApiErrorType.accessDenied:
         return ForbiddenFailure(
           title: msg.title,
           message: msg.message,
@@ -59,6 +63,7 @@ abstract final class FailureMapper {
           code: msg.errorType.serializedName,
         );
       case ApiErrorType.notFound:
+      case ApiErrorType.timelogNotFound:
         return NotFoundFailure(
           title: msg.title,
           message: msg.message,
@@ -66,6 +71,8 @@ abstract final class FailureMapper {
           code: msg.errorType.serializedName,
         );
       case ApiErrorType.invalidJson:
+      case ApiErrorType.badRequest:
+      case ApiErrorType.activeTimerExists:
       case ApiErrorType.validationError:
       case ApiErrorType.duplicateData:
       case ApiErrorType.emailAlreadyExists:
@@ -125,4 +132,3 @@ abstract final class FailureMapper {
     return _fromUserFriendlyMessage(userMsg);
   }
 }
-

@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_dimensions.dart';
 import '../../../app/theme/app_spacing.dart';
+import '../../localization/context_extensions.dart';
 
 class AppErrorWidget extends StatelessWidget {
   final String? title;
   final String? message;
   final VoidCallback? onRetry;
-  final String retryText;
+  final String? retryText;
   final IconData icon;
 
   const AppErrorWidget({
@@ -15,7 +16,7 @@ class AppErrorWidget extends StatelessWidget {
     this.title,
     this.message,
     this.onRetry,
-    this.retryText = 'Retry',
+    this.retryText,
     this.icon = Icons.error_outline,
   });
 
@@ -36,7 +37,7 @@ class AppErrorWidget extends StatelessWidget {
             ),
             SizedBox(height: AppSpacing.md),
             Text(
-              title ?? 'Something went wrong',
+              title ?? context.loc.somethingWentWrong,
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium,
             ),
@@ -52,7 +53,10 @@ class AppErrorWidget extends StatelessWidget {
             ],
             if (onRetry != null) ...[
               SizedBox(height: AppSpacing.lg),
-              FilledButton(onPressed: onRetry, child: Text(retryText)),
+              FilledButton(
+                onPressed: onRetry,
+                child: Text(retryText ?? context.loc.retry),
+              ),
             ],
           ],
         ),

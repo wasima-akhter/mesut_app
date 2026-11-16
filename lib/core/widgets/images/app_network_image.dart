@@ -32,12 +32,22 @@ class AppNetworkImage extends StatelessWidget {
   final Widget? errorWidget;
   final Widget? placeholder;
 
+  int? _cacheDimension(double? logicalSize, double devicePixelRatio) {
+    if (logicalSize == null || !logicalSize.isFinite || logicalSize <= 0) {
+      return null;
+    }
+    return (logicalSize * devicePixelRatio).round().clamp(1, 2048);
+  }
+
   @override
   Widget build(BuildContext context) {
     final resolvedUrl = ImageHelper.resolveNetworkUrl(
       value: imageUrl,
       baseUrl: baseUrl,
     );
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final cacheW = _cacheDimension(width, dpr);
+    final cacheH = _cacheDimension(height, dpr);
 
     final child = resolvedUrl == null
         ? _fallback()
@@ -45,6 +55,10 @@ class AppNetworkImage extends StatelessWidget {
             imageUrl: resolvedUrl,
             width: width,
             height: height,
+            memCacheWidth: cacheW,
+            memCacheHeight: cacheH,
+            maxWidthDiskCache: 1200,
+            maxHeightDiskCache: 1200,
             fit: fit,
             placeholder: (_, _) => placeholder ?? _defaultPlaceholder(),
             errorWidget: (_, _, _) => errorWidget ?? _fallback(),

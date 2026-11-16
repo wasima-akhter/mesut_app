@@ -11,8 +11,14 @@ class LegalWebPage extends StatefulWidget {
 
   /// Complete HTML + CSS received from backend.
   final String html;
+  final Future<void> Function()? onRefresh;
 
-  const LegalWebPage({super.key, required this.title, required this.html});
+  const LegalWebPage({
+    super.key,
+    required this.title,
+    required this.html,
+    this.onRefresh,
+  });
 
   @override
   State<LegalWebPage> createState() => _LegalWebPageState();
@@ -26,6 +32,9 @@ class _LegalWebPageState extends State<LegalWebPage> {
   // ============================================================
 
   Future<void> _refresh() async {
+    if (widget.onRefresh != null) {
+      await widget.onRefresh!();
+    }
     setState(() {
       _contentKey = UniqueKey();
     });

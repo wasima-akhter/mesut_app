@@ -13,6 +13,8 @@ import '../../../../core/services/launcher_service.dart';
 import '../../../../core/widgets/snack/app_snackbar.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/presentation/widgets/logout_dialog.dart';
+import '../../../shared/config/presentation/providers/mobile_config_provider.dart';
+import '../../../shared/mobile_dashboard/presentation/widgets/mobile_profile_stats_banner.dart';
 import '../../presentation/providers/employee_profile_provider.dart';
 
 class EmployeeProfilePage extends ConsumerWidget {
@@ -44,7 +46,9 @@ class EmployeeProfilePage extends ConsumerWidget {
 
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildStats(context)),
+              sliver: const SliverToBoxAdapter(
+                child: MobileProfileStatsBanner(),
+              ),
             ),
 
             SliverToBoxAdapter(child: SizedBox(height: 14.h)),
@@ -547,6 +551,7 @@ class EmployeeProfilePage extends ConsumerWidget {
 
   void _changeLanguage(BuildContext context, WidgetRef ref) {
     final currentLang = ref.read(appLanguageProvider);
+    final enabledLanguages = ref.read(enabledLanguagesProvider);
 
     showModalBottomSheet<void>(
       context: context,
@@ -575,20 +580,16 @@ class EmployeeProfilePage extends ConsumerWidget {
 
                       SizedBox(height: 14.h),
 
-                      _languageOption(
-                        context: dialogContext,
-                        ref: ref,
-                        title: context.loc.english,
-                        language: AppLanguage.english,
-                        isSelected: currentLang == AppLanguage.english,
-                      ),
-                      _languageOption(
-                        context: dialogContext,
-                        ref: ref,
-                        title: context.loc.german,
-                        language: AppLanguage.german,
-                        isSelected: currentLang == AppLanguage.german,
-                      ),
+                      for (final lang in enabledLanguages)
+                        _languageOption(
+                          context: dialogContext,
+                          ref: ref,
+                          title: lang == AppLanguage.german
+                              ? context.loc.german
+                              : context.loc.english,
+                          language: lang,
+                          isSelected: currentLang == lang,
+                        ),
                     ],
                   ),
                 ),

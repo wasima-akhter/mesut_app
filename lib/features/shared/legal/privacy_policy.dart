@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../../core/localization/app_localization.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/context_extensions.dart';
+import '../config/presentation/providers/mobile_config_provider.dart';
 import '../legal_web_page.dart';
 
-class PrivacyPolicyPage extends StatelessWidget {
+class PrivacyPolicyPage extends ConsumerWidget {
   const PrivacyPolicyPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final remoteHtml = ref.watch(privacyPolicyHtmlProvider);
     const String privacyPolicyHtml = '''
 <div style="font-family: Arial, sans-serif; line-height: 1.7; color: #333;">
 
@@ -168,8 +171,11 @@ class PrivacyPolicyPage extends StatelessWidget {
 ''';
 
     return LegalWebPage(
-      title: AppLocalization.current.privacyPolicy,
-      html: privacyPolicyHtml,
+      title: context.loc.privacyPolicy,
+      html: (remoteHtml != null && remoteHtml.trim().isNotEmpty)
+          ? remoteHtml
+          : privacyPolicyHtml,
+      onRefresh: () => ref.read(mobileConfigProvider.notifier).refresh(),
     );
   }
 }

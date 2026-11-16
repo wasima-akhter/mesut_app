@@ -10,6 +10,7 @@ import '../../../core/localization/app_language.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/localization/localization_provider.dart';
 import '../../../core/widgets/buttons/app_button.dart';
+import '../../shared/config/presentation/providers/mobile_config_provider.dart';
 
 class ChooseLanguagePage extends ConsumerStatefulWidget {
   const ChooseLanguagePage({super.key});
@@ -22,6 +23,7 @@ class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
   @override
   Widget build(BuildContext context) {
     final currentLanguage = ref.watch(appLanguageProvider);
+    final enabledLanguages = ref.watch(enabledLanguagesProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -53,31 +55,27 @@ class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
                 ),
               ),
               SizedBox(height: 32.h),
-              _buildLanguageCard(
-                language: AppLanguage.english,
-                title: 'English',
-                subtitle: 'English (US/UK)',
-                flagEmoji: '🇬🇧',
-                isSelected: currentLanguage == AppLanguage.english,
-                onTap: () {
-                  ref
-                      .read(appLanguageProvider.notifier)
-                      .setLanguage(AppLanguage.english);
-                },
-              ),
-              SizedBox(height: 14.h),
-              _buildLanguageCard(
-                language: AppLanguage.german,
-                title: 'Deutsch',
-                subtitle: 'German (DE/AT/CH)',
-                flagEmoji: '🇩🇪',
-                isSelected: currentLanguage == AppLanguage.german,
-                onTap: () {
-                  ref
-                      .read(appLanguageProvider.notifier)
-                      .setLanguage(AppLanguage.german);
-                },
-              ),
+              for (int i = 0; i < enabledLanguages.length; i++) ...[
+                if (i > 0) SizedBox(height: 14.h),
+                _buildLanguageCard(
+                  language: enabledLanguages[i],
+                  title: enabledLanguages[i] == AppLanguage.german
+                      ? 'Deutsch'
+                      : 'English',
+                  subtitle: enabledLanguages[i] == AppLanguage.german
+                      ? 'German (DE/AT/CH)'
+                      : 'English (US/UK)',
+                  flagEmoji: enabledLanguages[i] == AppLanguage.german
+                      ? '🇩🇪'
+                      : '🇬🇧',
+                  isSelected: currentLanguage == enabledLanguages[i],
+                  onTap: () {
+                    ref
+                        .read(appLanguageProvider.notifier)
+                        .setLanguage(enabledLanguages[i]);
+                  },
+                ),
+              ],
               const Spacer(),
               AppButton(
                 onPressed: () {

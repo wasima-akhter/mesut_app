@@ -4,13 +4,14 @@
 library;
 
 import 'dart:ui';
+
 import '../../../core/localization/app_localization.dart';
 
 enum ProjectPhase { erection, dismantling, standingScaffold, completed }
 
 enum ProjectPriority { high, medium, low }
 
-enum ProjectStatus { inProgress, notStarted, postponed }
+enum ProjectStatus { completed, inProgress, notStarted, postponed }
 
 enum ProjectTab {
   all,
@@ -197,6 +198,8 @@ extension ProjectStatusExtension on ProjectStatus {
 
       case ProjectStatus.postponed:
         return AppLocalization.current.postponed;
+      case ProjectStatus.completed:
+        return AppLocalization.current.completed;
     }
   }
 
@@ -210,6 +213,8 @@ extension ProjectStatusExtension on ProjectStatus {
 
       case ProjectStatus.postponed:
         return const Color(0xFFE53935);
+      case ProjectStatus.completed:
+        return const Color(0xFF00A651);
     }
   }
 }

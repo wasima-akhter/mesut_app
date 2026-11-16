@@ -76,6 +76,31 @@ enum DevicePlatform {
   final String serializedName;
 }
 
+/// Backend time tracking activity types (`ERECTION`, `DISMANTLING`, `TRANSPORT`, `MAINTENANCE`, `OTHER`).
+enum BackendActivityType {
+  erection('ERECTION'),
+  dismantling('DISMANTLING'),
+  transport('TRANSPORT'),
+  maintenance('MAINTENANCE'),
+  other('OTHER');
+
+  const BackendActivityType(this.serializedName);
+  final String serializedName;
+
+  static BackendActivityType fromString(
+    String? raw, {
+    BackendActivityType fallback = BackendActivityType.other,
+  }) {
+    if (raw == null || raw.trim().isEmpty) return fallback;
+    final normalized = raw.trim().toUpperCase().replaceAll(' ', '_');
+    return BackendActivityType.values.firstWhere(
+      (e) =>
+          e.serializedName == normalized || e.name.toUpperCase() == normalized,
+      orElse: () => fallback,
+    );
+  }
+}
+
 /// API failure errorType codes returned by the backend.
 enum ApiErrorType {
   invalidCredentials('INVALID_CREDENTIALS'),
@@ -93,9 +118,16 @@ enum ApiErrorType {
   tokenExpired('TOKEN_EXPIRED'),
   tokenBlacklisted('TOKEN_BLACKLISTED'),
   sessionExpired('SESSION_EXPIRED'),
+  sessionRevoked('SESSION_REVOKED'),
+  deviceNotFound('DEVICE_NOT_FOUND'),
+  deviceNotOwned('DEVICE_NOT_OWNED'),
   unauthorized('UNAUTHORIZED'),
   forbidden('FORBIDDEN'),
+  accessDenied('ACCESS_DENIED'),
   notFound('NOT_FOUND'),
+  timelogNotFound('TIMELOG_NOT_FOUND'),
+  activeTimerExists('ACTIVE_TIMER_EXISTS'),
+  badRequest('BAD_REQUEST'),
   validationError('VALIDATION_ERROR'),
   fileTooLarge('FILE_TOO_LARGE'),
   invalidFileType('INVALID_FILE_TYPE'),
@@ -141,8 +173,31 @@ enum ApiErrorType {
         if (normalized == 'TOKEN_BLACKLISTED') {
           return ApiErrorType.tokenBlacklisted;
         }
-        if (normalized.contains('TOKEN') || normalized.contains('SESSION')) {
-          return ApiErrorType.tokenExpired;
+        if (normalized == 'SESSION_REVOKED') {
+          return ApiErrorType.sessionRevoked;
+        }
+        if (normalized == 'DEVICE_NOT_FOUND') {
+          return ApiErrorType.deviceNotFound;
+        }
+        if (normalized == 'DEVICE_NOT_OWNED') {
+          return ApiErrorType.deviceNotOwned;
+        }
+        if (normalized.contains('TOKEN') ||
+            normalized.contains('SESSION') ||
+            normalized.contains('DEVICE_')) {
+          return ApiErrorType.sessionExpired;
+        }
+        if (normalized == 'ACCESS_DENIED' || normalized == 'FORBIDDEN') {
+          return ApiErrorType.accessDenied;
+        }
+        if (normalized == 'ACTIVE_TIMER_EXISTS') {
+          return ApiErrorType.activeTimerExists;
+        }
+        if (normalized == 'TIMELOG_NOT_FOUND') {
+          return ApiErrorType.timelogNotFound;
+        }
+        if (normalized == 'BAD_REQUEST') {
+          return ApiErrorType.badRequest;
         }
         if (normalized.contains('AUTH') || normalized.contains('UNAUTHORIZED')) {
           return ApiErrorType.unauthorized;

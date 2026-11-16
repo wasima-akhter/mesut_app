@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/storage_keys.dart';
+import '../services/address_resolver_service.dart';
 import 'app_language.dart';
 import 'app_localization.dart';
 import 'app_strings.dart';
@@ -42,12 +43,33 @@ class AppLanguageNotifier extends Notifier<AppLanguage> {
 
   Future<void> setLanguage(AppLanguage language) async {
     activeLanguageCode = language.code;
-    if (state == language) return;
-    await AppLocalization.load(language);
-    state = language;
+    AddressResolverService.clearCache();
+    if (state != language) {
+      await AppLocalization.load(language);
+      state = language;
+    }
 
     try {
       final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_storageKey, language.code);
+      await prefs.setBool(StorageKeys.hasUserSelectedLanguage, true);
+    } catch (_) {}
+  }
+
+  /// Applies backend `defaultLanguage` from `/mobile/config` only when the
+  /// user has not explicitly picked a language on-device.
+  Future<void> applyServerDefault(AppLanguage language) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final hasExplicitChoice =
+          prefs.getBool(StorageKeys.hasUserSelectedLanguage) ?? false;
+      if (hasExplicitChoice) return;
+
+      activeLanguageCode = language.code;
+      if (state != language) {
+        await AppLocalization.load(language);
+        state = language;
+      }
       await prefs.setString(_storageKey, language.code);
     } catch (_) {}
   }

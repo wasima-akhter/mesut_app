@@ -11,6 +11,8 @@ import '../../../core/localization/context_extensions.dart';
 import '../../../core/localization/localization_provider.dart';
 import '../../auth/presentation/providers/auth_provider.dart';
 import '../../auth/presentation/widgets/logout_dialog.dart';
+import '../../employee/presentation/providers/offline_sync_provider.dart';
+import '../../shared/config/presentation/providers/mobile_config_provider.dart';
 import '../projects/overview_modules.dart';
 
 class SiteManagerMorePage extends ConsumerStatefulWidget {
@@ -25,6 +27,7 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
   @override
   Widget build(BuildContext context) {
     final currentLang = ref.watch(appLanguageProvider);
+    final syncState = ref.watch(offlineSyncProvider);
     final langName = currentLang == AppLanguage.german
         ? context.loc.german
         : context.loc.english;
@@ -83,13 +86,36 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
                     children: [
                       _buildSettingsTile(
                         icon: Icons.sync_rounded,
-                        title: context.loc.synced,
+                        title: syncState.hasPending
+                            ? context.loc.pendingSyncCount(
+                                '${syncState.pendingCount}',
+                              )
+                            : context.loc.synced,
                         trailing: Text(
-                          context.loc.synced,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: AppColors.success),
+                          syncState.isSyncing
+                              ? context.loc.syncingInProgress
+                              : (syncState.hasPending
+                                    ? context.loc.syncNow
+                                    : context.loc.synced),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: syncState.hasPending
+                                ? AppColors.warning
+                                : AppColors.success,
+                          ),
                         ),
-                        onTap: () {},
+                        onTap: () async {
+                          final res = await ref
+                              .read(offlineSyncProvider.notifier)
+                              .syncPendingLogs();
+                          if (res != null && mounted) {
+                            showMessage(
+                              context.loc.syncCompleted(
+                                '${res.created}',
+                                '${res.skipped}',
+                              ),
+                            );
+                          }
+                        },
                       ),
                       _buildSettingsTile(
                         icon: Icons.translate_rounded,
@@ -352,6 +378,7 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
 
   void _showLanguageOptions() {
     final currentLang = ref.read(appLanguageProvider);
+    final enabledLanguages = ref.read(enabledLanguagesProvider);
 
     showDialog(
       context: context,
@@ -360,32 +387,26 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
           title: Text(context.loc.selectLanguage),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text(context.loc.english),
-                trailing: currentLang == AppLanguage.english
+            children: enabledLanguages.map((lang) {
+              final label = lang == AppLanguage.german
+                  ? context.loc.german
+                  : context.loc.english;
+              return ListTile(
+                title: Text(label),
+                trailing: currentLang == lang
                     ? const Icon(Icons.check_circle, color: AppColors.primary)
-                    : const Icon(Icons.circle_outlined, color: AppColors.border),
+                    : const Icon(
+                        Icons.circle_outlined,
+                        color: AppColors.border,
+                      ),
                 onTap: () async {
                   Navigator.pop(dialogContext);
                   await ref
                       .read(appLanguageProvider.notifier)
-                      .setLanguage(AppLanguage.english);
+                      .setLanguage(lang);
                 },
-              ),
-              ListTile(
-                title: Text(context.loc.german),
-                trailing: currentLang == AppLanguage.german
-                    ? const Icon(Icons.check_circle, color: AppColors.primary)
-                    : const Icon(Icons.circle_outlined, color: AppColors.border),
-                onTap: () async {
-                  Navigator.pop(dialogContext);
-                  await ref
-                      .read(appLanguageProvider.notifier)
-                      .setLanguage(AppLanguage.german);
-                },
-              ),
-            ],
+              );
+            }).toList(),
           ),
         );
       },

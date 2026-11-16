@@ -7,6 +7,7 @@ import '../../../app/constants/route_constants.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/services/launcher_service.dart';
+import '../../shared/mobile_dashboard/presentation/widgets/mobile_profile_stats_banner.dart';
 import '../presentation/providers/site_manager_profile_provider.dart';
 
 class SiteManagerProfile extends ConsumerWidget {
@@ -34,7 +35,7 @@ class SiteManagerProfile extends ConsumerWidget {
 
               SizedBox(height: 22.h),
 
-              _buildStats(context),
+              const MobileProfileStatsBanner(),
 
               SizedBox(height: 14.h),
 

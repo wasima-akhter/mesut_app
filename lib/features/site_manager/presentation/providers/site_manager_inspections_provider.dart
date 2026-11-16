@@ -12,76 +12,12 @@ class SiteInspectionState {
 
   SiteInspectionState({
     this.selectedStatus = InspectionStatus.pending,
-    this.inspections = const [
-      SiteInspectionModel(
-        projectId: 'PRJ-0842',
-        projectName: 'Goldsteins.Complex',
-        company: 'HochTief AG',
-        type: 'Commercial',
-        address: 'Goldsteinstraße 12, 50968 Köln',
-        inspector: 'Mesut Yilmaz (you)',
-        appointment: 'Today, 10:30 am',
-        status: InspectionStatus.pending,
-      ),
-      SiteInspectionModel(
-        projectId: 'PRJ-0843',
-        projectName: 'Goldsteins.Complex',
-        company: 'HochTief AG',
-        type: 'Commercial',
-        address: 'Goldsteinstraße 12, 50968 Köln',
-        inspector: 'Mesut Yilmaz (you)',
-        appointment: 'Today, 10:30 am',
-        status: InspectionStatus.pending,
-      ),
-      SiteInspectionModel(
-        projectId: 'PRJ-0844',
-        projectName: 'Goldsteins.Complex',
-        company: 'HochTief AG',
-        type: 'Commercial',
-        address: 'Goldsteinstraße 12, 50968 Köln',
-        inspector: 'Mesut Yilmaz (you)',
-        appointment: 'Today, 10:30 am',
-        status: InspectionStatus.pending,
-      ),
-      SiteInspectionModel(
-        projectId: 'PRJ-0845',
-        projectName: 'Goldsteins.Complex',
-        company: 'HochTief AG',
-        type: 'Commercial',
-        address: 'Goldsteinstraße 12, 50968 Köln',
-        inspector: 'Mesut Yilmaz (you)',
-        appointment: '18 Sep 2026',
-        status: InspectionStatus.completed,
-      ),
-    ],
+    this.inspections = const [],
     DateTime? selectedCalendarDate,
     DateTime? focusedCalendarDate,
-    this.calendarEvents = const [
-      CalendarEventModel(
-        projectId: 'PRJ-0842',
-        title: 'Goldsteins.Complex',
-        address: 'Goldsteinstraße 12, 50968 Köln',
-        type: 'Erection',
-        dateRange: 'Sept 18 – Sept 20 (2.5 days)',
-        time: '7:30–4:30',
-        assignee: 'Mesut Yilmaz (you)',
-        color: Colors.green,
-      ),
-      CalendarEventModel(
-        projectId: 'PRJ-0842',
-        title: 'Goldsteins.Complex',
-        address: 'Goldsteinstraße 12, 50968 Köln',
-        type: 'Dismantling',
-        dateRange: 'Sept 18 – Sept 20 (2.5 days)',
-        time: '7:30–4:30',
-        assignee: 'Mesut Yilmaz (you)',
-        color: Colors.orange,
-      ),
-    ],
-  })  : selectedCalendarDate =
-            selectedCalendarDate ?? DateTime(2026, 9, 18),
-        focusedCalendarDate =
-            focusedCalendarDate ?? DateTime(2026, 9, 18);
+    this.calendarEvents = const [],
+  })  : selectedCalendarDate = selectedCalendarDate ?? DateTime.now(),
+        focusedCalendarDate = focusedCalendarDate ?? DateTime.now();
 
   List<SiteInspectionModel> get filteredInspections {
     return inspections.where((i) => i.status == selectedStatus).toList();

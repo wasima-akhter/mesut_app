@@ -2,64 +2,35 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../phase_board/site_manager_phase_board.dart';
 
+class ProjectBoardModel {
+  final String id;
+  final String title;
+  final String company;
+  final String type;
+  final String address;
+  final String assignee;
+  final String priority;
+  final String days;
+
+  const ProjectBoardModel({
+    required this.id,
+    required this.title,
+    required this.company,
+    required this.type,
+    required this.address,
+    required this.assignee,
+    required this.priority,
+    required this.days,
+  });
+}
+
 class PhaseBoardState {
   final ProjectPhase selectedPhase;
   final List<ProjectBoardModel> projects;
 
   const PhaseBoardState({
     this.selectedPhase = ProjectPhase.erection,
-    this.projects = const [
-      ProjectBoardModel(
-        id: 'PRJ-0842',
-        title: 'Goldsteins.Complex',
-        company: 'HochTief AG',
-        type: 'Commercial',
-        address: 'Goldsteinstraße 12, 50968 Köln',
-        assignee: 'Mesut Yilmaz',
-        priority: 'High',
-        days: '2.5 days',
-      ),
-      ProjectBoardModel(
-        id: 'PRJ-0842',
-        title: 'Goldsteins.Complex',
-        company: 'HochTief AG',
-        type: 'Commercial',
-        address: 'Goldsteinstraße 12, 50968 Köln',
-        assignee: 'Mesut Yilmaz',
-        priority: 'Medium',
-        days: '2.5 days',
-      ),
-      ProjectBoardModel(
-        id: 'PRJ-0842',
-        title: 'Goldsteins.Complex',
-        company: 'HochTief AG',
-        type: 'Commercial',
-        address: 'Goldsteinstraße 12, 50968 Köln',
-        assignee: 'Mesut Yilmaz',
-        priority: 'Low',
-        days: '2.5 days',
-      ),
-      ProjectBoardModel(
-        id: 'PRJ-0843',
-        title: 'Goldsteins.Complex',
-        company: 'HochTief AG',
-        type: 'Commercial',
-        address: 'Goldsteinstraße 12, 50968 Köln',
-        assignee: 'Mesut Yilmaz',
-        priority: 'Low',
-        days: '2.5 days',
-      ),
-      ProjectBoardModel(
-        id: 'PRJ-0844',
-        title: 'Goldsteins.Complex',
-        company: 'HochTief AG',
-        type: 'Commercial',
-        address: 'Goldsteinstraße 12, 50968 Köln',
-        assignee: 'Mesut Yilmaz',
-        priority: 'Low',
-        days: '2.5 days',
-      ),
-    ],
+    this.projects = const [],
   });
 
   PhaseBoardState copyWith({

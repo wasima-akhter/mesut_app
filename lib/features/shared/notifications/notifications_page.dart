@@ -19,6 +19,14 @@ class NotificationsPage extends ConsumerStatefulWidget {
 class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   int _selectedFilterIndex = 0; // 0 = All, 1 = Unread
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(notificationsProvider.notifier).refresh();
+    });
+  }
+
   List<AppNotification> _filterNotifications(List<AppNotification> list) {
     if (_selectedFilterIndex == 1) {
       return list.where((n) => !n.isRead).toList();
@@ -59,19 +67,45 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
       body: SafeArea(
         child: notificationsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => Center(child: Text('Error: $err')),
-          data: (allNotifications) {
+          error: (err, _) => Center(
+            child: Padding(
+              padding: EdgeInsets.all(24.w),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('$err', textAlign: TextAlign.center),
+                  SizedBox(height: 12.h),
+                  ElevatedButton(
+                    onPressed: () =>
+                        ref.read(notificationsProvider.notifier).refresh(),
+                    child: Text(context.loc.retry),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          data: (feed) {
+            final allNotifications = feed.items;
             final filtered = _filterNotifications(allNotifications);
-            final unreadCount = allNotifications.where((n) => !n.isRead).length;
 
             return Column(
               children: [
                 _buildHeader(allNotifications.isNotEmpty),
-                _buildFilterTabs(allNotifications.length, unreadCount),
+                _buildFilterTabs(allNotifications.length, feed.unreadCount),
                 Expanded(
-                  child: filtered.isEmpty
-                      ? _buildEmptyState()
-                      : _buildNotificationList(filtered),
+                  child: RefreshIndicator(
+                    onRefresh: () =>
+                        ref.read(notificationsProvider.notifier).refresh(),
+                    child: filtered.isEmpty
+                        ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [
+                              SizedBox(height: 80.h),
+                              _buildEmptyState(),
+                            ],
+                          )
+                        : _buildNotificationList(filtered, feed),
+                  ),
                 ),
               ],
             );
@@ -310,7 +344,10 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     );
   }
 
-  Widget _buildNotificationList(List<AppNotification> items) {
+  Widget _buildNotificationList(
+    List<AppNotification> items,
+    NotificationsFeedState feed,
+  ) {
     final todayItems = items.where((i) => i.dateGroup == 'today').toList();
     final yesterdayItems = items
         .where((i) => i.dateGroup == 'yesterday')
@@ -318,7 +355,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     final earlierItems = items.where((i) => i.dateGroup == 'earlier').toList();
 
     return ListView(
-      physics: const BouncingScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(
+        parent: BouncingScrollPhysics(),
+      ),
       padding: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 24.h),
       children: [
         if (todayItems.isNotEmpty) ...[
@@ -335,6 +374,19 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
           _buildGroupHeader(context.loc.notifEarlier),
           ...earlierItems.map(_buildNotificationCard),
         ],
+        if (feed.hasMore)
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 12.h),
+            child: Center(
+              child: feed.isLoadingMore
+                  ? const CircularProgressIndicator()
+                  : OutlinedButton(
+                      onPressed: () =>
+                          ref.read(notificationsProvider.notifier).loadMore(),
+                      child: Text(context.loc.viewAll),
+                    ),
+            ),
+          ),
       ],
     );
   }

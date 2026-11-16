@@ -16,6 +16,7 @@ import '../../../../core/widgets/fields/app_text_field.dart';
 import '../../../../core/widgets/snack/app_snackbar.dart';
 import '../providers/auth_provider.dart';
 import '../validators/auth_validators.dart';
+import '../widgets/auth_role_selector.dart';
 import '../widgets/auth_screen_container.dart';
 import 'otp_page.dart';
 
@@ -30,7 +31,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  final UserRole _selectedRole = UserRole.employee;
+  UserRole _selectedRole = UserRole.employee;
   bool _rememberMe = false;
 
   @override
@@ -147,6 +148,19 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
           SizedBox(height: 24.h),
 
+          _buildFieldLabel(loc.selectRole),
+
+          SizedBox(height: 6.h),
+
+          AuthRoleSelector(
+            selectedRole: _selectedRole,
+            onChanged: (role) {
+              setState(() => _selectedRole = role);
+            },
+          ),
+
+          SizedBox(height: 14.h),
+
           _buildFieldLabel(loc.workEmail),
 
           SizedBox(height: 5.h),
@@ -181,52 +195,63 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
           SizedBox(height: 6.h),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  setState(() => _rememberMe = !_rememberMe);
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: 22.w,
-                      height: 22.w,
-                      child: Checkbox(
-                        value: _rememberMe,
-                        activeColor: const Color(0xFFE7193F),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        onChanged: (val) {
-                          setState(() => _rememberMe = val ?? false);
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8.w,
+              runSpacing: 4.h,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    setState(() => _rememberMe = !_rememberMe);
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 22.w,
+                        height: 22.w,
+                        child: Checkbox(
+                          value: _rememberMe,
+                          activeColor: const Color(0xFFE7193F),
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          onChanged: (val) {
+                            setState(() => _rememberMe = val ?? false);
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 6.w),
+                      Flexible(
+                        child: Text(
+                          loc.rememberMe,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                AppTextButton(
+                  text: loc.forgotPassword,
+                  onPressed: authState.isLoading
+                      ? null
+                      : () {
+                          context.push(RouteConstants.forgotPassword);
                         },
-                      ),
-                    ),
-                    SizedBox(width: 6.w),
-                    Text(
-                      loc.rememberMe,
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: Colors.black54,
-                      ),
-                    ),
-                  ],
+                  foregroundColor: const Color(0xFFE7193F),
+                  textStyle: AppTextStyles.bodyMedium.copyWith(
+                    color: const Color(0xFFE7193F),
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: 4.h),
                 ),
-              ),
-              AppTextButton(
-                text: loc.forgotPassword,
-                onPressed: authState.isLoading
-                    ? null
-                    : () {
-                        context.push(RouteConstants.forgotPassword);
-                      },
-                foregroundColor: const Color(0xFFE7193F),
-                textStyle: AppTextStyles.bodyMedium.copyWith(
-                  color: const Color(0xFFE7193F),
-                ),
-                padding: EdgeInsets.symmetric(vertical: 4.h),
-              ),
-            ],
+              ],
+            ),
           ),
 
           SizedBox(height: 22.h),
@@ -239,8 +264,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
           SizedBox(height: 20.h),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
                 loc.dontHaveAccount,

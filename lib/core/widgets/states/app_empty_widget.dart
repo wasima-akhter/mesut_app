@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_dimensions.dart';
 import '../../../app/theme/app_spacing.dart';
+import '../../localization/context_extensions.dart';
 
 class AppEmptyWidget extends StatelessWidget {
   final String? title;
@@ -37,7 +38,7 @@ class AppEmptyWidget extends StatelessWidget {
             ),
             SizedBox(height: AppSpacing.md),
             Text(
-              title ?? 'Nothing here yet',
+              title ?? context.loc.noData,
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium,
             ),
@@ -55,7 +56,10 @@ class AppEmptyWidget extends StatelessWidget {
             // onRetry button add
             if (onRetry != null) ...[
               SizedBox(height: AppSpacing.lg),
-              FilledButton(onPressed: onRetry, child: Text('Retry')),
+              FilledButton(
+                onPressed: onRetry,
+                child: Text(context.loc.mapRetry),
+              ),
             ],
 
             if (action != null) ...[SizedBox(height: AppSpacing.lg), action!],

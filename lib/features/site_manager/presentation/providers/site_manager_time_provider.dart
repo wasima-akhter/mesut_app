@@ -15,40 +15,11 @@ class SiteManagerTimeState {
   const SiteManagerTimeState({
     this.selectedTab = TimeTrackingTab.myTime,
     this.selectedFilter = TimeEntryFilter.thisWeek,
-    this.selectedProject = 'PRJ-0842 • Goldstein Complex',
+    this.selectedProject = '',
     this.isTimerRunning = false,
-    this.projects = const [
-      'PRJ-0842 • Goldstein Complex',
-      'PRJ-0912 • Riverside Tower',
-      'PRJ-0731 • City Center',
-    ],
+    this.projects = const [],
     this.entries = const [],
-    this.crewMembers = const [
-      CrewMemberModel(
-        name: 'Tim Muller',
-        activity: ActivityType.erection,
-        startTime: '07:30 am',
-        endTime: '04:15 pm',
-        breakTime: '45m',
-        totalHours: '7h 30min',
-      ),
-      CrewMemberModel(
-        name: 'Alex Brown',
-        activity: ActivityType.dismantling,
-        startTime: '07:30 am',
-        endTime: '04:15 pm',
-        breakTime: '45m',
-        totalHours: '7h 30min',
-      ),
-      CrewMemberModel(
-        name: 'John Smith',
-        activity: ActivityType.others,
-        startTime: '08:00 am',
-        endTime: '04:30 pm',
-        breakTime: '30m',
-        totalHours: '8h',
-      ),
-    ],
+    this.crewMembers = const [],
   });
 
   SiteManagerTimeState copyWith({

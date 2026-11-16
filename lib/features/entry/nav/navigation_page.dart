@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,14 +8,20 @@ import '../../../core/enums/app_enum.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/localization/localization_provider.dart';
 import '../../../core/providers/common_provider.dart';
+import '../../../core/services/notification_service.dart';
+import '../../../core/services/notification_socket_service.dart';
+import '../../../core/storage/storage_provider.dart';
 import '../../employee/home/employee_home_page.dart';
 import '../../employee/plan/employee_plan_page.dart';
+import '../../employee/presentation/providers/offline_sync_provider.dart';
 import '../../employee/profile/profile/employee_profile_page.dart';
 import '../../employee/timer/employee_time_tracking_page.dart';
+import '../../shared/config/presentation/providers/mobile_config_provider.dart';
+import '../../shared/notifications/presentation/providers/notifications_provider.dart';
 import '../../site_manager/home/site_manager_home_page.dart';
 import '../../site_manager/map/site_manager_map_page.dart';
 import '../../site_manager/more/site_manager_more_page.dart';
-import '../../site_manager/projects/site_manager_projects_page.dart';
+import '../../site_manager/projects/presentation/screens/site_manager_projects_page.dart';
 import '../../site_manager/time_tracking/site_manager_time_tracking_page.dart';
 import 'bottom_nav_tabs.dart';
 import 'navigation_provider.dart';
@@ -28,39 +36,69 @@ class NavigationPage extends ConsumerStatefulWidget {
 }
 
 class _NavigationPageState extends ConsumerState<NavigationPage> {
+  final Set<int> _visitedTabs = {0};
+  UserRole? _lastRole;
+
   @override
   void initState() {
     super.initState();
+
+    if (widget.index != 0) {
+      _visitedTabs.add(widget.index);
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.index != 0) {
         ref.read(navigationProvider.notifier).changeTab(widget.index);
       }
+      unawaited(_bootstrapAuthenticatedSession());
     });
   }
 
-  // ------------------------------------------------------------
-  // PAGES BY ROLE
-  // ------------------------------------------------------------
+  Future<void> _bootstrapAuthenticatedSession() async {
+    if (!mounted) return;
+    final storage = ref.read(storageServiceProvider);
+    final token = await storage.getAccessToken();
+    if (!mounted) return;
+    if (token != null && token.isNotEmpty) {
+      ref.read(notificationSocketServiceProvider).connect(token);
+    }
+    unawaited(ref.read(mobileConfigProvider.notifier).refresh());
+    unawaited(ref.read(notificationsProvider.notifier).refresh());
+    unawaited(ref.read(offlineSyncProvider.notifier).syncPendingLogs());
+    ref.read(pushNotificationServiceProvider).consumePendingInitialNavigation();
+  }
 
-  List<Widget> _getPages(UserRole role) {
+  Widget _buildTabPage(UserRole role, int index) {
     switch (role) {
       case UserRole.siteManager:
-        return const [
-          SiteManagerHomePage(),
-          SiteManagerProjectsPage(),
-          SiteManagerMapPage(),
-          SiteManagerTimeTrackingPage(),
-          SiteManagerMorePage(),
-        ];
-
+        switch (index) {
+          case 0:
+            return const SiteManagerHomePage();
+          case 1:
+            return const SiteManagerProjectsPage();
+          case 2:
+            return const SiteManagerMapPage();
+          case 3:
+            return const SiteManagerTimeTrackingPage();
+          case 4:
+            return const SiteManagerMorePage();
+          default:
+            return const SizedBox.shrink();
+        }
       case UserRole.employee:
-        return const [
-          EmployeeHomePage(),
-          EmployeeTimeTrackingPage(),
-          EmployeePlanPage(),
-          EmployeeProfilePage(),
-        ];
+        switch (index) {
+          case 0:
+            return const EmployeeHomePage();
+          case 1:
+            return const EmployeeTimeTrackingPage();
+          case 2:
+            return const EmployeePlanPage();
+          case 3:
+            return const EmployeeProfilePage();
+          default:
+            return const SizedBox.shrink();
+        }
     }
   }
 
@@ -73,13 +111,9 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
     }
   }
 
-  // ------------------------------------------------------------
-  // BUILD
-  // ------------------------------------------------------------
-
   @override
   Widget build(BuildContext context) {
-    ref.watch(appLanguageProvider);
+    ref.watch(appLanguageProvider.select((lang) => lang.code));
     final loc = ref.watch(appStringsProvider);
     final role = ref.watch(userRoleProvider);
 
@@ -87,11 +121,25 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
       return Scaffold(body: Center(child: Text(loc.error)));
     }
 
-    final selectedIndex = ref.watch(navigationProvider);
-    final pages = _getPages(role);
-    final tabs = _getTabs(role);
+    if (_lastRole != role) {
+      _lastRole = role;
+      _visitedTabs
+        ..clear()
+        ..add(0);
+    }
 
-    final safeIndex = selectedIndex >= pages.length ? 0 : selectedIndex;
+    final selectedIndex = ref.watch(navigationProvider);
+    final tabs = _getTabs(role);
+    final safeIndex = selectedIndex >= tabs.length ? 0 : selectedIndex;
+    _visitedTabs.add(safeIndex);
+
+    // Lazy-mount tabs only after first visit to reduce startup memory, GPU, and map/GPS battery drain.
+    final pages = List<Widget>.generate(
+      tabs.length,
+      (index) => _visitedTabs.contains(index)
+          ? _buildTabPage(role, index)
+          : const SizedBox.shrink(),
+    );
 
     return Scaffold(
       body: IndexedStack(index: safeIndex, children: pages),
@@ -103,16 +151,11 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
     );
   }
 
-  // ------------------------------------------------------------
-  // BOTTOM NAVIGATION
-  // ------------------------------------------------------------
-
   Widget _buildBottomNavBar({
     required List<AppBottomTab> tabs,
     required int selectedIndex,
     required AppStrings loc,
   }) {
-
     return Container(
       padding: const EdgeInsets.only(top: 20, bottom: 4),
       decoration: BoxDecoration(
@@ -145,10 +188,6 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
       ),
     );
   }
-
-  // ------------------------------------------------------------
-  // NAV ITEM
-  // ------------------------------------------------------------
 
   Widget _buildNavItem({
     required int index,

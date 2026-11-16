@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_dimensions.dart';
 import '../../../app/theme/app_spacing.dart';
+import '../../localization/context_extensions.dart';
 
 class AppNoConnection extends StatelessWidget {
   final String? title;
   final String? message;
   final VoidCallback? onRetry;
-  final String retryText;
+  final String? retryText;
   final IconData icon;
 
   const AppNoConnection({
@@ -15,7 +16,7 @@ class AppNoConnection extends StatelessWidget {
     this.title,
     this.message,
     this.onRetry,
-    this.retryText = 'Try Again',
+    this.retryText,
     this.icon = Icons.wifi_off_rounded,
   });
 
@@ -36,13 +37,13 @@ class AppNoConnection extends StatelessWidget {
             ),
             SizedBox(height: AppSpacing.md),
             Text(
-              title ?? 'No internet connection',
+              title ?? context.loc.noInternetConnection,
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium,
             ),
             SizedBox(height: AppSpacing.sm),
             Text(
-              message ?? 'Please check your internet connection and try again.',
+              message ?? context.loc.checkInternetConnection,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
@@ -50,7 +51,10 @@ class AppNoConnection extends StatelessWidget {
             ),
             if (onRetry != null) ...[
               SizedBox(height: AppSpacing.lg),
-              FilledButton(onPressed: onRetry, child: Text(retryText)),
+              FilledButton(
+                onPressed: onRetry,
+                child: Text(retryText ?? context.loc.retry),
+              ),
             ],
           ],
         ),

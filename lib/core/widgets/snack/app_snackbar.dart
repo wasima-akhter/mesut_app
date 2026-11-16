@@ -28,7 +28,8 @@ class AppSnackBar {
     SnackBarBehavior behavior = SnackBarBehavior.floating,
     EdgeInsetsGeometry? margin,
   }) {
-    final resolvedBg = backgroundColor ??
+    final resolvedBg =
+        backgroundColor ??
         switch (type) {
           AppSnackBarType.success => AppColors.successDark,
           AppSnackBarType.error => AppColors.errorDark,
@@ -36,7 +37,8 @@ class AppSnackBar {
           AppSnackBarType.info => AppColors.infoDark,
         };
 
-    final resolvedIcon = icon ??
+    final resolvedIcon =
+        icon ??
         (showIcon
             ? switch (type) {
                 AppSnackBarType.success => Icons.check_circle_outline_rounded,
@@ -46,7 +48,8 @@ class AppSnackBar {
               }
             : null);
 
-    final resolvedAction = action ??
+    final resolvedAction =
+        action ??
         (actionLabel != null && onAction != null
             ? SnackBarAction(
                 label: actionLabel,
@@ -61,18 +64,12 @@ class AppSnackBar {
       duration: duration,
       margin: margin ?? EdgeInsets.all(16.r),
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.r),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
       action: resolvedAction,
       content: Row(
         children: [
           if (resolvedIcon != null) ...[
-            Icon(
-              resolvedIcon,
-              color: AppColors.white,
-              size: 22.sp,
-            ),
+            Icon(resolvedIcon, color: AppColors.white, size: 22.sp),
             SizedBox(width: 12.w),
           ],
           Expanded(

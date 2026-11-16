@@ -131,6 +131,40 @@ class StorageService {
   String? get selectedLanguage =>
       localStorage.getString(StorageKeys.selectedLanguage);
 
+  Future<void> setHasUserSelectedLanguage(bool value) async {
+    await localStorage.setBool(StorageKeys.hasUserSelectedLanguage, value);
+  }
+
+  bool get hasUserSelectedLanguage =>
+      localStorage.getBool(StorageKeys.hasUserSelectedLanguage) ?? false;
+
+  Future<void> saveMobileConfigJson(String json) async {
+    await localStorage.setString(StorageKeys.mobileConfigCache, json);
+  }
+
+  String? getMobileConfigJson() =>
+      localStorage.getString(StorageKeys.mobileConfigCache);
+
+  Future<void> saveOfflineTimeLogsJson(String json) async {
+    await localStorage.setString(StorageKeys.offlineTimeLogsQueue, json);
+  }
+
+  String? getOfflineTimeLogsJson() =>
+      localStorage.getString(StorageKeys.offlineTimeLogsQueue);
+
+  Future<void> saveLastSyncTime(DateTime time) async {
+    await localStorage.setString(
+      StorageKeys.lastSyncTime,
+      time.toUtc().toIso8601String(),
+    );
+  }
+
+  DateTime? getLastSyncTime() {
+    final raw = localStorage.getString(StorageKeys.lastSyncTime);
+    if (raw == null || raw.isEmpty) return null;
+    return DateTime.tryParse(raw);
+  }
+
   // ==============================
   // Device Identifier
   // ==============================

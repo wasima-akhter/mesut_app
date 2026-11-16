@@ -82,6 +82,26 @@ class MapMarkerService {
     );
   }
 
+  /// Creates a distinctive marker for the manager's live GPS position.
+  Marker createManagerMarker({
+    required MapCoordinate coordinate,
+    String title = 'My Location (Site Manager)',
+    VoidCallback? onTap,
+  }) {
+    return Marker(
+      markerId: const MarkerId('marker_manager_location'),
+      position: coordinate.toLatLng(),
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose),
+      infoWindow: InfoWindow(
+        title: title,
+        snippet:
+            '${coordinate.latitude.toStringAsFixed(4)}, ${coordinate.longitude.toStringAsFixed(4)}',
+      ),
+      zIndexInt: 10,
+      onTap: onTap,
+    );
+  }
+
   /// Creates a marker for another participant (e.g., employee or delivery team).
   Marker createParticipantMarker({
     required MapLocationEntity participant,

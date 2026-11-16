@@ -4,40 +4,43 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/constants/route_constants.dart';
-import '../../../core/localization/context_extensions.dart';
-import '../../../core/widgets/buttons/app_button.dart';
-import '../../../core/widgets/buttons/app_outlined_button.dart';
-import '../../../core/widgets/snack/app_snackbar.dart';
 import '../../../core/enums/app_enum.dart';
+import '../../../core/localization/context_extensions.dart';
+import '../../../core/localization/localization_provider.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
 import '../../entry/nav/navigation_provider.dart';
+import '../../map/domain/entities/map_coordinate_entity.dart';
 import '../../map/domain/entities/map_location_entity.dart';
 import '../../map/domain/entities/map_request_entity.dart';
 import '../../map/utils/map_coordinate_resolver.dart';
+import '../../shared/mobile_dashboard/domain/entities/mobile_dashboard_entity.dart';
+import '../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
+import '../../shared/notifications/presentation/providers/notifications_provider.dart';
 import '../presentation/providers/site_manager_home_provider.dart';
+import 'widgets/site_manager_home_header.dart';
+import 'widgets/site_manager_home_map_card.dart';
+import 'widgets/site_manager_home_operation_card.dart';
+import 'widgets/site_manager_home_stats.dart';
 
 class SiteManagerHomePage extends ConsumerWidget {
   const SiteManagerHomePage({super.key});
 
-  void _showMessage(BuildContext context, String message) {
-    AppSnackBar.showInfo(context, message);
-  }
-
-  void _openProject(BuildContext context, Map<String, dynamic> project) {
-    context.push(RouteConstants.siteManagerProjectDetail);
-  }
-
-  void _openRoute(BuildContext context, Map<String, dynamic> project) {
-    final title = project['title'] as String? ?? 'Site Location';
-    final address =
-        project['address'] as String? ?? 'Goltsteinstraße 12, 50968 Köln';
-    final type = project['type'] as String? ?? 'Erection';
+  void _openRoute(
+    BuildContext context,
+    UpcomingTaskEntity task,
+    List<MobileMapPinEntity> pins,
+  ) {
+    final pin = pins.where((p) => p.id == task.project.id).firstOrNull;
+    final coordinate = pin != null
+        ? MapCoordinate(latitude: pin.latitude, longitude: pin.longitude)
+        : MapCoordinateResolver.resolve(task.project.address);
 
     final destination = MapLocationEntity(
-      id: project['id']?.toString() ?? 'op_${title.hashCode}',
-      title: title,
-      address: address,
-      coordinate: MapCoordinateResolver.resolve(address),
-      type: type,
+      id: task.project.id.isNotEmpty ? task.project.id : task.phaseId,
+      title: task.project.name,
+      address: task.project.address,
+      coordinate: coordinate,
+      type: task.type,
     );
 
     context.push(
@@ -49,863 +52,179 @@ class SiteManagerHomePage extends ConsumerWidget {
     );
   }
 
-  String _localizeOperationType(BuildContext context, String type) {
-    switch (type.toLowerCase()) {
-      case 'erection':
-        return context.loc.erectionPhase;
-      case 'dismantling':
-        return context.loc.dismantlingPhase;
-      case 'standing':
-      case 'standing scaffold':
-        return context.loc.standingScaffold;
-      default:
-        return type;
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(appLanguageProvider);
     final homeState = ref.watch(siteManagerHomeProvider);
-    final visibleOperations = homeState.visibleOperations;
+    final dashboardAsync = ref.watch(mobileDashboardProvider);
+    final unreadCount = ref.watch(unreadNotificationsCountProvider);
+    final currentUser = ref.watch(currentUserProvider);
+    final profile = ref.watch(mobileProfileProvider).asData?.value;
+
+    final userName = profile?.fullName.isNotEmpty == true
+        ? profile!.fullName
+        : (currentUser?.fullName.isNotEmpty == true
+              ? currentUser!.fullName
+              : context.loc.siteManager);
 
     return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(18, 18, 18, 8),
-              sliver: SliverToBoxAdapter(
-                child: _buildHeader(context, ref, homeState),
-              ),
-            ),
-
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              sliver: SliverToBoxAdapter(
-                child: _buildMapCard(context, ref, homeState.activeSites),
-              ),
-            ),
-
-            const SliverToBoxAdapter(child: SizedBox(height: 14)),
-
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              sliver: SliverToBoxAdapter(child: _buildMainStats(context)),
-            ),
-
-            const SliverToBoxAdapter(child: SizedBox(height: 14)),
-
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              sliver: SliverToBoxAdapter(
-                child: _buildSecondaryStats(context, homeState),
-              ),
-            ),
-
-            const SliverToBoxAdapter(child: SizedBox(height: 18)),
-
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              sliver: SliverToBoxAdapter(
-                child: _buildOperationsHeader(context, ref, homeState),
-              ),
-            ),
-
-            const SliverToBoxAdapter(child: SizedBox(height: 10)),
-
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(18, 0, 18, 24),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final operation = visibleOperations[index];
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: _buildOperationCard(context, operation),
-                  );
-                }, childCount: visibleOperations.length),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(
-    BuildContext context,
-    WidgetRef ref,
-    SiteManagerHomeState homeState,
-  ) {
-    final notificationsEnabled = homeState.notificationsEnabled;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                context.loc.welcomeBack,
-                style: TextStyle(
-                  fontSize: 19.sp,
-                  color: const Color(0xFF777777),
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Mesut Yilmaz',
-                style: TextStyle(
-                  fontSize: 28.sp,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF171717),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Network profile image
-        Container(
-          width: 43,
-          height: 43,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 2),
-          ),
-          child: const CircleAvatar(
-            backgroundImage: NetworkImage(
-              'https://randomuser.me/api/portraits/men/32.jpg',
-            ),
-          ),
-        ),
-
-        const SizedBox(width: 9),
-
-        GestureDetector(
-          onTap: () =>
-              ref.read(siteManagerHomeProvider.notifier).toggleNotifications(),
-          child: Container(
-            width: 43,
-            height: 43,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFE4E4E4)),
-            ),
-            child: Icon(
-              notificationsEnabled
-                  ? Icons.notifications
-                  : Icons.notifications_none_outlined,
-              size: 21,
-              color: notificationsEnabled
-                  ? const Color(0xFF00652F)
-                  : const Color(0xFF777777),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMapCard(BuildContext context, WidgetRef ref, int activeSites) {
-    return Container(
-      height: 148,
-      decoration: BoxDecoration(
-        color: const Color(0xFFDDE6D8),
-        borderRadius: BorderRadius.circular(11),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          // Map placeholder
-          Positioned.fill(child: CustomPaint(painter: MapPlaceholderPainter())),
-
-          Positioned(
-            left: 10,
-            top: 10,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(7),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: .08),
-                    blurRadius: 5,
-                  ),
-                ],
-              ),
-              child: Text(
-                '$activeSites ${context.loc.activeSites}',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF333333),
-                ),
-              ),
-            ),
-          ),
-
-          // Fake map pins
-          const Positioned(
-            left: 112,
-            top: 70,
-            child: _MapPin(color: Color(0xFF2196F3)),
-          ),
-
-          const Positioned(
-            left: 174,
-            top: 48,
-            child: _MapPin(color: Color(0xFFFF9800)),
-          ),
-
-          const Positioned(
-            right: 104,
-            top: 84,
-            child: _MapPin(color: Color(0xFFE53935)),
-          ),
-
-          Positioned(
-            right: 9,
-            bottom: 8,
-            child: GestureDetector(
-              onTap: () => ref.read(navigationProvider.notifier).changeTab(2),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 11,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(7),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      context.loc.navMap,
-                      style: TextStyle(
-                        color: const Color(0xFFE22B3B),
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.arrow_forward,
-                      size: 17,
-                      color: Color(0xFFE22B3B),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMainStats(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                color: const Color(0xFF004D26),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.loc.standingScaffold,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 17.sp,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  Text(
-                    '30',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 33.sp,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  Text(
-                    context.loc.activeSites,
-                    maxLines: 2,
-                    style: TextStyle(color: Colors.white70, fontSize: 17.sp),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(width: 8),
-
-          Expanded(
-            child: GestureDetector(
-              onTap: () => _showMessage(context, context.loc.inspections),
-              child: Container(
-                padding: const EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFD9DC),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFE53948)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      '30',
-                      style: TextStyle(
-                        color: const Color(0xFFE32638),
-                        fontSize: 33.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-
-                    Text(
-                      context.loc.inspections,
-                      style: TextStyle(
-                        color: const Color(0xFFE32638),
-                        fontSize: 17.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSecondaryStats(
-    BuildContext context,
-    SiteManagerHomeState homeState,
-  ) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            context: context,
-            title: context.loc.erectionPhase,
-            color: const Color(0xFF00A651),
-            planned: 14,
-            running: 5,
-            onTap: () => _showMessage(context, context.loc.erectionPhase),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _buildStatCard(
-            context: context,
-            title: context.loc.dismantlingPhase,
-            color: const Color(0xFFFF9800),
-            planned: 14,
-            running: 5,
-            onTap: () => _showMessage(context, context.loc.dismantlingPhase),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatCard({
-    required BuildContext context,
-    required String title,
-    required Color color,
-    required int planned,
-    required int running,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 160.h,
-        padding: const EdgeInsets.fromLTRB(13, 12, 13, 10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(9),
-          border: Border.all(color: const Color(0xFFE5E5E5)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '$planned',
-                  style: TextStyle(
-                    fontSize: 25.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF171717),
-                  ),
-                ),
-                Text(
-                  '$running',
-                  style: TextStyle(
-                    fontSize: 25.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF171717),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 1),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  context.loc.planned,
-                  style: TextStyle(
-                    color: const Color(0xFF858585),
-                    fontSize: 16.sp,
-                  ),
-                ),
-                Text(
-                  context.loc.running,
-                  style: TextStyle(
-                    color: const Color(0xFF858585),
-                    fontSize: 16.sp,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOperationsHeader(
-    BuildContext context,
-    WidgetRef ref,
-    SiteManagerHomeState homeState,
-  ) {
-    final operations = homeState.operations;
-
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            "${context.loc.upcomingTasks} (${operations.length})",
-            style: TextStyle(
-              fontSize: 25.sp,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF171717),
-            ),
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            // ref
-            //     .read(siteManagerHomeProvider.notifier)
-            //     .toggleShowAllOperations();
-
-            // go to projects tab
-            ref.read(navigationProvider.notifier).goToTabProjects();
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await Future.wait([
+              ref.read(mobileDashboardProvider.notifier).refresh(),
+              ref.read(notificationsProvider.notifier).refresh(),
+            ]);
           },
-
-          child: Row(
-            children: [
-              Text(
-                // showAllOperations ? context.loc.close :
-                context.loc.viewAll,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  color: const Color(0xFF888888),
-                ),
-              ),
-              const SizedBox(width: 3),
-              Icon(
-                // showAllOperations
-                //     ? Icons.keyboard_arrow_up
-                //     :
-                Icons.arrow_forward_ios,
-                size: 13,
-                color: const Color(0xFF888888),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildOperationCard(
-    BuildContext context,
-    Map<String, dynamic> operation,
-  ) {
-    final Color typeColor = operation['typeColor'];
-
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE5E5E5)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Operation type
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-            decoration: BoxDecoration(
-              color: typeColor.withValues(alpha: .10),
-              borderRadius: BorderRadius.circular(5),
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
             ),
-            child: Text(
-              _localizeOperationType(
-                context,
-                operation['type'] as String? ?? '',
-              ),
-              style: TextStyle(
-                color: typeColor,
-                fontSize: 17.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 9),
-
-          Text(
-            operation['project'],
-            style: TextStyle(
-              fontSize: 19.sp,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF171717),
-            ),
-          ),
-
-          const SizedBox(height: 7),
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(
-                Icons.location_on_outlined,
-                size: 17,
-                color: Color(0xFF999999),
-              ),
-              const SizedBox(width: 5),
-              Expanded(
-                child: Text(
-                  operation['address'],
-                  style: TextStyle(
-                    fontSize: 17.sp,
-                    color: const Color(0xFF8A8A8A),
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
+                sliver: SliverToBoxAdapter(
+                  child: SiteManagerHomeHeader(
+                    userName: userName,
+                    unreadCount: unreadCount,
+                    avatarUrl: profile?.avatarUrl,
                   ),
                 ),
               ),
-            ],
-          ),
-
-          const SizedBox(height: 6),
-
-          Text(
-            '${context.loc.customer}: ${operation['client']}',
-            style: TextStyle(fontSize: 17.sp, color: const Color(0xFF888888)),
-          ),
-
-          if (operation['loggedHours'] != null) ...[
-            const SizedBox(height: 8),
-            Builder(
-              builder: (context) {
-                final double loggedHours = (operation['loggedHours'] as num)
-                    .toDouble();
-                final double budgetHours =
-                    (operation['budgetHours'] as num?)?.toDouble() ?? 0.0;
-                final bool isProfitable = budgetHours > 0
-                    ? loggedHours <= budgetHours
-                    : true;
-                final String formattedLogged =
-                    '${loggedHours.toStringAsFixed(loggedHours.truncateToDouble() == loggedHours ? 0 : 1)}h';
-                final String formattedBudget =
-                    '${budgetHours.toStringAsFixed(budgetHours.truncateToDouble() == budgetHours ? 0 : 1)}h';
-
-                return Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 5,
+              ...dashboardAsync.when(
+                loading: () => [
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(child: CircularProgressIndicator()),
                   ),
-                  decoration: BoxDecoration(
-                    color: isProfitable
-                        ? const Color(0xFFF0FDF4)
-                        : const Color(0xFFFEF2F2),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: isProfitable
-                          ? const Color(0xFFBBF7D0)
-                          : const Color(0xFFFECACA),
-                      width: 0.8,
+                ],
+                error: (_, _) => [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(context.loc.somethingWentWrong),
+                          const SizedBox(height: 12),
+                          ElevatedButton(
+                            onPressed: () => ref
+                                .read(mobileDashboardProvider.notifier)
+                                .refresh(),
+                            child: Text(context.loc.mapRetry),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.access_time_filled_rounded,
-                        size: 20.sp,
-                        color: isProfitable
-                            ? const Color(0xFF15803D)
-                            : const Color(0xFFB91C1C),
+                ],
+                data: (dashboard) {
+                  final tasks = homeState.showAllOperations
+                      ? dashboard.upcomingTasks
+                      : dashboard.upcomingTasks.take(3).toList();
+                  return [
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      sliver: SliverToBoxAdapter(
+                        child: SiteManagerHomeMapCard(
+                          activeSitesCount: dashboard.mapPins.length,
+                          onTap: () => ref
+                              .read(navigationProvider.notifier)
+                              .changeTab(2),
+                        ),
                       ),
-                      SizedBox(width: 7.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 14)),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      sliver: SliverToBoxAdapter(
+                        child: SiteManagerHomeStats(
+                          stats: dashboard.stats,
+                          onTapProjects: () => ref
+                              .read(navigationProvider.notifier)
+                              .changeTab(1),
+                          onTapInspections: () => context.push(
+                            RouteConstants.siteManagerSiteInspection,
+                          ),
+                          onTapSchedule: () =>
+                              context.push(RouteConstants.siteManagerSchedule),
+                        ),
+                      ),
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(18, 18, 18, 10),
+                      sliver: SliverToBoxAdapter(
+                        child: Row(
                           children: [
-                            Text(
-                              context.loc.totalProjectHours,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF4B5563),
+                            Expanded(
+                              child: Text(
+                                context.loc.upcomingTasks,
+                                style: TextStyle(
+                                  fontSize: 19.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF1F2937),
+                                ),
                               ),
                             ),
-                            SizedBox(height: 1.h),
-                            Row(
-                              children: [
-                                Text(
-                                  formattedLogged,
-                                  style: TextStyle(
-                                    fontSize: 15.5.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF111827),
-                                  ),
+                            if (dashboard.upcomingTasks.length > 3)
+                              TextButton(
+                                onPressed: () => ref
+                                    .read(siteManagerHomeProvider.notifier)
+                                    .toggleShowAllOperations(),
+                                child: Text(
+                                  homeState.showAllOperations
+                                      ? context.loc.showLess
+                                      : context.loc.viewAll,
                                 ),
-                                if (budgetHours > 0) ...[
-                                  Flexible(
-                                    child: Text(
-                                      ' / $formattedBudget',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 14.5.sp,
-                                        color: const Color(0xFF6B7280),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
+                              ),
                           ],
                         ),
                       ),
-                      if (budgetHours > 0) ...[
-                        SizedBox(width: 8.w),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isProfitable
-                                ? const Color(0xFFDCFCE7)
-                                : const Color(0xFFFEE2E2),
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                          child: Text(
-                            isProfitable
-                                ? context.loc.profitable
-                                : context.loc.lossRisk,
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w700,
-                              color: isProfitable
-                                  ? const Color(0xFF15803D)
-                                  : const Color(0xFFB91C1C),
+                    ),
+                    if (tasks.isEmpty)
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 20,
+                        ),
+                        sliver: SliverToBoxAdapter(
+                          child: Center(
+                            child: Text(
+                              context.loc.noUpcomingTasks,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: const Color(0xFF6B7280),
+                              ),
                             ),
                           ),
                         ),
-                      ],
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-
-          const SizedBox(height: 14),
-
-          Row(
-            children: [
-              Expanded(
-                child: AppOutlinedButton(
-                  onPressed: () => _openRoute(context, operation),
-                  leadingIcon: Icons.location_on_outlined,
-                  text: context.loc.route,
-                  foregroundColor: const Color(0xFF777777),
-                  borderColor: const Color(0xFFD9D9D9),
-                  borderRadius: 7.r,
-                  textStyle: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 10),
-
-              Expanded(
-                flex: 2,
-                child: AppButton(
-                  onPressed: () => _openProject(context, operation),
-                  text: context.loc.openProject,
-                ),
+                      )
+                    else
+                      SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(18, 0, 18, 24),
+                        sliver: SliverList.builder(
+                          itemCount: tasks.length,
+                          itemBuilder: (context, index) {
+                            final task = tasks[index];
+                            return SiteManagerHomeOperationCard(
+                              task: task,
+                              onOpenProject: () => context.push(
+                                RouteConstants.siteManagerProjectDetail,
+                                extra: task.project.id,
+                              ),
+                              onOpenRoute: () =>
+                                  _openRoute(context, task, dashboard.mapPins),
+                            );
+                          },
+                        ),
+                      ),
+                  ];
+                },
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
-  }
-}
-
-class _MapPin extends StatelessWidget {
-  final Color color;
-
-  const _MapPin({required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Icon(Icons.location_on, size: 26, color: color);
-  }
-}
-
-class MapPlaceholderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final roadPaint = Paint()
-      ..color = Colors.white.withValues(alpha: .9)
-      ..strokeWidth = 13
-      ..style = PaintingStyle.stroke;
-
-    final smallRoadPaint = Paint()
-      ..color = Colors.white.withValues(alpha: .8)
-      ..strokeWidth = 6
-      ..style = PaintingStyle.stroke;
-
-    final greenPaint = Paint()
-      ..color = const Color(0xFFBFDDAA)
-      ..style = PaintingStyle.fill;
-
-    // Green map areas
-    canvas.drawRect(
-      Rect.fromLTWH(
-        size.width * .02,
-        size.height * .68,
-        size.width * .25,
-        size.height * .28,
-      ),
-      greenPaint,
-    );
-
-    canvas.drawRect(
-      Rect.fromLTWH(size.width * .75, 0, size.width * .25, size.height * .22),
-      greenPaint,
-    );
-
-    // Main roads
-    final path1 = Path()
-      ..moveTo(-20, size.height * .2)
-      ..lineTo(size.width * .45, size.height * .75)
-      ..lineTo(size.width + 30, size.height * .48);
-
-    canvas.drawPath(path1, roadPaint);
-
-    final path2 = Path()
-      ..moveTo(size.width * .35, -20)
-      ..lineTo(size.width * .50, size.height * .45)
-      ..lineTo(size.width * .62, size.height + 20);
-
-    canvas.drawPath(path2, roadPaint);
-
-    final path3 = Path()
-      ..moveTo(-20, size.height * .65)
-      ..lineTo(size.width * .35, size.height * .55)
-      ..lineTo(size.width + 20, size.height * .82);
-
-    canvas.drawPath(path3, smallRoadPaint);
-
-    final path4 = Path()
-      ..moveTo(size.width * .80, -10)
-      ..lineTo(size.width * .66, size.height * .40)
-      ..lineTo(size.width * .93, size.height + 20);
-
-    canvas.drawPath(path4, smallRoadPaint);
-
-    // Simple building blocks
-    final buildingPaint = Paint()
-      ..color = const Color(0xFFD0D0CC)
-      ..style = PaintingStyle.fill;
-
-    for (int i = 0; i < 12; i++) {
-      final x = (i % 4) * size.width * .25 + 8;
-      final y = (i ~/ 4) * size.height * .30 + 8;
-
-      canvas.drawRect(
-        Rect.fromLTWH(x, y, size.width * .13, size.height * .14),
-        buildingPaint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
   }
 }

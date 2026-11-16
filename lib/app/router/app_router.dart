@@ -28,14 +28,24 @@ import '../../features/site_manager/inspection_pages/inspection_survey_page.dart
 import '../../features/site_manager/inspection_pages/site_manager_inspections_page.dart';
 import '../../features/site_manager/phase_board/site_manager_phase_board.dart';
 import '../../features/site_manager/profile/site_manager_edit_profile.dart';
-import '../../features/site_manager/projects/create_project_modules.dart';
-import '../../features/site_manager/projects/site_manager_project_details_screen.dart';
+import '../../features/site_manager/create/presentation/screens/new_project_page.dart';
+import '../../features/site_manager/project_details/presentation/screens/site_manager_project_details_screen.dart';
+import '../../features/site_manager/schedule/site_manager_schedule_page.dart';
 import '../constants/route_constants.dart';
+import 'route_guards.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  final guard = ref.watch(routeGuardProvider);
   final router = GoRouter(
     navigatorKey: appNavigatorKey,
     initialLocation: RouteConstants.splash,
+    redirect: (context, state) {
+      final path = state.matchedLocation;
+      if (guard.isSiteManagerOnlyPath(path) && !guard.canAccessSiteManager()) {
+        return RouteConstants.mainNav;
+      }
+      return null;
+    },
     routes: [
       GoRoute(
         path: RouteConstants.splash,
@@ -110,8 +120,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RouteConstants.siteManagerProjectDetail,
         builder: (context, state) {
-          final extra = state.extra as String?;
-          return ProjectDetailsScreen(projectId: extra ?? '');
+          final extra = state.extra;
+          final id = extra is String
+              ? extra
+              : (extra is Map
+                  ? (extra['id'] ?? extra['projectId'] ?? '')
+                  : (state.uri.queryParameters['projectId'] ??
+                      extra?.toString() ??
+                      ''));
+          return ProjectDetailsScreen(projectId: id);
         },
       ),
       GoRoute(
@@ -167,6 +184,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RouteConstants.siteManagerProfileEdit,
         builder: (context, state) {
           return const EditProfilePage();
+        },
+      ),
+      GoRoute(
+        path: RouteConstants.siteManagerSchedule,
+        builder: (context, state) {
+          return const SiteManagerSchedulePage();
         },
       ),
 

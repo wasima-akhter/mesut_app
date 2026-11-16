@@ -110,6 +110,7 @@ class _CentralMapScreenState extends ConsumerState<CentralMapScreen> {
                   : (mapState.selectedLocation != null ? 180.h : 30.h),
             ),
             onMapCreated: (controller) {
+              _isMapInitialized = true;
               _localMapController = controller;
               notifier.attachMapController(controller);
             },

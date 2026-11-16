@@ -627,6 +627,9 @@ class AppErrorResolver {
       case ApiErrorType.tokenExpired:
       case ApiErrorType.tokenBlacklisted:
       case ApiErrorType.sessionExpired:
+      case ApiErrorType.sessionRevoked:
+      case ApiErrorType.deviceNotFound:
+      case ApiErrorType.deviceNotOwned:
       case ApiErrorType.unauthorized:
         return UserFriendlyMessage(
           title: isGerman ? 'Sitzung abgelaufen' : 'Session Expired',
@@ -642,25 +645,41 @@ class AppErrorResolver {
           traceId: traceId,
         );
       case ApiErrorType.forbidden:
+      case ApiErrorType.accessDenied:
         return UserFriendlyMessage(
           title: isGerman ? 'Zugriff verweigert' : 'Access Denied',
-          message: isGerman
-              ? 'Sie haben keine Berechtigung für diese Aktion.'
-              : 'You do not have permission to perform this action.',
+          message: customMessage ??
+              (isGerman
+                  ? 'Sie haben keine Berechtigung für diese Aktion.'
+                  : 'You do not have permission to perform this action.'),
           directive: customDirective,
           errorType: type,
           traceId: traceId,
         );
+      case ApiErrorType.activeTimerExists:
+        return UserFriendlyMessage(
+          title: isGerman ? 'Timer bereits aktiv' : 'Active Timer Exists',
+          message: customMessage ??
+              (isGerman
+                  ? 'Es läuft bereits ein Timer. Bitte stoppen Sie ihn zuerst.'
+                  : 'Another timer is already running. Please stop it first.'),
+          directive: customDirective,
+          errorType: type,
+          traceId: traceId,
+        );
+      case ApiErrorType.timelogNotFound:
       case ApiErrorType.notFound:
         return UserFriendlyMessage(
           title: isGerman ? 'Nicht gefunden' : 'Not Found',
-          message: isGerman
-              ? 'Die angeforderte Ressource wurde nicht gefunden.'
-              : 'The requested resource was not found.',
+          message: customMessage ??
+              (isGerman
+                  ? 'Die angeforderte Ressource wurde nicht gefunden.'
+                  : 'The requested resource was not found.'),
           directive: customDirective,
           errorType: type,
           traceId: traceId,
         );
+      case ApiErrorType.badRequest:
       case ApiErrorType.invalidJson:
       case ApiErrorType.validationError:
         return UserFriendlyMessage(

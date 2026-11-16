@@ -1,0 +1,905 @@
+MobileTimeTracking
+Mobile timer, crew time, and offline sync endpoints
+
+
+
+POST
+/api/v1/mobile/timer/start
+Start mobile timer
+
+
+
+Starts an active TimeLog and returns { timeLog, project } (role-aware project via getProjectDto). Rejects with 409 when an open timer already exists.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "phaseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "activityType": "ERECTION",
+  "gpsStartLat": 0,
+  "gpsStartLng": 0
+}
+Responses
+Code	Description	Links
+201	
+Timer started successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Timer started successfully.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": {
+    "timeLog": {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "phaseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "activityType": "ERECTION",
+      "startTime": "2026-11-12T09:13:52.467Z",
+      "endTime": "2026-11-12T09:13:52.467Z",
+      "isManual": true,
+      "status": "PENDING_APPROVAL",
+      "clientSyncId": "string",
+      "breakMinutes": 0,
+      "netHours": 0,
+      "createdAt": "2026-11-12T09:13:52.467Z",
+      "updatedAt": "2026-11-12T09:13:52.467Z",
+      "user": {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "firstName": "string",
+        "lastName": "string"
+      }
+    },
+    "project": {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "address": "string",
+      "customer": {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "name": "string"
+      },
+      "phases": [
+        {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "type": "ERECTION",
+          "status": "ENQUIRY",
+          "priority": "HIGH",
+          "startDate": "2026-11-12T09:13:52.467Z",
+          "endDate": "2026-11-12T09:13:52.467Z"
+        }
+      ],
+      "budgetedHours": 0,
+      "totalLoggedHours": 0,
+      "isProfitable": true
+    }
+  }
+}
+No links
+400	
+Invalid JSON payload
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+401	
+Authentication or device session failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Forbidden or inactive account
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Only site managers can access crew time logs",
+  "errorType": "FORBIDDEN",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+404	
+Phase not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Phase not found",
+  "errorType": "PHASE_NOT_FOUND",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+409	
+Active timer already exists (checkNoActiveTimerMiddleware)
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "An active timer already exists",
+  "errorType": "ACTIVE_TIMER_EXISTS",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422	
+Request validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "string",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "errors": [
+    {
+      "field": "string",
+      "message": "string"
+    }
+  ]
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+
+POST
+/api/v1/mobile/timer/stop
+Stop mobile timer
+
+
+
+Stops the authenticated user's open timer by timeLogId and sets endTime/GPS.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "timeLogId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "gpsEndLat": 0,
+  "gpsEndLng": 0
+}
+Responses
+Code	Description	Links
+200	
+Timer stopped successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Timer started successfully.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "phaseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "activityType": "ERECTION",
+    "startTime": "2026-11-12T09:13:52.522Z",
+    "endTime": "2026-11-12T09:13:52.522Z",
+    "isManual": true,
+    "status": "PENDING_APPROVAL",
+    "clientSyncId": "string",
+    "breakMinutes": 0,
+    "netHours": 0,
+    "createdAt": "2026-11-12T09:13:52.522Z",
+    "updatedAt": "2026-11-12T09:13:52.522Z",
+    "user": {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "firstName": "string",
+      "lastName": "string"
+    }
+  }
+}
+No links
+401	
+Authentication or device session failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Forbidden or inactive account
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Only site managers can access crew time logs",
+  "errorType": "FORBIDDEN",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+404	
+Active owned time log not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Active time log not found",
+  "errorType": "TIMELOG_NOT_FOUND",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422	
+Request validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "string",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "errors": [
+    {
+      "field": "string",
+      "message": "string"
+    }
+  ]
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+
+POST
+/api/v1/mobile/timer/manual
+Create manual time entry
+
+
+
+Creates a manual TimeLog with status PENDING_APPROVAL and optional break minutes. Employees are blocked with 403 when CompanyProfile.allowEmployeeManualTime is false.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "phaseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "activityType": "ERECTION",
+  "startTime": "2026-11-12T09:13:52.415Z",
+  "endTime": "2026-11-12T09:13:52.415Z",
+  "breakMinutes": 0
+}
+Responses
+Code	Description	Links
+201	
+Manual time entry submitted
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Timer started successfully.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "phaseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "activityType": "ERECTION",
+    "startTime": "2026-11-12T09:13:52.531Z",
+    "endTime": "2026-11-12T09:13:52.531Z",
+    "isManual": true,
+    "status": "PENDING_APPROVAL",
+    "clientSyncId": "string",
+    "breakMinutes": 0,
+    "netHours": 0,
+    "createdAt": "2026-11-12T09:13:52.531Z",
+    "updatedAt": "2026-11-12T09:13:52.531Z",
+    "user": {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "firstName": "string",
+      "lastName": "string"
+    }
+  }
+}
+No links
+401	
+Authentication or device session failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Forbidden — inactive account, or employee manual time disabled
+
+Media type
+
+application/json
+Examples
+
+Inactive account
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Account is inactive",
+  "errorType": "ACCOUNT_INACTIVE",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+404	
+Phase not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Phase not found",
+  "errorType": "PHASE_NOT_FOUND",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422	
+Request validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "string",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "errors": [
+    {
+      "field": "string",
+      "message": "string"
+    }
+  ]
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+
+GET
+/api/v1/mobile/time-logs
+List my time logs
+
+
+
+Returns the authenticated user's time logs filtered by UTC period TODAY, WEEK, or MONTH.
+
+Parameters
+Try it out
+Name	Description
+period
+string
+(query)
+Available values : TODAY, WEEK, MONTH
+
+Default value : TODAY
+
+
+TODAY
+Responses
+Code	Description	Links
+200	
+Time logs fetched successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Time logs fetched successfully.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "phaseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "activityType": "ERECTION",
+      "startTime": "2026-11-12T09:13:52.548Z",
+      "endTime": "2026-11-12T09:13:52.548Z",
+      "isManual": true,
+      "status": "PENDING_APPROVAL",
+      "clientSyncId": "string",
+      "breakMinutes": 0,
+      "netHours": 0,
+      "createdAt": "2026-11-12T09:13:52.548Z",
+      "updatedAt": "2026-11-12T09:13:52.548Z",
+      "user": {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "firstName": "string",
+        "lastName": "string"
+      }
+    }
+  ]
+}
+No links
+401	
+Authentication or device session failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Forbidden or inactive account
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Only site managers can access crew time logs",
+  "errorType": "FORBIDDEN",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422	
+Request query validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "string",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "errors": [
+    {
+      "field": "string",
+      "message": "string"
+    }
+  ]
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+
+GET
+/api/v1/mobile/crew-time
+Get project crew time
+
+
+
+Site Manager only. Aggregates TimeLogs for a project (optional UTC date filter). Returns totalProjectHours, hoursByActivity, crewBreakdown, and log details.
+
+Parameters
+Try it out
+Name	Description
+projectId *
+string($uuid)
+(query)
+projectId
+date
+string($date-time)
+(query)
+date
+Responses
+Code	Description	Links
+200	
+Crew time fetched successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Crew time fetched successfully.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": {
+    "totalProjectHours": 0,
+    "hoursByActivity": [
+      {
+        "activityType": "ERECTION",
+        "hours": 0
+      }
+    ],
+    "crewBreakdown": [
+      {
+        "user": {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "firstName": "string",
+          "lastName": "string"
+        },
+        "totalHours": 0,
+        "synced": true
+      }
+    ],
+    "logs": [
+      {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "phaseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "activityType": "ERECTION",
+        "startTime": "2026-11-12T09:13:52.555Z",
+        "endTime": "2026-11-12T09:13:52.555Z",
+        "isManual": true,
+        "status": "PENDING_APPROVAL",
+        "clientSyncId": "string",
+        "breakMinutes": 0,
+        "netHours": 0,
+        "createdAt": "2026-11-12T09:13:52.555Z",
+        "updatedAt": "2026-11-12T09:13:52.555Z",
+        "user": {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "firstName": "string",
+          "lastName": "string"
+        }
+      }
+    ]
+  }
+}
+No links
+401	
+Authentication or device session failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Forbidden (not site manager / not assigned)
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Only site managers can access this resource",
+  "errorType": "FORBIDDEN",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+404	
+Project not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Project not found",
+  "errorType": "PROJECT_NOT_FOUND",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422	
+Request query validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "string",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "errors": [
+    {
+      "field": "string",
+      "message": "string"
+    }
+  ]
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+
+POST
+/api/v1/mobile/sync
+Sync offline time logs
+
+
+
+Bulk upserts offline logs using clientSyncId for idempotency. New logs are saved as APPROVED non-manual entries.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "logs": [
+    {
+      "clientSyncId": "string",
+      "phaseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "activityType": "ERECTION",
+      "startTime": "2026-11-12T09:13:52.429Z",
+      "endTime": "2026-11-12T09:13:52.429Z",
+      "breakMinutes": 0
+    }
+  ]
+}
+Responses
+Code	Description	Links
+200	
+Time logs synced successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Time logs synced successfully.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": {
+    "created": 0,
+    "skipped": 0,
+    "logs": [
+      {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "phaseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "activityType": "ERECTION",
+        "startTime": "2026-11-12T09:13:52.563Z",
+        "endTime": "2026-11-12T09:13:52.563Z",
+        "isManual": true,
+        "status": "PENDING_APPROVAL",
+        "clientSyncId": "string",
+        "breakMinutes": 0,
+        "netHours": 0,
+        "createdAt": "2026-11-12T09:13:52.563Z",
+        "updatedAt": "2026-11-12T09:13:52.563Z",
+        "user": {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "firstName": "string",
+          "lastName": "string"
+        }
+      }
+    ]
+  }
+}
+No links
+401	
+Authentication or device session failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Forbidden or inactive account
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Only site managers can access crew time logs",
+  "errorType": "FORBIDDEN",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422	
+Request validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "string",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "errors": [
+    {
+      "field": "string",
+      "message": "string"
+    }
+  ]
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}

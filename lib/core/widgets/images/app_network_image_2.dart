@@ -25,6 +25,13 @@ class AppNetworkImage extends StatelessWidget {
     this.errorWidget,
   });
 
+  int? _cacheDimension(double? logicalSize, double dpr) {
+    if (logicalSize == null || !logicalSize.isFinite || logicalSize <= 0) {
+      return null;
+    }
+    return (logicalSize * dpr).round().clamp(1, 2048);
+  }
+
   @override
   Widget build(BuildContext context) {
     final radius =
@@ -34,18 +41,21 @@ class AppNetworkImage extends StatelessWidget {
       return _buildFallback(radius);
     }
 
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+
     return ClipRRect(
       borderRadius: radius,
       child: Image.network(
         url!,
         width: width,
         height: height,
+        cacheWidth: _cacheDimension(width, dpr),
+        cacheHeight: _cacheDimension(height, dpr),
         fit: fit,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) {
             return child;
           }
-
           return placeholder ?? _buildPlaceholder();
         },
         errorBuilder: (_, _, _) {

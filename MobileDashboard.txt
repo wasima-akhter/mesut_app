@@ -1,0 +1,538 @@
+MobileDashboard
+Mobile app dashboard, projects, and profile endpoints
+
+
+
+GET
+/api/v1/mobile/dashboard
+Get mobile dashboard
+
+
+
+Returns home-screen stats (pending inspections, assigned projects), upcoming active phases for the authenticated user, and map pins for projects with active phases.
+
+Parameters
+Try it out
+No parameters
+
+Responses
+Code	Description	Links
+200	
+Dashboard fetched successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Dashboard fetched successfully.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": {
+    "stats": {
+      "pendingInspections": 0,
+      "assignedProjects": 0
+    },
+    "upcomingTasks": [
+      {
+        "phaseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "type": "ERECTION",
+        "status": "ENQUIRY",
+        "priority": "HIGH",
+        "startDate": "2026-11-12T06:36:45.459Z",
+        "endDate": "2026-11-12T06:36:45.459Z",
+        "project": {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "name": "string",
+          "address": "string"
+        }
+      }
+    ],
+    "mapPins": [
+      {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "name": "string",
+        "latitude": 0,
+        "longitude": 0,
+        "activePhaseType": "ERECTION"
+      }
+    ]
+  }
+}
+No links
+401	
+Authentication or device session failed
+
+Media type
+
+application/json
+Examples
+
+tokenInvalid
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Account inactive or suspended
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Your account is not active. Please verify your email or contact support.",
+  "errorType": "ACCOUNT_INACTIVE",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+
+GET
+/api/v1/mobile/projects
+List my projects
+
+
+
+Returns distinct projects assigned to the authenticated user via ProjectManagerAssignment or CrewAssignment, with customer name and user-relevant phases only.
+
+Parameters
+Try it out
+No parameters
+
+Responses
+Code	Description	Links
+200	
+Projects fetched successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Projects fetched successfully.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "address": "string",
+      "customer": {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "name": "string"
+      },
+      "phases": [
+        {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "type": "ERECTION",
+          "status": "ENQUIRY",
+          "priority": "HIGH",
+          "startDate": "2026-11-12T06:36:45.491Z",
+          "endDate": "2026-11-12T06:36:45.491Z"
+        }
+      ],
+      "budgetedHours": 0,
+      "totalLoggedHours": 0,
+      "isProfitable": true
+    }
+  ]
+}
+No links
+401	
+Authentication or device session failed
+
+Media type
+
+application/json
+Examples
+
+tokenInvalid
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Account inactive or suspended
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Your account is not active. Please verify your email or contact support.",
+  "errorType": "ACCOUNT_INACTIVE",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+
+GET
+/api/v1/mobile/profile
+Get mobile profile stats
+
+
+
+Returns profile fields plus hoursThisWeek (UTC ISO week, APPROVED net hours), assignedProjectsCount, and completedProjectsCount (all phases COMPLETED).
+
+Parameters
+Try it out
+No parameters
+
+Responses
+Code	Description	Links
+200	
+Profile fetched successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Profile fetched successfully.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "firstName": "string",
+    "lastName": "string",
+    "role": "ADMIN",
+    "email": "user@example.com",
+    "phone": "string",
+    "avatarUrl": "string",
+    "weeklyHoursTarget": 0,
+    "hoursThisWeek": 32.5,
+    "assignedProjectsCount": 0,
+    "completedProjectsCount": 0
+  }
+}
+No links
+401	
+Authentication or device session failed
+
+Media type
+
+application/json
+Examples
+
+tokenInvalid
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Account inactive or suspended
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Your account is not active. Please verify your email or contact support.",
+  "errorType": "ACCOUNT_INACTIVE",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+
+GET
+/api/v1/mobile/schedule
+Get site-manager schedule
+
+
+
+Site Manager only. Returns ProjectPhases overlapping the query window, grouped by UTC date. Respects CompanyProfile.siteManagerAccessRule. Excludes phases with null startDate/endDate.
+
+Parameters
+Try it out
+Name	Description
+startDate *
+string($date-time)
+(query)
+startDate
+endDate *
+string($date-time)
+(query)
+endDate
+Responses
+Code	Description	Links
+200	
+Schedule fetched successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Schedule fetched successfully.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": [
+    {
+      "date": "2026-11-12",
+      "phases": [
+        {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "type": "ERECTION",
+          "status": "ENQUIRY",
+          "priority": "HIGH",
+          "startDate": "2026-11-12T06:36:45.498Z",
+          "endDate": "2026-11-12T06:36:45.498Z",
+          "project": {
+            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "name": "string",
+            "address": "string"
+          }
+        }
+      ]
+    }
+  ]
+}
+No links
+401	
+Authentication or device session failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Forbidden (not site manager / not assigned)
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Only site managers can access this resource",
+  "errorType": "FORBIDDEN",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422	
+Request query validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "string",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "errors": [
+    {
+      "field": "string",
+      "message": "string"
+    }
+  ]
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+
+GET
+/api/v1/mobile/map
+Get site-manager map pins
+
+
+
+Site Manager only. Returns distinct projects with lat/lng and an active phase type. Respects siteManagerAccessRule. Optional type filter.
+
+Parameters
+Try it out
+Name	Description
+type
+string
+(query)
+Available values : ERECTION, DISMANTLING, STANDING, MAINTENANCE
+
+
+--
+Responses
+Code	Description	Links
+200	
+Map data fetched successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Map data fetched successfully.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "data": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "latitude": 0,
+      "longitude": 0,
+      "activePhaseType": "ERECTION"
+    }
+  ]
+}
+No links
+401	
+Authentication or device session failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Token not found",
+  "errorType": "TOKEN_INVALID",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+403	
+Forbidden (not site manager / not assigned)
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "Only site managers can access this resource",
+  "errorType": "FORBIDDEN",
+  "traceId": "123e4567-e89b-12d3-a456-426614174000"
+}
+No links
+422	
+Request query validation failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "string",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "errors": [
+    {
+      "field": "string",
+      "message": "string"
+    }
+  ]
+}
+No links
+500	
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}

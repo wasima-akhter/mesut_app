@@ -23,5 +23,8 @@ abstract final class StorageKeys {
   static const String rememberedEmail = 'remembered_email';
   static const String onboardingCompleted = 'onboarding_completed';
   static const String selectedLanguage = 'selected_language_code';
+  static const String hasUserSelectedLanguage = 'has_user_selected_language';
   static const String lastSyncTime = 'last_sync_time';
+  static const String mobileConfigCache = 'mobile_config_cache';
+  static const String offlineTimeLogsQueue = 'offline_time_logs_queue';
 }

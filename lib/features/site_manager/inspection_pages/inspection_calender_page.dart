@@ -8,8 +8,10 @@ import 'package:table_calendar/table_calendar.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/states/app_empty_widget.dart';
 import '../presentation/providers/site_manager_inspections_provider.dart';
 import 'site_manager_inspections_page.dart';
+import 'widgets/inspection_header.dart';
 
 class InspectionCalendarPage extends ConsumerStatefulWidget {
   const InspectionCalendarPage({super.key});
@@ -56,12 +58,18 @@ class _InspectionCalendarPageState
 
                   SizedBox(height: 9.h),
 
-                  ..._events.map(
-                    (event) => Padding(
-                      padding: EdgeInsets.only(bottom: 10.h),
-                      child: _buildEventCard(event),
+                  if (_events.isEmpty)
+                    AppEmptyWidget(
+                      icon: Icons.event_busy_outlined,
+                      title: context.loc.noInspections,
+                    )
+                  else
+                    ..._events.map(
+                      (event) => Padding(
+                        padding: EdgeInsets.only(bottom: 10.h),
+                        child: _buildEventCard(event),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -437,7 +445,10 @@ class _InspectionCalendarPageState
               SmallRedButton(
                 text: context.loc.openProject,
                 onTap: () {
-                  context.push(RouteConstants.siteManagerProjectDetail);
+                  context.push(
+                    RouteConstants.siteManagerProjectDetail,
+                    extra: event.projectId,
+                  );
                 },
               ),
             ],

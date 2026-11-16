@@ -20,6 +20,7 @@ class SessionManager {
   DateTime? _lastSessionExpiryHandledAt;
 
   final List<VoidCallback> _authResetCallbacks = [];
+  final List<Future<void> Function()> _asyncSessionCleanupCallbacks = [];
   GoRouter? _router;
 
   void attachRouter(GoRouter router) {
@@ -34,6 +35,16 @@ class SessionManager {
 
   void unregisterAuthResetCallback(VoidCallback callback) {
     _authResetCallbacks.remove(callback);
+  }
+
+  void registerAsyncCleanupCallback(Future<void> Function() callback) {
+    if (!_asyncSessionCleanupCallbacks.contains(callback)) {
+      _asyncSessionCleanupCallbacks.add(callback);
+    }
+  }
+
+  void unregisterAsyncCleanupCallback(Future<void> Function() callback) {
+    _asyncSessionCleanupCallbacks.remove(callback);
   }
 
   bool _isAlreadyOnAuthScreen() {
@@ -79,6 +90,17 @@ class SessionManager {
       }
 
       await storageService.clearAuthentication();
+      await storageService.clearFcmToken();
+
+      for (final callback in List<Future<void> Function()>.from(
+        _asyncSessionCleanupCallbacks,
+      )) {
+        try {
+          await callback();
+        } catch (e) {
+          debugPrint('SessionManager: Error executing async cleanup: $e');
+        }
+      }
 
       for (final callback in List<VoidCallback>.from(_authResetCallbacks)) {
         try {

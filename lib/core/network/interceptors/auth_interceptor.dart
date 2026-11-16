@@ -98,16 +98,18 @@ class AuthInterceptor extends Interceptor {
     final path = err.requestOptions.path;
 
     final errorType = err.response?.data is Map
-        ? err.response!.data['errorType']?.toString()
+        ? err.response!.data['errorType']?.toString().toUpperCase()
         : null;
 
+    final isSessionErrorCode =
+        errorType != null &&
+        (errorType.startsWith('TOKEN_') ||
+            errorType.startsWith('SESSION_') ||
+            errorType.startsWith('DEVICE_') ||
+            errorType == 'UNAUTHORIZED');
+
     final isAuthError =
-        (statusCode == 401 && errorType != 'INVALID_OTP') ||
-        (errorType == 'TOKEN_EXPIRED' ||
-            errorType == 'UNAUTHORIZED' ||
-            errorType == 'TOKEN_BLACKLISTED' ||
-            errorType == 'TOKEN_INVALID' ||
-            errorType == 'SESSION_EXPIRED');
+        (statusCode == 401 && errorType != 'INVALID_OTP') || isSessionErrorCode;
 
     if (isAuthError && !_isExcludedFromSessionExpiry(path)) {
       if (sessionManager != null) {

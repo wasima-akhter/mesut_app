@@ -76,10 +76,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       country: _selectedPhoneCountry,
       languageCode: loc.localeCode,
     );
-    // if (phoneError != null) {
-    //   AppSnackBar.error(phoneError);
-    //   return;
-    // }
+    if (phoneError != null) {
+      AppSnackBar.error(phoneError);
+      // return;
+    }
 
     final formattedPhone = PhoneHelper.formatCompleteNumber(
       _selectedPhoneCountry,
@@ -113,7 +113,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           firstName: firstName,
           lastName: lastName,
           email: email,
-          phone: "1234567891" ?? formattedPhone,
+          phone: "0123456789" ?? formattedPhone,
           password: password,
           role: _selectedRole,
         );
@@ -342,8 +342,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
           SizedBox(height: 17.h),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
                 loc.alreadyHaveAccount,

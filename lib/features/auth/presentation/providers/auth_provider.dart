@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/enums/app_enum.dart';
@@ -6,6 +9,8 @@ import '../../../../core/helpers/device_location_helper.dart';
 import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/network/network_providers.dart';
 import '../../../../core/providers/common_provider.dart';
+import '../../../../core/services/notification_service.dart';
+import '../../../../core/services/notification_socket_service.dart';
 import '../../../../core/session/session_invalidator.dart';
 import '../../../../core/session/session_manager.dart';
 import '../../../../core/storage/storage_provider.dart';
@@ -103,6 +108,9 @@ class AuthState {
 }
 
 class AuthNotifier extends Notifier<AuthState> {
+  DateTime? _lastHeartbeatAt;
+  bool _isHeartbeatRunning = false;
+
   @override
   AuthState build() {
     final repository = ref.watch(authRepositoryProvider);
@@ -133,9 +141,59 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   void _onSessionExpired() {
+    try {
+      ref.read(notificationSocketServiceProvider).disconnect();
+    } catch (_) {}
     clearUserSessionState(ref);
     ref.read(userRoleProvider.notifier).clearRole();
     state = const AuthState(status: AuthStatus.unauthenticated);
+  }
+
+  /// Periodic / lifecycle heartbeat (`POST /auth/check`) syncing GPS and rotated FCM token.
+  Future<void> heartbeatCheck({bool throttle = true}) async {
+    if (_isHeartbeatRunning || !state.isAuthenticated) return;
+
+    final now = DateTime.now();
+    if (throttle &&
+        _lastHeartbeatAt != null &&
+        now.difference(_lastHeartbeatAt!).inSeconds < 60) {
+      return;
+    }
+
+    _isHeartbeatRunning = true;
+    try {
+      final storageService = ref.read(storageServiceProvider);
+      final hasValid = await storageService.hasValidAccessToken();
+      if (!hasValid) return;
+
+      final deviceId = await storageService.getOrCreateDeviceIdentifier();
+      var fcmToken = await storageService.getFcmToken();
+      if (fcmToken == null || fcmToken.isEmpty) {
+        try {
+          fcmToken = await ref
+              .read(pushNotificationServiceProvider)
+              .refreshAndPersistToken();
+        } catch (_) {}
+      }
+      final coords = await DeviceLocationHelper.tryGetCoordinates();
+
+      final user = await ref.read(authRepositoryProvider).checkSession(
+        deviceIdentifier: deviceId,
+        fcmToken: fcmToken,
+        lat: coords?.lat,
+        lng: coords?.lng,
+      );
+
+      _lastHeartbeatAt = DateTime.now();
+      if (user != null && ref.mounted) {
+        ref.read(userRoleProvider.notifier).setRole(user.role);
+        state = state.copyWith(user: user, selectedRole: user.role);
+      }
+    } catch (e) {
+      debugPrint('Heartbeat check warning: $e');
+    } finally {
+      _isHeartbeatRunning = false;
+    }
   }
 
   UserFriendlyMessage _resolveError(Object error) {
@@ -224,7 +282,14 @@ class AuthNotifier extends Notifier<AuthState> {
     final storageService = ref.read(storageServiceProvider);
     try {
       final deviceId = await storageService.getOrCreateDeviceIdentifier();
-      final fcmToken = await storageService.getFcmToken();
+      var fcmToken = await storageService.getFcmToken();
+      if (fcmToken == null || fcmToken.isEmpty) {
+        try {
+          fcmToken = await ref
+              .read(pushNotificationServiceProvider)
+              .refreshAndPersistToken();
+        } catch (_) {}
+      }
       final coords = await DeviceLocationHelper.tryGetCoordinates();
 
       final session = await ref.read(authRepositoryProvider).login(
@@ -354,7 +419,14 @@ class AuthNotifier extends Notifier<AuthState> {
     final storageService = ref.read(storageServiceProvider);
     try {
       final deviceId = await storageService.getOrCreateDeviceIdentifier();
-      final fcmToken = await storageService.getFcmToken();
+      var fcmToken = await storageService.getFcmToken();
+      if (fcmToken == null || fcmToken.isEmpty) {
+        try {
+          fcmToken = await ref
+              .read(pushNotificationServiceProvider)
+              .refreshAndPersistToken();
+        } catch (_) {}
+      }
       final coords = await DeviceLocationHelper.tryGetCoordinates();
 
       final session = await ref.read(authRepositoryProvider).verifyOtp(
@@ -414,6 +486,12 @@ class AuthNotifier extends Notifier<AuthState> {
     try {
       await ref.read(authRepositoryProvider).logout();
     } finally {
+      try {
+        ref.read(notificationSocketServiceProvider).disconnect();
+      } catch (_) {}
+      try {
+        await ref.read(pushNotificationServiceProvider).clearTokenOnLogout();
+      } catch (_) {}
       clearUserSessionState(ref);
       ref.read(userRoleProvider.notifier).clearRole();
       state = AuthState(

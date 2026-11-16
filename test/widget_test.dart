@@ -1,11 +1,11 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:construction_app/features/entry/nav/bottom_nav_tabs.dart';
 import 'package:construction_app/features/employee/presentation/providers/employee_timer_provider.dart';
+import 'package:construction_app/features/entry/nav/bottom_nav_tabs.dart';
 import 'package:construction_app/features/site_manager/presentation/providers/site_manager_home_provider.dart';
-import 'package:construction_app/features/site_manager/presentation/providers/site_manager_projects_provider.dart';
+import 'package:construction_app/features/site_manager/projects/presentation/providers/site_manager_projects_provider.dart';
 import 'package:construction_app/features/site_manager/presentation/providers/site_manager_time_provider.dart';
 import 'package:construction_app/features/site_manager/projects/enums.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Bottom Navigation Tabs Configuration Tests', () {
@@ -25,22 +25,25 @@ void main() {
   });
 
   group('Riverpod Providers State Tests', () {
-    test('EmployeeTimerNotifier start, pause, and finish timer updates state correctly', () {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+    test(
+      'EmployeeTimerNotifier start, pause, and finish timer updates state correctly',
+      () {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
 
-      expect(container.read(employeeTimerProvider).isTimerRunning, isFalse);
-      container.read(employeeTimerProvider.notifier).startTimer();
-      expect(container.read(employeeTimerProvider).isTimerRunning, isTrue);
-      expect(container.read(employeeTimerProvider).isOnBreak, isFalse);
+        expect(container.read(employeeTimerProvider).isTimerRunning, isFalse);
+        container.read(employeeTimerProvider.notifier).startTimer();
+        expect(container.read(employeeTimerProvider).isTimerRunning, isTrue);
+        expect(container.read(employeeTimerProvider).isOnBreak, isFalse);
 
-      container.read(employeeTimerProvider.notifier).pauseTimer();
-      expect(container.read(employeeTimerProvider).isOnBreak, isTrue);
+        container.read(employeeTimerProvider.notifier).pauseTimer();
+        expect(container.read(employeeTimerProvider).isOnBreak, isTrue);
 
-      container.read(employeeTimerProvider.notifier).finishTimer();
-      expect(container.read(employeeTimerProvider).isTimerRunning, isFalse);
-      expect(container.read(employeeTimerProvider).isOnBreak, isFalse);
-    });
+        container.read(employeeTimerProvider.notifier).finishTimer();
+        expect(container.read(employeeTimerProvider).isTimerRunning, isFalse);
+        expect(container.read(employeeTimerProvider).isOnBreak, isFalse);
+      },
+    );
 
     test('SiteManagerProjectsNotifier tab selection filter', () {
       final container = ProviderContainer();
@@ -48,8 +51,10 @@ void main() {
 
       final notifier = container.read(siteManagerProjectsProvider.notifier);
       notifier.selectTab(ProjectTab.active);
-      expect(container.read(siteManagerProjectsProvider).selectedTab, equals(ProjectTab.active));
-      expect(container.read(siteManagerProjectsProvider).filteredProjects.isNotEmpty, isTrue);
+      expect(
+        container.read(siteManagerProjectsProvider).selectedTab,
+        equals(ProjectTab.active),
+      );
     });
 
     test('SiteManagerHomeNotifier toggles operations view', () {
@@ -57,7 +62,10 @@ void main() {
       addTearDown(container.dispose);
 
       final notifier = container.read(siteManagerHomeProvider.notifier);
-      expect(container.read(siteManagerHomeProvider).showAllOperations, isFalse);
+      expect(
+        container.read(siteManagerHomeProvider).showAllOperations,
+        isFalse,
+      );
       notifier.toggleShowAllOperations();
       expect(container.read(siteManagerHomeProvider).showAllOperations, isTrue);
     });

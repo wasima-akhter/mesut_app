@@ -1,14 +1,16 @@
-import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../core/errors/app_error_resolver.dart';
 import '../../../core/localization/context_extensions.dart';
-import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/localization/localization_provider.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
-import '../presentation/providers/site_manager_phase_board_provider.dart';
+import '../../../core/widgets/states/app_empty_widget.dart';
+import '../../shared/mobile_dashboard/presentation/utils/mobile_phase_localizer.dart';
+import '../domain/entities/mobile_phase_entity.dart';
+import '../presentation/providers/mobile_phase_provider.dart';
 
 enum ProjectPhase { enquiry, erection, dismantling, standing }
 
@@ -22,540 +24,237 @@ class SiteManagerPhaseBoardPage extends ConsumerStatefulWidget {
 
 class _SiteManagerPhaseBoardPageState
     extends ConsumerState<SiteManagerPhaseBoardPage> {
-  ProjectPhase get _selectedPhase =>
-      ref.watch(phaseBoardProvider).selectedPhase;
+  String _selectedType = 'ALL';
 
-  List<ProjectBoardModel> get _projects =>
-      ref.watch(phaseBoardProvider).projects;
+  Future<void> _pickAndUpdateStatus(MobilePhaseEntity phase) async {
+    const statuses = ['ENQUIRY', 'PLANNED', 'IN_PROGRESS', 'ON_HOLD', 'COMPLETED'];
+    final chosen = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: EdgeInsets.all(14.w),
+              child: Text(
+                context.loc.updateStatus,
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+              ),
+            ),
+            for (final status in statuses)
+              ListTile(
+                title: Text(status),
+                trailing: phase.status == status
+                    ? const Icon(Icons.check, color: AppColors.primary)
+                    : null,
+                onTap: () => Navigator.of(ctx).pop(status),
+              ),
+          ],
+        ),
+      ),
+    );
+
+    if (chosen == null || chosen == phase.status) return;
+    try {
+      await ref
+          .read(mobilePhasesProvider.notifier)
+          .updateStatus(phase.id, chosen);
+      if (!mounted) return;
+      AppSnackBar.showSuccess(
+        context,
+        context.loc.phaseChanged(phase.status, chosen),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      final lang = ref.read(appLanguageProvider).code;
+      final resolved = AppErrorResolver.resolve(e, languageCode: lang);
+      AppSnackBar.showError(context, resolved.displayMessage);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(appLanguageProvider);
+    final phasesAsync = ref.watch(mobilePhasesProvider);
+
+    final filters = <(String, String)>[
+      ('ALL', context.loc.mapFilterAll),
+      ('ERECTION', context.loc.erectionPhase),
+      ('DISMANTLING', context.loc.dismantlingPhase),
+      ('STANDING', context.loc.standing),
+      ('MAINTENANCE', context.loc.maintenancePhase),
+    ];
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Sticky header
-            Padding(
-              padding: EdgeInsets.fromLTRB(12.w, 18.h, 12.w, 0),
-              child: _buildHeader(),
-            ),
-
-            SizedBox(height: 14.h),
-
-            // Sticky phase tabs
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12.w),
-              child: _buildPhaseTabs(),
-            ),
-
-            SizedBox(height: 12.h),
-
-            // Only the project cards scroll
-            Expanded(
-              child: CustomScrollView(
-                physics: const BouncingScrollPhysics(
-                  parent: AlwaysScrollableScrollPhysics(),
-                ),
-                slivers: [
-                  SliverPadding(
-                    padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 20.h),
-                    sliver: SliverList.builder(
-                      itemCount: _projects.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 12.h),
-                          child: _buildProjectCard(_projects[index]),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Row(
-      children: [
-        _buildBackButton(),
-
-        SizedBox(width: 12.w),
-
-        Expanded(
-          child: Text(
-            context.loc.phaseBoard,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-        ),
-
-        _headerIcon(Icons.search_rounded, onTap: () {}),
-
-        SizedBox(width: 7.w),
-
-        _headerIcon(Icons.tune_rounded, onTap: () {}),
-      ],
-    );
-  }
-
-  Widget _buildBackButton() {
-    return const AppBackButton();
-  }
-
-  Widget _headerIcon(IconData icon, {required VoidCallback onTap}) {
-    return AppIconButton.circle(
-      iconData: icon,
-      onPressed: onTap,
-      borderColor: AppColors.border,
-      size: 38.w,
-      iconSize: 18.sp,
-    );
-  }
-
-  Widget _buildPhaseTabs() {
-    return SizedBox(
-      height: 38.h,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: ProjectPhase.values.length,
-        separatorBuilder: (_, _) => SizedBox(width: 6.w),
-        itemBuilder: (context, index) {
-          final phase = ProjectPhase.values[index];
-
-          final selected = phase == _selectedPhase;
-
-          return Material(
-            color: selected ? AppColors.black : AppColors.surface,
-            borderRadius: BorderRadius.circular(7.r),
-            child: InkWell(
-              onTap: () {
-                ref.read(phaseBoardProvider.notifier).setPhase(phase);
+      appBar: AppBar(title: Text(context.loc.phaseBoard)),
+      body: Column(
+        children: [
+          SizedBox(
+            height: 50.h,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+              itemCount: filters.length,
+              separatorBuilder: (_, __) => SizedBox(width: 8.w),
+              itemBuilder: (_, index) {
+                final (code, label) = filters[index];
+                return ChoiceChip(
+                  label: Text(label),
+                  selected: _selectedType == code,
+                  onSelected: (_) => setState(() => _selectedType = code),
+                );
               },
-              borderRadius: BorderRadius.circular(7.r),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 13.w),
-                child: Row(
-                  children: [
-                    if (phase != ProjectPhase.enquiry)
-                      Container(
-                        width: 7.w,
-                        height: 7.w,
-                        margin: EdgeInsets.only(right: 6.w),
-                        decoration: BoxDecoration(
-                          color: _phaseColor(phase),
-                          shape: BoxShape.circle,
+            ),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () =>
+                  ref.read(mobilePhasesProvider.notifier).refresh(),
+              child: phasesAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(context.loc.somethingWentWrong),
+                      SizedBox(height: 10.h),
+                      ElevatedButton(
+                        onPressed: () =>
+                            ref.read(mobilePhasesProvider.notifier).refresh(),
+                        child: Text(context.loc.mapRetry),
+                      ),
+                    ],
+                  ),
+                ),
+                data: (phases) {
+                  final visible = _selectedType == 'ALL'
+                      ? phases
+                      : phases
+                            .where(
+                              (p) =>
+                                  p.type.trim().toUpperCase() == _selectedType,
+                            )
+                            .toList();
+
+                  if (visible.isEmpty) {
+                    return ListView(
+                      children: [
+                        SizedBox(height: 72.h),
+                        AppEmptyWidget(
+                          icon: Icons.view_kanban_outlined,
+                          title: context.loc.noPhasesFound,
+                          onRetry: () => ref
+                              .read(mobilePhasesProvider.notifier)
+                              .refresh(),
                         ),
-                      ),
-                    Text(
-                      _phaseLabel(phase),
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: selected
-                            ? AppColors.white
-                            : AppColors.textSecondary,
-                      ),
+                      ],
+                    );
+                  }
+
+                  return ListView.builder(
+                    padding: EdgeInsets.all(14.w),
+                    itemCount: visible.length,
+                    itemBuilder: (_, index) => _PhaseBoardCard(
+                      phase: visible[index],
+                      onUpdateStatus: () =>
+                          _pickAndUpdateStatus(visible[index]),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildProjectCard(ProjectBoardModel project) {
-    return GestureDetector(
-      onTap: () => context.push(RouteConstants.siteManagerProjectDetail),
-      child: Container(
-        padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(9.r),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                _priorityBadge(project.priority),
-
-                const Spacer(),
-
-                Icon(
-                  Icons.calendar_month_outlined,
-                  size: 16.sp,
-                  color: AppColors.textSecondary,
-                ),
-
-                SizedBox(width: 5.w),
-
-                Text(
-                  project.days,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
-
-            SizedBox(height: 10.h),
-
-            Text(
-              '${project.id} • ${project.title}',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-
-            SizedBox(height: 7.h),
-
-            Row(
-              children: [
-                Icon(
-                  Icons.business_outlined,
-                  size: 15.sp,
-                  color: AppColors.textSecondary,
-                ),
-                SizedBox(width: 5.w),
-                Expanded(
-                  child: Text(
-                    '${project.company} • ${project.type}',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-              ],
-            ),
-
-            SizedBox(height: 6.h),
-
-            Row(
-              children: [
-                Icon(
-                  Icons.location_on_outlined,
-                  size: 15.sp,
-                  color: AppColors.textSecondary,
-                ),
-                SizedBox(width: 5.w),
-                Expanded(
-                  child: Text(
-                    project.address,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-              ],
-            ),
-
-            SizedBox(height: 11.h),
-
-            Divider(height: 1, color: AppColors.border),
-
-            SizedBox(height: 9.h),
-
-            Row(
-              children: [
-                Icon(
-                  Icons.person_outline_rounded,
-                  size: 17.sp,
-                  color: AppColors.textSecondary,
-                ),
-
-                SizedBox(width: 5.w),
-
-                Expanded(
-                  child: Text(
-                    project.assignee,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-
-                _moreButton(project),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _priorityBadge(String priority) {
-    Color color;
-    String label;
-
-    switch (priority.toLowerCase()) {
-      case 'high':
-        color = AppColors.error;
-        label = context.loc.high;
-        break;
-      case 'medium':
-        color = AppColors.warning;
-        label = context.loc.medium;
-        break;
-      default:
-        color = AppColors.textSecondary;
-        label = context.loc.low;
-    }
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: .08),
-        borderRadius: BorderRadius.circular(4.r),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color),
-      ),
-    );
-  }
-
-  Widget _moreButton(ProjectBoardModel project) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _showMoveToBottomSheet(project),
-        borderRadius: BorderRadius.circular(50.r),
-        child: Container(
-          width: 28.w,
-          height: 28.w,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.border),
           ),
-          child: Icon(Icons.more_vert_rounded, size: 17.sp),
-        ),
+        ],
       ),
     );
-  }
-
-  void _showMoveToBottomSheet(ProjectBoardModel project) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        return Container(
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-          ),
-          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 16.h),
-          child: SafeArea(
-            top: false,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 42.w,
-                    height: 4.h,
-                    decoration: BoxDecoration(
-                      color: AppColors.border,
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  '${project.id}.${project.title}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                    fontSize: 18.sp,
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  context.loc.get('siteManager.moveTo', 'Move to...'),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 19.sp,
-                  ),
-                ),
-                SizedBox(height: 12.h),
-                _buildMoveOption(
-                  sheetContext,
-                  icon: Icons.apartment_rounded,
-                  iconColor: const Color(0xFF0EA5E9),
-                  iconBgColor: const Color(0xFFE8F6FE),
-                  title: context.loc.get(
-                    'siteManager.standingScaffold',
-                    'Standing Scaffold',
-                  ),
-                  onTap: () {
-                    Navigator.of(sheetContext).pop();
-                    _onMoveProject(project, ProjectPhase.standing);
-                  },
-                ),
-                Divider(
-                  height: 1,
-                  color: AppColors.border.withValues(alpha: 0.6),
-                ),
-                _buildMoveOption(
-                  sheetContext,
-                  icon: Icons.build_outlined,
-                  iconColor: const Color(0xFFF59E0B),
-                  iconBgColor: const Color(0xFFFFF4E5),
-                  title: context.loc.get(
-                    'siteManager.dismantling',
-                    'Dismantling',
-                  ),
-                  onTap: () {
-                    Navigator.of(sheetContext).pop();
-                    _onMoveProject(project, ProjectPhase.dismantling);
-                  },
-                ),
-                Divider(
-                  height: 1,
-                  color: AppColors.border.withValues(alpha: 0.6),
-                ),
-                _buildMoveOption(
-                  sheetContext,
-                  icon: Icons.check_rounded,
-                  iconColor: const Color(0xFF4B5563),
-                  iconBgColor: const Color(0xFFF3F4F6),
-                  title: context.loc.get('siteManager.completed', 'Completed'),
-                  onTap: () {
-                    Navigator.of(sheetContext).pop();
-                    _onMoveProject(project, null, isCompleted: true);
-                  },
-                ),
-                SizedBox(height: 16.h),
-                Center(
-                  child: InkWell(
-                    onTap: () => Navigator.of(sheetContext).pop(),
-                    borderRadius: BorderRadius.circular(8.r),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 24.w,
-                        vertical: 8.h,
-                      ),
-                      child: Text(
-                        context.loc.cancel,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 18.sp,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildMoveOption(
-    BuildContext sheetContext, {
-    required IconData icon,
-    required Color iconColor,
-    required Color iconBgColor,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8.r),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 4.w),
-        child: Row(
-          children: [
-            Container(
-              width: 38.w,
-              height: 38.w,
-              decoration: BoxDecoration(
-                color: iconBgColor,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 19.sp, color: iconColor),
-            ),
-            SizedBox(width: 14.w),
-            Expanded(
-              child: Text(
-                title,
-                style: Theme.of(sheetContext).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 18.sp,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _onMoveProject(
-    ProjectBoardModel project,
-    ProjectPhase? phase, {
-    bool isCompleted = false,
-  }) {
-    final destination = isCompleted
-        ? context.loc.get('siteManager.completed', 'Completed')
-        : (phase != null ? _phaseLabel(phase) : '');
-
-    AppSnackBar.showSuccess(
-      context,
-      context.loc.get(
-        'siteManager.projectMovedTo',
-        'Moved ${project.id} to $destination',
-        {'id': project.id, 'phase': destination},
-      ),
-    );
-  }
-
-  String _phaseLabel(ProjectPhase phase) {
-    switch (phase) {
-      case ProjectPhase.enquiry:
-        return context.loc.enquiry;
-      case ProjectPhase.erection:
-        return context.loc.erectionPhase;
-      case ProjectPhase.dismantling:
-        return context.loc.dismantlingPhase;
-      case ProjectPhase.standing:
-        return context.loc.standing;
-    }
-  }
-
-  Color _phaseColor(ProjectPhase phase) {
-    switch (phase) {
-      case ProjectPhase.erection:
-        return AppColors.success;
-      case ProjectPhase.dismantling:
-        return AppColors.warning;
-      case ProjectPhase.standing:
-        return AppColors.info;
-      case ProjectPhase.enquiry:
-        return AppColors.textSecondary;
-    }
   }
 }
 
-class ProjectBoardModel {
-  final String id;
-  final String title;
-  final String company;
-  final String type;
-  final String address;
-  final String assignee;
-  final String priority;
-  final String days;
-
-  const ProjectBoardModel({
-    required this.id,
-    required this.title,
-    required this.company,
-    required this.type,
-    required this.address,
-    required this.assignee,
-    required this.priority,
-    required this.days,
+class _PhaseBoardCard extends StatelessWidget {
+  const _PhaseBoardCard({
+    required this.phase,
+    required this.onUpdateStatus,
   });
+
+  final MobilePhaseEntity phase;
+  final VoidCallback onUpdateStatus;
+
+  @override
+  Widget build(BuildContext context) {
+    final typeColor = MobilePhaseLocalizer.phaseColor(phase.type);
+    return RepaintBoundary(
+      child: Card(
+        elevation: 0,
+        margin: EdgeInsets.only(bottom: 12.h),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          side: const BorderSide(color: AppColors.border),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(14.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 4.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: typeColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6.r),
+                    ),
+                    child: Text(
+                      MobilePhaseLocalizer.phaseType(context, phase.type),
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        color: typeColor,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Text(
+                    phase.status,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: onUpdateStatus,
+                    child: Text(context.loc.updateStatus),
+                  ),
+                ],
+              ),
+              SizedBox(height: 6.h),
+              Text(
+                phase.project.name.isEmpty ? phase.id : phase.project.name,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              if (phase.project.address.isNotEmpty) ...[
+                SizedBox(height: 4.h),
+                Text(
+                  phase.project.address,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: AppColors.textTertiary,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

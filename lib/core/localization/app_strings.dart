@@ -74,6 +74,26 @@ class AppStrings {
   String get onHold => get('common.onHold', 'On Hold');
   String get commercial => get('common.commercial', 'Commercial');
   String get private => get('common.private', 'Private');
+  String get preconstruction =>
+      get('common.preconstruction', 'Preconstruction');
+  String get noOtherItemsAvailable =>
+      get('common.noOtherItemsAvailable', 'No other items are available');
+  String get noInternetConnection =>
+      get('common.noInternetConnection', 'No internet connection');
+  String get checkInternetConnection => get(
+    'common.checkInternetConnection',
+    'Please check your internet connection and try again.',
+  );
+  String get addSchedule => get('common.addSchedule', '+ Add Schedule');
+  String get removeSchedule => get('common.removeSchedule', 'Remove Schedule');
+  String get coordinates => get('common.coordinates', 'Coordinates');
+  String get useCurrentLocation =>
+      get('common.useCurrentLocation', 'Use GPS Location');
+  String get heightM => get('common.heightM', 'Height (m)');
+  String get standingScaffold =>
+      get('common.standingScaffold', 'Standing Scaffold');
+  String get maintenance => get('common.maintenance', 'Maintenance');
+  String get other => get('common.other', 'Other');
 
   // ============================================================
   // AUTH
@@ -105,7 +125,8 @@ class AppStrings {
   String get fullName => get('auth.fullName', 'Full Name');
   String get enterFullName => get('auth.enterFullName', 'Enter your full name');
   String get firstName => get('auth.firstName', 'First Name');
-  String get enterFirstName => get('auth.enterFirstName', 'Enter your first name');
+  String get enterFirstName =>
+      get('auth.enterFirstName', 'Enter your first name');
   String get lastName => get('auth.lastName', 'Last Name');
   String get enterLastName => get('auth.enterLastName', 'Enter your last name');
   String get selectRole => get('auth.selectRole', 'Select Role');
@@ -135,15 +156,10 @@ class AppStrings {
   );
   String get verifyCode => get('auth.verifyCode', 'Verify Code');
   String get resendCode => get('auth.resendCode', 'Resend Code');
-  String resendInSeconds(String seconds) => get(
-    'auth.resendInSeconds',
-    'Resend in {seconds}s',
-    {'seconds': seconds},
-  );
-  String get otpSentSuccess => get(
-    'auth.otpSentSuccess',
-    'Verification code sent to your email',
-  );
+  String resendInSeconds(String seconds) =>
+      get('auth.resendInSeconds', 'Resend in {seconds}s', {'seconds': seconds});
+  String get otpSentSuccess =>
+      get('auth.otpSentSuccess', 'Verification code sent to your email');
   String get verificationResentSuccess => get(
     'auth.verificationResentSuccess',
     'Verification code resent successfully',
@@ -334,8 +350,8 @@ class AppStrings {
       get('employee.scaffoldErection', 'Scaffold Erection');
   String get scaffoldDismantling =>
       get('employee.scaffoldDismantling', 'Scaffold Dismantling');
-  String get standingScaffold =>
-      get('employee.standingScaffold', 'Standing Scaffold');
+  // String get standingScaffold =>
+  //     get('employee.standingScaffold', 'Standing Scaffold');
   String get otherActivity => get('employee.otherActivity', 'Other Activity');
   String get breakTime => get('employee.breakTime', 'Break Time');
   String get startTime => get('employee.startTime', 'Start Time');
@@ -464,10 +480,7 @@ class AppStrings {
   String nextSafetyInspection(String date) => get(
     'siteManager.nextSafetyInspection',
     'Next Safety Inspection: {date}',
-    {
-      'date': date,
-      'duration': date,
-    },
+    {'date': date, 'duration': date},
   );
   String get siteAccessAndPhotos =>
       get('siteManager.siteAccessAndPhotos', 'Site Access & Photos');
@@ -580,19 +593,15 @@ class AppStrings {
     'siteManager.hoursLoggedByCrew',
     'Total hours logged across all assigned employees',
   );
-  String get targetBudget =>
-      get('siteManager.targetBudget', 'Target Budget');
-  String get budgetStatus =>
-      get('siteManager.budgetStatus', 'Budget Status');
-  String get profitable =>
-      get('siteManager.profitable', 'Profitable');
+  String get targetBudget => get('siteManager.targetBudget', 'Target Budget');
+  String get budgetStatus => get('siteManager.budgetStatus', 'Budget Status');
+  String get profitable => get('siteManager.profitable', 'Profitable');
   String profitableUnderBudget(String hours) => get(
     'siteManager.profitableUnderBudget',
     'Profitable ({hours}h under budget)',
     {'hours': hours},
   );
-  String get lossRisk =>
-      get('siteManager.lossRisk', 'Loss Risk');
+  String get lossRisk => get('siteManager.lossRisk', 'Loss Risk');
   String lossRiskOverBudget(String hours) => get(
     'siteManager.lossRiskOverBudget',
     'Over Budget (+{hours}h)',
@@ -609,8 +618,7 @@ class AppStrings {
       get('siteManager.hoursByActivity', 'Hours by Activity');
   String get viewTimeLogs =>
       get('siteManager.viewTimeLogs', 'View Detailed Time Logs');
-  String get hoursLogged =>
-      get('siteManager.hoursLogged', 'Hours Logged');
+  String get hoursLogged => get('siteManager.hoursLogged', 'Hours Logged');
   String get consumedHours =>
       get('siteManager.consumedHours', 'Consumed Hours');
   String loggedAcrossEmployees(String hours, int count) => get(
@@ -618,14 +626,10 @@ class AppStrings {
     '{hours} logged across {count} employees',
     {'hours': hours, 'count': '$count'},
   );
-  String get profitabilityHealthy => get(
-    'siteManager.profitabilityHealthy',
-    'Project Profitability: Healthy',
-  );
-  String get profitabilityAtRisk => get(
-    'siteManager.profitabilityAtRisk',
-    'Project Profitability: At Risk',
-  );
+  String get profitabilityHealthy =>
+      get('siteManager.profitabilityHealthy', 'Project Profitability: Healthy');
+  String get profitabilityAtRisk =>
+      get('siteManager.profitabilityAtRisk', 'Project Profitability: At Risk');
   String remainingUnderLaborBudget(String hours, String budget) => get(
     'siteManager.remainingUnderLaborBudget',
     '{hours}h remaining under the {budget} labor budget.',
@@ -636,15 +640,10 @@ class AppStrings {
     '{hours}h exceeding the allocated {budget} target.',
     {'hours': hours, 'budget': budget},
   );
-  String get itemizedTimeLogsByCrew => get(
-    'siteManager.itemizedTimeLogsByCrew',
-    'Itemized Time Logs by Crew',
-  );
-  String primaryTask(String task) => get(
-    'siteManager.primaryTask',
-    'Primary task: {task}',
-    {'task': task},
-  );
+  String get itemizedTimeLogsByCrew =>
+      get('siteManager.itemizedTimeLogsByCrew', 'Itemized Time Logs by Crew');
+  String primaryTask(String task) =>
+      get('siteManager.primaryTask', 'Primary task: {task}', {'task': task});
   String get scaffolder => get('siteManager.scaffolder', 'Scaffolder');
   String get leadScaffolder =>
       get('siteManager.leadScaffolder', 'Lead Scaffolder');
@@ -700,6 +699,8 @@ class AppStrings {
       get('siteManager.openingEmail', 'Opening project email...');
   String get projectOpened =>
       get('siteManager.projectOpened', 'Project opened');
+  String get projectDetails =>
+      get('siteManager.projectDetails', 'Project Details');
   String get editProjectDetails =>
       get('siteManager.editProjectDetails', 'Edit Project Details');
   String get contactName => get('siteManager.contactName', 'Contact Name');
@@ -799,8 +800,8 @@ class AppStrings {
       get('siteManager.standingScaffold', 'Standing Scaffold');
   String get frontScaffold =>
       get('siteManager.frontScaffold', 'Front Scaffold');
-  String get preconstruction =>
-      get('siteManager.preconstruction', 'Preconstruction');
+  // String get preconstruction =>
+  //     get('siteManager.preconstruction', 'Preconstruction');
   String get construction => get('siteManager.construction', 'Construction');
   String get completion => get('siteManager.completion', 'Completion');
   String get handover => get('siteManager.handover', 'Handover');
@@ -815,7 +816,7 @@ class AppStrings {
   String get sideScaffold => get('siteManager.sideScaffold', 'Side Scaffold');
   String get fullScaffold => get('siteManager.fullScaffold', 'Full Scaffold');
   String get estAreaM2 => get('siteManager.estAreaM2', 'Est. area m²');
-  String get heightM => get('siteManager.heightM', 'Height m²');
+  // String get heightM => get('siteManager.heightM', 'Height m²');
   String get accessAndRequirements =>
       get('siteManager.accessAndRequirements', 'Access & Requirements');
   String get siteAccessInstruction =>
@@ -925,10 +926,8 @@ class AppStrings {
   // ============================================================
   // MAP
   // ============================================================
-  String get mapActiveSitesMap =>
-      get('map.activeSitesMap', 'Active Sites Map');
-  String get mapSiteManagerMap =>
-      get('map.siteManagerMap', 'Site Manager Map');
+  String get mapActiveSitesMap => get('map.activeSitesMap', 'Active Sites Map');
+  String get mapSiteManagerMap => get('map.siteManagerMap', 'Site Manager Map');
   String get mapAssignmentNavigation =>
       get('map.assignmentNavigation', 'Assignment Navigation');
   String get mapSearchHint =>
@@ -942,9 +941,9 @@ class AppStrings {
   String get mapRoleSiteManager => get('map.roleSiteManager', 'Site Manager');
   String get mapRoleEmployee => get('map.roleEmployee', 'Employee');
   String get mapPermissionNotice => get(
-        'map.permissionNotice',
-        'Showing Cologne locations. Enable GPS for live positioning.',
-      );
+    'map.permissionNotice',
+    'Showing Cologne locations. Enable GPS for live positioning.',
+  );
   String get mapEnable => get('map.enable', 'Enable');
   String get mapSampleRouteBadge =>
       get('map.sampleRouteBadge', 'SAMPLE ROUTE (MOCK)');
@@ -959,13 +958,162 @@ class AppStrings {
   String get mapZoomIn => get('map.zoomIn', 'Zoom In');
   String get mapZoomOut => get('map.zoomOut', 'Zoom Out');
   String get mapMyLocation => get('map.myLocation', 'My Location');
-  String get mapLoadingData =>
-      get('map.loadingData', 'Loading map data...');
-  String get mapUnavailable =>
-      get('map.mapUnavailable', 'Map Unavailable');
+  String get mapLoadingData => get('map.loadingData', 'Loading map data...');
+  String get mapUnavailable => get('map.mapUnavailable', 'Map Unavailable');
   String get mapErrorDescription => get(
-        'map.errorDescription',
-        'Unable to load map or route data. Please verify network and location settings.',
-      );
+    'map.errorDescription',
+    'Unable to load map or route data. Please verify network and location settings.',
+  );
   String get mapRetry => get('map.retry', 'Retry');
+
+  // ============================================================
+  // SYNC & RBAC
+  // ============================================================
+  String get syncNow => get('sync.syncNow', 'Sync Now');
+  String pendingSyncCount(String count) =>
+      get('sync.pendingCount', '{count} pending sync', {'count': count});
+  String get syncingInProgress => get('sync.syncing', 'Syncing...');
+  String syncCompleted(String created, String skipped) => get(
+    'sync.completed',
+    'Synced {created} new, {skipped} skipped',
+    {'created': created, 'skipped': skipped},
+  );
+  String get manualTimeDisabled => get(
+    'rbac.manualTimeDisabled',
+    'Manual time entry is disabled by company policy.',
+  );
+
+  // ============================================================
+  // MOBILE DASHBOARD, SCHEDULE & PROFILE STATS
+  // ============================================================
+  String get pendingInspections =>
+      get('mobile.pendingInspections', 'Pending Inspections');
+  // String get assignedProjects =>
+  //     get('mobile.assignedProjects', 'Assigned Projects');
+  // String get upcomingTasks =>
+  //     get('mobile.upcomingTasks', 'Upcoming Phases');
+  String get noUpcomingTasks =>
+      get('mobile.noUpcomingTasks', 'No upcoming active phases');
+  String get scheduleTitle => get('mobile.scheduleTitle', 'Site Schedule');
+  // String get thisWeek => get('mobile.thisWeek', 'This Week');
+  String get next14Days => get('mobile.next14Days', 'Next 14 Days');
+  String get noScheduleItems =>
+      get('mobile.noScheduleItems', 'No scheduled phases in this range');
+  // String get hoursThisWeek =>
+  // get('mobile.hoursThisWeek', 'Hours This Week');
+  String get completedProjects =>
+      get('mobile.completedProjects', 'Completed Projects');
+  String get maintenancePhase => get('mobile.maintenancePhase', 'Maintenance');
+  String get viewSchedule => get('mobile.viewSchedule', 'View Schedule');
+  String get priorityHigh => get('mobile.priorityHigh', 'High');
+  String get priorityMedium => get('mobile.priorityMedium', 'Medium');
+  String get priorityLow => get('mobile.priorityLow', 'Low');
+  String get somethingWentWrong =>
+      get('common.somethingWentWrong', 'Something went wrong');
+  String get showLess => get('common.showLess', 'Show less');
+
+  // ============================================================
+  // MOBILE TIME TRACKING & CREW TIME
+  // ============================================================
+  String get periodToday => get('time.today', 'Today');
+  String get periodThisWeek => get('time.thisWeek', 'This Week');
+  String get periodThisMonth => get('time.thisMonth', 'This Month');
+
+  String get noTimeLogs =>
+      get('time.noTimeLogs', 'No time logs for this period');
+  String get noCrewLogs => get('time.noCrewLogs', 'No crew time logs found');
+  String get syncedLabel => get('time.synced', 'Synced');
+  String get pendingSyncLabel => get('time.pendingSync', 'Pending');
+  String get manualLabel => get('time.manual', 'Manual');
+  String get timerLabel => get('time.timer', 'Timer');
+  String get breakLabel => get('time.breakLabel', 'Break');
+
+  // ============================================================
+  // MOBILE INSPECTIONS & PHASES
+  // ============================================================
+  String get surveyDone => get('inspections.surveyDone', 'Survey Done');
+  String get noInspections =>
+      get('inspections.noInspections', 'No inspections assigned');
+  String get completeSurvey =>
+      get('inspections.completeSurvey', 'Complete Survey');
+  String get scaffoldAreaLabel =>
+      get('inspections.scaffoldArea', 'Scaffold Area (m²)');
+  String get scaffoldHeightLabel =>
+      get('inspections.scaffoldHeight', 'Scaffold Height (m)');
+  String get scaffoldTypeLabel =>
+      get('inspections.scaffoldType', 'Scaffold Type');
+  String get updateStatus => get('phases.updateStatus', 'Update Status');
+  String get noPhasesFound => get('phases.noPhases', 'No managed phases found');
+
+  // ============================================================
+  // SITE LOCATION & CUSTOMER SELECTION
+  // ============================================================
+  String get selectSiteLocation =>
+      get('siteManager.selectSiteLocation', 'Select Site Location');
+  String get tapMapToPositionPin => get(
+    'siteManager.tapMapToPositionPin',
+    'Tap on the map or drag the pin to position the site',
+  );
+  String get confirmLocation =>
+      get('siteManager.confirmLocation', 'Confirm Location');
+  String get selectScaffoldingCoordinates => get(
+    'siteManager.selectScaffoldingCoordinates',
+    'Select the scaffolding project coordinates via map or GPS.',
+  );
+  String get selectOnMap => get('siteManager.selectOnMap', 'Select on Map');
+  String get currentGps => get('siteManager.currentGps', 'Current GPS');
+  String get tapToChange => get('siteManager.tapToChange', 'Tap to change');
+  String get placeLabelOptional =>
+      get('siteManager.placeLabelOptional', 'Place Label (Optional)');
+  String get placeLabelHint => get(
+    'siteManager.placeLabelHint',
+    'e.g. Goltsteinstraße 12, 50968 Cologne',
+  );
+  // String get locationPermissionRequired => get(
+  //     'siteManager.locationPermissionRequired',
+  //     'Location permission is required to detect device position.');
+  String get unableToGetGpsLocation => get(
+    'siteManager.unableToGetGpsLocation',
+    'Unable to get current GPS location.',
+  );
+  String get locationUpdatedFromGps => get(
+    'siteManager.locationUpdatedFromGps',
+    'Location updated from device GPS.',
+  );
+  String get couldNotObtainLocation => get(
+    'siteManager.couldNotObtainLocation',
+    'Could not obtain current location. Check permissions and GPS.',
+  );
+  String get pleaseSelectSiteLocation => get(
+    'siteManager.pleaseSelectSiteLocation',
+    'Please select a valid site location on the map.',
+  );
+  String get selectCustomer =>
+      get('siteManager.selectCustomer', 'Select Customer');
+  String get searchCustomerByName =>
+      get('siteManager.searchCustomerByName', 'Search customer by name...');
+  String get failedToLoadCustomers =>
+      get('siteManager.failedToLoadCustomers', 'Failed to load customers');
+  String get noCustomersFound =>
+      get('siteManager.noCustomersFound', 'No customers found');
+  String get selectExistingCustomer =>
+      get('siteManager.selectExistingCustomer', 'Select existing customer');
+  String get pleaseSelectExistingCustomer => get(
+    'siteManager.pleaseSelectExistingCustomer',
+    'Please select an existing customer',
+  );
+  String get pleaseEnterCustomerName =>
+      get('siteManager.pleaseEnterCustomerName', 'Please enter customer name');
+  String get pleaseEnterContactPersonName => get(
+    'siteManager.pleaseEnterContactPersonName',
+    'Please enter contact person name',
+  );
+  String get customerOrCompanyName =>
+      get('siteManager.customerOrCompanyName', 'Customer or Company name');
+  String get accessCode => get('siteManager.accessCode', 'Access Code: ');
+  String get searchProjectsHint => get(
+    'siteManager.searchProjectsHint',
+    'Search projects, address, city...',
+  );
+  String get cityCologne => get('common.cityCologne', 'Cologne');
 }

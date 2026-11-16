@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -16,7 +18,8 @@ class ActiveTimerPage extends ConsumerWidget {
 
   EmployeeAssignmentModel get assignment => fakeAssignments.last;
 
-  void _finishWork(BuildContext context, WidgetRef ref, EmployeeTimerState timerState) {
+  void _finishWork(BuildContext context, WidgetRef ref) {
+    final timerState = ref.read(employeeTimerProvider);
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -38,7 +41,9 @@ class ActiveTimerPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final timerState = ref.watch(employeeTimerProvider);
+    final isOnBreak = ref.watch(
+      employeeTimerProvider.select((s) => s.isOnBreak),
+    );
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -48,7 +53,9 @@ class ActiveTimerPage extends ConsumerWidget {
           slivers: [
             SliverPadding(
               padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 12.h),
-              sliver: SliverToBoxAdapter(child: _buildHeader(context, timerState)),
+              sliver: SliverToBoxAdapter(
+                child: _buildHeader(context, isOnBreak),
+              ),
             ),
 
             SliverPadding(
@@ -61,7 +68,7 @@ class ActiveTimerPage extends ConsumerWidget {
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 18.w),
               sliver: SliverToBoxAdapter(
-                child: _buildTimerCard(context, ref, timerState),
+                child: _buildTimerCard(context, ref, isOnBreak),
               ),
             ),
 
@@ -72,7 +79,7 @@ class ActiveTimerPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, EmployeeTimerState timerState) {
+  Widget _buildHeader(BuildContext context, bool isOnBreak) {
     return Row(
       children: [
         const AppBackButton(),
@@ -90,22 +97,17 @@ class ActiveTimerPage extends ConsumerWidget {
           ),
         ),
 
-        _statusBadge(context, timerState),
+        _statusBadge(context, isOnBreak),
       ],
     );
   }
 
-  Widget _statusBadge(BuildContext context, EmployeeTimerState timerState) {
-    final color = timerState.isOnBreak ? AppColors.warning : AppColors.success;
-
-    final background = timerState.isOnBreak
-        ? AppColors.warningLight
-        : AppColors.successLight;
-
+  Widget _statusBadge(BuildContext context, bool isOnBreak) {
+    final color = isOnBreak ? AppColors.warning : AppColors.success;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
       decoration: BoxDecoration(
-        color: background,
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6.r),
       ),
       child: Row(
@@ -118,7 +120,7 @@ class ActiveTimerPage extends ConsumerWidget {
           ),
           SizedBox(width: 6.w),
           Text(
-            timerState.isOnBreak ? context.loc.pauseBreak : context.loc.inProgress,
+            isOnBreak ? context.loc.pauseBreak : context.loc.inProgress,
             style: TextStyle(
               fontSize: 15.sp,
               fontWeight: FontWeight.w600,
@@ -198,34 +200,24 @@ class ActiveTimerPage extends ConsumerWidget {
   Widget _buildTimerCard(
     BuildContext context,
     WidgetRef ref,
-    EmployeeTimerState timerState,
+    bool isOnBreak,
   ) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 16.h),
       decoration: BoxDecoration(
-        color: timerState.isOnBreak ? const Color(0xFFFFF7E8) : AppColors.white,
+        color: isOnBreak ? const Color(0xFFFFF7E8) : AppColors.white,
         borderRadius: BorderRadius.circular(11.r),
         border: Border.all(
-          color: timerState.isOnBreak ? const Color(0xFFF9D89A) : AppColors.border,
+          color: isOnBreak ? const Color(0xFFF9D89A) : AppColors.border,
         ),
       ),
       child: Column(
         children: [
           SizedBox(height: 4.h),
 
-          Text(
-            timerState.formattedElapsed,
-            style: TextStyle(
-              fontSize: 44.sp,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1,
-              color: timerState.isOnBreak
-                  ? const Color(0xFFC47A0A)
-                  : AppColors.success,
-            ),
-          ),
+          _ActiveTimerElapsedView(isOnBreak: isOnBreak),
 
           SizedBox(height: 14.h),
 
@@ -240,7 +232,7 @@ class ActiveTimerPage extends ConsumerWidget {
             '${context.loc.breakTime}: ${const Duration(minutes: 45).formatCompactLocalized()}',
             style: TextStyle(
               fontSize: 16.sp,
-              color: timerState.isOnBreak
+              color: isOnBreak
                   ? AppColors.warningDark
                   : AppColors.textTertiary,
             ),
@@ -256,14 +248,14 @@ class ActiveTimerPage extends ConsumerWidget {
                     ref.read(employeeTimerProvider.notifier).toggleBreak();
                   },
                   leadingIcon:
-                      timerState.isOnBreak ? Icons.play_arrow : Icons.pause,
-                  text: timerState.isOnBreak
+                      isOnBreak ? Icons.play_arrow : Icons.pause,
+                  text: isOnBreak
                       ? context.loc.resumeWork
                       : context.loc.pauseBreak,
-                  foregroundColor: timerState.isOnBreak
+                  foregroundColor: isOnBreak
                       ? AppColors.primary
                       : AppColors.textSecondary,
-                  borderColor: timerState.isOnBreak
+                  borderColor: isOnBreak
                       ? AppColors.primary
                       : AppColors.borderDark,
                   borderRadius: 8.r,
@@ -276,13 +268,39 @@ class ActiveTimerPage extends ConsumerWidget {
               SizedBox(width: 10.w),
               Expanded(
                 child: AppButton(
-                  onPressed: () => _finishWork(context, ref, timerState),
+                  onPressed: () => _finishWork(context, ref),
                   text: context.loc.finishWork,
                 ),
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ActiveTimerElapsedView extends ConsumerWidget {
+  const _ActiveTimerElapsedView({required this.isOnBreak});
+
+  final bool isOnBreak;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final formatted = ref.watch(
+      employeeTimerProvider.select((s) => s.formattedElapsed),
+    );
+
+    return RepaintBoundary(
+      child: Text(
+        formatted,
+        style: TextStyle(
+          fontSize: 44.sp,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1,
+          color: isOnBreak ? const Color(0xFFC47A0A) : AppColors.success,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        ),
       ),
     );
   }
