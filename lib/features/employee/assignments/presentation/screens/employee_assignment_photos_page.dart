@@ -5,12 +5,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../app/theme/app_colors.dart';
-import '../../../core/extensions/date_time_extensions.dart';
-import '../../../core/localization/context_extensions.dart';
-import '../../../core/services/image_service.dart';
-import '../../../core/services/permission_service.dart';
-import '../../../core/widgets/snack/app_snackbar.dart';
+import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/extensions/date_time_extensions.dart';
+import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/services/image_service.dart';
+import 'package:construction_app/core/services/permission_service.dart';
+import 'package:construction_app/core/widgets/snack/app_snackbar.dart';
 
 class EmployeePhotoItem {
   final String id;
@@ -169,7 +169,8 @@ class _EmployeeAssignmentPhotosPageState
         _photos.insert(
           0,
           EmployeePhotoItem(
-            id: DateTime.now().millisecondsSinceEpoch.toString() +
+            id:
+                DateTime.now().millisecondsSinceEpoch.toString() +
                 image.path.hashCode.toString(),
             title:
                 'Site Photo (${DateTime.now().hour}:${DateTime.now().minute})',
@@ -184,10 +185,7 @@ class _EmployeeAssignmentPhotosPageState
 
     AppSnackBar.showSuccess(
       context,
-      context.loc.get(
-        'siteManager.photoAdded',
-        'Photo added successfully',
-      ),
+      context.loc.get('siteManager.photoAdded', 'Photo added successfully'),
     );
   }
 
@@ -225,10 +223,7 @@ class _EmployeeAssignmentPhotosPageState
       });
       AppSnackBar.showSuccess(
         context,
-        context.loc.get(
-          'siteManager.photoAdded',
-          'Photo added successfully',
-        ),
+        context.loc.get('siteManager.photoAdded', 'Photo added successfully'),
       );
     }
   }

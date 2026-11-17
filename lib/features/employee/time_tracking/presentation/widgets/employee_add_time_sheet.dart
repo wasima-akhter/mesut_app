@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../app/theme/app_colors.dart';
-import '../../../../core/extensions/date_time_extensions.dart';
-import '../../../../core/localization/context_extensions.dart';
-import '../../../../core/widgets/buttons/buttons.dart';
-import '../../../../core/widgets/snack/app_snackbar.dart';
+import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/extensions/date_time_extensions.dart';
+import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/widgets/buttons/buttons.dart';
+import 'package:construction_app/core/widgets/snack/app_snackbar.dart';
+
 import '../../domain/entities/employee_time_tracking_entities.dart';
-import '../../presentation/providers/employee_time_tracking_provider.dart';
-import '../../presentation/providers/employee_timer_projects_provider.dart';
+import '../providers/employee_time_tracking_provider.dart';
+import '../providers/employee_timer_projects_provider.dart';
 import 'employee_project_phase_picker.dart';
 
 Future<void> showEmployeeAddTimeSheet({

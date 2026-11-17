@@ -1,10 +1,11 @@
 import 'dart:async';
+
+import 'package:construction_app/core/enums/backend_enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/enums/backend_enums.dart';
-import '../../helper/employee_enums.dart';
-import '../../helper/employee_models.dart';
+import '../../../shared/helper/employee_enums.dart';
+import '../../../shared/helper/employee_models.dart';
 import 'offline_sync_provider.dart';
 
 class EmployeeTimerState {
@@ -61,8 +62,8 @@ class EmployeeTimerState {
 
 final employeeTimerProvider =
     NotifierProvider<EmployeeTimerNotifier, EmployeeTimerState>(
-  EmployeeTimerNotifier.new,
-);
+      EmployeeTimerNotifier.new,
+    );
 
 class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
   Timer? _ticker;
@@ -182,7 +183,9 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
   void resumeTimer() {
     if (!state.isTimerRunning) return;
     if (_breakStartedAt != null) {
-      _totalBreakDuration += DateTime.now().toUtc().difference(_breakStartedAt!);
+      _totalBreakDuration += DateTime.now().toUtc().difference(
+        _breakStartedAt!,
+      );
       _breakStartedAt = null;
     }
     state = state.copyWith(isOnBreak: false);
@@ -211,7 +214,9 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
     final breakMinutes = _totalBreakDuration.inMinutes;
 
     final elapsedMinutes = state.elapsed.inMinutes;
-    final durationHours = double.parse((elapsedMinutes / 60).toStringAsFixed(1));
+    final durationHours = double.parse(
+      (elapsedMinutes / 60).toStringAsFixed(1),
+    );
     final newLog = EmployeeTimeLogModel(
       timestamp: endTime,
       project: state.currentProject,

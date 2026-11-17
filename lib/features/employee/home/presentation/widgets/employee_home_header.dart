@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../app/constants/route_constants.dart';
-import '../../../../app/theme/app_colors.dart';
-import '../../../../core/extensions/date_time_extensions.dart';
-import '../../../../core/localization/context_extensions.dart';
+import 'package:construction_app/app/constants/route_constants.dart';
+import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/extensions/date_time_extensions.dart';
+import 'package:construction_app/core/localization/context_extensions.dart';
 import '../../domain/entities/employee_dashboard_entity.dart';
 
 class EmployeeHomeHeader extends StatelessWidget {

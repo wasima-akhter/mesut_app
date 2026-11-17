@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../helper/employee_models.dart';
+import '../../../shared/helper/employee_models.dart';
 
 class AssignmentTaskItem {
   final String id;
@@ -96,5 +96,5 @@ class AssignmentDetailsNotifier extends Notifier<AssignmentDetailsState> {
 
 final assignmentDetailsProvider =
     NotifierProvider<AssignmentDetailsNotifier, AssignmentDetailsState>(
-  AssignmentDetailsNotifier.new,
-);
+      AssignmentDetailsNotifier.new,
+    );

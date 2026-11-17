@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/connectivity/connectivity_provider.dart';
-import '../../../../core/connectivity/network_status.dart';
-import '../../../../core/enums/backend_enums.dart';
-import '../../../../core/errors/app_error_resolver.dart';
-import '../../../../core/localization/localization_provider.dart';
-import '../../../../core/network/network_providers.dart';
-import '../../../../core/storage/storage_provider.dart';
+import 'package:construction_app/core/connectivity/connectivity_provider.dart';
+import 'package:construction_app/core/connectivity/network_status.dart';
+import 'package:construction_app/core/enums/backend_enums.dart';
+import 'package:construction_app/core/errors/app_error_resolver.dart';
+import 'package:construction_app/core/localization/localization_provider.dart';
+import 'package:construction_app/core/network/network_providers.dart';
+import 'package:construction_app/core/storage/storage_provider.dart';
 import '../../data/datasources/mobile_timer_remote_datasource.dart';
 import '../../data/datasources/offline_sync_local_datasource.dart';
 import '../../domain/entities/offline_time_log.dart';

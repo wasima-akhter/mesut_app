@@ -5,18 +5,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/theme/app_colors.dart';
-import '../../../core/localization/context_extensions.dart';
-import '../../../core/services/launcher_service.dart';
-import '../../../core/widgets/snack/app_snackbar.dart';
-import '../../../core/enums/app_enum.dart';
-import '../../map/domain/entities/map_location_entity.dart';
-import '../../map/domain/entities/map_request_entity.dart';
-import '../../map/utils/map_coordinate_resolver.dart';
-import '../helper/employee_enums.dart';
-import '../helper/employee_models.dart';
-import '../presentation/providers/employee_assignment_details_provider.dart';
-import '../presentation/providers/employee_timer_provider.dart';
+import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/enums/app_enum.dart';
+import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/services/launcher_service.dart';
+import 'package:construction_app/core/widgets/snack/app_snackbar.dart';
+import '../../../../map/domain/entities/map_location_entity.dart';
+import '../../../../map/domain/entities/map_request_entity.dart';
+import '../../../../map/utils/map_coordinate_resolver.dart';
+import '../../../shared/helper/employee_enums.dart';
+import '../../../shared/helper/employee_models.dart';
+import '../../../time_tracking/presentation/providers/employee_timer_provider.dart';
+import '../providers/employee_assignment_details_provider.dart';
 
 class AssignmentDetailsPage extends ConsumerWidget {
   const AssignmentDetailsPage({super.key});

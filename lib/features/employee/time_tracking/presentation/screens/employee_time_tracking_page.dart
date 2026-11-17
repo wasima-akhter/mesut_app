@@ -1,24 +1,24 @@
+import 'package:construction_app/app/constants/route_constants.dart';
+import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/pagination/app_pagination_footer.dart';
+import 'package:construction_app/core/widgets/buttons/buttons.dart';
+import 'package:construction_app/core/widgets/snack/app_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/constants/route_constants.dart';
-import '../../../app/theme/app_colors.dart';
-import '../../../core/localization/context_extensions.dart';
-import '../../../core/pagination/app_pagination_footer.dart';
-import '../../../core/widgets/buttons/buttons.dart';
-import '../../../core/widgets/snack/app_snackbar.dart';
-import '../helper/employee_bottom_sheets.dart';
-import '../presentation/providers/employee_time_tracking_provider.dart';
-import 'widgets/employee_active_timer_card.dart';
-import 'widgets/employee_add_time_sheet.dart';
-import 'widgets/employee_start_timer_sheet.dart';
-import 'widgets/employee_time_log_card.dart';
-import 'widgets/employee_time_logs_placeholder.dart';
-import 'widgets/employee_time_tracking_header.dart';
-import 'widgets/employee_time_tracking_mappers.dart';
-import 'widgets/employee_weekly_summary_card.dart';
+import '../../../shared/helper/employee_bottom_sheets.dart';
+import '../providers/employee_time_tracking_provider.dart';
+import '../widgets/employee_active_timer_card.dart';
+import '../widgets/employee_add_time_sheet.dart';
+import '../widgets/employee_start_timer_sheet.dart';
+import '../widgets/employee_time_log_card.dart';
+import '../widgets/employee_time_logs_placeholder.dart';
+import '../widgets/employee_time_tracking_header.dart';
+import '../widgets/employee_time_tracking_mappers.dart';
+import '../widgets/employee_weekly_summary_card.dart';
 
 class EmployeeTimeTrackingPage extends ConsumerStatefulWidget {
   const EmployeeTimeTrackingPage({super.key});
@@ -105,9 +105,7 @@ class _EmployeeTimeTrackingPageState
               SliverPadding(
                 padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 8.h),
                 sliver: SliverToBoxAdapter(
-                  child: EmployeeTimeTrackingTopHeader(
-                    onAddTime: _openAddTime,
-                  ),
+                  child: EmployeeTimeTrackingTopHeader(onAddTime: _openAddTime),
                 ),
               ),
               SliverPadding(
@@ -125,8 +123,8 @@ class _EmployeeTimeTrackingPageState
                       onFinish: () {
                         final name =
                             summary.activeTimer?.projectName.isNotEmpty == true
-                                ? summary.activeTimer!.projectName
-                                : 'Project';
+                            ? summary.activeTimer!.projectName
+                            : 'Project';
                         final durationStr =
                             '${summary.activeTimer?.netHours.toStringAsFixed(1) ?? '0.0'} hrs';
                         _finishTimer(name, durationStr);

@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/enums/app_enum.dart';
-import '../../../../core/network/network_providers.dart';
-import '../../../../core/providers/common_provider.dart';
-import '../../../../core/storage/storage_provider.dart';
+import 'package:construction_app/core/enums/app_enum.dart';
+import 'package:construction_app/core/network/network_providers.dart';
+import 'package:construction_app/core/providers/common_provider.dart';
+import 'package:construction_app/core/storage/storage_provider.dart';
 import '../../data/datasources/employee_schedule_datasource.dart';
 import '../../domain/entities/employee_schedule_entity.dart';
 

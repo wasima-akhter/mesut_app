@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../app/theme/app_colors.dart';
-import '../../../../core/localization/context_extensions.dart';
-import '../../../../core/widgets/buttons/buttons.dart';
+import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/widgets/buttons/buttons.dart';
 
 class EmployeeTimeLogsLoadingPlaceholder extends StatelessWidget {
   const EmployeeTimeLogsLoadingPlaceholder({super.key});

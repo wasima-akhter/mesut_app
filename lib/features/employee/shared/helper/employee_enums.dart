@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/localization/app_localization.dart';
+import '../../../../core/localization/app_localization.dart';
 
 enum EmployeeActivityType { erection, dismantling, others }
 

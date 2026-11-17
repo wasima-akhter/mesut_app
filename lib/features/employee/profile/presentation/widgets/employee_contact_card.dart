@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../app/theme/app_colors.dart';
-import '../../../../core/localization/context_extensions.dart';
-import '../../../../core/services/launcher_service.dart';
-import '../../../../core/widgets/snack/app_snackbar.dart';
+import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/services/launcher_service.dart';
+import 'package:construction_app/core/widgets/snack/app_snackbar.dart';
 
 class EmployeeContactCard extends StatelessWidget {
   const EmployeeContactCard({

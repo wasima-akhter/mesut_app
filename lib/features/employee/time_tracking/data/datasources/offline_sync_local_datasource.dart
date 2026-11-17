@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import '../../../../core/storage/storage_service.dart';
+import 'package:construction_app/core/storage/storage_service.dart';
 import '../../domain/entities/offline_time_log.dart';
 
 abstract class OfflineSyncLocalDataSource {

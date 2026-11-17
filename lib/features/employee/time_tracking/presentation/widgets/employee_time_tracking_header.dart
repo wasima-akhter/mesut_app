@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../app/theme/app_colors.dart';
-import '../../../../core/localization/context_extensions.dart';
-import '../../../../core/utils/app_date_time_formatter.dart';
-import '../../../../core/widgets/buttons/buttons.dart';
+import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/utils/app_date_time_formatter.dart';
+import 'package:construction_app/core/widgets/buttons/buttons.dart';
 import '../../domain/entities/employee_time_tracking_entities.dart';
 
 class EmployeeTimeTrackingTopHeader extends StatelessWidget {

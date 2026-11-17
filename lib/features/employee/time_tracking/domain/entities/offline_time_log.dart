@@ -1,6 +1,6 @@
 import 'package:uuid/uuid.dart';
 
-import '../../../../core/enums/backend_enums.dart';
+import 'package:construction_app/core/enums/backend_enums.dart';
 
 /// Immutable locally queued time log segment synced via `POST /mobile/sync`.
 class OfflineTimeLog {

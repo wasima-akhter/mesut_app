@@ -3,15 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../app/constants/route_constants.dart';
-import '../../../../app/theme/app_colors.dart';
-import '../../../../core/localization/app_language.dart';
-import '../../../../core/localization/context_extensions.dart';
-import '../../../../core/localization/localization_provider.dart';
-import '../../../shared/config/presentation/providers/mobile_config_provider.dart';
-import '../../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
-import '../../../shared/notifications/presentation/providers/notification_settings_provider.dart';
-import '../../presentation/providers/employee_profile_provider.dart';
+import 'package:construction_app/app/constants/route_constants.dart';
+import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/localization/app_language.dart';
+import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/localization/localization_provider.dart';
+import '../../../../shared/config/presentation/providers/mobile_config_provider.dart';
+import '../../../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
+import '../../../../shared/notifications/presentation/providers/notification_settings_provider.dart';
 
 class EmployeeSettingsCard extends ConsumerWidget {
   const EmployeeSettingsCard({super.key});
@@ -149,8 +148,9 @@ class EmployeeSettingsCard extends ConsumerWidget {
                         ListTile(
                           onTap: () async {
                             Navigator.of(dialogContext).pop();
-                            final langCode =
-                                lang == AppLanguage.german ? 'DE' : 'EN';
+                            final langCode = lang == AppLanguage.german
+                                ? 'DE'
+                                : 'EN';
                             await ref
                                 .read(appLanguageProvider.notifier)
                                 .setLanguage(lang);
@@ -167,7 +167,10 @@ class EmployeeSettingsCard extends ConsumerWidget {
                             style: TextStyle(fontSize: 17.sp),
                           ),
                           trailing: currentLang == lang
-                              ? const Icon(Icons.check, color: AppColors.primary)
+                              ? const Icon(
+                                  Icons.check,
+                                  color: AppColors.primary,
+                                )
                               : null,
                         ),
                     ],

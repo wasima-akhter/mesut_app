@@ -93,7 +93,7 @@ class EmployeeTimerProjectsState {
 }
 
 class EmployeeTimerProjectsNotifier
-    extends AutoDisposeNotifier<EmployeeTimerProjectsState> {
+    extends Notifier<EmployeeTimerProjectsState> {
   EmployeeTimeTrackingDatasource get _datasource =>
       ref.read(employeeTimeTrackingDatasourceProvider);
 

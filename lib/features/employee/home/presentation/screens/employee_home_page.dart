@@ -1,26 +1,26 @@
-import 'package:construction_app/features/map/domain/entities/map_coordinate_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/constants/route_constants.dart';
-import '../../../app/theme/app_colors.dart';
-import '../../../core/enums/app_enum.dart';
-import '../../../core/pagination/app_pagination_footer.dart';
-import '../../map/domain/entities/map_location_entity.dart';
-import '../../map/domain/entities/map_request_entity.dart';
-import '../../map/utils/map_coordinate_resolver.dart';
-import '../domain/entities/employee_dashboard_entity.dart';
-import '../helper/employee_enums.dart';
-import '../helper/employee_models.dart';
-import '../presentation/providers/employee_assignment_details_provider.dart';
-import '../presentation/providers/employee_dashboard_provider.dart';
-import '../presentation/providers/employee_time_tracking_provider.dart';
-import '../presentation/providers/employee_timer_provider.dart';
-import 'widgets/employee_assignment_card.dart';
-import 'widgets/employee_home_header.dart';
-import 'widgets/employee_home_placeholders.dart';
+import '../../../../../app/constants/route_constants.dart';
+import '../../../../../app/theme/app_colors.dart';
+import '../../../../../core/enums/app_enum.dart';
+import '../../../../../core/pagination/app_pagination_footer.dart';
+import '../../../../map/domain/entities/map_coordinate_entity.dart';
+import '../../../../map/domain/entities/map_location_entity.dart';
+import '../../../../map/domain/entities/map_request_entity.dart';
+import '../../../../map/utils/map_coordinate_resolver.dart';
+import '../../../assignments/presentation/providers/employee_assignment_details_provider.dart';
+import '../../../shared/helper/employee_enums.dart';
+import '../../../shared/helper/employee_models.dart';
+import '../../../time_tracking/presentation/providers/employee_time_tracking_provider.dart';
+import '../../../time_tracking/presentation/providers/employee_timer_provider.dart';
+import '../../domain/entities/employee_dashboard_entity.dart';
+import '../providers/employee_dashboard_provider.dart';
+import '../widgets/employee_assignment_card.dart';
+import '../widgets/employee_home_header.dart';
+import '../widgets/employee_home_placeholders.dart';
 
 class EmployeeHomePage extends ConsumerStatefulWidget {
   const EmployeeHomePage({super.key});

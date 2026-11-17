@@ -1,6 +1,6 @@
-import '../../../../core/constants/api_constants.dart';
-import '../../../../core/enums/backend_enums.dart';
-import '../../../../core/network/api_client.dart';
+import 'package:construction_app/core/constants/api_constants.dart';
+import 'package:construction_app/core/enums/backend_enums.dart';
+import 'package:construction_app/core/network/api_client.dart';
 import '../../domain/entities/offline_time_log.dart';
 
 abstract class MobileTimerRemoteDataSource {

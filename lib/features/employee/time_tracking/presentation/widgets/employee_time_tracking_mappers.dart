@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/employee_time_tracking_entities.dart';
-import '../../helper/employee_enums.dart';
-import '../../helper/employee_models.dart';
+import '../../../shared/helper/employee_enums.dart';
+import '../../../shared/helper/employee_models.dart';
 
 class EmployeeTimeTrackingMappers {
   const EmployeeTimeTrackingMappers._();

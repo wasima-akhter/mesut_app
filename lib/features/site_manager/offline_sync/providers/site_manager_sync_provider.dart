@@ -6,15 +6,16 @@ import '../../../../core/connectivity/connectivity_provider.dart';
 import '../../../../core/connectivity/network_status.dart';
 import '../../../../core/network/network_providers.dart';
 import '../../../../core/storage/storage_provider.dart';
-import '../../../employee/presentation/providers/offline_sync_provider.dart';
+import '../../../employee/time_tracking/presentation/providers/offline_sync_provider.dart';
 import '../../../media/presentation/providers/media_providers.dart';
 import '../models/site_manager_sync_action.dart';
 import '../services/site_manager_cache_service.dart';
 import '../services/site_manager_sync_queue.dart';
 import '../services/site_manager_sync_service.dart';
 
-final siteManagerCacheServiceProvider =
-    Provider<SiteManagerCacheService>((ref) {
+final siteManagerCacheServiceProvider = Provider<SiteManagerCacheService>((
+  ref,
+) {
   return SiteManagerCacheService(ref.watch(localStorageProvider));
 });
 
@@ -88,7 +89,7 @@ class SiteManagerSyncNotifier extends Notifier<SiteManagerSyncState> {
 
       final transitionedToOnline =
           _lastObservedNetworkStatus != NetworkStatus.online &&
-              status == NetworkStatus.online;
+          status == NetworkStatus.online;
       _lastObservedNetworkStatus = status;
 
       final isOnline = status == NetworkStatus.online;
@@ -147,15 +148,12 @@ class SiteManagerSyncNotifier extends Notifier<SiteManagerSyncState> {
             : null,
       );
     } catch (e) {
-      state = state.copyWith(
-        isSyncing: false,
-        lastSyncMessage: e.toString(),
-      );
+      state = state.copyWith(isSyncing: false, lastSyncMessage: e.toString());
     }
   }
 }
 
 final siteManagerSyncProvider =
     NotifierProvider<SiteManagerSyncNotifier, SiteManagerSyncState>(
-  SiteManagerSyncNotifier.new,
-);
+      SiteManagerSyncNotifier.new,
+    );

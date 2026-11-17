@@ -1,18 +1,16 @@
-import 'dart:ui';
-
+import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/extensions/date_time_extensions.dart';
+import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/widgets/buttons/buttons.dart';
+import 'package:construction_app/core/widgets/snack/app_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../app/theme/app_colors.dart';
-import '../../../core/extensions/date_time_extensions.dart';
-import '../../../core/localization/context_extensions.dart';
-import '../../../core/widgets/buttons/buttons.dart';
-import '../../../core/widgets/snack/app_snackbar.dart';
-import '../helper/employee_enums.dart';
-import '../helper/employee_models.dart';
-import '../presentation/providers/employee_timer_provider.dart';
-import 'widgets/finish_work_dialog.dart';
+import '../../../shared/helper/employee_enums.dart';
+import '../../../shared/helper/employee_models.dart';
+import '../providers/employee_timer_provider.dart';
+import '../widgets/finish_work_dialog.dart';
 
 class ActiveTimerPage extends ConsumerWidget {
   const ActiveTimerPage({super.key});
@@ -187,11 +185,7 @@ class ActiveTimerPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildTimerCard(
-    BuildContext context,
-    WidgetRef ref,
-    bool isOnBreak,
-  ) {
+  Widget _buildTimerCard(BuildContext context, WidgetRef ref, bool isOnBreak) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       width: double.infinity,
@@ -217,9 +211,7 @@ class ActiveTimerPage extends ConsumerWidget {
             '${context.loc.breakTime}: ${const Duration(minutes: 45).formatCompactLocalized()}',
             style: TextStyle(
               fontSize: 16.sp,
-              color: isOnBreak
-                  ? AppColors.warningDark
-                  : AppColors.textTertiary,
+              color: isOnBreak ? AppColors.warningDark : AppColors.textTertiary,
             ),
           ),
           SizedBox(height: 20.h),

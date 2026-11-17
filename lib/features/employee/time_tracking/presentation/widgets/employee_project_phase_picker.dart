@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../app/theme/app_colors.dart';
-import '../../../../core/localization/context_extensions.dart';
+import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/localization/context_extensions.dart';
 import '../../domain/entities/employee_time_tracking_entities.dart';
-import '../../presentation/providers/employee_timer_projects_provider.dart';
+import '../providers/employee_timer_projects_provider.dart';
 
 class EmployeeProjectPhasePicker extends ConsumerWidget {
   const EmployeeProjectPhasePicker({

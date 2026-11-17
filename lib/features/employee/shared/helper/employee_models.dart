@@ -67,7 +67,7 @@ class EmployeeProjectModel {
     this.siteManager = '',
   });
 
-  String get fullName => '$id · $name';
+  String get fullName => name;
 
   String get displayName => fullName;
 

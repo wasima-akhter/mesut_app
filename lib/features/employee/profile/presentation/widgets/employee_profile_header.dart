@@ -2,31 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../app/constants/route_constants.dart';
-import '../../../../app/theme/app_colors.dart';
-import '../../../../core/localization/context_extensions.dart';
-import '../../../../core/widgets/buttons/buttons.dart';
-import '../../../shared/mobile_dashboard/domain/entities/mobile_profile_entity.dart';
+import 'package:construction_app/app/constants/route_constants.dart';
+import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/widgets/buttons/app_icon_button.dart';
+import '../../../../shared/mobile_dashboard/domain/entities/mobile_profile_entity.dart';
 
 class EmployeeProfileHeader extends StatelessWidget {
-  const EmployeeProfileHeader({
-    super.key,
-    required this.profile,
-  });
+  const EmployeeProfileHeader({super.key, required this.profile});
 
   final MobileProfileEntity? profile;
 
   @override
   Widget build(BuildContext context) {
     final avatarUrl = profile?.avatarUrl;
-    final fullName =
-        (profile?.fullName.isNotEmpty == true) ? profile!.fullName : '-';
+    final fullName = (profile?.fullName.isNotEmpty == true)
+        ? profile!.fullName
+        : '-';
     final role = profile?.role ?? '';
     final roleTitle = role.toUpperCase() == 'EMPLOYEE'
         ? context.loc.roleEmployee
         : (role.toUpperCase() == 'SITE_MANAGER'
-            ? context.loc.roleSiteManager
-            : (role.isNotEmpty ? role : context.loc.roleEmployee));
+              ? context.loc.roleSiteManager
+              : (role.isNotEmpty ? role : context.loc.roleEmployee));
 
     return Column(
       children: [

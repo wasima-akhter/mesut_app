@@ -1,5 +1,5 @@
-import '../../../../core/constants/api_constants.dart';
-import '../../../../core/network/api_client.dart';
+import 'package:construction_app/core/constants/api_constants.dart';
+import 'package:construction_app/core/network/api_client.dart';
 import '../../domain/entities/employee_schedule_entity.dart';
 import '../models/employee_schedule_model.dart';
 

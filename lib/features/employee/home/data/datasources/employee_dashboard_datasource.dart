@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/constants/api_constants.dart';
-import '../../../../core/network/api_client.dart';
-import '../../../../core/network/network_providers.dart';
+import 'package:construction_app/core/constants/api_constants.dart';
+import 'package:construction_app/core/network/api_client.dart';
+import 'package:construction_app/core/network/network_providers.dart';
 import '../../domain/entities/employee_dashboard_entity.dart';
 import '../models/employee_dashboard_models.dart';
 

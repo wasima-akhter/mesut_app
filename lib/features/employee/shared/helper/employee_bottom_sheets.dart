@@ -3,10 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../app/theme/app_colors.dart';
-import '../../../core/extensions/date_time_extensions.dart';
-import '../../../core/localization/context_extensions.dart';
-import '../../../core/widgets/buttons/buttons.dart';
+import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/extensions/date_time_extensions.dart';
+import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/widgets/buttons/buttons.dart';
 import 'employee_enums.dart';
 import 'employee_models.dart';
 

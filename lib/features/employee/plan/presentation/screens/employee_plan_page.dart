@@ -3,16 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
-import '../../../app/theme/app_colors.dart';
-import '../../../core/localization/context_extensions.dart';
-import '../../../core/pagination/app_pagination_footer.dart';
-import '../../../core/widgets/loading/app_loader.dart';
-import '../../../core/widgets/states/app_empty_widget.dart';
-import '../../../core/widgets/states/app_error_widget.dart';
-import '../presentation/providers/employee_schedule_provider.dart';
-import 'widgets/employee_plan_calendar_card.dart';
-import 'widgets/employee_plan_card.dart';
-import 'widgets/employee_plan_legend.dart';
+import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/pagination/app_pagination_footer.dart';
+import 'package:construction_app/core/widgets/loading/app_loader.dart';
+import 'package:construction_app/core/widgets/states/app_empty_widget.dart';
+import 'package:construction_app/core/widgets/states/app_error_widget.dart';
+import '../providers/employee_schedule_provider.dart';
+import '../widgets/employee_plan_calendar_card.dart';
+import '../widgets/employee_plan_card.dart';
+import '../widgets/employee_plan_legend.dart';
 
 class EmployeePlanPage extends ConsumerStatefulWidget {
   const EmployeePlanPage({super.key});
