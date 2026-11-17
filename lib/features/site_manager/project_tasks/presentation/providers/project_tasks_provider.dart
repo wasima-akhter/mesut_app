@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/widgets/states/app_data_state.dart';
+import '../../../offline_sync/models/site_manager_sync_action.dart';
+import '../../../offline_sync/providers/site_manager_sync_provider.dart';
 import '../../../projects/enums.dart';
 import '../../data/repositories/project_tasks_repository_impl.dart';
 import '../../domain/entities/project_task_entity.dart';
@@ -23,19 +26,19 @@ class ProjectTasksNotifier extends Notifier<ProjectTasksState> {
     bool isRefresh = false,
   }) async {
     if (projectId.isEmpty) {
-      state = state.copyWith(
-        status: AppDataStatus.empty,
-        clearError: true,
-      );
+      state = state.copyWith(status: AppDataStatus.empty, clearError: true);
       return;
     }
 
-    final hasData = state.currentTasks.isNotEmpty;
+    final isDifferentProject = state.projectId != projectId;
+    final hasData = !isDifferentProject && state.currentTasks.isNotEmpty;
     state = state.copyWith(
       projectId: projectId,
       status: (hasData && isRefresh)
           ? AppDataStatus.refreshing
           : AppDataStatus.loading,
+      openTasks: isDifferentProject ? const [] : state.openTasks,
+      completedTasks: isDifferentProject ? const [] : state.completedTasks,
       clearError: true,
     );
 
@@ -46,11 +49,9 @@ class ProjectTasksNotifier extends Notifier<ProjectTasksState> {
         limit: 10,
       );
 
-      final openCount = result.open.length;
-      final completedCount = result.completed.length;
       final isCurrentEmpty = state.selectedTab == TaskStatusTab.open
-          ? openCount == 0
-          : completedCount == 0;
+          ? result.open.isEmpty
+          : result.completed.isEmpty;
 
       state = state.copyWith(
         status: isCurrentEmpty ? AppDataStatus.empty : AppDataStatus.success,
@@ -91,16 +92,14 @@ class ProjectTasksNotifier extends Notifier<ProjectTasksState> {
       );
 
       if (isTabOpen) {
-        final merged = [...state.openTasks, ...result.open];
         state = state.copyWith(
-          openTasks: merged,
+          openTasks: [...state.openTasks, ...result.open],
           openMeta: result.meta,
           isLoadingMore: false,
         );
       } else {
-        final merged = [...state.completedTasks, ...result.completed];
         state = state.copyWith(
-          completedTasks: merged,
+          completedTasks: [...state.completedTasks, ...result.completed],
           completedMeta: result.meta,
           isLoadingMore: false,
         );
@@ -117,13 +116,13 @@ class ProjectTasksNotifier extends Notifier<ProjectTasksState> {
     required ProjectPriority priority,
     DateTime? dueDate,
   }) async {
-    try {
-      final priorityStr = priority == ProjectPriority.high
-          ? 'HIGH'
-          : priority == ProjectPriority.low
-              ? 'LOW'
-              : 'MEDIUM';
+    final priorityStr = priority == ProjectPriority.high
+        ? 'HIGH'
+        : priority == ProjectPriority.low
+            ? 'LOW'
+            : 'MEDIUM';
 
+    try {
       final createdTask = await _repository.createProjectTask(
         projectId: projectId,
         description: description,
@@ -132,14 +131,42 @@ class ProjectTasksNotifier extends Notifier<ProjectTasksState> {
         dueDate: dueDate,
       );
 
-      final updatedOpen = [createdTask, ...state.openTasks];
       state = state.copyWith(
-        openTasks: updatedOpen,
+        openTasks: [createdTask, ...state.openTasks],
         status: AppDataStatus.success,
       );
       return true;
     } catch (e) {
-      rethrow;
+      final localId = 'offline_${DateTime.now().millisecondsSinceEpoch}';
+      final offlineTask = ProjectTaskEntity(
+        id: localId,
+        projectId: projectId,
+        description: description,
+        priority: priority,
+        isCompleted: false,
+        dueDate: dueDate,
+      );
+      final action = SiteManagerSyncAction(
+        id: localId,
+        actionType: SiteManagerSyncActionType.createTask,
+        endpoint: ApiConstants.mobileProjectTasks(projectId),
+        httpMethod: 'POST',
+        projectId: projectId,
+        displayTitle: 'Task: $description',
+        createdAt: DateTime.now(),
+        payload: {
+          'description': description,
+          'employeeId': employeeId,
+          'priority': priorityStr,
+          if (dueDate != null) 'dueDate': dueDate.toIso8601String(),
+        },
+      );
+      await ref.read(siteManagerSyncProvider.notifier).enqueue(action);
+      state = state.copyWith(
+        openTasks: [offlineTask, ...state.openTasks],
+        status: AppDataStatus.success,
+      );
+      return true;
     }
   }
 
@@ -149,11 +176,10 @@ class ProjectTasksNotifier extends Notifier<ProjectTasksState> {
     final targetList = tab == TaskStatusTab.open
         ? state.openTasks
         : state.completedTasks;
-    final isTargetEmpty = targetList.isEmpty;
 
     state = state.copyWith(
       selectedTab: tab,
-      status: isTargetEmpty ? AppDataStatus.empty : AppDataStatus.success,
+      status: targetList.isEmpty ? AppDataStatus.empty : AppDataStatus.success,
     );
   }
 
@@ -163,16 +189,10 @@ class ProjectTasksNotifier extends Notifier<ProjectTasksState> {
         state.completedTasks.indexWhere((t) => t.id == taskId);
     if (openIndex == -1 && completedIndex == -1) return;
 
-    final isMovingToCompleted = openIndex != -1;
-    final originalOpen = state.openTasks;
-    final originalCompleted = state.completedTasks;
-
-    if (isMovingToCompleted) {
+    if (openIndex != -1) {
       final task = state.openTasks[openIndex];
-      final updatedTask = task.copyWith(isCompleted: true);
-      final newOpen = List<ProjectTaskEntity>.from(state.openTasks)
-        ..removeAt(openIndex);
-      final newCompleted = [updatedTask, ...state.completedTasks];
+      final newOpen = List<ProjectTaskEntity>.from(state.openTasks)..removeAt(openIndex);
+      final newCompleted = [task.copyWith(isCompleted: true), ...state.completedTasks];
       state = state.copyWith(
         openTasks: newOpen,
         completedTasks: newCompleted,
@@ -182,46 +202,43 @@ class ProjectTasksNotifier extends Notifier<ProjectTasksState> {
       );
     } else {
       final task = state.completedTasks[completedIndex];
-      final updatedTask = task.copyWith(isCompleted: false);
-      final newCompleted = List<ProjectTaskEntity>.from(state.completedTasks)
-        ..removeAt(completedIndex);
-      final newOpen = [updatedTask, ...state.openTasks];
+      final newCompleted = List<ProjectTaskEntity>.from(state.completedTasks)..removeAt(completedIndex);
+      final newOpen = [task.copyWith(isCompleted: false), ...state.openTasks];
       state = state.copyWith(
         openTasks: newOpen,
         completedTasks: newCompleted,
-        status: (state.selectedTab == TaskStatusTab.completed &&
-                newCompleted.isEmpty)
+        status: (state.selectedTab == TaskStatusTab.completed && newCompleted.isEmpty)
             ? AppDataStatus.empty
             : AppDataStatus.success,
       );
     }
 
     try {
-      final updatedFromBackend = await _repository.toggleProjectTask(taskId);
-      if (updatedFromBackend.isCompleted) {
-        final newCompleted = state.completedTasks
-            .map((t) => t.id == taskId ? updatedFromBackend : t)
-            .toList();
-        state = state.copyWith(completedTasks: newCompleted);
+      final updated = await _repository.toggleProjectTask(taskId);
+      if (updated.isCompleted) {
+        state = state.copyWith(
+          completedTasks: state.completedTasks.map((t) => t.id == taskId ? updated : t).toList(),
+        );
       } else {
-        final newOpen = state.openTasks
-            .map((t) => t.id == taskId ? updatedFromBackend : t)
-            .toList();
-        state = state.copyWith(openTasks: newOpen);
+        state = state.copyWith(
+          openTasks: state.openTasks.map((t) => t.id == taskId ? updated : t).toList(),
+        );
       }
-    } catch (e) {
-      state = state.copyWith(
-        openTasks: originalOpen,
-        completedTasks: originalCompleted,
+    } catch (_) {
+      final action = SiteManagerSyncAction(
+        id: 'toggle_${DateTime.now().millisecondsSinceEpoch}',
+        actionType: SiteManagerSyncActionType.toggleTask,
+        endpoint: ApiConstants.mobileTaskToggle(taskId),
+        httpMethod: 'PATCH',
+        projectId: state.projectId,
+        displayTitle: 'Toggle Task',
+        createdAt: DateTime.now(),
       );
-      rethrow;
+      await ref.read(siteManagerSyncProvider.notifier).enqueue(action);
     }
   }
 
   Future<void> deleteTask(String taskId) async {
-    final originalOpen = state.openTasks;
-    final originalCompleted = state.completedTasks;
-
     final newOpen = state.openTasks.where((t) => t.id != taskId).toList();
     final newCompleted =
         state.completedTasks.where((t) => t.id != taskId).toList();
@@ -238,26 +255,31 @@ class ProjectTasksNotifier extends Notifier<ProjectTasksState> {
 
     try {
       await _repository.deleteProjectTask(taskId);
-    } catch (e) {
-      state = state.copyWith(
-        openTasks: originalOpen,
-        completedTasks: originalCompleted,
-        status: AppDataStatus.success,
+    } catch (_) {
+      final action = SiteManagerSyncAction(
+        id: 'delete_task_${DateTime.now().millisecondsSinceEpoch}',
+        actionType: SiteManagerSyncActionType.deleteTask,
+        endpoint: ApiConstants.mobileTaskDelete(taskId),
+        httpMethod: 'DELETE',
+        projectId: state.projectId,
+        displayTitle: 'Delete Task',
+        createdAt: DateTime.now(),
       );
-      rethrow;
+      await ref.read(siteManagerSyncProvider.notifier).enqueue(action);
     }
   }
 
   void addTask(ProjectTaskEntity task) {
     if (task.isCompleted) {
-      final updated = [task, ...state.completedTasks];
       state = state.copyWith(
-        completedTasks: updated,
+        completedTasks: [task, ...state.completedTasks],
         status: AppDataStatus.success,
       );
     } else {
-      final updated = [task, ...state.openTasks];
-      state = state.copyWith(openTasks: updated, status: AppDataStatus.success);
+      state = state.copyWith(
+        openTasks: [task, ...state.openTasks],
+        status: AppDataStatus.success,
+      );
     }
   }
 }

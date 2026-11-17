@@ -26,6 +26,8 @@ class ProjectDetailsState {
   bool get isSuccess => overviewStatus == AppDataStatus.success;
   bool get hasError => overviewStatus == AppDataStatus.error;
 
+  bool hasDetailsFor(String id) => details != null && details!.id == id;
+
   ProjectDetailsState copyWith({
     String? projectId,
     AppDataStatus? overviewStatus,
@@ -35,12 +37,13 @@ class ProjectDetailsState {
     String? errorMessage,
     Object? errorObject,
     bool clearError = false,
+    bool clearDetails = false,
   }) {
     return ProjectDetailsState(
       projectId: projectId ?? this.projectId,
       overviewStatus: overviewStatus ?? status ?? this.overviewStatus,
       selectedTab: selectedTab ?? this.selectedTab,
-      details: details ?? this.details,
+      details: clearDetails ? null : (details ?? this.details),
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       errorObject: clearError ? null : (errorObject ?? this.errorObject),
     );

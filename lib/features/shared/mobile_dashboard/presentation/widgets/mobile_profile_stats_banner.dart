@@ -67,7 +67,7 @@ class _StatItem extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12.sp,
+                fontSize: 14.sp,
                 color: Colors.white.withValues(alpha: 0.65),
               ),
             ),
@@ -75,7 +75,7 @@ class _StatItem extends StatelessWidget {
             Text(
               value,
               style: TextStyle(
-                fontSize: 19.sp,
+                fontSize: 22.sp,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
               ),

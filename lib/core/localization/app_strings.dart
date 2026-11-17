@@ -67,6 +67,8 @@ class AppStrings {
   String get high => get('common.high', 'High');
   String get medium => get('common.medium', 'Medium');
   String get low => get('common.low', 'Low');
+  String get on => get('common.on', 'On');
+  String get off => get('common.off', 'Off');
   String get open => get('common.open', 'Open');
   String get completed => get('common.completed', 'Completed');
   String get inProgress => get('common.inProgress', 'In Progress');
@@ -95,6 +97,9 @@ class AppStrings {
       get('common.standingScaffold', 'Standing Scaffold');
   String get maintenance => get('common.maintenance', 'Maintenance');
   String get other => get('common.other', 'Other');
+  String get deviceStorage => get('common.deviceStorage', 'Device Storage');
+  String get chooseFromDevice =>
+      get('common.chooseFromDevice', 'Choose from Device Storage');
 
   // ============================================================
   // AUTH
@@ -216,6 +221,7 @@ class AppStrings {
   String get otpRequired =>
       get('auth.otpRequired', 'Please enter the full 6-digit code');
   String get logout => get('auth.logout', 'Log Out');
+  String get loggingOut => get('auth.loggingOut', 'Logging out...');
   String get logoutTitle => get('auth.logoutTitle', 'Log Out?');
   String get logoutConfirmation => get(
     'auth.logoutConfirmation',
@@ -433,6 +439,8 @@ class AppStrings {
   String get projects => get('siteManager.projects', 'Projects');
   String get createProject =>
       get('siteManager.createProject', 'Create Project');
+  String get projectCreatedSuccess =>
+      get('siteManager.projectCreatedSuccess', 'Project created successfully');
   String get newProject => get('siteManager.newProject', 'New Project');
   String stepOf(int current, int total) => get(
     'siteManager.stepOf',
@@ -1053,6 +1061,15 @@ class AppStrings {
     'Synced {created} new, {skipped} skipped',
     {'created': created, 'skipped': skipped},
   );
+  String get allSynced =>
+      get('sync.allSynced', 'All changes are synchronized');
+  String get savedOffline =>
+      get('sync.savedOffline', 'Saved offline. Will sync when back online.');
+  String get offlineTimeLogs =>
+      get('sync.offlineTimeLogs', 'Offline Time Logs');
+  String get offline => get('common.offline', 'Offline');
+  String get workingOffline =>
+      get('common.workingOffline', 'Working offline');
   String get manualTimeDisabled => get(
     'rbac.manualTimeDisabled',
     'Manual time entry is disabled by company policy.',

@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/services/image_service.dart';
-import '../../../../../core/utils/logger.dart';
 import '../../../../media/domain/repositories/media_repository.dart';
 import '../../../../media/presentation/providers/media_providers.dart';
+import '../../../offline_sync/models/site_manager_sync_action.dart';
+import '../../../offline_sync/providers/site_manager_sync_provider.dart';
 import '../../data/repositories/project_attachments_repository_impl.dart';
 import '../../domain/entities/project_attachment_entity.dart';
 import '../../domain/repositories/project_attachments_repository.dart';
@@ -31,10 +33,13 @@ class ProjectAttachmentsNotifier extends Notifier<ProjectAttachmentsState> {
 
   /// Initial load or pull-to-refresh of attachments for [projectId].
   Future<void> loadInitial(String projectId, {bool isRefresh = false}) async {
+    final isDifferentProject = state.projectId != projectId;
+
     state = state.copyWith(
-      isLoading: !isRefresh,
+      isLoading: isDifferentProject || !isRefresh,
       clearError: true,
       projectId: projectId,
+      items: isDifferentProject ? const [] : state.items,
       page: 1,
     );
 
@@ -54,13 +59,7 @@ class ProjectAttachmentsNotifier extends Notifier<ProjectAttachmentsState> {
         page: 1,
         hasMore: hasMore,
       );
-    } catch (e, st) {
-      AppLogger.error(
-        'Failed to load project attachments',
-        error: e,
-        stackTrace: st,
-        name: 'ATTACHMENTS',
-      );
+    } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
@@ -88,13 +87,7 @@ class ProjectAttachmentsNotifier extends Notifier<ProjectAttachmentsState> {
         page: nextPage,
         hasMore: hasMore,
       );
-    } catch (e, st) {
-      AppLogger.error(
-        'Failed to load more attachments',
-        error: e,
-        stackTrace: st,
-        name: 'ATTACHMENTS',
-      );
+    } catch (_) {
       state = state.copyWith(isLoadingMore: false);
     }
   }
@@ -161,25 +154,19 @@ class ProjectAttachmentsNotifier extends Notifier<ProjectAttachmentsState> {
       state = state.copyWith(isMutating: true, clearError: true);
     }
 
-    try {
-      final fileName = overrideFileName ??
-          file.path.split(Platform.pathSeparator).last;
-      final fileSize = await file.length();
+    final fileName =
+        overrideFileName ?? file.path.split(Platform.pathSeparator).last;
+    final fileSize = await file.length();
 
-      // Step 1: Upload media to S3 via Media repository
+    try {
       String remoteUrl;
       try {
         final uploadedUrls = await _mediaRepository.uploadMedia(files: [file]);
-        if (uploadedUrls.isNotEmpty) {
-          remoteUrl = uploadedUrls.first;
-        } else {
-          remoteUrl = file.path;
-        }
+        remoteUrl = uploadedUrls.isNotEmpty ? uploadedUrls.first : file.path;
       } catch (_) {
         remoteUrl = file.path;
       }
 
-      // Step 2: Register attachment row in database
       final newAttachment = await _repository.registerAttachment(
         state.projectId,
         url: remoteUrl,
@@ -190,14 +177,9 @@ class ProjectAttachmentsNotifier extends Notifier<ProjectAttachmentsState> {
         isCover: isCover,
       );
 
-      // If registered as cover, unmark existing covers in state
-      List<ProjectAttachmentEntity> updatedList;
-      if (isCover) {
-        updatedList =
-            state.items.map((a) => a.copyWith(isCover: false)).toList();
-      } else {
-        updatedList = List.of(state.items);
-      }
+      final updatedList = isCover
+          ? state.items.map((a) => a.copyWith(isCover: false)).toList()
+          : List.of(state.items);
       updatedList.insert(0, newAttachment);
 
       state = state.copyWith(
@@ -205,69 +187,96 @@ class ProjectAttachmentsNotifier extends Notifier<ProjectAttachmentsState> {
         isMutating: skipLocalLoadingState ? state.isMutating : false,
       );
       return true;
-    } catch (e, st) {
-      AppLogger.error(
-        'Failed to upload attachment',
-        error: e,
-        stackTrace: st,
-        name: 'ATTACHMENTS',
+    } catch (_) {
+      final localId = 'offline_${DateTime.now().millisecondsSinceEpoch}';
+      final offlineAttachment = ProjectAttachmentEntity(
+        id: localId,
+        projectId: state.projectId,
+        url: file.path,
+        fileType: fileType,
+        category: category,
+        fileName: fileName,
+        fileSize: fileSize,
+        isCover: isCover,
+        createdAt: DateTime.now(),
       );
+
+      final action = SiteManagerSyncAction(
+        id: localId,
+        actionType: SiteManagerSyncActionType.uploadAttachment,
+        endpoint: ApiConstants.mobileProjectAttachments(state.projectId),
+        httpMethod: 'POST',
+        projectId: state.projectId,
+        filePath: file.path,
+        displayTitle: 'Attachment: $fileName',
+        createdAt: DateTime.now(),
+        payload: {
+          'fileType': fileType,
+          'category': category,
+          'fileName': fileName,
+          'fileSize': fileSize,
+          'isCover': isCover,
+        },
+      );
+      await ref.read(siteManagerSyncProvider.notifier).enqueue(action);
+
+      final updatedList = isCover
+          ? state.items.map((a) => a.copyWith(isCover: false)).toList()
+          : List.of(state.items);
+      updatedList.insert(0, offlineAttachment);
+
       state = state.copyWith(
+        items: updatedList,
         isMutating: skipLocalLoadingState ? state.isMutating : false,
-        errorMessage: e.toString(),
       );
-      return false;
+      return true;
     }
   }
 
   Future<bool> setCoverPhoto(String attachmentId) async {
     state = state.copyWith(isMutating: true, clearError: true);
     try {
-      final updated =
-          await _repository.setCoverPhoto(state.projectId, attachmentId);
-      final updatedList = state.items.map((a) {
-        if (a.id == updated.id) {
-          return updated;
-        }
-        return a.copyWith(isCover: false);
-      }).toList();
-
+      final updated = await _repository.setCoverPhoto(state.projectId, attachmentId);
+      final updatedList = state.items.map((a) => a.id == updated.id ? updated : a.copyWith(isCover: false)).toList();
       state = state.copyWith(items: updatedList, isMutating: false);
       return true;
-    } catch (e, st) {
-      AppLogger.error(
-        'Failed to set cover photo',
-        error: e,
-        stackTrace: st,
-        name: 'ATTACHMENTS',
+    } catch (_) {
+      final action = SiteManagerSyncAction(
+        id: 'cover_${DateTime.now().millisecondsSinceEpoch}',
+        actionType: SiteManagerSyncActionType.setCoverAttachment,
+        endpoint: ApiConstants.mobileProjectAttachmentCover(state.projectId, attachmentId),
+        httpMethod: 'PATCH',
+        projectId: state.projectId,
+        displayTitle: 'Set Cover Photo',
+        createdAt: DateTime.now(),
       );
-      state = state.copyWith(isMutating: false, errorMessage: e.toString());
-      return false;
+      await ref.read(siteManagerSyncProvider.notifier).enqueue(action);
+
+      final updatedList = state.items.map((a) => a.id == attachmentId ? a.copyWith(isCover: true) : a.copyWith(isCover: false)).toList();
+      state = state.copyWith(items: updatedList, isMutating: false);
+      return true;
     }
   }
 
   Future<bool> deleteAttachment(String attachmentId) async {
-    state = state.copyWith(isMutating: true, clearError: true);
+    final updatedList = state.items.where((a) => a.id != attachmentId).toList();
+    state = state.copyWith(items: updatedList, isMutating: false);
+
     try {
-      final ok =
-          await _repository.deleteAttachment(state.projectId, attachmentId);
-      if (ok) {
-        final updatedList =
-            state.items.where((a) => a.id != attachmentId).toList();
-        state = state.copyWith(items: updatedList, isMutating: false);
-        return true;
-      }
-      state = state.copyWith(isMutating: false);
-      return false;
-    } catch (e, st) {
-      AppLogger.error(
-        'Failed to delete attachment',
-        error: e,
-        stackTrace: st,
-        name: 'ATTACHMENTS',
+      await _repository.deleteAttachment(state.projectId, attachmentId);
+      return true;
+    } catch (_) {
+      final action = SiteManagerSyncAction(
+        id: 'del_att_${DateTime.now().millisecondsSinceEpoch}',
+        actionType: SiteManagerSyncActionType.deleteAttachment,
+        endpoint: ApiConstants.mobileProjectAttachmentById(state.projectId, attachmentId),
+        httpMethod: 'DELETE',
+        projectId: state.projectId,
+        displayTitle: 'Delete Attachment',
+        createdAt: DateTime.now(),
       );
-      state = state.copyWith(isMutating: false, errorMessage: e.toString());
-      return false;
+      await ref.read(siteManagerSyncProvider.notifier).enqueue(action);
+      return true;
     }
   }
 }

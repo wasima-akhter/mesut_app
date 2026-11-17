@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/constants/api_constants.dart';
 import '../../../../core/enums/app_enum.dart';
 import '../../../../core/network/network_providers.dart';
 import '../../../../core/providers/common_provider.dart';
@@ -8,11 +9,14 @@ import '../../data/datasources/mobile_inspection_datasource.dart';
 import '../../data/repositories/mobile_inspection_repository_impl.dart';
 import '../../domain/entities/mobile_inspection_entity.dart';
 import '../../domain/repositories/mobile_inspection_repository.dart';
+import '../../offline_sync/models/site_manager_sync_action.dart';
+import '../../offline_sync/providers/site_manager_sync_provider.dart';
 
 final mobileInspectionDataSourceProvider =
     Provider<MobileInspectionRemoteDataSource>((ref) {
       return MobileInspectionRemoteDataSourceImpl(
         apiClient: ref.watch(apiClientProvider),
+        cacheService: ref.watch(siteManagerCacheServiceProvider),
       );
     });
 
@@ -57,18 +61,52 @@ class MobileInspectionsNotifier
     required double scaffoldHeight,
     required String scaffoldType,
   }) async {
-    final updated = await ref
-        .read(mobileInspectionRepositoryProvider)
-        .completeInspection(
-          id,
-          scaffoldArea: scaffoldArea,
-          scaffoldHeight: scaffoldHeight,
-          scaffoldType: scaffoldType,
-        );
-    final current = state.asData?.value ?? const <MobileInspectionEntity>[];
-    final next = current.map((e) => e.id == id ? updated : e).toList();
-    state = AsyncValue.data(next);
-    return updated;
+    final payload = {
+      'scaffoldArea': scaffoldArea,
+      'scaffoldHeight': scaffoldHeight,
+      'scaffoldType': scaffoldType,
+    };
+
+    try {
+      final updated = await ref
+          .read(mobileInspectionRepositoryProvider)
+          .completeInspection(
+            id,
+            scaffoldArea: scaffoldArea,
+            scaffoldHeight: scaffoldHeight,
+            scaffoldType: scaffoldType,
+          );
+      final current = state.asData?.value ?? const <MobileInspectionEntity>[];
+      final next = current.map((e) => e.id == id ? updated : e).toList();
+      state = AsyncValue.data(next);
+      return updated;
+    } catch (_) {
+      final current = state.asData?.value ?? const <MobileInspectionEntity>[];
+      final item = current.firstWhere(
+        (e) => e.id == id,
+        orElse: () => current.first,
+      );
+      final updated = item.copyWith(
+        status: 'SURVEY_DONE',
+        scaffoldArea: scaffoldArea,
+        scaffoldHeight: scaffoldHeight,
+        scaffoldType: scaffoldType,
+      );
+      final next = current.map((e) => e.id == id ? updated : e).toList();
+      state = AsyncValue.data(next);
+
+      final action = SiteManagerSyncAction(
+        id: 'inspection_$id',
+        actionType: SiteManagerSyncActionType.completeInspection,
+        endpoint: ApiConstants.mobileInspectionComplete(id),
+        httpMethod: 'PATCH',
+        displayTitle: 'Inspection: ${item.siteTitle}',
+        createdAt: DateTime.now(),
+        payload: payload,
+      );
+      await ref.read(siteManagerSyncProvider.notifier).enqueue(action);
+      return updated;
+    }
   }
 }
 

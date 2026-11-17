@@ -3,9 +3,9 @@ import 'package:construction_app/features/auth/presentation/screens/otp_page.dar
 import 'package:construction_app/features/auth/presentation/screens/reset_password_page.dart';
 import 'package:construction_app/features/auth/presentation/screens/sign_in_page.dart';
 import 'package:construction_app/features/auth/presentation/screens/sign_up_page.dart';
-import 'package:construction_app/features/employee/assignments/employee_assignment_detail_page.dart';
-import 'package:construction_app/features/employee/assignments/employee_assignment_photos_page.dart';
-import 'package:construction_app/features/employee/timer/active_timer_page.dart';
+import 'package:construction_app/features/employee/assignments/presentation/screens/employee_assignment_detail_page.dart';
+import 'package:construction_app/features/employee/assignments/presentation/screens/employee_assignment_photos_page.dart';
+import 'package:construction_app/features/employee/time_tracking/presentation/screens/active_timer_page.dart';
 import 'package:construction_app/features/entry/splash/splash_page.dart';
 import 'package:construction_app/features/site_manager/profile/site_manager_profile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -213,6 +213,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RouteConstants.employeeActiveTimerPage,
         builder: (context, state) {
           return const ActiveTimerPage();
+        },
+      ),
+      GoRoute(
+        path: RouteConstants.employeeProfileEdit,
+        builder: (context, state) {
+          return const EditProfilePage();
         },
       ),
 

@@ -19,4 +19,11 @@ abstract class ProjectTasksRepository {
   Future<ProjectTaskEntity> toggleProjectTask(String taskId);
 
   Future<void> deleteProjectTask(String taskId);
+
+  Future<List<ProjectTaskEmployeeEntity>> getProjectEmployees({
+    required String projectId,
+    String? search,
+    int page = 1,
+    int limit = 50,
+  });
 }

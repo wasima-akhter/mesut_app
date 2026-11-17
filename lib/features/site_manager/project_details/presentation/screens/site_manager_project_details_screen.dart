@@ -135,10 +135,13 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
   }
 
   Widget _buildTabBody(ProjectDetailsState state) {
+    final hasValidDetails =
+        state.details != null && state.details!.id == widget.projectId;
+
     switch (state.selectedTab) {
       case ProjectDetailsTab.overview:
         final effectiveStatus =
-            (state.details == null &&
+            (!hasValidDetails &&
                 (state.overviewStatus == AppDataStatus.initial ||
                     state.overviewStatus == AppDataStatus.refreshing))
             ? AppDataStatus.loading
@@ -152,7 +155,7 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
           onRetry: () => ref
               .read(projectDetailsProvider.notifier)
               .loadOverview(widget.projectId, forceRefresh: true),
-          child: state.details != null
+          child: hasValidDetails
               ? ProjectDetailsOverviewTab(
                   details: state.details!,
                   onRefresh: () => ref
@@ -171,7 +174,7 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
       case ProjectDetailsTab.photos:
         return ProjectPhotosTabView(
           projectId: widget.projectId,
-          projectName: state.details?.name ?? '',
+          projectName: hasValidDetails ? state.details!.name : '',
         );
       case ProjectDetailsTab.measurement:
         return ProjectMeasurementTabView(projectId: widget.projectId);
@@ -187,13 +190,15 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(projectDetailsProvider);
+    final hasValidDetails =
+        state.details != null && state.details!.id == widget.projectId;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
       body: SafeArea(
         child: Column(
           children: [
-            if (state.details != null)
+            if (hasValidDetails)
               ProjectDetailsHeader(details: state.details!)
             else
               _buildPlaceholderHeader(context),

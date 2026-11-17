@@ -138,6 +138,13 @@ class StorageService {
   bool get hasUserSelectedLanguage =>
       localStorage.getBool(StorageKeys.hasUserSelectedLanguage) ?? false;
 
+  Future<void> setNotificationsEnabled(bool value) async {
+    await localStorage.setBool(StorageKeys.notificationsEnabled, value);
+  }
+
+  bool get notificationsEnabled =>
+      localStorage.getBool(StorageKeys.notificationsEnabled) ?? true;
+
   Future<void> saveMobileConfigJson(String json) async {
     await localStorage.setString(StorageKeys.mobileConfigCache, json);
   }

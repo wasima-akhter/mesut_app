@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/network/api_client.dart';
 import '../../../../../core/network/network_providers.dart';
+import '../../../offline_sync/providers/site_manager_sync_provider.dart';
+import '../../../offline_sync/services/site_manager_cache_service.dart';
 
 abstract class ProjectNotesDatasource {
   Future<Map<String, dynamic>> fetchProjectNotes({
@@ -30,8 +32,9 @@ abstract class ProjectNotesDatasource {
 
 class ProjectNotesDatasourceImpl implements ProjectNotesDatasource {
   final ApiClient _client;
+  final SiteManagerCacheService? _cacheService;
 
-  ProjectNotesDatasourceImpl(this._client);
+  ProjectNotesDatasourceImpl(this._client, [this._cacheService]);
 
   @override
   Future<Map<String, dynamic>> fetchProjectNotes({
@@ -40,17 +43,28 @@ class ProjectNotesDatasourceImpl implements ProjectNotesDatasource {
     int limit = 10,
   }) async {
     final endpoint = ApiConstants.mobileProjectNotes(projectId);
-    final response = await _client.get(
-      endpoint,
-      queryParameters: {
-        'page': page,
-        'limit': limit,
-      },
-    );
+    try {
+      final response = await _client.get(
+        endpoint,
+        queryParameters: {
+          'page': page,
+          'limit': limit,
+        },
+      );
 
-    final data = response.data;
-    if (data is Map<String, dynamic>) {
-      return data;
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        if (page == 1) {
+          await _cacheService?.cacheNotes(projectId, data);
+        }
+        return data;
+      }
+    } catch (_) {
+      final cached = _cacheService?.getCachedNotes(projectId);
+      if (cached is Map<String, dynamic>) {
+        return cached;
+      }
+      rethrow;
     }
     return {};
   }
@@ -104,5 +118,6 @@ class ProjectNotesDatasourceImpl implements ProjectNotesDatasource {
 
 final projectNotesDatasourceProvider = Provider<ProjectNotesDatasource>((ref) {
   final client = ref.watch(apiClientProvider);
-  return ProjectNotesDatasourceImpl(client);
+  final cache = ref.watch(siteManagerCacheServiceProvider);
+  return ProjectNotesDatasourceImpl(client, cache);
 });

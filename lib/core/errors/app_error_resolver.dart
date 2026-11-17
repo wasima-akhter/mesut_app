@@ -445,7 +445,11 @@ class AppErrorResolver {
     if (lower.contains('socketexception') ||
         lower.contains('connection') ||
         lower.contains('network') ||
-        lower.contains('timeout')) {
+        lower.contains('timeout') ||
+        lower.contains('failed host lookup') ||
+        lower.contains('no address associated with hostname') ||
+        lower.contains('unreachable') ||
+        lower.contains('offline')) {
       return _buildMessage(
         type: ApiErrorType.networkError,
         isGerman: isGerman,
@@ -499,7 +503,11 @@ class AppErrorResolver {
     }
     if (cleaned.contains('DioException') ||
         cleaned.contains('StackTrace') ||
-        cleaned.contains('SocketException')) {
+        cleaned.contains('SocketException') ||
+        cleaned.contains('Failed host lookup') ||
+        cleaned.contains('RequestOptions') ||
+        cleaned.contains('validateStatus') ||
+        cleaned.contains('Client error')) {
       return null;
     }
     return cleaned.isEmpty ? null : cleaned;

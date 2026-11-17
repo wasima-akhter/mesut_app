@@ -1,6 +1,7 @@
 import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/enums/backend_enums.dart';
 import '../../../../../core/network/api_client.dart';
+import '../../../../site_manager/offline_sync/services/site_manager_cache_service.dart';
 import '../../domain/entities/mobile_time_log_entity.dart';
 import '../models/mobile_time_tracking_models.dart';
 
@@ -38,9 +39,13 @@ abstract class MobileTimeTrackingRemoteDataSource {
 
 class MobileTimeTrackingRemoteDataSourceImpl
     implements MobileTimeTrackingRemoteDataSource {
-  MobileTimeTrackingRemoteDataSourceImpl({required this.apiClient});
+  MobileTimeTrackingRemoteDataSourceImpl({
+    required this.apiClient,
+    this.cacheService,
+  });
 
   final ApiClient apiClient;
+  final SiteManagerCacheService? cacheService;
 
   @override
   Future<MobileTimerStartResultEntity> startTimer({
@@ -115,12 +120,24 @@ class MobileTimeTrackingRemoteDataSourceImpl
   Future<List<MobileTimeLogEntity>> getTimeLogs({
     String period = 'TODAY',
   }) async {
-    final response = await apiClient.get<Map<String, dynamic>>(
-      ApiConstants.mobileTimeLogs,
-      queryParameters: {'period': period},
-    );
-    final body = response.data ?? const <String, dynamic>{};
-    return MobileTimeLogModel.fromList(body['data']);
+    try {
+      final response = await apiClient.get<Map<String, dynamic>>(
+        ApiConstants.mobileTimeLogs,
+        queryParameters: {'period': period},
+      );
+      final body = response.data ?? const <String, dynamic>{};
+      final data = body['data'];
+      if (data != null) {
+        await cacheService?.save('time_logs_$period', data);
+      }
+      return MobileTimeLogModel.fromList(data);
+    } catch (_) {
+      final cached = cacheService?.getList('time_logs_$period');
+      if (cached != null) {
+        return MobileTimeLogModel.fromList(cached);
+      }
+      rethrow;
+    }
   }
 
   @override
@@ -130,19 +147,30 @@ class MobileTimeTrackingRemoteDataSourceImpl
     int page = 1,
     int limit = 10,
   }) async {
-    final response = await apiClient.get<Map<String, dynamic>>(
-      ApiConstants.mobileCrewTime,
-      queryParameters: {
-        'projectId': projectId,
-        if (date != null) 'date': date.toUtc().toIso8601String(),
-        'page': page,
-        'limit': limit,
-      },
-    );
-    final body = response.data ?? const <String, dynamic>{};
-    final data = body['data'] is Map
-        ? Map<String, dynamic>.from(body['data'] as Map)
-        : body;
-    return MobileCrewTimeModel.fromJson(data);
+    try {
+      final response = await apiClient.get<Map<String, dynamic>>(
+        ApiConstants.mobileCrewTime,
+        queryParameters: {
+          'projectId': projectId,
+          if (date != null) 'date': date.toUtc().toIso8601String(),
+          'page': page,
+          'limit': limit,
+        },
+      );
+      final body = response.data ?? const <String, dynamic>{};
+      final data = body['data'] is Map
+          ? Map<String, dynamic>.from(body['data'] as Map)
+          : body;
+      if (page == 1 && date == null) {
+        await cacheService?.cacheCrewTime(projectId, data);
+      }
+      return MobileCrewTimeModel.fromJson(data);
+    } catch (_) {
+      final cached = cacheService?.getCachedCrewTime(projectId);
+      if (cached is Map<String, dynamic>) {
+        return MobileCrewTimeModel.fromJson(cached);
+      }
+      rethrow;
+    }
   }
 }

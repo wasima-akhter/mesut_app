@@ -9,11 +9,17 @@ import '../../../app/theme/app_radii.dart';
 import '../../../core/localization/app_language.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/localization/localization_provider.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import '../../auth/presentation/providers/auth_provider.dart';
 import '../../auth/presentation/widgets/logout_dialog.dart';
-import '../../employee/presentation/providers/offline_sync_provider.dart';
+import '../../auth/presentation/widgets/logout_loading_overlay.dart';
 import '../../shared/config/presentation/providers/mobile_config_provider.dart';
+import '../../shared/notifications/presentation/providers/notification_settings_provider.dart';
+import '../offline_sync/providers/site_manager_sync_provider.dart';
+import '../offline_sync/widgets/site_manager_sync_details_sheet.dart';
 import '../projects/overview_modules.dart';
+import 'widgets/site_manager_more_tiles.dart';
+import 'widgets/site_manager_profile_card.dart';
 
 class SiteManagerMorePage extends ConsumerStatefulWidget {
   const SiteManagerMorePage({super.key});
@@ -24,10 +30,13 @@ class SiteManagerMorePage extends ConsumerStatefulWidget {
 }
 
 class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
+  bool _isLoggingOut = false;
+
   @override
   Widget build(BuildContext context) {
     final currentLang = ref.watch(appLanguageProvider);
-    final syncState = ref.watch(offlineSyncProvider);
+    final syncState = ref.watch(siteManagerSyncProvider);
+    final notificationsEnabled = ref.watch(notificationSettingsProvider);
     final langName = currentLang == AppLanguage.german
         ? context.loc.german
         : context.loc.english;
@@ -35,20 +44,22 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverPadding(
-              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 30.h),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  _buildProfileCard(),
+        child: Stack(
+          children: [
+            CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 30.h),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      const SiteManagerProfileCard(),
                   SizedBox(height: 14.h),
 
-                  _buildSection(
+                  SiteManagerSection(
                     title: context.loc.smOverview,
                     children: [
-                      _buildSettingsTile(
+                      SiteManagerSettingsTile(
                         icon: Icons.assignment_outlined,
                         title: context.loc.inspections,
                         subtitle: context.loc.performInspection,
@@ -58,7 +69,7 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
                           );
                         },
                       ),
-                      _buildSettingsTile(
+                      SiteManagerSettingsTile(
                         icon: Icons.account_tree_outlined,
                         title: context.loc.phaseBoard,
                         subtitle: context.loc.projects,
@@ -66,7 +77,7 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
                           context.push(RouteConstants.siteManagerPhaseBoard);
                         },
                       ),
-                      _buildSettingsTile(
+                      SiteManagerSettingsTile(
                         icon: Icons.calendar_month_outlined,
                         title: context.loc.calendar,
                         subtitle: context.loc.scheduleAndDuration,
@@ -81,14 +92,14 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
 
                   SizedBox(height: 12.h),
 
-                  _buildSection(
+                  SiteManagerSection(
                     title: context.loc.settings,
                     children: [
-                      _buildSettingsTile(
+                      SiteManagerSettingsTile(
                         icon: Icons.sync_rounded,
                         title: syncState.hasPending
                             ? context.loc.pendingSyncCount(
-                                '${syncState.pendingCount}',
+                                '${syncState.totalPendingCount}',
                               )
                             : context.loc.synced,
                         trailing: Text(
@@ -97,27 +108,16 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
                               : (syncState.hasPending
                                     ? context.loc.syncNow
                                     : context.loc.synced),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: syncState.hasPending
-                                ? AppColors.warning
-                                : AppColors.success,
-                          ),
-                        ),
-                        onTap: () async {
-                          final res = await ref
-                              .read(offlineSyncProvider.notifier)
-                              .syncPendingLogs();
-                          if (res != null && mounted) {
-                            showMessage(
-                              context.loc.syncCompleted(
-                                '${res.created}',
-                                '${res.skipped}',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: syncState.hasPending
+                                    ? AppColors.warning
+                                    : AppColors.success,
                               ),
-                            );
-                          }
-                        },
+                        ),
+                        onTap: () => SiteManagerSyncDetailsSheet.show(context),
                       ),
-                      _buildSettingsTile(
+                      SiteManagerSettingsTile(
                         icon: Icons.translate_rounded,
                         title: context.loc.language,
                         subtitle: langName,
@@ -138,14 +138,30 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
                         ),
                         onTap: _showLanguageOptions,
                       ),
-                      _buildSettingsTile(
-                        icon: Icons.notifications_outlined,
+                      SiteManagerSettingsTile(
+                        icon: notificationsEnabled
+                            ? Icons.notifications_outlined
+                            : Icons.notifications_off_outlined,
                         title: context.loc.notifications,
+                        subtitle: notificationsEnabled
+                            ? context.loc.on
+                            : context.loc.off,
+                        trailing: Switch.adaptive(
+                          value: notificationsEnabled,
+                          activeColor: AppColors.primary,
+                          onChanged: (_) {
+                            ref
+                                .read(notificationSettingsProvider.notifier)
+                                .toggle();
+                          },
+                        ),
                         onTap: () {
-                          context.push(RouteConstants.notifications);
+                          ref
+                              .read(notificationSettingsProvider.notifier)
+                              .toggle();
                         },
                       ),
-                      _buildSettingsTile(
+                      SiteManagerSettingsTile(
                         icon: Icons.lock_outline_rounded,
                         title: context.loc.changePassword,
                         onTap: () {
@@ -157,17 +173,17 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
 
                   SizedBox(height: 12.h),
 
-                  _buildSection(
+                  SiteManagerSection(
                     title: context.loc.legalNotice,
                     children: [
-                      _buildSettingsTile(
+                      SiteManagerSettingsTile(
                         icon: Icons.policy_outlined,
                         title: context.loc.privacyPolicy,
                         onTap: () {
                           context.push(RouteConstants.privacyPolicy);
                         },
                       ),
-                      _buildSettingsTile(
+                      SiteManagerSettingsTile(
                         icon: Icons.gavel_outlined,
                         title: context.loc.termsAndConditions,
                         onTap: () {
@@ -187,191 +203,27 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildProfileCard() {
-    return GestureDetector(
-      onTap: () => context.push(RouteConstants.siteManagerProfileEdit),
-      child: Container(
-        padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: AppRadii.medium,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48.w,
-              height: 48.w,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.neutral200,
-              ),
-              child: ClipOval(
-                child: Image.asset(
-                  'assets/images/profile.png',
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) {
-                    return Icon(
-                      Icons.person,
-                      color: AppColors.textSecondary,
-                      size: 25.sp,
-                    );
-                  },
-                ),
-              ),
-            ),
-
-            SizedBox(width: 12.w),
-
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Tim Muller',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    context.loc.siteManagerRole,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  SizedBox(height: 3.h),
-                  Text(
-                    context.loc.inProgress,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.labelSmall?.copyWith(color: AppColors.success),
-                  ),
-                ],
-              ),
-            ),
-
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 22.sp,
-              color: AppColors.textPrimary,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSection({
-    required String title,
-    required List<Widget> children,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: AppRadii.medium,
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(top: 12.h, bottom: 4.h),
-              child: Text(title, style: Theme.of(context).textTheme.titleSmall),
-            ),
-            ...children,
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSettingsTile({
-    required IconData icon,
-    required String title,
-    String? subtitle,
-    Widget? trailing,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 11.h),
-          decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: AppColors.border, width: .7)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 30.w,
-                height: 30.w,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceTertiary,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, size: 17.sp, color: AppColors.textSecondary),
-              ),
-
-              SizedBox(width: 10.w),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: Theme.of(context).textTheme.bodyMedium),
-                    if (subtitle != null) ...[
-                      SizedBox(height: 2.h),
-                      Text(
-                        subtitle,
-                        style: Theme.of(context).textTheme.labelSmall,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-
-              trailing ??
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    size: 20.sp,
-                    color: AppColors.textSecondary,
-                  ),
-            ],
-          ),
-        ),
-      ),
-    );
+        if (_isLoggingOut) const LogoutLoadingOverlay(),
+      ],
+    ),
+  ),
+);
   }
 
   Widget _buildLogoutButton() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 12.h),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.error),
-        borderRadius: AppRadii.medium,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: _logout,
-          borderRadius: AppRadii.medium,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.logout_rounded, size: 17.sp, color: AppColors.error),
-              SizedBox(width: 7.w),
-              Text(
-                context.loc.logout,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge?.copyWith(color: AppColors.error),
-              ),
-            ],
-          ),
-        ),
+    return AppOutlinedButton(
+      fullWidth: true,
+      isLoading: _isLoggingOut,
+      onPressed: _isLoggingOut ? null : _logout,
+      leadingIcon: Icons.logout_rounded,
+      text: context.loc.logout,
+      foregroundColor: AppColors.error,
+      borderColor: AppColors.error,
+      borderRadius: 8.r,
+      textStyle: TextStyle(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w600,
+        color: AppColors.error,
       ),
     );
   }
@@ -417,10 +269,17 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
     LogoutConfirmation.show(
       context: context,
       onLogout: () async {
-        await ref.read(authProvider.notifier).logout();
-        if (mounted) {
-          showMessage(context.loc.loggedOutSuccess);
-          context.go(RouteConstants.signIn);
+        setState(() => _isLoggingOut = true);
+        try {
+          await ref.read(authProvider.notifier).logout();
+          if (mounted) {
+            showMessage(context.loc.loggedOutSuccess);
+            context.go(RouteConstants.signIn);
+          }
+        } catch (_) {
+          if (mounted) {
+            setState(() => _isLoggingOut = false);
+          }
         }
       },
     );

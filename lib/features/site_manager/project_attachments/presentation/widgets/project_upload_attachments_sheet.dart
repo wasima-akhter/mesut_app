@@ -61,10 +61,11 @@ class ProjectUploadAttachmentsSheet extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(
-                Icons.photo_library_outlined,
+                Icons.folder_outlined,
                 color: Color(0xFFC8102E),
               ),
-              title: Text(context.loc.gallery),
+              title: Text(context.loc.deviceStorage),
+              subtitle: Text(context.loc.chooseFromDevice),
               onTap: onChooseGallery,
             ),
             ListTile(

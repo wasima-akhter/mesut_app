@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import 'app_data_state.dart';
@@ -26,23 +25,16 @@ class AppScreenStateView extends StatelessWidget {
   final String? errorMessage;
   final Object? errorObject;
 
-  static bool isConnectionError(Object? err) {
-    if (err is DioException) {
-      return err.type == DioExceptionType.connectionTimeout ||
-          err.type == DioExceptionType.sendTimeout ||
-          err.type == DioExceptionType.receiveTimeout ||
-          err.type == DioExceptionType.connectionError;
-    }
-    final str = err?.toString().toLowerCase() ?? '';
-    return str.contains('socket') ||
-        str.contains('network') ||
-        str.contains('connection') ||
-        str.contains('offline');
-  }
+  static bool isConnectionError(Object? err) =>
+      AppErrorWidget.isConnectionError(err);
 
   @override
   Widget build(BuildContext context) {
-    if (status == AppDataStatus.noConnection || isConnectionError(errorObject)) {
+    final hasConnError = status == AppDataStatus.noConnection ||
+        AppErrorWidget.isConnectionError(errorObject) ||
+        AppErrorWidget.isConnectionError(errorMessage);
+
+    if (hasConnError) {
       return Center(
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -70,6 +62,7 @@ class AppScreenStateView extends StatelessWidget {
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: AppErrorWidget(
+              error: errorObject,
               message: errorMessage,
               onRetry: onRetry,
             ),

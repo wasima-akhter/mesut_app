@@ -214,6 +214,7 @@ class MobileProfileModel {
       email: (json['email'] ?? '').toString(),
       phone: (json['phone'] ?? '').toString(),
       avatarUrl: (avatar == null || avatar.isEmpty) ? null : avatar,
+      language: (json['language'] ?? 'DE').toString().toUpperCase(),
       weeklyHoursTarget: _asDouble(json['weeklyHoursTarget']),
       hoursThisWeek: _asDouble(json['hoursThisWeek']),
       assignedProjectsCount: _asInt(json['assignedProjectsCount']),
@@ -253,10 +254,43 @@ class MobileScheduleModel {
           );
         }
       }
+      final rawInspections = dayMap['inspections'];
+      final inspections = <MobileScheduleInspectionEntity>[];
+      if (rawInspections is List) {
+        for (final item in rawInspections) {
+          final m = _asMap(item);
+          if (m.isEmpty) continue;
+          final cust = _asMap(m['customer']);
+          final conv = _asMap(m['convertedProject']);
+          inspections.add(
+            MobileScheduleInspectionEntity(
+              id: (m['id'] ?? '').toString(),
+              siteTitle: (m['siteTitle'] ?? '').toString(),
+              address: (m['address'] ?? '').toString(),
+              postalCode: (m['postalCode'] ?? '').toString(),
+              city: (m['city'] ?? '').toString(),
+              appointmentDate: _asDateTime(m['appointmentDate']),
+              scaffoldArea: (m['scaffoldArea'] as num?)?.toDouble() ?? 0,
+              scaffoldHeight: (m['scaffoldHeight'] as num?)?.toDouble() ?? 0,
+              scaffoldType: (m['scaffoldType'] ?? '').toString(),
+              siteAccessInstructions:
+                  (m['siteAccessInstructions'] ?? '').toString(),
+              specialRequirements: (m['specialRequirements'] ?? '').toString(),
+              status: (m['status'] ?? 'PENDING').toString(),
+              projectId: (m['projectId'] ?? '').toString(),
+              customerName: (cust['name'] ?? '').toString(),
+              customerCategory: (cust['category'] ?? '').toString(),
+              convertedProjectId: conv['id']?.toString(),
+              convertedProjectName: conv['name']?.toString(),
+            ),
+          );
+        }
+      }
       days.add(
         MobileScheduleDayEntity(
           date: (dayMap['date'] ?? '').toString(),
           phases: phases,
+          inspections: inspections,
         ),
       );
     }

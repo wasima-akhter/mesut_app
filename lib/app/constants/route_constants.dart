@@ -21,6 +21,7 @@ abstract final class RouteConstants {
   static const String employeeTime = '/employee/time';
   static const String employeePlan = '/employee/plan';
   static const String employeeProfile = '/employee/profile';
+  static const String employeeProfileEdit = '/employee/profile-edit';
 
   // Site Manager
   static const String siteManager = '/site-manager';

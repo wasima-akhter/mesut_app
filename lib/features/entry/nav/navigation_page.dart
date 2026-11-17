@@ -11,16 +11,19 @@ import '../../../core/providers/common_provider.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/services/notification_socket_service.dart';
 import '../../../core/storage/storage_provider.dart';
-import '../../employee/home/employee_home_page.dart';
-import '../../employee/plan/employee_plan_page.dart';
-import '../../employee/presentation/providers/offline_sync_provider.dart';
-import '../../employee/profile/profile/employee_profile_page.dart';
-import '../../employee/timer/employee_time_tracking_page.dart';
+import '../../employee/home/presentation/screens/employee_home_page.dart';
+import '../../employee/plan/presentation/screens/employee_plan_page.dart';
+import '../../employee/time_tracking/presentation/providers/offline_sync_provider.dart';
+import '../../employee/profile/presentation/screens/employee_profile_page.dart';
+import '../../employee/time_tracking/presentation/screens/employee_time_tracking_page.dart';
 import '../../shared/config/presentation/providers/mobile_config_provider.dart';
+import '../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
 import '../../shared/notifications/presentation/providers/notifications_provider.dart';
 import '../../site_manager/home/site_manager_home_page.dart';
 import '../../site_manager/map/site_manager_map_page.dart';
 import '../../site_manager/more/site_manager_more_page.dart';
+import '../../site_manager/offline_sync/providers/site_manager_sync_provider.dart';
+import '../../site_manager/offline_sync/widgets/site_manager_sync_banner.dart';
 import '../../site_manager/projects/presentation/screens/site_manager_projects_page.dart';
 import '../../site_manager/time_tracking/site_manager_time_tracking_page.dart';
 import 'bottom_nav_tabs.dart';
@@ -64,8 +67,10 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
       ref.read(notificationSocketServiceProvider).connect(token);
     }
     unawaited(ref.read(mobileConfigProvider.notifier).refresh());
+    unawaited(ref.read(mobileProfileProvider.notifier).refresh());
     unawaited(ref.read(notificationsProvider.notifier).refresh());
     unawaited(ref.read(offlineSyncProvider.notifier).syncPendingLogs());
+    unawaited(ref.read(siteManagerSyncProvider.notifier).syncAll());
     ref.read(pushNotificationServiceProvider).consumePendingInitialNavigation();
   }
 
@@ -142,7 +147,17 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
     );
 
     return Scaffold(
-      body: IndexedStack(index: safeIndex, children: pages),
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            if (role == UserRole.siteManager) const SiteManagerSyncBanner(),
+            Expanded(
+              child: IndexedStack(index: safeIndex, children: pages),
+            ),
+          ],
+        ),
+      ),
       bottomNavigationBar: _buildBottomNavBar(
         tabs: tabs,
         selectedIndex: safeIndex,

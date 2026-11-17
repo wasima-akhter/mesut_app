@@ -1,7 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/utils/logger.dart';
+import '../../../offline_sync/models/site_manager_sync_action.dart';
+import '../../../offline_sync/providers/site_manager_sync_provider.dart';
+import '../../data/models/project_note_model.dart';
 import '../../data/repositories/project_notes_repository_impl.dart';
+import '../../domain/entities/project_note_entity.dart';
 import 'project_notes_state.dart';
 
 class ProjectNotesNotifier extends Notifier<ProjectNotesState> {
@@ -14,10 +19,13 @@ class ProjectNotesNotifier extends Notifier<ProjectNotesState> {
 
   /// Initial load or pull-to-refresh of notes for [projectId].
   Future<void> loadInitial(String projectId) async {
+    final isDifferentProject = state.projectId != projectId;
+
     state = state.copyWith(
       isLoading: true,
       clearError: true,
       projectId: projectId,
+      items: isDifferentProject ? const [] : state.items,
       page: 1,
     );
 
@@ -95,6 +103,8 @@ class ProjectNotesNotifier extends Notifier<ProjectNotesState> {
     required String content,
   }) async {
     state = state.copyWith(isMutating: true);
+    final payload = {'category': category, 'content': content};
+
     try {
       final repository = ref.read(projectNotesRepositoryProvider);
       final created = await repository.createNote(
@@ -108,15 +118,33 @@ class ProjectNotesNotifier extends Notifier<ProjectNotesState> {
         items: [created, ...state.items],
       );
       return true;
-    } catch (e, st) {
-      AppLogger.error(
-        'Failed to create project note',
-        error: e,
-        stackTrace: st,
-        name: 'NOTES',
+    } catch (_) {
+      final localId = 'offline_${DateTime.now().millisecondsSinceEpoch}';
+      final offlineNote = ProjectNoteEntity(
+        id: localId,
+        projectId: state.projectId,
+        category: ProjectNoteModel.parseCategory(category),
+        content: content,
+        createdAt: DateTime.now(),
       );
-      state = state.copyWith(isMutating: false);
-      return false;
+
+      final action = SiteManagerSyncAction(
+        id: localId,
+        actionType: SiteManagerSyncActionType.createNote,
+        endpoint: ApiConstants.mobileProjectNotes(state.projectId),
+        httpMethod: 'POST',
+        projectId: state.projectId,
+        displayTitle: 'Note: $category',
+        createdAt: DateTime.now(),
+        payload: payload,
+      );
+      await ref.read(siteManagerSyncProvider.notifier).enqueue(action);
+
+      state = state.copyWith(
+        isMutating: false,
+        items: [offlineNote, ...state.items],
+      );
+      return true;
     }
   }
 
@@ -127,10 +155,15 @@ class ProjectNotesNotifier extends Notifier<ProjectNotesState> {
     required String content,
   }) async {
     state = state.copyWith(isMutating: true);
+    final payload = {'category': category, 'content': content};
+    final effectiveProjectId = state.projectId.isNotEmpty
+        ? state.projectId
+        : (state.items.where((i) => i.id == noteId).firstOrNull?.projectId ?? '');
+
     try {
       final repository = ref.read(projectNotesRepositoryProvider);
       final updated = await repository.updateNote(
-        projectId: state.projectId,
+        projectId: effectiveProjectId,
         noteId: noteId,
         category: category,
         content: content,
@@ -142,47 +175,59 @@ class ProjectNotesNotifier extends Notifier<ProjectNotesState> {
 
       state = state.copyWith(isMutating: false, items: updatedList);
       return true;
-    } catch (e, st) {
-      AppLogger.error(
-        'Failed to update project note',
-        error: e,
-        stackTrace: st,
-        name: 'NOTES',
+    } catch (_) {
+      final updatedList = state.items.map((item) {
+        if (item.id != noteId) return item;
+        return item.copyWith(
+          category: ProjectNoteModel.parseCategory(category),
+          content: content,
+        );
+      }).toList();
+
+      final action = SiteManagerSyncAction(
+        id: 'update_note_${DateTime.now().millisecondsSinceEpoch}',
+        actionType: SiteManagerSyncActionType.updateNote,
+        endpoint: ApiConstants.mobileProjectNoteById(effectiveProjectId, noteId),
+        httpMethod: 'PATCH',
+        projectId: effectiveProjectId,
+        displayTitle: 'Note: $category',
+        createdAt: DateTime.now(),
+        payload: payload,
       );
-      state = state.copyWith(isMutating: false);
-      return false;
+      await ref.read(siteManagerSyncProvider.notifier).enqueue(action);
+
+      state = state.copyWith(isMutating: false, items: updatedList);
+      return true;
     }
   }
 
-  /// Deletes a note by ID with optimistic update and rollback on failure.
+  /// Deletes a note by ID with optimistic update.
   Future<bool> deleteNote(String noteId) async {
-    final previousItems = state.items;
+    final effectiveProjectId = state.projectId.isNotEmpty
+        ? state.projectId
+        : (state.items.where((i) => i.id == noteId).firstOrNull?.projectId ?? '');
     final updatedList = state.items.where((n) => n.id != noteId).toList();
-
-    // Optimistic removal
     state = state.copyWith(items: updatedList);
 
     try {
       final repository = ref.read(projectNotesRepositoryProvider);
-      final success = await repository.deleteNote(
-        projectId: state.projectId,
+      await repository.deleteNote(
+        projectId: effectiveProjectId,
         noteId: noteId,
       );
-
-      if (!success) {
-        state = state.copyWith(items: previousItems);
-        return false;
-      }
       return true;
-    } catch (e, st) {
-      AppLogger.error(
-        'Failed to delete project note',
-        error: e,
-        stackTrace: st,
-        name: 'NOTES',
+    } catch (_) {
+      final action = SiteManagerSyncAction(
+        id: 'delete_note_${DateTime.now().millisecondsSinceEpoch}',
+        actionType: SiteManagerSyncActionType.deleteNote,
+        endpoint: ApiConstants.mobileProjectNoteById(effectiveProjectId, noteId),
+        httpMethod: 'DELETE',
+        projectId: effectiveProjectId,
+        displayTitle: 'Delete Note',
+        createdAt: DateTime.now(),
       );
-      state = state.copyWith(items: previousItems);
-      return false;
+      await ref.read(siteManagerSyncProvider.notifier).enqueue(action);
+      return true;
     }
   }
 }

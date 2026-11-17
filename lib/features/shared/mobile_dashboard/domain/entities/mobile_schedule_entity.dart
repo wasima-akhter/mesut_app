@@ -20,12 +20,56 @@ class MobileSchedulePhaseEntity {
   final DashboardProjectSummaryEntity project;
 }
 
+class MobileScheduleInspectionEntity {
+  const MobileScheduleInspectionEntity({
+    required this.id,
+    required this.siteTitle,
+    required this.address,
+    this.postalCode = '',
+    this.city = '',
+    this.appointmentDate,
+    this.scaffoldArea = 0,
+    this.scaffoldHeight = 0,
+    this.scaffoldType = '',
+    this.siteAccessInstructions = '',
+    this.specialRequirements = '',
+    this.status = 'PENDING',
+    this.projectId = '',
+    this.customerName = '',
+    this.customerCategory = '',
+    this.convertedProjectId,
+    this.convertedProjectName,
+  });
+
+  final String id;
+  final String siteTitle;
+  final String address;
+  final String postalCode;
+  final String city;
+  final DateTime? appointmentDate;
+  final double scaffoldArea;
+  final double scaffoldHeight;
+  final String scaffoldType;
+  final String siteAccessInstructions;
+  final String specialRequirements;
+  final String status;
+  final String projectId;
+  final String customerName;
+  final String customerCategory;
+  final String? convertedProjectId;
+  final String? convertedProjectName;
+}
+
 class MobileScheduleDayEntity {
   const MobileScheduleDayEntity({
     required this.date,
     this.phases = const [],
+    this.inspections = const [],
   });
 
   final String date;
   final List<MobileSchedulePhaseEntity> phases;
+  final List<MobileScheduleInspectionEntity> inspections;
+
+  int get totalEvents => phases.length + inspections.length;
 }

@@ -5,10 +5,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/localization/context_extensions.dart';
 import '../../../../../core/widgets/buttons/buttons.dart';
 import '../../../../../core/widgets/snack/app_snackbar.dart';
-import '../../../project_details/presentation/providers/project_details_provider.dart';
-import '../../domain/entities/project_task_entity.dart';
 import '../../../projects/enums.dart';
 import '../providers/project_tasks_provider.dart';
+import 'project_task_employee_dropdown.dart';
 
 Future<void> showAddProjectTaskSheet(
   BuildContext context,
@@ -44,34 +43,8 @@ class _ProjectTasksAddSheetState extends ConsumerState<ProjectTasksAddSheet> {
     super.dispose();
   }
 
-  List<ProjectTaskEmployeeEntity> _getAvailableEmployees() {
-    final details = ref.read(projectDetailsProvider).details;
-    final tasksState = ref.read(projectTasksProvider);
-    final map = <String, ProjectTaskEmployeeEntity>{};
-
-    if (details != null) {
-      for (final m in details.crewBreakdown) {
-        if (m.user.id.isNotEmpty) {
-          map[m.user.id] = ProjectTaskEmployeeEntity(
-            id: m.user.id,
-            firstName: m.user.firstName,
-            lastName: m.user.lastName,
-          );
-        }
-      }
-    }
-    for (final t in [...tasksState.openTasks, ...tasksState.completedTasks]) {
-      if (t.employee != null && t.employee!.id.isNotEmpty) {
-        map.putIfAbsent(t.employee!.id, () => t.employee!);
-      }
-    }
-    return map.values.toList();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final employees = _getAvailableEmployees();
-
     return Container(
       constraints: BoxConstraints(
         maxHeight: MediaQuery.sizeOf(context).height * .90,
@@ -110,7 +83,12 @@ class _ProjectTasksAddSheetState extends ConsumerState<ProjectTasksAddSheet> {
                   SizedBox(height: 14.h),
                   _fieldLabel(context.loc.responsibleEmployee),
                   SizedBox(height: 6.h),
-                  _employeeDropdown(employees),
+                  ProjectTaskEmployeeDropdown(
+                    projectId: widget.projectId,
+                    selectedEmployeeId: _selectedEmployeeId,
+                    onChanged: (val) =>
+                        setState(() => _selectedEmployeeId = val),
+                  ),
                   SizedBox(height: 14.h),
                   _fieldLabel(context.loc.priority),
                   SizedBox(height: 6.h),
@@ -178,29 +156,6 @@ class _ProjectTasksAddSheetState extends ConsumerState<ProjectTasksAddSheet> {
           borderRadius: BorderRadius.circular(6.r),
         ),
         child: child,
-      );
-
-  Widget _employeeDropdown(List<ProjectTaskEmployeeEntity> employees) =>
-      _boxWrapper(
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            value: _selectedEmployeeId,
-            hint: Text(
-              context.loc.selectEmployee,
-              style: TextStyle(fontSize: 16.sp, color: const Color(0xFF999999)),
-            ),
-            isExpanded: true,
-            icon: Icon(Icons.keyboard_arrow_down, size: 20.sp),
-            style: TextStyle(fontSize: 16.sp, color: const Color(0xFF444444)),
-            items: employees
-                .map((emp) => DropdownMenuItem(
-                      value: emp.id,
-                      child: Text(emp.fullName.isNotEmpty ? emp.fullName : emp.id),
-                    ))
-                .toList(),
-            onChanged: (val) => setState(() => _selectedEmployeeId = val),
-          ),
-        ),
       );
 
   Widget _priorityDropdown() => _boxWrapper(

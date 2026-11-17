@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/services/image_service.dart';
 import '../../../core/services/permission_service.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
 
@@ -110,6 +111,74 @@ class _InspectionPhotosViewAllPageState
         .toList();
   }
 
+  Future<void> _showAddPhotoSheet() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 16.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(
+                  Icons.camera_alt_outlined,
+                  color: Color(0xFFC8102E),
+                ),
+                title: Text(context.loc.takePhoto),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _takePhoto();
+                },
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.folder_outlined,
+                  color: Color(0xFFC8102E),
+                ),
+                title: Text(context.loc.deviceStorage),
+                subtitle: Text(context.loc.chooseFromDevice),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickFromDeviceStorage();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickFromDeviceStorage() async {
+    final images = await AppImageService.pickMultipleCompressedImages();
+    if (images.isEmpty || !mounted) return;
+
+    setState(() {
+      for (final image in images) {
+        _photos.insert(
+          0,
+          InspectionPhotoItem(
+            id: DateTime.now().millisecondsSinceEpoch.toString() +
+                image.path.hashCode.toString(),
+            title: 'New Site Photo',
+            category: _selectedCategory,
+            url: image.path,
+            timestamp: 'Just now',
+          ),
+        );
+      }
+    });
+
+    AppSnackBar.showSuccess(
+      context,
+      context.loc.get('siteManager.photoAdded', 'Photo added successfully'),
+    );
+  }
+
   Future<void> _takePhoto() async {
     final allowed = await AppPermissions.requestCamera();
     if (!allowed) {
@@ -203,13 +272,13 @@ class _InspectionPhotosViewAllPageState
           IconButton(
             icon: const Icon(Icons.camera_alt_outlined, color: AppColors.textPrimary),
             tooltip: context.loc.takePhoto,
-            onPressed: _takePhoto,
+            onPressed: _showAddPhotoSheet,
           ),
           SizedBox(width: 4.w),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _takePhoto,
+        onPressed: _showAddPhotoSheet,
         backgroundColor: const Color(0xFFC8102E),
         foregroundColor: Colors.white,
         icon: const Icon(Icons.camera_alt),

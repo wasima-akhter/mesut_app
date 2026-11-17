@@ -114,6 +114,22 @@ class ProjectTasksRepositoryImpl implements ProjectTasksRepository {
     await _datasource.deleteProjectTask(taskId);
   }
 
+  @override
+  Future<List<ProjectTaskEmployeeEntity>> getProjectEmployees({
+    required String projectId,
+    String? search,
+    int page = 1,
+    int limit = 50,
+  }) async {
+    final rawList = await _datasource.fetchProjectEmployees(
+      projectId: projectId,
+      search: search,
+      page: page,
+      limit: limit,
+    );
+    return rawList.map(ProjectTaskEmployeeModel.fromJson).toList();
+  }
+
   void _distributeTasks(
     List<dynamic> list,
     List<ProjectTaskEntity> openTasks,

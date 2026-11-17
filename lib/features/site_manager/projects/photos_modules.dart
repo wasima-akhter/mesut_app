@@ -8,6 +8,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/localization/app_localization.dart';
+import '../../../core/localization/context_extensions.dart';
+import '../../../core/services/image_service.dart';
 import '../../../core/services/permission_service.dart';
 import '../presentation/providers/site_manager_photos_provider.dart';
 import 'all_photos_screen.dart';
@@ -77,18 +79,17 @@ class _PhotosTabState extends ConsumerState<PhotosTab> {
       );
       return;
     }
-    final picker = ImagePicker();
-    final images = await picker.pickMultiImage(imageQuality: 90);
+    final images = await AppImageService.pickMultipleCompressedImages();
 
     if (images.isEmpty) return;
 
-    final newPhotos = images.map((image) {
+    final newPhotos = images.map((file) {
       return ProjectPhoto(
         id:
             DateTime.now().millisecondsSinceEpoch.toString() +
-            image.path.hashCode.toString(),
-        url: image.path,
-        title: 'Gallery Upload',
+            file.path.hashCode.toString(),
+        url: file.path,
+        title: 'Device Upload',
         caption: 'Uploaded ${DateTime.now().toLocal()}',
       );
     }).toList();
@@ -844,8 +845,8 @@ class _PhotosTabState extends ConsumerState<PhotosTab> {
                     SizedBox(width: 10.w),
                     Expanded(
                       child: _uploadOption(
-                        icon: Icons.photo_library_outlined,
-                        title: loc.gallery,
+                        icon: Icons.folder_outlined,
+                        title: context.loc.deviceStorage,
                         onTap: () {
                           Navigator.pop(context);
                           _pickGallery();

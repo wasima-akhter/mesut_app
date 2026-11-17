@@ -7,6 +7,7 @@ class ProjectTaskEmployeeModel extends ProjectTaskEmployeeEntity {
     super.firstName,
     super.lastName,
     super.avatarUrl,
+    super.role,
   });
 
   factory ProjectTaskEmployeeModel.fromJson(Map<String, dynamic> json) {
@@ -15,6 +16,7 @@ class ProjectTaskEmployeeModel extends ProjectTaskEmployeeEntity {
       firstName: json['firstName']?.toString() ?? '',
       lastName: json['lastName']?.toString() ?? '',
       avatarUrl: json['avatarUrl']?.toString(),
+      role: json['role']?.toString(),
     );
   }
 }

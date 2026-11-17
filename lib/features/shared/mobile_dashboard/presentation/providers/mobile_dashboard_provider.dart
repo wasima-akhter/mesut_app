@@ -4,6 +4,7 @@ import '../../../../../core/enums/app_enum.dart';
 import '../../../../../core/network/network_providers.dart';
 import '../../../../../core/providers/common_provider.dart';
 import '../../../../../core/storage/storage_provider.dart';
+import '../../../../site_manager/offline_sync/providers/site_manager_sync_provider.dart';
 import '../../data/datasources/mobile_dashboard_datasource.dart';
 import '../../data/repositories/mobile_dashboard_repository_impl.dart';
 import '../../domain/entities/mobile_dashboard_entity.dart';
@@ -16,6 +17,7 @@ final mobileDashboardDataSourceProvider =
     Provider<MobileDashboardRemoteDataSource>((ref) {
       return MobileDashboardRemoteDataSourceImpl(
         apiClient: ref.watch(apiClientProvider),
+        cacheService: ref.watch(siteManagerCacheServiceProvider),
       );
     });
 
@@ -142,6 +144,25 @@ class MobileProfileNotifier extends AsyncNotifier<MobileProfileEntity?> {
       () => ref.read(mobileDashboardRepositoryProvider).getProfile(),
     );
   }
+
+  Future<MobileProfileEntity> updateProfile({
+    String? firstName,
+    String? lastName,
+    String? phone,
+    String? avatarUrl,
+    String? language,
+  }) async {
+    final repository = ref.read(mobileDashboardRepositoryProvider);
+    final updated = await repository.updateProfile(
+      firstName: firstName,
+      lastName: lastName,
+      phone: phone,
+      avatarUrl: avatarUrl,
+      language: language,
+    );
+    state = AsyncValue.data(updated);
+    return updated;
+  }
 }
 
 final mobileProfileProvider =
@@ -169,9 +190,22 @@ class MobileScheduleNotifier
         .hasValidAccessToken();
     final role = ref.watch(userRoleProvider);
     if (!hasToken || role != UserRole.siteManager) return const [];
+    final now = DateTime.now().toUtc();
+    final firstDay = DateTime.utc(now.year, now.month, 1);
+    final lastDay = DateTime.utc(now.year, now.month + 1, 0, 23, 59, 59);
+    _startDate = firstDay.subtract(const Duration(days: 7));
+    _endDate = lastDay.add(const Duration(days: 7));
     return ref
         .watch(mobileDashboardRepositoryProvider)
         .getSchedule(startDate: _startDate, endDate: _endDate);
+  }
+
+  Future<void> loadMonth(DateTime month) async {
+    final firstDay = DateTime.utc(month.year, month.month, 1);
+    final lastDay = DateTime.utc(month.year, month.month + 1, 0, 23, 59, 59);
+    _startDate = firstDay.subtract(const Duration(days: 7));
+    _endDate = lastDay.add(const Duration(days: 7));
+    await refresh();
   }
 
   Future<void> loadRange({

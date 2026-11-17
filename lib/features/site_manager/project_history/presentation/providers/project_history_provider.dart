@@ -14,10 +14,13 @@ class ProjectHistoryNotifier extends Notifier<ProjectHistoryState> {
 
   /// Initial load or pull-to-refresh of audit log history for [projectId].
   Future<void> loadInitial(String projectId, {bool isRefresh = false}) async {
+    final isDifferentProject = state.projectId != projectId;
+
     state = state.copyWith(
-      isLoading: !isRefresh,
+      isLoading: isDifferentProject || !isRefresh,
       clearError: true,
       projectId: projectId,
+      items: isDifferentProject ? const [] : state.items,
       page: 1,
     );
 

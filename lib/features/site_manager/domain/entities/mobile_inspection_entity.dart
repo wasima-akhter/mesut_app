@@ -41,4 +41,36 @@ class MobileInspectionEntity {
 
   bool get isPending => status.trim().toUpperCase() == 'PENDING';
   bool get isSurveyDone => status.trim().toUpperCase() == 'SURVEY_DONE';
+
+  MobileInspectionEntity copyWith({
+    String? id,
+    String? siteTitle,
+    String? address,
+    String? postalCode,
+    String? city,
+    DateTime? appointmentDate,
+    double? scaffoldArea,
+    double? scaffoldHeight,
+    String? scaffoldType,
+    String? status,
+    MobileInspectionCustomerEntity? customer,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return MobileInspectionEntity(
+      id: id ?? this.id,
+      siteTitle: siteTitle ?? this.siteTitle,
+      address: address ?? this.address,
+      postalCode: postalCode ?? this.postalCode,
+      city: city ?? this.city,
+      appointmentDate: appointmentDate ?? this.appointmentDate,
+      scaffoldArea: scaffoldArea ?? this.scaffoldArea,
+      scaffoldHeight: scaffoldHeight ?? this.scaffoldHeight,
+      scaffoldType: scaffoldType ?? this.scaffoldType,
+      status: status ?? this.status,
+      customer: customer ?? this.customer,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 }

@@ -10,6 +10,14 @@ abstract class MobileDashboardRepository {
 
   Future<MobileProfileEntity> getProfile();
 
+  Future<MobileProfileEntity> updateProfile({
+    String? firstName,
+    String? lastName,
+    String? phone,
+    String? avatarUrl,
+    String? language,
+  });
+
   Future<List<MobileScheduleDayEntity>> getSchedule({
     required DateTime startDate,
     required DateTime endDate,

@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../features/employee/presentation/providers/employee_profile_provider.dart';
-import '../../features/employee/presentation/providers/employee_timer_provider.dart';
+import '../../features/employee/home/presentation/providers/employee_dashboard_provider.dart';
+import '../../features/employee/profile/presentation/providers/employee_profile_provider.dart';
+import '../../features/employee/time_tracking/presentation/providers/employee_timer_provider.dart';
 import '../../features/entry/nav/navigation_provider.dart';
 import '../../features/shared/config/presentation/providers/mobile_config_provider.dart';
 import '../../features/shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
@@ -30,6 +31,10 @@ void clearUserSessionState(Ref ref) {
   }
 
   safeInvalidate(() => ref.invalidate(navigationProvider), 'navigationProvider');
+  safeInvalidate(
+    () => ref.invalidate(employeeDashboardProvider),
+    'employeeDashboardProvider',
+  );
   safeInvalidate(
     () => ref.invalidate(employeeProfileProvider),
     'employeeProfileProvider',

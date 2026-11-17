@@ -5,12 +5,14 @@ class ProjectTaskEmployeeEntity {
   final String firstName;
   final String lastName;
   final String? avatarUrl;
+  final String? role;
 
   const ProjectTaskEmployeeEntity({
     required this.id,
     this.firstName = '',
     this.lastName = '',
     this.avatarUrl,
+    this.role,
   });
 
   String get fullName {

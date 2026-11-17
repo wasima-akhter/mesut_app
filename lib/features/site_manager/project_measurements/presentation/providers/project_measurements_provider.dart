@@ -1,23 +1,29 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/utils/logger.dart';
+import '../../../offline_sync/models/site_manager_sync_action.dart';
+import '../../../offline_sync/providers/site_manager_sync_provider.dart';
 import '../../data/repositories/project_measurements_repository_impl.dart';
+import '../../domain/entities/project_measurement_entity.dart';
 import 'project_measurements_state.dart';
 
 class ProjectMeasurementsNotifier extends Notifier<ProjectMeasurementsState> {
   static const int _pageSize = 10;
 
   @override
-  ProjectMeasurementsState build() {
-    return const ProjectMeasurementsState();
-  }
+  ProjectMeasurementsState build() => const ProjectMeasurementsState();
 
   /// Initial load or pull-to-refresh of measurements for [projectId].
   Future<void> loadInitial(String projectId) async {
+    final isDifferentProject = state.projectId != projectId;
+
     state = state.copyWith(
       isLoading: true,
       clearError: true,
       projectId: projectId,
+      items: isDifferentProject ? const [] : state.items,
+      totalArea: isDifferentProject ? 0.0 : state.totalArea,
       page: 1,
     );
 
@@ -40,12 +46,8 @@ class ProjectMeasurementsNotifier extends Notifier<ProjectMeasurementsState> {
         hasMore: hasMore,
       );
     } catch (e, st) {
-      AppLogger.error(
-        'Failed to load measurements',
-        error: e,
-        stackTrace: st,
-        name: 'MEASUREMENTS',
-      );
+      AppLogger.error('Failed to load measurements',
+          error: e, stackTrace: st, name: 'MEASUREMENTS');
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
@@ -66,9 +68,8 @@ class ProjectMeasurementsNotifier extends Notifier<ProjectMeasurementsState> {
       );
 
       final existingIds = state.items.map((m) => m.id).toSet();
-      final newItems = response.items
-          .where((m) => !existingIds.contains(m.id))
-          .toList();
+      final newItems =
+          response.items.where((m) => !existingIds.contains(m.id)).toList();
       final combined = [...state.items, ...newItems];
       final hasMore =
           nextPage < response.meta.totalPages && response.items.isNotEmpty;
@@ -76,19 +77,14 @@ class ProjectMeasurementsNotifier extends Notifier<ProjectMeasurementsState> {
       state = state.copyWith(
         isLoadingMore: false,
         items: combined,
-        totalArea: response.totalArea > 0
-            ? response.totalArea
-            : state.totalArea,
+        totalArea:
+            response.totalArea > 0 ? response.totalArea : state.totalArea,
         page: nextPage,
         hasMore: hasMore,
       );
     } catch (e, st) {
-      AppLogger.error(
-        'Failed to load more measurements',
-        error: e,
-        stackTrace: st,
-        name: 'MEASUREMENTS',
-      );
+      AppLogger.error('Failed to load more measurements',
+          error: e, stackTrace: st, name: 'MEASUREMENTS');
       state = state.copyWith(isLoadingMore: false);
     }
   }
@@ -103,6 +99,15 @@ class ProjectMeasurementsNotifier extends Notifier<ProjectMeasurementsState> {
     String? remark,
   }) async {
     state = state.copyWith(isMutating: true);
+    final payload = {
+      'position': position,
+      'length': length,
+      'height': height,
+      'quantity': quantity,
+      'unit': unit,
+      'remark': ?remark,
+    };
+
     try {
       final repository = ref.read(projectMeasurementsRepositoryProvider);
       final created = await repository.createMeasurement(
@@ -115,24 +120,47 @@ class ProjectMeasurementsNotifier extends Notifier<ProjectMeasurementsState> {
         remark: remark,
       );
 
-      final updatedItems = [created, ...state.items];
-      final newTotalArea = state.totalArea + created.calculatedArea;
+      state = state.copyWith(
+        isMutating: false,
+        items: [created, ...state.items],
+        totalArea: state.totalArea + created.calculatedArea,
+      );
+      return true;
+    } catch (_) {
+      final calculated = length * height * quantity;
+      final localId = 'offline_${DateTime.now().millisecondsSinceEpoch}';
+      final offlineItem = ProjectMeasurementEntity(
+        id: localId,
+        projectId: state.projectId,
+        position: position,
+        length: length,
+        height: height,
+        quantity: quantity,
+        unit: unit,
+        remark: remark ?? '',
+        area: calculated,
+        createdAt: DateTime.now(),
+      );
+
+      await ref.read(siteManagerSyncProvider.notifier).enqueue(
+            SiteManagerSyncAction(
+              id: localId,
+              actionType: SiteManagerSyncActionType.saveMeasurements,
+              endpoint: ApiConstants.mobileProjectMeasurements(state.projectId),
+              httpMethod: 'POST',
+              projectId: state.projectId,
+              displayTitle: 'Measurement: $position',
+              createdAt: DateTime.now(),
+              payload: payload,
+            ),
+          );
 
       state = state.copyWith(
         isMutating: false,
-        items: updatedItems,
-        totalArea: newTotalArea,
+        items: [offlineItem, ...state.items],
+        totalArea: state.totalArea + calculated,
       );
       return true;
-    } catch (e, st) {
-      AppLogger.error(
-        'Failed to create measurement',
-        error: e,
-        stackTrace: st,
-        name: 'MEASUREMENTS',
-      );
-      state = state.copyWith(isMutating: false);
-      return false;
     }
   }
 
@@ -147,10 +175,22 @@ class ProjectMeasurementsNotifier extends Notifier<ProjectMeasurementsState> {
     String? remark,
   }) async {
     state = state.copyWith(isMutating: true);
+    final payload = {
+      'position': position,
+      'length': length,
+      'height': height,
+      'quantity': quantity,
+      'unit': unit,
+      'remark': ?remark,
+    };
+    final effectiveProjectId = state.projectId.isNotEmpty
+        ? state.projectId
+        : (state.items.where((i) => i.id == measurementId).firstOrNull?.projectId ?? '');
+
     try {
       final repository = ref.read(projectMeasurementsRepositoryProvider);
       final updated = await repository.updateMeasurement(
-        projectId: state.projectId,
+        projectId: effectiveProjectId,
         measurementId: measurementId,
         position: position,
         length: length,
@@ -160,77 +200,98 @@ class ProjectMeasurementsNotifier extends Notifier<ProjectMeasurementsState> {
         remark: remark,
       );
 
-      final updatedList = state.items.map((item) {
-        return item.id == measurementId ? updated : item;
+      final updatedList =
+          state.items.map((i) => i.id == measurementId ? updated : i).toList();
+      state = state.copyWith(
+        isMutating: false,
+        items: updatedList,
+        totalArea: updatedList.fold<double>(0.0, (s, i) => s + i.calculatedArea),
+      );
+      return true;
+    } catch (_) {
+      final calculated = length * height * quantity;
+      final updatedList = state.items.map((i) {
+        if (i.id != measurementId) return i;
+        return i.copyWith(
+          position: position,
+          length: length,
+          height: height,
+          quantity: quantity,
+          unit: unit,
+          remark: remark ?? i.remark,
+          area: calculated,
+        );
       }).toList();
 
-      final newTotalArea = updatedList.fold<double>(
-        0.0,
-        (sum, item) => sum + item.calculatedArea,
-      );
+      await ref.read(siteManagerSyncProvider.notifier).enqueue(
+            SiteManagerSyncAction(
+              id: 'update_meas_${DateTime.now().millisecondsSinceEpoch}',
+              actionType: SiteManagerSyncActionType.updateMeasurement,
+              endpoint: ApiConstants.mobileProjectMeasurementById(
+                effectiveProjectId,
+                measurementId,
+              ),
+              httpMethod: 'PATCH',
+              projectId: effectiveProjectId,
+              displayTitle: 'Measurement: $position',
+              createdAt: DateTime.now(),
+              payload: payload,
+            ),
+          );
 
       state = state.copyWith(
         isMutating: false,
         items: updatedList,
-        totalArea: newTotalArea,
+        totalArea: updatedList.fold<double>(0.0, (s, i) => s + i.calculatedArea),
       );
       return true;
-    } catch (e, st) {
-      AppLogger.error(
-        'Failed to update measurement',
-        error: e,
-        stackTrace: st,
-        name: 'MEASUREMENTS',
-      );
-      state = state.copyWith(isMutating: false);
-      return false;
     }
   }
 
-  /// Deletes a measurement item by ID with optimistic update and rollback on failure.
+  /// Deletes a measurement item by ID with optimistic update.
   Future<bool> deleteMeasurement(String measurementId) async {
-    final previousItems = state.items;
     final targetIndex = state.items.indexWhere((m) => m.id == measurementId);
     if (targetIndex == -1) return false;
 
     final targetItem = state.items[targetIndex];
-    final updatedList = state.items
-        .where((m) => m.id != measurementId)
-        .toList();
-    final newTotalArea = (state.totalArea - targetItem.calculatedArea).clamp(
-      0.0,
-      double.infinity,
-    );
+    final effectiveProjectId = state.projectId.isNotEmpty
+        ? state.projectId
+        : targetItem.projectId;
+    final updatedList =
+        state.items.where((m) => m.id != measurementId).toList();
+    final newTotalArea =
+        (state.totalArea - targetItem.calculatedArea).clamp(0.0, double.infinity);
 
-    // Optimistic removal
     state = state.copyWith(items: updatedList, totalArea: newTotalArea);
 
     try {
       final repository = ref.read(projectMeasurementsRepositoryProvider);
-      final success = await repository.deleteMeasurement(
-        projectId: state.projectId,
+      await repository.deleteMeasurement(
+        projectId: effectiveProjectId,
         measurementId: measurementId,
       );
-
-      if (!success) {
-        state = state.copyWith(items: previousItems);
-        return false;
-      }
       return true;
-    } catch (e, st) {
-      AppLogger.error(
-        'Failed to delete measurement',
-        error: e,
-        stackTrace: st,
-        name: 'MEASUREMENTS',
-      );
-      state = state.copyWith(items: previousItems);
-      return false;
+    } catch (_) {
+      await ref.read(siteManagerSyncProvider.notifier).enqueue(
+            SiteManagerSyncAction(
+              id: 'delete_meas_${DateTime.now().millisecondsSinceEpoch}',
+              actionType: SiteManagerSyncActionType.deleteMeasurement,
+              endpoint: ApiConstants.mobileProjectMeasurementById(
+                effectiveProjectId,
+                measurementId,
+              ),
+              httpMethod: 'DELETE',
+              projectId: effectiveProjectId,
+              displayTitle: 'Delete Measurement',
+              createdAt: DateTime.now(),
+            ),
+          );
+      return true;
     }
   }
 }
 
 final projectMeasurementsProvider =
     NotifierProvider<ProjectMeasurementsNotifier, ProjectMeasurementsState>(
-      ProjectMeasurementsNotifier.new,
-    );
+  ProjectMeasurementsNotifier.new,
+);

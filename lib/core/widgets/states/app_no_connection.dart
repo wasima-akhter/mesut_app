@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/app_dimensions.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../localization/context_extensions.dart';
+import 'app_error_widget.dart';
 
 class AppNoConnection extends StatelessWidget {
   final String? title;
@@ -24,6 +25,14 @@ class AppNoConnection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    // If a raw technical or connection error string was passed as message,
+    // fallback cleanly to localized checkInternetConnection string.
+    final effectiveMessage = (message != null &&
+            !AppErrorWidget.isTechnicalError(message) &&
+            !AppErrorWidget.isConnectionError(message))
+        ? message!
+        : context.loc.checkInternetConnection;
+
     return Center(
       child: Padding(
         padding: AppSpacing.screenPadding,
@@ -43,7 +52,7 @@ class AppNoConnection extends StatelessWidget {
             ),
             SizedBox(height: AppSpacing.sm),
             Text(
-              message ?? context.loc.checkInternetConnection,
+              effectiveMessage,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,

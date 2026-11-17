@@ -1,6 +1,7 @@
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_client.dart';
 import '../../domain/entities/mobile_phase_entity.dart';
+import '../../offline_sync/services/site_manager_cache_service.dart';
 import '../models/mobile_phase_model.dart';
 
 abstract class MobilePhaseRemoteDataSource {
@@ -14,9 +15,10 @@ abstract class MobilePhaseRemoteDataSource {
 }
 
 class MobilePhaseRemoteDataSourceImpl implements MobilePhaseRemoteDataSource {
-  MobilePhaseRemoteDataSourceImpl({required this.apiClient});
+  MobilePhaseRemoteDataSourceImpl({required this.apiClient, this.cacheService});
 
   final ApiClient apiClient;
+  final SiteManagerCacheService? cacheService;
 
   @override
   Future<List<MobilePhaseEntity>> getManagedPhases({
@@ -32,12 +34,24 @@ class MobilePhaseRemoteDataSourceImpl implements MobilePhaseRemoteDataSource {
       queryParams['column'] = column;
     }
 
-    final response = await apiClient.get<Map<String, dynamic>>(
-      ApiConstants.mobilePhases,
-      queryParameters: queryParams,
-    );
-    final body = response.data ?? const <String, dynamic>{};
-    return MobilePhaseModel.fromList(body['data']);
+    try {
+      final response = await apiClient.get<Map<String, dynamic>>(
+        ApiConstants.mobilePhases,
+        queryParameters: queryParams,
+      );
+      final body = response.data ?? const <String, dynamic>{};
+      final data = body['data'];
+      if (page == 1 && data != null) {
+        await cacheService?.cachePhases(column ?? 'ALL', data);
+      }
+      return MobilePhaseModel.fromList(data);
+    } catch (_) {
+      final cached = cacheService?.getCachedPhases(column ?? 'ALL');
+      if (cached != null) {
+        return MobilePhaseModel.fromList(cached);
+      }
+      rethrow;
+    }
   }
 
   @override

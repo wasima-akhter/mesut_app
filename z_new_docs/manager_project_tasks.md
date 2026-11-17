@@ -514,3 +514,161 @@ Schema
   "errorType": "INVALID_JSON",
   "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 }
+
+
+
+# -- Get employee list
+GET
+/api/v1/mobile/projects/{projectId}/employees
+List employees for task assignee picker
+
+
+
+Returns ACTIVE EMPLOYEE and SITE_MANAGER users for the Site Manager task-creation Assign Employee dropdown. Use each row id as create-task employeeId. Optional search filters first/last name (case-insensitive). Requires Site Manager project access (same chain as project tasks).
+
+Parameters
+Try it out
+Name	Description
+projectId *
+string($uuid)
+(path)
+projectId
+search
+string
+(query)
+Optional name search (firstName or lastName contains)
+
+search
+page
+integer
+(query)
+1-based page number
+
+Default value : 1
+
+1
+limit
+integer
+(query)
+Page size
+
+Default value : 10
+
+10
+Responses
+Code	Description	Links
+200
+Employees fetched successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "success": true,
+  "message": "Employees fetched successfully.",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "meta": {
+    "total": 150,
+    "totalPages": 8,
+    "links": {
+      "currentPage": "http://localhost:5000/api/v1/items?page=1&limit=20",
+      "nextPage": "http://localhost:5000/api/v1/items?page=2&limit=20",
+      "previousPage": null,
+      "firstPage": "http://localhost:5000/api/v1/items?page=1&limit=20",
+      "lastPage": "http://localhost:5000/api/v1/items?page=8&limit=20"
+    }
+  },
+  "data": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "firstName": "string",
+      "lastName": "string",
+      "avatarUrl": "string",
+      "role": "EMPLOYEE"
+    }
+  ]
+}
+No links
+401
+Authentication failed
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "TOKEN_EXPIRED",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+403
+Forbidden (not site manager or no project access)
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "TOKEN_EXPIRED",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+404
+Project not found
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "TOKEN_EXPIRED",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+No links
+422
+Validation error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "string",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "errors": [
+    {
+      "field": "string",
+      "message": "string"
+    }
+  ]
+}
+No links
+500
+Internal server error
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "success": false,
+  "message": "string",
+  "errorType": "INVALID_JSON",
+  "traceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}

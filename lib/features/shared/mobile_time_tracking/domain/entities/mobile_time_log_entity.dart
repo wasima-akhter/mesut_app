@@ -45,6 +45,38 @@ class MobileTimeLogEntity {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final MobileTimeLogUserEntity? user;
+
+  MobileTimeLogEntity copyWith({
+    String? id,
+    String? phaseId,
+    BackendActivityType? activityType,
+    DateTime? startTime,
+    DateTime? endTime,
+    bool? isManual,
+    String? status,
+    String? clientSyncId,
+    int? breakMinutes,
+    double? netHours,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    MobileTimeLogUserEntity? user,
+  }) {
+    return MobileTimeLogEntity(
+      id: id ?? this.id,
+      phaseId: phaseId ?? this.phaseId,
+      activityType: activityType ?? this.activityType,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      isManual: isManual ?? this.isManual,
+      status: status ?? this.status,
+      clientSyncId: clientSyncId ?? this.clientSyncId,
+      breakMinutes: breakMinutes ?? this.breakMinutes,
+      netHours: netHours ?? this.netHours,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      user: user ?? this.user,
+    );
+  }
 }
 
 class MobileTimerStartResultEntity {

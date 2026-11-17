@@ -38,9 +38,12 @@ abstract final class ApiConstants {
   // ==============================
   static const String mobileConfig = '/mobile/config';
   static const String mobileDashboard = '/mobile/dashboard';
+  static const String mobileEmployeeDashboard = '/mobile/employee/dashboard';
   static const String mobileProjects = '/mobile/projects';
   static String mobileProjectById(String id) => '/mobile/projects/$id';
   static String mobileProjectTasks(String id) => '/mobile/projects/$id/tasks';
+  static String mobileProjectEmployees(String projectId) =>
+      '/mobile/projects/$projectId/employees';
   static String mobileTaskToggle(String taskId) => '/mobile/tasks/$taskId/toggle';
   static String mobileTaskDelete(String taskId) => '/mobile/tasks/$taskId';
   static String mobileProjectMeasurements(String projectId) =>
@@ -63,6 +66,19 @@ abstract final class ApiConstants {
       '/mobile/projects/$projectId/phases/$phaseId/dates';
   static const String mobileProfile = '/mobile/profile';
   static const String mobileSchedule = '/mobile/schedule';
+  static const String mobileEmployeeSchedule = '/mobile/employee/schedule';
+  static const String mobileEmployeeTimeTrackingSummary =
+      '/mobile/employee/time-tracking/summary';
+  static const String mobileEmployeeTimeTrackingProjects =
+      '/mobile/employee/time-tracking/projects';
+  static const String mobileEmployeeTimerStart =
+      '/mobile/employee/timer/start';
+  static const String mobileEmployeeTimerStop =
+      '/mobile/employee/timer/stop';
+  static const String mobileEmployeeTimerManual =
+      '/mobile/employee/timer/manual';
+  static const String mobileEmployeeTimeLogs =
+      '/mobile/employee/time-logs';
   static const String mobileMap = '/mobile/map';
   static const String mobileCustomers = '/mobile/customers';
   static const String mobileInspections = '/mobile/inspections';

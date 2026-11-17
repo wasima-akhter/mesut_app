@@ -28,4 +28,24 @@ class MobilePhaseEntity {
   final DateTime? startDate;
   final DateTime? endDate;
   final MobilePhaseProjectEntity project;
+
+  MobilePhaseEntity copyWith({
+    String? id,
+    String? type,
+    String? status,
+    String? priority,
+    DateTime? startDate,
+    DateTime? endDate,
+    MobilePhaseProjectEntity? project,
+  }) {
+    return MobilePhaseEntity(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      status: status ?? this.status,
+      priority: priority ?? this.priority,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      project: project ?? this.project,
+    );
+  }
 }

@@ -14,32 +14,20 @@ import '../storage/storage_provider.dart';
 import '../storage/storage_service.dart';
 import '../widgets/snack/app_snackbar.dart';
 
-/// Top-level background FCM handler invoked in its own isolate.
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   try {
-    if (Firebase.apps.isEmpty) {
-      await Firebase.initializeApp();
-    }
+    if (Firebase.apps.isEmpty) await Firebase.initializeApp();
   } catch (e) {
     debugPrint('FCM background init skipped: $e');
   }
-
-  if (kDebugMode) {
-    debugPrint(
-      'FCM background message received: ${message.messageId} data=${message.data}',
-    );
-  }
 }
 
-/// Manages Firebase Cloud Messaging (FCM), local foreground banners,
-/// token rotation syncing, and notification-tap deep navigation.
 class PushNotificationService {
   PushNotificationService({required this.storageService});
 
   final StorageService storageService;
-  final FlutterLocalNotificationsPlugin _localNotifications =
-      FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
 
   static const String androidChannelId = 'allround_notifications_channel';
   static const String androidChannelName = 'Allround Notifications';
@@ -63,37 +51,28 @@ class PushNotificationService {
   Future<void> initialize() async {
     if (_isInitialized) return;
     _isInitialized = true;
-
     await _initLocalNotifications();
     await _initFirebaseMessaging();
   }
 
   Future<void> _initLocalNotifications() async {
     try {
-      const androidSettings = AndroidInitializationSettings(
-        '@mipmap/ic_launcher',
-      );
-      const darwinSettings = DarwinInitializationSettings(
-        requestAlertPermission: false,
-        requestBadgePermission: false,
-        requestSoundPermission: false,
-      );
-      const initSettings = InitializationSettings(
-        android: androidSettings,
-        iOS: darwinSettings,
-      );
-
       await _localNotifications.initialize(
-        settings: initSettings,
+        settings: const InitializationSettings(
+          android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+          iOS: DarwinInitializationSettings(
+            requestAlertPermission: false,
+            requestBadgePermission: false,
+            requestSoundPermission: false,
+          ),
+        ),
         onDidReceiveNotificationResponse: _onLocalNotificationTapped,
       );
 
       if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-        final androidPlugin = _localNotifications
-            .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin
-            >();
-        await androidPlugin?.createNotificationChannel(
+        final plugin = _localNotifications.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+        await plugin?.createNotificationChannel(
           const AndroidNotificationChannel(
             androidChannelId,
             androidChannelName,
@@ -108,94 +87,96 @@ class PushNotificationService {
   }
 
   Future<void> _initFirebaseMessaging() async {
-    final isMobilePlatform =
-        !kIsWeb &&
+    final isMobile = !kIsWeb &&
         (defaultTargetPlatform == TargetPlatform.android ||
             defaultTargetPlatform == TargetPlatform.iOS);
-    if (!isMobilePlatform) return;
+    if (!isMobile) return;
 
     try {
-      if (Firebase.apps.isEmpty) {
-        await Firebase.initializeApp();
-      }
+      if (Firebase.apps.isEmpty) await Firebase.initializeApp();
       _firebaseAvailable = true;
 
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-
       final messaging = FirebaseMessaging.instance;
-      await messaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-        provisional: false,
-      );
-
+      await messaging.requestPermission(alert: true, badge: true, sound: true);
       await messaging.setForegroundNotificationPresentationOptions(
         alert: true,
         badge: true,
         sound: true,
       );
 
-      final token = await messaging.getToken();
-      if (token != null && token.isNotEmpty) {
-        await storageService.saveFcmToken(token);
+      if (storageService.notificationsEnabled) {
+        final token = await messaging.getToken();
+        if (token != null && token.isNotEmpty) await storageService.saveFcmToken(token);
+      } else {
+        await storageService.clearFcmToken();
       }
 
       _tokenRefreshSub = messaging.onTokenRefresh.listen((newToken) async {
-        if (newToken.isEmpty) return;
+        if (newToken.isEmpty || !storageService.notificationsEnabled) return;
         await storageService.saveFcmToken(newToken);
-        final callback = onTokenRotated;
-        if (callback != null) {
-          await callback(newToken);
-        }
+        await onTokenRotated?.call(newToken);
       });
 
-      _onMessageSub = FirebaseMessaging.onMessage.listen(
-        _handleForegroundMessage,
-      );
+      _onMessageSub = FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+      _onOpenedSub = FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpened);
 
-      _onOpenedSub = FirebaseMessaging.onMessageOpenedApp.listen(
-        _handleMessageOpened,
-      );
-
-      final initialMessage = await messaging.getInitialMessage();
-      if (initialMessage != null) {
+      final initial = await messaging.getInitialMessage();
+      if (initial != null && storageService.notificationsEnabled) {
         _pendingInitialOpen = true;
         _scheduleOpenNotifications();
       }
     } catch (e) {
       _firebaseAvailable = false;
-      debugPrint(
-        'FCM init skipped (verify Firebase configuration files): $e',
-      );
+      debugPrint('FCM init skipped: $e');
+    }
+  }
+
+  Future<void> setNotificationsEnabled(bool enabled) async {
+    await storageService.setNotificationsEnabled(enabled);
+    if (!enabled) {
+      try {
+        await _localNotifications.cancelAll();
+        if (_firebaseAvailable) await FirebaseMessaging.instance.deleteToken();
+      } catch (e) {
+        debugPrint('Disable notifications warning: $e');
+      } finally {
+        await storageService.clearFcmToken();
+      }
+    } else {
+      if (_firebaseAvailable) {
+        try {
+          final messaging = FirebaseMessaging.instance;
+          await messaging.requestPermission(alert: true, badge: true, sound: true);
+          final token = await messaging.getToken();
+          if (token != null && token.isNotEmpty) {
+            await storageService.saveFcmToken(token);
+            await onTokenRotated?.call(token);
+          }
+        } catch (e) {
+          debugPrint('Enable notifications warning: $e');
+        }
+      }
     }
   }
 
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
+    if (!storageService.notificationsEnabled) return;
     final data = Map<String, dynamic>.from(message.data);
-    final title =
-        message.notification?.title ??
-        data['title']?.toString() ??
-        'Allround';
-    final body =
-        message.notification?.body ??
+    final title = message.notification?.title ?? data['title']?.toString() ?? 'Allround';
+    final body = message.notification?.body ??
         data['body']?.toString() ??
         data['message']?.toString() ??
         '';
 
     onForegroundPushReceived?.call(data);
-
     if (title.isNotEmpty || body.isNotEmpty) {
-      await showLocalNotification(
-        title: title,
-        body: body,
-        payload: jsonEncode(data),
-      );
+      await showLocalNotification(title: title, body: body, payload: jsonEncode(data));
     }
   }
 
   void _handleMessageOpened(RemoteMessage message) {
-    _navigateToNotifications();
+    if (storageService.notificationsEnabled) _navigateToNotifications();
   }
 
   void _onLocalNotificationTapped(NotificationResponse response) {
@@ -203,7 +184,7 @@ class PushNotificationService {
   }
 
   void consumePendingInitialNavigation() {
-    if (_pendingInitialOpen) {
+    if (_pendingInitialOpen && storageService.notificationsEnabled) {
       _pendingInitialOpen = false;
       _navigateToNotifications();
     }
@@ -211,7 +192,7 @@ class PushNotificationService {
 
   void _scheduleOpenNotifications() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_pendingInitialOpen) {
+      if (_pendingInitialOpen && storageService.notificationsEnabled) {
         _pendingInitialOpen = false;
         _navigateToNotifications();
       }
@@ -220,16 +201,14 @@ class PushNotificationService {
 
   void _navigateToNotifications() {
     onNotificationOpened?.call();
-
     final context = appNavigatorKey.currentContext;
     if (context == null || !context.mounted) return;
-
     try {
       final router = GoRouter.of(context);
-      final currentPath = router.routerDelegate.currentConfiguration.uri.path;
-      if (currentPath != RouteConstants.notifications &&
-          currentPath != RouteConstants.signIn &&
-          currentPath != RouteConstants.splash) {
+      final path = router.routerDelegate.currentConfiguration.uri.path;
+      if (path != RouteConstants.notifications &&
+          path != RouteConstants.signIn &&
+          path != RouteConstants.splash) {
         router.push(RouteConstants.notifications);
       }
     } catch (e) {
@@ -242,10 +221,10 @@ class PushNotificationService {
     required String body,
     String? payload,
   }) async {
+    if (!storageService.notificationsEnabled) return;
     try {
-      final id = DateTime.now().millisecondsSinceEpoch.remainder(100000);
       await _localNotifications.show(
-        id: id,
+        id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
         title: title,
         body: body,
         notificationDetails: const NotificationDetails(
@@ -271,14 +250,11 @@ class PushNotificationService {
   }
 
   Future<String?> refreshAndPersistToken() async {
-    if (!_firebaseAvailable) {
-      return storageService.getFcmToken();
-    }
+    if (!storageService.notificationsEnabled) return null;
+    if (!_firebaseAvailable) return storageService.getFcmToken();
     try {
       final token = await FirebaseMessaging.instance.getToken();
-      if (token != null && token.isNotEmpty) {
-        await storageService.saveFcmToken(token);
-      }
+      if (token != null && token.isNotEmpty) await storageService.saveFcmToken(token);
       return token;
     } catch (e) {
       debugPrint('FCM getToken error: $e');
@@ -288,9 +264,7 @@ class PushNotificationService {
 
   Future<void> clearTokenOnLogout() async {
     try {
-      if (_firebaseAvailable) {
-        await FirebaseMessaging.instance.deleteToken();
-      }
+      if (_firebaseAvailable) await FirebaseMessaging.instance.deleteToken();
     } catch (e) {
       debugPrint('FCM deleteToken warning: $e');
     } finally {
@@ -305,12 +279,9 @@ class PushNotificationService {
   }
 }
 
-final pushNotificationServiceProvider = Provider<PushNotificationService>((
-  ref,
-) {
+final pushNotificationServiceProvider = Provider<PushNotificationService>((ref) {
   final storage = ref.watch(storageServiceProvider);
   final service = PushNotificationService(storageService: storage);
   ref.onDispose(service.dispose);
   return service;
 });
-

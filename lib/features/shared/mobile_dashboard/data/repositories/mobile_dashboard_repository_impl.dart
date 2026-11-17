@@ -25,6 +25,22 @@ class MobileDashboardRepositoryImpl implements MobileDashboardRepository {
   Future<MobileProfileEntity> getProfile() => remoteDataSource.getProfile();
 
   @override
+  Future<MobileProfileEntity> updateProfile({
+    String? firstName,
+    String? lastName,
+    String? phone,
+    String? avatarUrl,
+    String? language,
+  }) =>
+      remoteDataSource.updateProfile(
+        firstName: firstName,
+        lastName: lastName,
+        phone: phone,
+        avatarUrl: avatarUrl,
+        language: language,
+      );
+
+  @override
   Future<List<MobileScheduleDayEntity>> getSchedule({
     required DateTime startDate,
     required DateTime endDate,
