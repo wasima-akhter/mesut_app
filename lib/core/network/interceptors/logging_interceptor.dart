@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
@@ -41,7 +43,12 @@ class ApiLogInterceptor extends Interceptor {
       debugPrint('STATUS : ${response.statusCode}');
       debugPrint('METHOD : ${response.requestOptions.method}');
       debugPrint('URL    : ${response.requestOptions.uri}');
-      debugPrint('BODY   : ${response.data}');
+      // debugPrint('BODY   : ${response.data}');
+
+      debugPrint(
+        'BODY:\n${const JsonEncoder.withIndent('  ').convert(response.data)}',
+        wrapWidth: 1024,
+      );
       debugPrint('══════════════════════════════════════════════════════');
 
       return true;
@@ -134,9 +141,13 @@ class ApiLogInterceptor extends Interceptor {
       }
 
       debugPrint('');
-      debugPrint('════════════════════════════════════════════════════════════');
+      debugPrint(
+        '════════════════════════════════════════════════════════════',
+      );
       debugPrint('API ERROR DIAGNOSTIC');
-      debugPrint('════════════════════════════════════════════════════════════');
+      debugPrint(
+        '════════════════════════════════════════════════════════════',
+      );
       debugPrint('ORIGIN    : $errorOrigin');
       debugPrint('DIAGNOSIS : $diagnosis');
       debugPrint('METHOD    : $method');
@@ -147,7 +158,9 @@ class ApiLogInterceptor extends Interceptor {
       }
       debugPrint('STATUS    : ${err.response?.statusCode}');
       debugPrint('BODY      : ${err.response?.data}');
-      debugPrint('════════════════════════════════════════════════════════════');
+      debugPrint(
+        '════════════════════════════════════════════════════════════',
+      );
       debugPrint('');
 
       return true;

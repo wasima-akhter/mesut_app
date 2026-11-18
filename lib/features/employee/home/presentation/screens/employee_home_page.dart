@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../app/constants/route_constants.dart';
 import '../../../../../app/theme/app_colors.dart';
 import '../../../../../core/enums/app_enum.dart';
+import '../../../../../core/localization/pending_refetch_controller.dart';
 import '../../../../../core/pagination/app_pagination_footer.dart';
 import '../../../../map/domain/entities/map_coordinate_entity.dart';
 import '../../../../map/domain/entities/map_location_entity.dart';
@@ -76,6 +77,7 @@ class _EmployeeHomePageState extends ConsumerState<EmployeeHomePage> {
           : 'Site Manager',
       latitude: task.project.latitude,
       longitude: task.project.longitude,
+      localization: task.localization,
     );
   }
 
@@ -156,15 +158,18 @@ class _EmployeeHomePageState extends ConsumerState<EmployeeHomePage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () =>
-              ref.read(employeeDashboardProvider.notifier).refresh(),
-          child: CustomScrollView(
-            controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
-            slivers: [
+        child: PendingPollEffect(
+          hasPending: anyLocalizationPending(tasks.map((t) => t.localization)),
+          onPoll: () => ref.read(employeeDashboardProvider.notifier).refresh(),
+          child: RefreshIndicator(
+            onRefresh: () =>
+                ref.read(employeeDashboardProvider.notifier).refresh(),
+            child: CustomScrollView(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              slivers: [
               SliverPadding(
                 padding: EdgeInsets.fromLTRB(18.w, 20.h, 18.w, 10.h),
                 sliver: SliverToBoxAdapter(
@@ -241,6 +246,7 @@ class _EmployeeHomePageState extends ConsumerState<EmployeeHomePage> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

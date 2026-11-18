@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
-import '../../../core/localization/app_localization.dart';
+import '../../../core/localization/context_extensions.dart';
 import '../../../core/widgets/buttons/buttons.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
+import 'presentation/providers/change_password_provider.dart';
 
-class ChangePasswordPage extends StatefulWidget {
+class ChangePasswordPage extends ConsumerStatefulWidget {
   const ChangePasswordPage({super.key});
 
   @override
-  State<ChangePasswordPage> createState() => _ChangePasswordPageState();
+  ConsumerState<ChangePasswordPage> createState() => _ChangePasswordPageState();
 }
 
-class _ChangePasswordPageState extends State<ChangePasswordPage> {
+class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
   final _formKey = GlobalKey<FormState>();
 
   final _currentPasswordController = TextEditingController();
@@ -32,101 +35,145 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     super.dispose();
   }
 
+  Future<void> _changePassword() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final currentPass = _currentPasswordController.text;
+    final newPass = _newPasswordController.text;
+
+    final success = await ref
+        .read(changePasswordProvider.notifier)
+        .changePassword(
+          currentPassword: currentPass,
+          newPassword: newPass,
+        );
+
+    if (!mounted) return;
+
+    if (success) {
+      AppSnackBar.showSuccess(context, context.loc.passwordChangedSuccess);
+      context.pop();
+    } else {
+      final error = ref.read(changePasswordProvider).errorMessage;
+      AppSnackBar.showError(
+        context,
+        error?.isNotEmpty == true ? error! : context.loc.changePasswordFailed,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalization.current;
+    final loc = context.loc;
+    final state = ref.watch(changePasswordProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverPadding(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
               padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 30.h),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  _buildHeader(),
-
-                  SizedBox(height: 28.h),
-
-                  Form(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 48.h,
+                ),
+                child: IntrinsicHeight(
+                  child: Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        _buildHeader(loc),
+                        SizedBox(height: 28.h),
                         _buildPasswordField(
                           label: loc.currentPassword,
                           hint: loc.enterCurrentPassword,
                           controller: _currentPasswordController,
                           obscureText: _obscureCurrent,
-                          onToggle: () {
-                            setState(() {
-                              _obscureCurrent = !_obscureCurrent;
-                            });
+                          onToggle: () => setState(
+                            () => _obscureCurrent = !_obscureCurrent,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return loc.passwordRequired;
+                            }
+                            return null;
                           },
                         ),
-
                         SizedBox(height: 18.h),
-
                         _buildPasswordField(
                           label: loc.newPassword,
                           hint: loc.enterPassword,
                           controller: _newPasswordController,
                           obscureText: _obscureNew,
-                          onToggle: () {
-                            setState(() {
-                              _obscureNew = !_obscureNew;
-                            });
+                          onToggle: () =>
+                              setState(() => _obscureNew = !_obscureNew),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return loc.passwordRequired;
+                            }
+                            if (value.length < 6) {
+                              return loc.passwordTooShort;
+                            }
+                            if (value == _currentPasswordController.text) {
+                              return loc.newPasswordMustBeDifferent;
+                            }
+                            return null;
                           },
                         ),
-
                         SizedBox(height: 18.h),
-
                         _buildPasswordField(
                           label: loc.confirmNewPassword,
                           hint: loc.confirmPassword,
                           controller: _confirmPasswordController,
                           obscureText: _obscureConfirm,
-                          onToggle: () {
-                            setState(() {
-                              _obscureConfirm = !_obscureConfirm;
-                            });
+                          onToggle: () => setState(
+                            () => _obscureConfirm = !_obscureConfirm,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return loc.passwordConfirmRequired;
+                            }
+                            if (value != _newPasswordController.text) {
+                              return loc.passwordsDoNotMatch;
+                            }
+                            return null;
                           },
                         ),
-
-                        SizedBox(height: 285.h),
-
-                        _buildSaveButton(),
+                        const Spacer(),
+                        SizedBox(height: 32.h),
+                        AppButton(
+                          text: loc.saveChanges,
+                          isLoading: state.isLoading,
+                          onPressed: state.isLoading ? null : _changePassword,
+                          borderRadius: 7.r,
+                        ),
                       ],
                     ),
                   ),
-                ]),
+                ),
               ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(dynamic loc) {
     return Row(
       children: [
-        _buildBackButton(),
+        AppBackButton(size: 38.w, iconSize: 19.sp),
         SizedBox(width: 14.w),
         Text(
-          AppLocalization.current.changePassword,
+          loc.changePassword,
           style: Theme.of(context).textTheme.titleLarge,
         ),
       ],
-    );
-  }
-
-  Widget _buildBackButton() {
-    return AppBackButton(
-      size: 38.w,
-      iconSize: 19.sp,
     );
   }
 
@@ -136,6 +183,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     required TextEditingController controller,
     required bool obscureText,
     required VoidCallback onToggle,
+    required FormFieldValidator<String> validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,13 +193,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         TextFormField(
           controller: controller,
           obscureText: obscureText,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return AppLocalization.current.passwordRequired;
-            }
-
-            return null;
-          },
+          validator: validator,
           decoration: InputDecoration(
             hintText: hint,
             suffixIcon: IconButton(
@@ -167,29 +209,5 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         ),
       ],
     );
-  }
-
-  Widget _buildSaveButton() {
-    return AppButton(
-      text: AppLocalization.current.saveChanges,
-      onPressed: _changePassword,
-      borderRadius: 7.r,
-    );
-  }
-
-  void _changePassword() {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    if (_newPasswordController.text != _confirmPasswordController.text) {
-      AppSnackBar.showError(
-        context,
-        AppLocalization.current.passwordsDoNotMatch,
-      );
-      return;
-    }
-
-    // API call here.
   }
 }

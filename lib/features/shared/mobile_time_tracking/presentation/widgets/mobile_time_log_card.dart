@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../app/theme/app_colors.dart';
 import '../../../../../core/localization/context_extensions.dart';
+import '../../../../../core/widgets/translation/translation_status_badge.dart';
 import '../../../mobile_dashboard/presentation/utils/mobile_phase_localizer.dart';
 import '../../domain/entities/mobile_time_log_entity.dart';
 
@@ -56,6 +57,10 @@ class MobileTimeLogCard extends StatelessWidget {
                       : context.loc.timerLabel,
                   color: const Color(0xFF475569),
                 ),
+                if (log.localization != null) ...[
+                  SizedBox(width: 8.w),
+                  TranslationStatusBadge.fromMeta(log.localization),
+                ],
                 const Spacer(),
                 Text(
                   '${log.netHours.toStringAsFixed(2)} h',

@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:construction_app/app/theme/app_colors.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
 import 'package:construction_app/core/widgets/buttons/buttons.dart';
+import 'package:construction_app/core/widgets/translation/translation_status_badge.dart';
 import '../../../shared/helper/employee_enums.dart';
 import '../../../shared/helper/employee_models.dart';
 
@@ -43,9 +44,10 @@ class EmployeeAssignmentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final activity = assignment.activity;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
         padding: EdgeInsets.all(14.w),
         decoration: BoxDecoration(
           color: AppColors.white,
@@ -76,13 +78,20 @@ class EmployeeAssignmentCard extends StatelessWidget {
               ],
             ),
             SizedBox(height: 15.h),
-            Text(
-              assignment.project,
-              style: TextStyle(
-                fontSize: 19.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    assignment.project,
+                    style: TextStyle(
+                      fontSize: 19.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                TranslationStatusBadge.fromMeta(assignment.localization),
+              ],
             ),
             SizedBox(height: 7.h),
             Row(
@@ -144,6 +153,7 @@ class EmployeeAssignmentCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

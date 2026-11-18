@@ -1,9 +1,10 @@
+import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/widgets/translation/translation_status_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
-import 'package:construction_app/app/theme/app_colors.dart';
-import 'package:construction_app/core/localization/context_extensions.dart';
 import '../../domain/entities/employee_schedule_entity.dart';
 
 class EmployeePlanCard extends StatelessWidget {
@@ -29,13 +30,18 @@ class EmployeePlanCard extends StatelessWidget {
 
   String _formatTimeRange(String locale) {
     if (phase.startDate == null && phase.endDate == null) {
-      if (phase.assignedHours > 0) return '${phase.assignedHours.toStringAsFixed(0)}h';
+      if (phase.assignedHours > 0)
+        return '${phase.assignedHours.toStringAsFixed(0)}h';
       return '-';
     }
     final fmt = DateFormat.jm(locale);
-    final startStr = phase.startDate != null ? fmt.format(phase.startDate!) : '';
+    final startStr = phase.startDate != null
+        ? fmt.format(phase.startDate!)
+        : '';
     final endStr = phase.endDate != null ? fmt.format(phase.endDate!) : '';
-    final hoursSuffix = phase.assignedHours > 0 ? ' (${phase.assignedHours.toStringAsFixed(0)}h)' : '';
+    final hoursSuffix = phase.assignedHours > 0
+        ? ' (${phase.assignedHours.toStringAsFixed(0)}h)'
+        : '';
 
     if (startStr.isNotEmpty && endStr.isNotEmpty) {
       return '$startStr – $endStr$hoursSuffix';
@@ -53,15 +59,16 @@ class EmployeePlanCard extends StatelessWidget {
         ? phase.project.name
         : context.loc.project;
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(9.r),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
+    return RepaintBoundary(
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(14.w),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(9.r),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -70,7 +77,7 @@ class EmployeePlanCard extends StatelessWidget {
                 child: Text(
                   projectName,
                   style: TextStyle(
-                    fontSize: 17.sp,
+                    fontSize: 19.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                   ),
@@ -85,12 +92,16 @@ class EmployeePlanCard extends StatelessWidget {
                 child: Text(
                   _formatType(context),
                   style: TextStyle(
-                    fontSize: 13.sp,
+                    fontSize: 15.sp,
                     color: badgeColor,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
+              if (phase.localization != null) ...[
+                SizedBox(width: 6.w),
+                TranslationStatusBadge.fromMeta(phase.localization),
+              ],
             ],
           ),
           if (phase.project.address.isNotEmpty) ...[
@@ -99,7 +110,7 @@ class EmployeePlanCard extends StatelessWidget {
               children: [
                 Icon(
                   Icons.location_on_outlined,
-                  size: 15.sp,
+                  size: 16.sp,
                   color: AppColors.textSecondary,
                 ),
                 SizedBox(width: 4.w),
@@ -109,7 +120,7 @@ class EmployeePlanCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 13.sp,
+                      fontSize: 15.sp,
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -129,7 +140,7 @@ class EmployeePlanCard extends StatelessWidget {
               Text(
                 timeStr,
                 style: TextStyle(
-                  fontSize: 14.sp,
+                  fontSize: 15.sp,
                   color: AppColors.textTertiary,
                   fontWeight: FontWeight.w500,
                 ),
@@ -141,7 +152,7 @@ class EmployeePlanCard extends StatelessWidget {
             children: [
               Icon(
                 Icons.person_outline_rounded,
-                size: 16.sp,
+                size: 18.sp,
                 color: AppColors.textTertiary,
               ),
               SizedBox(width: 6.w),
@@ -151,7 +162,7 @@ class EmployeePlanCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 13.sp,
+                    fontSize: 15.sp,
                     color: AppColors.textTertiary,
                   ),
                 ),
@@ -160,7 +171,7 @@ class EmployeePlanCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
 }
-
+}

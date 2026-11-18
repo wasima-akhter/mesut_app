@@ -1,3 +1,5 @@
+import 'package:construction_app/core/localization/localization_meta.dart';
+
 class EmployeeDashboardUserEntity {
   final String id;
   final String firstName;
@@ -59,6 +61,7 @@ class EmployeeDashboardTaskEntity {
   final EmployeeDashboardProjectEntity project;
   final EmployeeDashboardSiteManagerEntity siteManager;
   final String workingHours;
+  final LocalizationMeta? localization;
 
   const EmployeeDashboardTaskEntity({
     this.phaseId = '',
@@ -70,6 +73,7 @@ class EmployeeDashboardTaskEntity {
     this.project = const EmployeeDashboardProjectEntity(),
     this.siteManager = const EmployeeDashboardSiteManagerEntity(),
     this.workingHours = '',
+    this.localization,
   });
 
   bool get isDismantling => type.toUpperCase() == 'DISMANTLING';

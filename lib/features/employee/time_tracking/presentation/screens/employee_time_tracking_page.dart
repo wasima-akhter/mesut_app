@@ -1,6 +1,7 @@
 import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:construction_app/app/theme/app_colors.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/localization/pending_refetch_controller.dart';
 import 'package:construction_app/core/pagination/app_pagination_footer.dart';
 import 'package:construction_app/core/widgets/buttons/buttons.dart';
 import 'package:construction_app/core/widgets/snack/app_snackbar.dart';
@@ -78,10 +79,23 @@ class _EmployeeTimeTrackingPageState
 
   @override
   Widget build(BuildContext context) {
-    final tracking = ref.watch(employeeTimeTrackingProvider);
-    final summary = tracking.summary;
+    final summary =
+        ref.watch(employeeTimeTrackingProvider.select((s) => s.summary));
+    final isTimerRunning =
+        ref.watch(employeeTimeTrackingProvider.select((s) => s.isTimerRunning));
+    final recentLogs =
+        ref.watch(employeeTimeTrackingProvider.select((s) => s.recentLogs));
+    final isLoading =
+        ref.watch(employeeTimeTrackingProvider.select((s) => s.isLoading));
+    final errorMessage =
+        ref.watch(employeeTimeTrackingProvider.select((s) => s.errorMessage));
+    final showThisMonth =
+        ref.watch(employeeTimeTrackingProvider.select((s) => s.showThisMonth));
+    final hasMoreLogs =
+        ref.watch(employeeTimeTrackingProvider.select((s) => s.hasMoreLogs));
+    final isLoadingMoreLogs =
+        ref.watch(employeeTimeTrackingProvider.select((s) => s.isLoadingMoreLogs));
 
-    final isTimerRunning = tracking.isTimerRunning;
     final todayDuration = Duration(minutes: (summary.todayHours * 60).round());
     final weekDuration = Duration(minutes: (summary.weekHours * 60).round());
     final progressLogged = Duration(minutes: (summary.weekHours * 60).round());
@@ -90,13 +104,21 @@ class _EmployeeTimeTrackingPageState
         : const Duration(hours: 40);
     final progressValue = summary.progressRatio;
 
+    final hasPendingTranslations = anyLocalizationPending(
+      recentLogs.map((l) => l.localization),
+    );
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () =>
+        child: PendingPollEffect(
+          hasPending: hasPendingTranslations,
+          onPoll: () =>
               ref.read(employeeTimeTrackingProvider.notifier).refresh(),
-          child: CustomScrollView(
+          child: RefreshIndicator(
+            onRefresh: () =>
+                ref.read(employeeTimeTrackingProvider.notifier).refresh(),
+            child: CustomScrollView(
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
@@ -164,7 +186,7 @@ class _EmployeeTimeTrackingPageState
                 padding: EdgeInsets.symmetric(horizontal: 18.w),
                 sliver: SliverToBoxAdapter(
                   child: EmployeeRecentLogsHeader(
-                    showThisMonth: tracking.showThisMonth,
+                    showThisMonth: showThisMonth,
                     onTogglePeriod: () => ref
                         .read(employeeTimeTrackingProvider.notifier)
                         .togglePeriod(),
@@ -172,27 +194,26 @@ class _EmployeeTimeTrackingPageState
                 ),
               ),
               SliverToBoxAdapter(child: SizedBox(height: 10.h)),
-              if (tracking.isLoading)
+              if (isLoading)
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(18.w, 0, 18.w, 30.h),
                   sliver: const SliverToBoxAdapter(
                     child: EmployeeTimeLogsLoadingPlaceholder(),
                   ),
                 )
-              else if (tracking.errorMessage != null &&
-                  tracking.recentLogs.isEmpty)
+              else if (errorMessage != null && recentLogs.isEmpty)
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(18.w, 0, 18.w, 30.h),
                   sliver: SliverToBoxAdapter(
                     child: EmployeeTimeLogsErrorPlaceholder(
-                      message: tracking.errorMessage,
+                      message: errorMessage,
                       onRetry: () => ref
                           .read(employeeTimeTrackingProvider.notifier)
                           .loadInitial(),
                     ),
                   ),
                 )
-              else if (tracking.recentLogs.isEmpty)
+              else if (recentLogs.isEmpty)
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(18.w, 0, 18.w, 30.h),
                   sliver: const SliverToBoxAdapter(
@@ -203,11 +224,11 @@ class _EmployeeTimeTrackingPageState
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(18.w, 0, 18.w, 14.h),
                   sliver: SliverList.separated(
-                    itemCount: tracking.recentLogs.length,
+                    itemCount: recentLogs.length,
                     separatorBuilder: (_, _) => SizedBox(height: 10.h),
                     itemBuilder: (context, index) {
                       final log = EmployeeTimeTrackingMappers.toLogModel(
-                        tracking.recentLogs[index],
+                        recentLogs[index],
                       );
                       return EmployeeTimeLogCard(
                         log: log,
@@ -226,9 +247,9 @@ class _EmployeeTimeTrackingPageState
                 ),
                 SliverToBoxAdapter(
                   child: AppPaginationFooter(
-                    hasMore: tracking.hasMoreLogs,
-                    isLoadingMore: tracking.isLoadingMoreLogs,
-                    itemCount: tracking.recentLogs.length,
+                    hasMore: hasMoreLogs,
+                    isLoadingMore: isLoadingMoreLogs,
+                    itemCount: recentLogs.length,
                   ),
                 ),
                 SliverToBoxAdapter(child: SizedBox(height: 24.h)),
@@ -237,6 +258,7 @@ class _EmployeeTimeTrackingPageState
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 }

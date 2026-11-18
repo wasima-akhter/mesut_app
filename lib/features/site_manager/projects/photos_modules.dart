@@ -11,7 +11,8 @@ import '../../../core/localization/app_localization.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/services/image_service.dart';
 import '../../../core/services/permission_service.dart';
-import '../presentation/providers/site_manager_photos_provider.dart';
+import '../../../core/widgets/images/app_network_image.dart';
+import 'presentation/providers/site_manager_photos_provider.dart';
 import 'all_photos_screen.dart';
 import 'models.dart';
 import 'overview_modules.dart';
@@ -526,17 +527,11 @@ class _PhotosTabState extends ConsumerState<PhotosTab> {
         child: Stack(
           children: [
             Positioned.fill(
-              child: photo.url.startsWith('http')
-                  ? Image.network(
-                      photo.url,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => _imagePlaceholder(),
-                    )
-                  : Image.file(
-                      File(photo.url),
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => _imagePlaceholder(),
-                    ),
+              child: AppNetworkImage(
+                imageUrl: photo.url,
+                fit: BoxFit.cover,
+                fallback: _imagePlaceholder(),
+              ),
             ),
             Positioned(
               left: 5.w,
@@ -593,17 +588,11 @@ class _PhotosTabState extends ConsumerState<PhotosTab> {
             child: Stack(
               children: [
                 Positioned.fill(
-                  child: photo.url.startsWith('http')
-                      ? Image.network(
-                          photo.url,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => _imagePlaceholder(),
-                        )
-                      : Image.file(
-                          File(photo.url),
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => _imagePlaceholder(),
-                        ),
+                  child: AppNetworkImage(
+                    imageUrl: photo.url,
+                    fit: BoxFit.cover,
+                    fallback: _imagePlaceholder(),
+                  ),
                 ),
                 if (isLast)
                   Positioned.fill(
@@ -1030,20 +1019,10 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
   }
 
   Widget _buildImage() {
-    final isNetwork = widget.photo.url.startsWith('http');
-
-    if (isNetwork) {
-      return Image.network(
-        widget.photo.url,
-        fit: BoxFit.contain,
-        errorBuilder: (_, _, _) => _viewerPlaceholder(),
-      );
-    }
-
-    return Image.file(
-      File(widget.photo.url),
+    return AppNetworkImage(
+      imageUrl: widget.photo.url,
       fit: BoxFit.contain,
-      errorBuilder: (_, _, _) => _viewerPlaceholder(),
+      fallback: _viewerPlaceholder(),
     );
   }
 

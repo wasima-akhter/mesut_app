@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/localization/context_extensions.dart';
 import '../../../../core/services/image_service.dart';
+import '../../../../core/widgets/images/app_network_image.dart';
 
 class ProfileAvatarPicker extends StatelessWidget {
   const ProfileAvatarPicker({
@@ -131,12 +132,12 @@ class ProfileAvatarPicker extends StatelessWidget {
     }
 
     if (currentAvatarUrl != null && currentAvatarUrl!.isNotEmpty) {
-      return Image.network(
-        currentAvatarUrl!,
+      return AppNetworkImage(
+        imageUrl: currentAvatarUrl!,
         fit: BoxFit.cover,
         width: 90.w,
         height: 90.w,
-        errorBuilder: (_, _, _) => _fallbackIcon(),
+        fallback: _fallbackIcon(),
       );
     }
 

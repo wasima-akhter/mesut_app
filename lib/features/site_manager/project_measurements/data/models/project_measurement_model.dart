@@ -1,3 +1,4 @@
+import '../../../../../core/localization/localization_meta.dart';
 import '../../domain/entities/project_measurement_entity.dart';
 
 class ProjectMeasurementModel extends ProjectMeasurementEntity {
@@ -13,6 +14,7 @@ class ProjectMeasurementModel extends ProjectMeasurementEntity {
     super.area,
     super.scaffoldType,
     super.createdAt,
+    super.localization,
   });
 
   factory ProjectMeasurementModel.fromJson(Map<String, dynamic> json) {
@@ -30,6 +32,7 @@ class ProjectMeasurementModel extends ProjectMeasurementEntity {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'] as String)
           : null,
+      localization: LocalizationMeta.tryParse(json),
     );
   }
 

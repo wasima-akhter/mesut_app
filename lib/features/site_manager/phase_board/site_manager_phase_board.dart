@@ -8,11 +8,12 @@ import '../../../app/theme/app_colors.dart';
 import '../../../core/errors/app_error_resolver.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/localization/localization_provider.dart';
+import '../../../core/localization/pending_refetch_controller.dart';
 import '../../../core/widgets/buttons/buttons.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
 import '../../../core/widgets/states/app_empty_widget.dart';
-import '../domain/entities/mobile_phase_entity.dart';
-import '../presentation/providers/mobile_phase_provider.dart';
+import 'domain/entities/mobile_phase_entity.dart';
+import 'presentation/providers/mobile_phase_provider.dart';
 import 'models/backend_phase_status.dart';
 import 'widgets/site_manager_phase_card.dart';
 import 'widgets/site_manager_phase_status_sheet.dart';
@@ -123,11 +124,19 @@ class _SiteManagerPhaseBoardPageState
             ),
             SizedBox(height: 10.h),
             Expanded(
-              child: RefreshIndicator(
-                onRefresh: () => ref
+              child: PendingPollEffect(
+                hasPending: anyLocalizationPending(
+                  (phasesAsync.asData?.value ?? const [])
+                      .map((p) => p.localization),
+                ),
+                onPoll: () => ref
                     .read(mobilePhasesProvider.notifier)
                     .refresh(column: _selectedColumn),
-                child: phasesAsync.when(
+                child: RefreshIndicator(
+                  onRefresh: () => ref
+                      .read(mobilePhasesProvider.notifier)
+                      .refresh(column: _selectedColumn),
+                  child: phasesAsync.when(
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
                   error: (_, __) => Center(
@@ -197,7 +206,8 @@ class _SiteManagerPhaseBoardPageState
                 ),
               ),
             ),
-          ],
+          ),
+        ],
         ),
       ),
     );

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/localization/context_extensions.dart';
+import '../../../../../core/localization/pending_refetch_controller.dart';
 import '../../../../../core/widgets/buttons/buttons.dart';
 import '../../../../../core/widgets/snack/app_snackbar.dart';
 import '../../../../../core/widgets/states/app_error_widget.dart';
@@ -65,9 +66,12 @@ class _ProjectNotesTabViewState extends ConsumerState<ProjectNotesTabView> {
       return AppErrorWidget(message: state.errorMessage!, onRetry: _onRefresh);
     }
 
-    return RefreshIndicator(
-      onRefresh: _onRefresh,
-      child: CustomScrollView(
+    return PendingPollEffect(
+      hasPending: anyLocalizationPending(state.items.map((n) => n.localization)),
+      onPoll: _onRefresh,
+      child: RefreshIndicator(
+        onRefresh: _onRefresh,
+        child: CustomScrollView(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
@@ -114,8 +118,9 @@ class _ProjectNotesTabViewState extends ConsumerState<ProjectNotesTabView> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildTopBar() {
     return Row(

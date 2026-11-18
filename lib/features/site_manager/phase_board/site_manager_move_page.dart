@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/widgets/buttons/buttons.dart';
-import '../presentation/providers/site_manager_phase_board_provider.dart';
+import 'presentation/providers/site_manager_phase_board_provider.dart';
 
 enum MovePhase { standing, dismantling, completed }
 

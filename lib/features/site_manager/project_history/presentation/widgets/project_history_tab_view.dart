@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/localization/context_extensions.dart';
+import '../../../../../core/localization/pending_refetch_controller.dart';
 import '../../../../../core/widgets/states/app_data_state.dart';
 import '../../../../../core/widgets/states/app_empty_widget.dart';
 import '../../../../../core/widgets/states/app_screen_state_view.dart';
@@ -102,9 +103,13 @@ class _ProjectHistoryTabViewState extends ConsumerState<ProjectHistoryTabView> {
       errorMessage: state.errorMessage,
       loadingShimmer: const ProjectHistorySkeletonLoader(),
       onRetry: _onRefresh,
-      child: RefreshIndicator(
-        onRefresh: _onRefresh,
-        child: _buildContent(state),
+      child: PendingPollEffect(
+        hasPending: anyLocalizationPending(state.items.map((i) => i.localization)),
+        onPoll: _onRefresh,
+        child: RefreshIndicator(
+          onRefresh: _onRefresh,
+          child: _buildContent(state),
+        ),
       ),
     );
   }

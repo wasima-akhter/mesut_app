@@ -1,3 +1,4 @@
+import '../../../../../core/localization/localization_meta.dart';
 import '../../domain/entities/project_phase_card_entity.dart';
 
 class ProjectPhaseCardModel extends ProjectPhaseCardEntity {
@@ -17,6 +18,7 @@ class ProjectPhaseCardModel extends ProjectPhaseCardEntity {
     required super.budgetedHours,
     required super.totalLoggedHours,
     required super.isProfitable,
+    super.localization,
   });
 
   factory ProjectPhaseCardModel.fromJson(Map<String, dynamic> json) {
@@ -58,6 +60,7 @@ class ProjectPhaseCardModel extends ProjectPhaseCardEntity {
       budgetedHours: (json['budgetedHours'] as num?)?.toDouble() ?? 0.0,
       totalLoggedHours: (json['totalLoggedHours'] as num?)?.toDouble() ?? 0.0,
       isProfitable: json['isProfitable'] as bool? ?? true,
+      localization: LocalizationMeta.tryParse(json),
     );
   }
 }

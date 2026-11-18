@@ -10,6 +10,7 @@ import 'package:construction_app/core/extensions/date_time_extensions.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
 import 'package:construction_app/core/services/image_service.dart';
 import 'package:construction_app/core/services/permission_service.dart';
+import 'package:construction_app/core/widgets/images/app_network_image.dart';
 import 'package:construction_app/core/widgets/snack/app_snackbar.dart';
 
 class EmployeePhotoItem {
@@ -526,10 +527,10 @@ class _EmployeeAssignmentPhotosPageState
     }
 
     if (photo.url!.startsWith('http://') || photo.url!.startsWith('https://')) {
-      return Image.network(
-        photo.url!,
+      return AppNetworkImage(
+        imageUrl: photo.url!,
         fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => Container(
+        fallback: Container(
           color: AppColors.neutral200,
           child: Center(
             child: Icon(
@@ -539,15 +540,6 @@ class _EmployeeAssignmentPhotosPageState
             ),
           ),
         ),
-        loadingBuilder: (_, child, progress) {
-          if (progress == null) return child;
-          return Container(
-            color: AppColors.neutral100,
-            child: const Center(
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          );
-        },
       );
     }
 
@@ -766,10 +758,10 @@ class _FullScreenEmployeePhotoViewerState
     }
 
     if (photo.url!.startsWith('http://') || photo.url!.startsWith('https://')) {
-      return Image.network(
-        photo.url!,
+      return AppNetworkImage(
+        imageUrl: photo.url!,
         fit: BoxFit.contain,
-        errorBuilder: (_, _, _) =>
+        fallback:
             Icon(photo.placeholderIcon, size: 90.sp, color: Colors.white54),
       );
     }

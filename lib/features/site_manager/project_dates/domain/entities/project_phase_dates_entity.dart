@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/localization/localization_meta.dart';
+
 class ProjectPhaseDateItemEntity {
   final String id;
   final String projectId;
@@ -21,7 +23,10 @@ class ProjectPhaseDateItemEntity {
     this.endDate,
     this.durationDays = 1,
     this.safetyInspectionComplete = false,
+    this.localization,
   });
+
+  final LocalizationMeta? localization;
 
   String get displayTitle {
     final cleanType = type.replaceAll('_', ' ').toLowerCase();

@@ -15,7 +15,7 @@ import '../../../core/enums/app_enum.dart';
 import '../../map/domain/entities/map_location_entity.dart';
 import '../../map/domain/entities/map_request_entity.dart';
 import '../../map/utils/map_coordinate_resolver.dart';
-import '../presentation/providers/site_manager_project_details_provider.dart';
+import 'presentation/providers/site_manager_project_details_provider.dart';
 
 /// =============================================================
 /// OVERVIEW

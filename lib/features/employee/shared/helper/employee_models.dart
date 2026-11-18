@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/date_time_extensions.dart';
+import '../../../../core/localization/localization_meta.dart';
 import 'employee_enums.dart';
 
 class EmployeeAssignmentModel {
@@ -17,6 +18,7 @@ class EmployeeAssignmentModel {
   final String? totalProjectHours;
   final double? latitude;
   final double? longitude;
+  final LocalizationMeta? localization;
 
   const EmployeeAssignmentModel({
     this.projectId,
@@ -32,6 +34,7 @@ class EmployeeAssignmentModel {
     this.totalProjectHours = '142.5h',
     this.latitude,
     this.longitude,
+    this.localization,
   });
 
   String get formattedSchedule {
@@ -97,6 +100,7 @@ class EmployeeTimeLogModel {
   final String breakTime;
   final Duration? breakDuration;
   final bool synced;
+  final LocalizationMeta? localization;
 
   const EmployeeTimeLogModel({
     this.date = '',
@@ -107,6 +111,7 @@ class EmployeeTimeLogModel {
     this.breakTime = '45m',
     this.breakDuration,
     required this.synced,
+    this.localization,
   });
 
   String get formattedDate {

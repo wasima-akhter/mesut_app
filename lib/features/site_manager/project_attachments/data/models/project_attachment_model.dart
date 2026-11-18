@@ -1,3 +1,4 @@
+import '../../../../../core/localization/localization_meta.dart';
 import '../../domain/entities/project_attachment_entity.dart';
 
 class ProjectAttachmentModel extends ProjectAttachmentEntity {
@@ -12,6 +13,7 @@ class ProjectAttachmentModel extends ProjectAttachmentEntity {
     required super.projectId,
     super.inspectionId,
     super.createdAt,
+    super.localization,
   });
 
   factory ProjectAttachmentModel.fromJson(Map<String, dynamic> json) {
@@ -28,6 +30,7 @@ class ProjectAttachmentModel extends ProjectAttachmentEntity {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
+      localization: LocalizationMeta.tryParse(json),
     );
   }
 

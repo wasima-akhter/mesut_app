@@ -1,3 +1,4 @@
+import '../../../../../core/localization/localization_meta.dart';
 import '../../domain/entities/project_history_entity.dart';
 
 class ProjectHistoryUserModel extends ProjectHistoryUserEntity {
@@ -32,6 +33,7 @@ class ProjectHistoryModel extends ProjectHistoryEntity {
     required super.details,
     super.createdAt,
     super.user,
+    super.localization,
   });
 
   factory ProjectHistoryModel.fromJson(Map<String, dynamic> json) {
@@ -50,6 +52,7 @@ class ProjectHistoryModel extends ProjectHistoryEntity {
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
       user: user,
+      localization: LocalizationMeta.tryParse(json),
     );
   }
 

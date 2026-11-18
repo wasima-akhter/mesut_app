@@ -51,6 +51,43 @@ class EmployeeTimeLogsErrorPlaceholder extends StatelessWidget {
   final VoidCallback onRetry;
   final String? message;
 
+  String _formatMessage(BuildContext context, String? raw) {
+    if (raw == null || raw.trim().isEmpty) {
+      return context.loc.somethingWentWrong;
+    }
+    final lower = raw.toLowerCase();
+    if (lower.contains('dioexception') ||
+        lower.contains('socketexception') ||
+        lower.contains('connection') ||
+        lower.contains('network') ||
+        lower.contains('timeout') ||
+        lower.contains('failed host lookup') ||
+        lower.contains('no address associated') ||
+        lower.contains('errno') ||
+        lower.contains('offline') ||
+        lower.contains('unreachable')) {
+      return context.loc.checkInternetConnection;
+    }
+    if (lower.contains('status code') ||
+        lower.contains('500') ||
+        lower.contains('502') ||
+        lower.contains('503') ||
+        lower.contains('504') ||
+        lower.contains('server')) {
+      return context.loc.somethingWentWrong;
+    }
+    if (lower.contains('not found') || lower.contains('404')) {
+      return context.loc.noTimeLogs;
+    }
+    if (lower.contains('exception') ||
+        lower.contains('bad response') ||
+        lower.contains('stacktrace') ||
+        lower.contains('error:')) {
+      return context.loc.somethingWentWrong;
+    }
+    return raw;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -71,10 +108,10 @@ class EmployeeTimeLogsErrorPlaceholder extends StatelessWidget {
           ),
           SizedBox(height: 10.h),
           Text(
-            message ?? context.loc.somethingWentWrong,
+            _formatMessage(context, message),
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 15.sp,
+              fontSize: 14.5.sp,
               color: AppColors.textSecondary,
               fontWeight: FontWeight.w500,
             ),

@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/services/image_service.dart';
 import '../../../core/services/permission_service.dart';
+import '../../../core/widgets/images/app_network_image.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
 
 class InspectionPhotoItem {
@@ -401,10 +402,10 @@ class _InspectionPhotosViewAllPageState
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(
-                    photo.url,
+                  AppNetworkImage(
+                    imageUrl: photo.url,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Container(
+                    fallback: Container(
                       color: const Color(0xFFEEEEEE),
                       child: const Center(
                         child: Icon(Icons.image_not_supported_outlined),
@@ -546,10 +547,10 @@ class _FullScreenPhotoViewerState extends State<_FullScreenPhotoViewer> {
                 minScale: 0.8,
                 maxScale: 3.5,
                 child: Center(
-                  child: Image.network(
-                    photo.url,
+                  child: AppNetworkImage(
+                    imageUrl: photo.url,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, _, _) => const Center(
+                    fallback: const Center(
                       child: Icon(
                         Icons.broken_image_outlined,
                         color: Colors.white54,

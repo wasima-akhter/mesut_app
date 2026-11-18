@@ -6,6 +6,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../core/extensions/date_time_extensions.dart';
 import '../../../../core/localization/context_extensions.dart';
 import '../../../../core/widgets/snack/app_snackbar.dart';
+import '../../../../core/widgets/states/app_error_widget.dart';
 import '../../../shared/mobile_time_tracking/domain/entities/mobile_time_log_entity.dart';
 import '../../../shared/mobile_time_tracking/presentation/providers/mobile_time_tracking_provider.dart';
 import 'site_manager_my_time_entry_card.dart';
@@ -44,13 +45,14 @@ class SiteManagerMyTimeView {
           child: _buildFilterChips(context, notifier.period, notifier),
         ),
       ),
-      _buildLogsSliver(context, logsAsync),
+      _buildLogsSliver(context, logsAsync, notifier.refresh),
     ];
   }
 
   static Widget _buildLogsSliver(
     BuildContext context,
     AsyncValue<List<MobileTimeLogEntity>> logsAsync,
+    VoidCallback onRetry,
   ) {
     return logsAsync.when(
       loading: () => const SliverToBoxAdapter(
@@ -62,10 +64,11 @@ class SiteManagerMyTimeView {
         ),
       ),
       error: (e, _) => SliverToBoxAdapter(
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.all(24.w),
-            child: Text(e.toString(), style: Theme.of(context).textTheme.bodySmall),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+          child: AppErrorWidget(
+            error: e,
+            onRetry: onRetry,
           ),
         ),
       ),

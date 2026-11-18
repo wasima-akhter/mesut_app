@@ -1,3 +1,4 @@
+import '../../../../../core/localization/localization_meta.dart';
 import '../../../projects/enums.dart';
 
 class ProjectTaskEmployeeEntity {
@@ -44,7 +45,10 @@ class ProjectTaskEntity {
     this.employee,
     this.createdAt,
     this.updatedAt,
+    this.localization,
   });
+
+  final LocalizationMeta? localization;
 
   String get displayTitle {
     if (description.isNotEmpty) return description;

@@ -9,8 +9,8 @@ import '../../../core/localization/context_extensions.dart';
 import '../../../core/localization/localization_provider.dart';
 import '../../../core/widgets/buttons/app_button.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
-import '../domain/entities/mobile_inspection_entity.dart';
-import '../presentation/providers/mobile_inspection_provider.dart';
+import 'domain/entities/mobile_inspection_entity.dart';
+import 'presentation/providers/mobile_inspection_provider.dart';
 
 class InspectionSurveyPage extends ConsumerStatefulWidget {
   const InspectionSurveyPage({super.key});

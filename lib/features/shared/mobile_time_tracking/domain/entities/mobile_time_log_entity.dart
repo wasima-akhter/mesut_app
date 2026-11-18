@@ -1,4 +1,5 @@
 import '../../../../../core/enums/backend_enums.dart';
+import '../../../../../core/localization/localization_meta.dart';
 import '../../../../shared/mobile_dashboard/domain/entities/mobile_project_entity.dart';
 
 class MobileTimeLogUserEntity {
@@ -30,6 +31,7 @@ class MobileTimeLogEntity {
     this.createdAt,
     this.updatedAt,
     this.user,
+    this.localization,
   });
 
   final String id;
@@ -45,6 +47,7 @@ class MobileTimeLogEntity {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final MobileTimeLogUserEntity? user;
+  final LocalizationMeta? localization;
 
   MobileTimeLogEntity copyWith({
     String? id,

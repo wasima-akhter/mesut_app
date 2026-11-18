@@ -1,3 +1,4 @@
+import '../../../../../core/localization/localization_meta.dart';
 import '../../../projects/enums.dart';
 import '../../domain/entities/project_note_entity.dart';
 
@@ -26,6 +27,7 @@ class ProjectNoteModel extends ProjectNoteEntity {
     super.content,
     super.author,
     super.createdAt,
+    super.localization,
   });
 
   factory ProjectNoteModel.fromJson(Map<String, dynamic> json) {
@@ -42,6 +44,7 @@ class ProjectNoteModel extends ProjectNoteEntity {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'] as String)
           : null,
+      localization: LocalizationMeta.tryParse(json),
     );
   }
 

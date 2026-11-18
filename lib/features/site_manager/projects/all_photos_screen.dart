@@ -9,7 +9,8 @@ import '../../../core/localization/app_localization.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/services/image_service.dart';
 import '../../../core/services/permission_service.dart';
-import '../presentation/providers/site_manager_photos_provider.dart';
+import '../../../core/widgets/images/app_network_image.dart';
+import 'presentation/providers/site_manager_photos_provider.dart';
 import 'models.dart';
 import 'overview_modules.dart';
 import 'pdf_plan_preview_screen.dart';
@@ -967,22 +968,10 @@ class _AllPhotosScreenState extends ConsumerState<AllPhotosScreen> {
   }
 
   Widget _buildImageThumbnail(String url) {
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      return Image.network(
-        url,
-
-        fit: BoxFit.cover,
-
-        errorBuilder: (_, _, _) => _placeholder(),
-      );
-    }
-
-    return Image.file(
-      File(url),
-
+    return AppNetworkImage(
+      imageUrl: url,
       fit: BoxFit.cover,
-
-      errorBuilder: (_, _, _) => _placeholder(),
+      fallback: _placeholder(),
     );
   }
 

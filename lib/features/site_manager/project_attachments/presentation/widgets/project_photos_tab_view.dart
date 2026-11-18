@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../../core/localization/context_extensions.dart';
+import '../../../../../core/localization/pending_refetch_controller.dart';
 import '../../../../../core/services/permission_service.dart';
 import '../../../../../core/widgets/snack/app_snackbar.dart';
 import '../../../../../core/widgets/states/app_data_state.dart';
@@ -267,11 +268,17 @@ class _ProjectPhotosTabViewState extends ConsumerState<ProjectPhotosTabView> {
           onRetry: () => ref
               .read(projectAttachmentsProvider.notifier)
               .loadInitial(widget.projectId, isRefresh: true),
-          child: RefreshIndicator(
-            onRefresh: () => ref
+          child: PendingPollEffect(
+            hasPending: anyLocalizationPending(state.items.map((i) => i.localization)),
+            onPoll: () => ref
                 .read(projectAttachmentsProvider.notifier)
                 .loadInitial(widget.projectId, isRefresh: true),
-            child: _buildContent(state),
+            child: RefreshIndicator(
+              onRefresh: () => ref
+                  .read(projectAttachmentsProvider.notifier)
+                  .loadInitial(widget.projectId, isRefresh: true),
+              child: _buildContent(state),
+            ),
           ),
         ),
         if (state.isMutating)

@@ -11,6 +11,8 @@ class AppNoConnection extends StatelessWidget {
   final VoidCallback? onRetry;
   final String? retryText;
   final IconData icon;
+  final VoidCallback? onBack;
+  final bool showBackButton;
 
   const AppNoConnection({
     super.key,
@@ -19,6 +21,8 @@ class AppNoConnection extends StatelessWidget {
     this.onRetry,
     this.retryText,
     this.icon = Icons.wifi_off_rounded,
+    this.onBack,
+    this.showBackButton = false,
   });
 
   @override
@@ -32,6 +36,8 @@ class AppNoConnection extends StatelessWidget {
             !AppErrorWidget.isConnectionError(message))
         ? message!
         : context.loc.checkInternetConnection;
+
+    final canNavigateBack = showBackButton || onBack != null || Navigator.of(context).canPop();
 
     return Center(
       child: Padding(
@@ -58,11 +64,26 @@ class AppNoConnection extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            if (onRetry != null) ...[
+            if (onRetry != null || canNavigateBack) ...[
               SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: onRetry,
-                child: Text(retryText ?? context.loc.retry),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (canNavigateBack) ...[
+                    OutlinedButton.icon(
+                      onPressed: onBack ?? () => Navigator.of(context).maybePop(),
+                      icon: const Icon(Icons.arrow_back_rounded, size: 18),
+                      label: Text(context.loc.back),
+                    ),
+                    if (onRetry != null) SizedBox(width: AppSpacing.sm),
+                  ],
+                  if (onRetry != null)
+                    FilledButton(
+                      onPressed: onRetry,
+                      child: Text(retryText ?? context.loc.retry),
+                    ),
+                ],
               ),
             ],
           ],

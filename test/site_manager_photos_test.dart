@@ -1,4 +1,4 @@
-import 'package:construction_app/features/site_manager/presentation/providers/site_manager_photos_provider.dart';
+import 'package:construction_app/features/site_manager/projects/presentation/providers/site_manager_photos_provider.dart';
 import 'package:construction_app/features/site_manager/projects/models.dart';
 import 'package:construction_app/features/site_manager/projects/services/pdf_export_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

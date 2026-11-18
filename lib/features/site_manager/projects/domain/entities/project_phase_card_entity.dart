@@ -1,3 +1,4 @@
+import '../../../../../core/localization/localization_meta.dart';
 import '../../../../../core/services/address_resolver_service.dart';
 
 class ProjectPhaseCoordinates {
@@ -56,7 +57,10 @@ class ProjectPhaseCardEntity {
     required this.budgetedHours,
     required this.totalLoggedHours,
     required this.isProfitable,
+    this.localization,
   });
+
+  final LocalizationMeta? localization;
 
   /// Centrally extracts and formats the address from latitude/longitude coordinates.
   String get formattedAddress => AddressResolverService.resolveSync(

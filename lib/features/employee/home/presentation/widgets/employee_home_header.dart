@@ -6,6 +6,7 @@ import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:construction_app/app/theme/app_colors.dart';
 import 'package:construction_app/core/extensions/date_time_extensions.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/widgets/images/app_avatar.dart';
 import '../../domain/entities/employee_dashboard_entity.dart';
 
 class EmployeeHomeHeader extends StatelessWidget {
@@ -15,34 +16,18 @@ class EmployeeHomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initial =
-        user.firstName.isNotEmpty ? user.firstName[0].toUpperCase() : 'E';
-
     return Row(
       children: [
         Container(
-          width: 52.w,
-          height: 52.w,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.white, width: 2),
           ),
-          child: CircleAvatar(
+          child: AppAvatar(
+            imageUrl: user.avatarUrl,
+            name: user.fullName,
+            size: 50.w,
             backgroundColor: AppColors.neutral200,
-            backgroundImage:
-                user.avatarUrl != null && user.avatarUrl!.isNotEmpty
-                    ? NetworkImage(user.avatarUrl!)
-                    : null,
-            child: user.avatarUrl == null || user.avatarUrl!.isEmpty
-                ? Text(
-                    initial,
-                    style: TextStyle(
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.neutral700,
-                    ),
-                  )
-                : null,
           ),
         ),
         SizedBox(width: 12.w),

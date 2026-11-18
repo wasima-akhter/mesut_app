@@ -7,10 +7,12 @@ import '../../../app/constants/route_constants.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/localization/localization_provider.dart';
+import '../../../core/localization/pending_refetch_controller.dart';
 import '../../../core/widgets/states/app_empty_widget.dart';
+import '../../../core/widgets/translation/translation_status_badge.dart';
 import '../../shared/mobile_dashboard/presentation/utils/mobile_phase_localizer.dart';
-import '../domain/entities/mobile_inspection_entity.dart';
-import '../presentation/providers/mobile_inspection_provider.dart';
+import 'domain/entities/mobile_inspection_entity.dart';
+import 'presentation/providers/mobile_inspection_provider.dart';
 
 enum InspectionStatus { pending, completed }
 
@@ -117,10 +119,17 @@ class _SiteInspectionPageState extends ConsumerState<SiteInspectionPage> {
             ),
           ),
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: () =>
+            child: PendingPollEffect(
+              hasPending: anyLocalizationPending(
+                (inspectionsAsync.asData?.value ?? const [])
+                    .map((i) => i.localization),
+              ),
+              onPoll: () =>
                   ref.read(mobileInspectionsProvider.notifier).refresh(),
-              child: inspectionsAsync.when(
+              child: RefreshIndicator(
+                onRefresh: () =>
+                    ref.read(mobileInspectionsProvider.notifier).refresh(),
+                child: inspectionsAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (_, __) => Center(
                   child: Column(
@@ -178,6 +187,7 @@ class _SiteInspectionPageState extends ConsumerState<SiteInspectionPage> {
               ),
             ),
           ),
+        ),
         ],
       ),
     );
@@ -234,6 +244,10 @@ class _InspectionCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                    if (inspection.localization != null) ...[
+                      SizedBox(width: 6.w),
+                      TranslationStatusBadge.fromMeta(inspection.localization),
+                    ],
                     const Spacer(),
                     Text(
                       MobilePhaseLocalizer.formatDateRange(

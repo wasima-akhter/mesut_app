@@ -45,8 +45,9 @@ class EmployeeActiveTimerCard extends ConsumerWidget {
         ? (activeTimer != null ? activeTimer.startTime.toLocal().formatLocalized() : '--')
         : fallbackState.currentProject.formattedStartTime;
 
-    return Container(
-      width: double.infinity,
+    return RepaintBoundary(
+      child: Container(
+        width: double.infinity,
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: AppColors.timeDarkGreen,
@@ -161,8 +162,9 @@ class EmployeeActiveTimerCard extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   String stateText(BuildContext context, bool isOnBreak) {
     return isOnBreak ? context.loc.resumeWork : context.loc.pauseBreak;

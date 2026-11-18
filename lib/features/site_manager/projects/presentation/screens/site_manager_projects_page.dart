@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../app/constants/route_constants.dart';
 import '../../../../../core/localization/context_extensions.dart';
+import '../../../../../core/localization/pending_refetch_controller.dart';
 import '../../../../../core/pagination/app_pagination_footer.dart';
 import '../../../../../core/widgets/states/app_empty_widget.dart';
 import '../../../../../core/widgets/states/app_screen_state_view.dart';
@@ -154,12 +155,19 @@ class _SiteManagerProjectsPageState
                 onRetry: () => ref
                     .read(siteManagerProjectsProvider.notifier)
                     .loadInitial(),
-                child: RefreshIndicator(
-                  color: const Color(0xFFC8102E),
-                  onRefresh: () => ref
+                child: PendingPollEffect(
+                  hasPending: anyLocalizationPending(
+                    projects.map((p) => p.localization),
+                  ),
+                  onPoll: () => ref
                       .read(siteManagerProjectsProvider.notifier)
                       .loadInitial(isRefresh: true),
-                  child: CustomScrollView(
+                  child: RefreshIndicator(
+                    color: const Color(0xFFC8102E),
+                    onRefresh: () => ref
+                        .read(siteManagerProjectsProvider.notifier)
+                        .loadInitial(isRefresh: true),
+                    child: CustomScrollView(
                     controller: _scrollController,
                     physics: const AlwaysScrollableScrollPhysics(
                       parent: BouncingScrollPhysics(),
@@ -201,6 +209,7 @@ class _SiteManagerProjectsPageState
                     ],
                   ),
                 ),
+              ),
               ),
             ),
           ],

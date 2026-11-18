@@ -68,7 +68,7 @@ class EmployeeDashboardNotifier extends Notifier<EmployeeDashboardState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: e.toString(),
+        errorMessage: 'Unable to load dashboard. Please try again.',
       );
     }
   }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/localization/context_extensions.dart';
+import '../../../../../core/localization/pending_refetch_controller.dart';
 import '../../../../../core/widgets/states/app_screen_state_view.dart';
 import '../../../projects/enums.dart';
 import '../providers/project_tasks_provider.dart';
@@ -80,37 +81,45 @@ class _ProjectTasksTabViewState extends ConsumerState<ProjectTasksTabView> {
                 state.selectedTab == TaskStatusTab.open,
                 notifier,
               ),
-              child: RefreshIndicator(
-                onRefresh: () => notifier.loadInitial(widget.projectId, isRefresh: true),
-                color: const Color(0xFFC8102E),
-                child: ListView.builder(
-                  controller: _scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(
-                    parent: BouncingScrollPhysics(),
-                  ),
-                  itemCount:
-                      state.currentTasks.length + (state.isLoadingMore ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index >= state.currentTasks.length) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16.h),
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Color(0xFFC8102E),
+              child: PendingPollEffect(
+                hasPending: anyLocalizationPending(
+                  state.currentTasks.map((t) => t.localization),
+                ),
+                onPoll: () =>
+                    notifier.loadInitial(widget.projectId, isRefresh: true),
+                child: RefreshIndicator(
+                  onRefresh: () =>
+                      notifier.loadInitial(widget.projectId, isRefresh: true),
+                  color: const Color(0xFFC8102E),
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: BouncingScrollPhysics(),
+                    ),
+                    itemCount:
+                        state.currentTasks.length + (state.isLoadingMore ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index >= state.currentTasks.length) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16.h),
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xFFC8102E),
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    }
+                        );
+                      }
 
-                    final task = state.currentTasks[index];
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: 8.h),
-                      child: ProjectTaskCard(task: task),
-                    );
-                  },
+                      final task = state.currentTasks[index];
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 8.h),
+                        child: ProjectTaskCard(task: task),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

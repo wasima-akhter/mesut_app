@@ -1,3 +1,5 @@
+import '../../../../../core/localization/localization_meta.dart';
+
 /// Domain entity representing a scaffold measurement item.
 class ProjectMeasurementEntity {
   final String id;
@@ -24,7 +26,10 @@ class ProjectMeasurementEntity {
     this.area = 0.0,
     this.scaffoldType = 'Front Scaffold',
     this.createdAt,
+    this.localization,
   });
+
+  final LocalizationMeta? localization;
 
   /// Computed area as length * height * quantity.
   /// Falls back to API calculated area if available.

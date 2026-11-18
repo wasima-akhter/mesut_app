@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import 'package:construction_app/app/theme/app_colors.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/localization/pending_refetch_controller.dart';
 import 'package:construction_app/core/pagination/app_pagination_footer.dart';
 import 'package:construction_app/core/widgets/loading/app_loader.dart';
 import 'package:construction_app/core/widgets/states/app_empty_widget.dart';
@@ -56,13 +57,20 @@ class _EmployeePlanPageState extends ConsumerState<EmployeePlanPage> {
       locale,
     ).format(scheduleState.selectedDay).toUpperCase();
 
+    final hasPendingTranslations = anyLocalizationPending(
+      scheduleState.days.expand((d) => d.phases).map((p) => p.localization),
+    );
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () =>
-              ref.read(employeeScheduleProvider.notifier).refresh(),
-          child: CustomScrollView(
+        child: PendingPollEffect(
+          hasPending: hasPendingTranslations,
+          onPoll: () => ref.read(employeeScheduleProvider.notifier).refresh(),
+          child: RefreshIndicator(
+            onRefresh: () =>
+                ref.read(employeeScheduleProvider.notifier).refresh(),
+            child: CustomScrollView(
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
@@ -119,7 +127,8 @@ class _EmployeePlanPageState extends ConsumerState<EmployeePlanPage> {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildHeader(BuildContext context) {

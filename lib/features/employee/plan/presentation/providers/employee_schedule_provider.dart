@@ -4,6 +4,7 @@ import 'package:construction_app/core/enums/app_enum.dart';
 import 'package:construction_app/core/network/network_providers.dart';
 import 'package:construction_app/core/providers/common_provider.dart';
 import 'package:construction_app/core/storage/storage_provider.dart';
+import '../../../offline_sync/providers/employee_sync_provider.dart';
 import '../../data/datasources/employee_schedule_datasource.dart';
 import '../../domain/entities/employee_schedule_entity.dart';
 
@@ -11,6 +12,7 @@ final employeeScheduleDataSourceProvider =
     Provider<EmployeeScheduleRemoteDataSource>((ref) {
   return EmployeeScheduleRemoteDataSourceImpl(
     apiClient: ref.watch(apiClientProvider),
+    cacheService: ref.watch(employeeCacheServiceProvider),
   );
 });
 
@@ -127,7 +129,10 @@ class EmployeeScheduleNotifier extends Notifier<EmployeeScheduleState> {
         hasMore: days.length >= 50,
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Unable to load schedule. Please try again.',
+      );
     }
   }
 

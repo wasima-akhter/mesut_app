@@ -1,4 +1,5 @@
 import '../../../../../core/enums/backend_enums.dart';
+import '../../../../../core/localization/localization_meta.dart';
 import '../../../../shared/mobile_dashboard/data/models/mobile_dashboard_models.dart';
 import '../../domain/entities/mobile_time_log_entity.dart';
 
@@ -58,6 +59,7 @@ class MobileTimeLogModel {
       createdAt: _asDateTime(json['createdAt']),
       updatedAt: _asDateTime(json['updatedAt']),
       user: userMap.isEmpty ? null : MobileTimeLogUserModel.fromJson(userMap),
+      localization: LocalizationMeta.tryParse(json),
     );
   }
 

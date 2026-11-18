@@ -1,8 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:construction_app/core/constants/api_constants.dart';
 import 'package:construction_app/core/network/api_client.dart';
 import 'package:construction_app/core/network/network_providers.dart';
+import '../../../offline_sync/models/employee_sync_action.dart';
+import '../../../offline_sync/providers/employee_sync_provider.dart';
+import '../../../offline_sync/services/employee_cache_service.dart';
+import '../../../offline_sync/services/employee_sync_queue.dart';
 import '../../domain/entities/employee_time_tracking_entities.dart';
 import '../models/employee_time_tracking_models.dart';
 
@@ -37,17 +42,35 @@ abstract class EmployeeTimeTrackingDatasource {
 
 class EmployeeTimeTrackingDatasourceImpl
     implements EmployeeTimeTrackingDatasource {
-  EmployeeTimeTrackingDatasourceImpl({required this.apiClient});
+  EmployeeTimeTrackingDatasourceImpl({
+    required this.apiClient,
+    this.cacheService,
+    this.syncQueue,
+  });
 
   final ApiClient apiClient;
+  final EmployeeCacheService? cacheService;
+  final EmployeeSyncQueue? syncQueue;
 
   @override
   Future<EmployeeTimeSummaryEntity> getSummary() async {
-    final response = await apiClient.get<Map<String, dynamic>>(
-      ApiConstants.mobileEmployeeTimeTrackingSummary,
-    );
-    final data = _extractData(response.data);
-    return EmployeeTimeTrackingModels.summaryFromJson(data);
+    try {
+      final response = await apiClient.get<Map<String, dynamic>>(
+        ApiConstants.mobileEmployeeTimeTrackingSummary,
+      );
+      final data = _extractData(response.data);
+      await cacheService?.cacheTimeSummary(data);
+      return EmployeeTimeTrackingModels.summaryFromJson(data);
+    } catch (e) {
+      final cached = cacheService?.getCachedTimeSummary();
+      if (cached != null) {
+        return EmployeeTimeTrackingModels.summaryFromJson(cached);
+      }
+      if (e is DioException && e.response?.statusCode == 404) {
+        return const EmployeeTimeSummaryEntity();
+      }
+      rethrow;
+    }
   }
 
   @override
@@ -55,13 +78,24 @@ class EmployeeTimeTrackingDatasourceImpl
     int page = 1,
     int limit = 50,
   }) async {
-    final response = await apiClient.get<Map<String, dynamic>>(
-      ApiConstants.mobileEmployeeTimeTrackingProjects,
-      queryParameters: {'page': page, 'limit': limit},
-    );
-    final data = _extractData(response.data);
-    final list = data['data'] is List ? data['data'] : data;
-    return EmployeeTimeTrackingModels.projectListFromJson(list);
+    try {
+      final response = await apiClient.get<Map<String, dynamic>>(
+        ApiConstants.mobileEmployeeTimeTrackingProjects,
+        queryParameters: {'page': page, 'limit': limit},
+      );
+      final data = _extractData(response.data);
+      final list = data['data'] is List ? data['data'] : data;
+      if (list is List && page == 1) {
+        await cacheService?.cacheProjects(list);
+      }
+      return EmployeeTimeTrackingModels.projectListFromJson(list);
+    } catch (_) {
+      final cached = cacheService?.getCachedProjects();
+      if (cached != null) {
+        return EmployeeTimeTrackingModels.projectListFromJson(cached);
+      }
+      rethrow;
+    }
   }
 
   @override
@@ -69,13 +103,43 @@ class EmployeeTimeTrackingDatasourceImpl
     required String projectId,
     required String activityType,
   }) async {
-    final response = await apiClient.post<Map<String, dynamic>>(
-      ApiConstants.mobileEmployeeTimerStart,
-      data: {'projectId': projectId, 'activityType': activityType},
-    );
-    final data = _extractData(response.data);
-    final timeLogMap = data['timeLog'] ?? data;
-    return EmployeeTimeTrackingModels.parseActiveTimer(timeLogMap);
+    try {
+      final response = await apiClient.post<Map<String, dynamic>>(
+        ApiConstants.mobileEmployeeTimerStart,
+        data: {'projectId': projectId, 'activityType': activityType},
+      );
+      final data = _extractData(response.data);
+      final timeLogMap = data['timeLog'] ?? data;
+      return EmployeeTimeTrackingModels.parseActiveTimer(timeLogMap);
+    } catch (e) {
+      if (syncQueue != null) {
+        final localId = 'local_${DateTime.now().millisecondsSinceEpoch}';
+        final action = EmployeeSyncAction(
+          id: localId,
+          actionType: EmployeeSyncActionType.startTimer,
+          endpoint: ApiConstants.mobileEmployeeTimerStart,
+          httpMethod: 'POST',
+          payload: {'projectId': projectId, 'activityType': activityType},
+          projectId: projectId,
+          displayTitle: 'Start Timer ($activityType)',
+          createdAt: DateTime.now(),
+        );
+        await syncQueue!.enqueue(action);
+
+        return EmployeeActiveTimerEntity(
+          id: localId,
+          phaseId: '',
+          activityType: activityType,
+          startTime: DateTime.now(),
+          isManual: false,
+          status: 'IN_PROGRESS',
+          projectId: projectId,
+          projectName: 'Active Timer',
+          synced: false,
+        );
+      }
+      rethrow;
+    }
   }
 
   @override
@@ -84,14 +148,32 @@ class EmployeeTimeTrackingDatasourceImpl
     double? gpsEndLat,
     double? gpsEndLng,
   }) async {
-    await apiClient.post<Map<String, dynamic>>(
-      ApiConstants.mobileEmployeeTimerStop,
-      data: {
-        'timeLogId': timeLogId,
-        'gpsEndLat': gpsEndLat ?? 0,
-        'gpsEndLng': gpsEndLng ?? 0,
-      },
-    );
+    final payload = {
+      'timeLogId': timeLogId,
+      'gpsEndLat': gpsEndLat ?? 0,
+      'gpsEndLng': gpsEndLng ?? 0,
+    };
+    try {
+      await apiClient.post<Map<String, dynamic>>(
+        ApiConstants.mobileEmployeeTimerStop,
+        data: payload,
+      );
+    } catch (e) {
+      if (syncQueue != null) {
+        final action = EmployeeSyncAction(
+          id: 'stop_${DateTime.now().millisecondsSinceEpoch}',
+          actionType: EmployeeSyncActionType.stopTimer,
+          endpoint: ApiConstants.mobileEmployeeTimerStop,
+          httpMethod: 'POST',
+          payload: payload,
+          displayTitle: 'Stop Timer',
+          createdAt: DateTime.now(),
+        );
+        await syncQueue!.enqueue(action);
+        return;
+      }
+      rethrow;
+    }
   }
 
   @override
@@ -102,16 +184,35 @@ class EmployeeTimeTrackingDatasourceImpl
     required DateTime endTime,
     int breakMinutes = 0,
   }) async {
-    await apiClient.post<Map<String, dynamic>>(
-      ApiConstants.mobileEmployeeTimerManual,
-      data: {
-        'projectId': projectId,
-        'activityType': activityType,
-        'startTime': startTime.toUtc().toIso8601String(),
-        'endTime': endTime.toUtc().toIso8601String(),
-        'breakMinutes': breakMinutes,
-      },
-    );
+    final payload = {
+      'projectId': projectId,
+      'activityType': activityType,
+      'startTime': startTime.toUtc().toIso8601String(),
+      'endTime': endTime.toUtc().toIso8601String(),
+      'breakMinutes': breakMinutes,
+    };
+    try {
+      await apiClient.post<Map<String, dynamic>>(
+        ApiConstants.mobileEmployeeTimerManual,
+        data: payload,
+      );
+    } catch (e) {
+      if (syncQueue != null) {
+        final action = EmployeeSyncAction(
+          id: 'manual_${DateTime.now().millisecondsSinceEpoch}',
+          actionType: EmployeeSyncActionType.manualTimeLog,
+          endpoint: ApiConstants.mobileEmployeeTimerManual,
+          httpMethod: 'POST',
+          payload: payload,
+          projectId: projectId,
+          displayTitle: 'Manual Log ($activityType)',
+          createdAt: DateTime.now(),
+        );
+        await syncQueue!.enqueue(action);
+        return;
+      }
+      rethrow;
+    }
   }
 
   @override
@@ -120,13 +221,27 @@ class EmployeeTimeTrackingDatasourceImpl
     int page = 1,
     int limit = 20,
   }) async {
-    final response = await apiClient.get<Map<String, dynamic>>(
-      ApiConstants.mobileEmployeeTimeLogs,
-      queryParameters: {'period': period, 'page': page, 'limit': limit},
-    );
-    final data = _extractData(response.data);
-    final list = data['data'] is List ? data['data'] : data;
-    return EmployeeTimeTrackingModels.logListFromJson(list);
+    try {
+      final response = await apiClient.get<Map<String, dynamic>>(
+        ApiConstants.mobileEmployeeTimeLogs,
+        queryParameters: {'period': period, 'page': page, 'limit': limit},
+      );
+      final data = _extractData(response.data);
+      final list = data['data'] is List ? data['data'] : data;
+      if (list is List && page == 1) {
+        await cacheService?.cacheTimeLogs(period, list);
+      }
+      return EmployeeTimeTrackingModels.logListFromJson(list);
+    } catch (e) {
+      final cached = cacheService?.getCachedTimeLogs(period);
+      if (cached != null) {
+        return EmployeeTimeTrackingModels.logListFromJson(cached);
+      }
+      if (e is DioException && e.response?.statusCode == 404) {
+        return const [];
+      }
+      rethrow;
+    }
   }
 
   Map<String, dynamic> _extractData(Map<String, dynamic>? body) {
@@ -141,5 +256,11 @@ class EmployeeTimeTrackingDatasourceImpl
 final employeeTimeTrackingDatasourceProvider =
     Provider<EmployeeTimeTrackingDatasource>((ref) {
       final client = ref.watch(apiClientProvider);
-      return EmployeeTimeTrackingDatasourceImpl(apiClient: client);
+      final cache = ref.watch(employeeCacheServiceProvider);
+      final queue = ref.watch(employeeSyncQueueProvider);
+      return EmployeeTimeTrackingDatasourceImpl(
+        apiClient: client,
+        cacheService: cache,
+        syncQueue: queue,
+      );
     });

@@ -34,6 +34,7 @@ class EmployeeTimeTrackingMappers {
       breakTime: '${entity.breakMinutes}m',
       breakDuration: Duration(minutes: entity.breakMinutes),
       synced: entity.synced,
+      localization: entity.localization,
     );
   }
 

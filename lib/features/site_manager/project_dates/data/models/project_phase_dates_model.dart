@@ -1,3 +1,4 @@
+import '../../../../../core/localization/localization_meta.dart';
 import '../../domain/entities/project_phase_dates_entity.dart';
 
 class ProjectPhaseDateItemModel extends ProjectPhaseDateItemEntity {
@@ -11,6 +12,7 @@ class ProjectPhaseDateItemModel extends ProjectPhaseDateItemEntity {
     super.endDate,
     super.durationDays = 1,
     super.safetyInspectionComplete = false,
+    super.localization,
   });
 
   factory ProjectPhaseDateItemModel.fromJson(
@@ -52,6 +54,7 @@ class ProjectPhaseDateItemModel extends ProjectPhaseDateItemEntity {
       endDate: parseDate(json['endDate']),
       durationDays: parsedDuration > 0 ? parsedDuration : 1,
       safetyInspectionComplete: safetyInspectionComplete,
+      localization: LocalizationMeta.tryParse(json),
     );
   }
 

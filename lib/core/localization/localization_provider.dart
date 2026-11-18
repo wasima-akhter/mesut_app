@@ -1,11 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../constants/api_constants.dart';
 import '../constants/storage_keys.dart';
+import '../network/network_providers.dart';
 import '../services/address_resolver_service.dart';
 import 'app_language.dart';
 import 'app_localization.dart';
 import 'app_strings.dart';
+import 'locale_cache_invalidator.dart';
 
 /// NotifierProvider for managing the current application language
 final appLanguageProvider = NotifierProvider<AppLanguageNotifier, AppLanguage>(
@@ -54,6 +57,18 @@ class AppLanguageNotifier extends Notifier<AppLanguage> {
       await prefs.setString(_storageKey, language.code);
       await prefs.setBool(StorageKeys.hasUserSelectedLanguage, true);
     } catch (_) {}
+
+    // Persist to backend preference if reachable
+    try {
+      final apiClient = ref.read(apiClientProvider);
+      await apiClient.post(
+        ApiConstants.settingsLanguage,
+        data: {'language': language.code.toUpperCase()},
+      );
+    } catch (_) {}
+
+    // Clear caches and refetch active screens
+    await onAppLanguageChanged(ref);
   }
 
   /// Applies backend `defaultLanguage` from `/mobile/config` only when the

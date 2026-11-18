@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:construction_app/app/theme/app_colors.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/widgets/translation/translation_status_badge.dart';
 import '../../../shared/helper/employee_enums.dart';
 import '../../../shared/helper/employee_models.dart';
 
@@ -20,9 +21,10 @@ class EmployeeTimeLogCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final activity = log.project.activity;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
         width: double.infinity,
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
@@ -72,20 +74,28 @@ class EmployeeTimeLogCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: 8.h),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
-              decoration: BoxDecoration(
-                color: activity.backgroundColor,
-                borderRadius: BorderRadius.circular(5.r),
-              ),
-              child: Text(
-                activity.label,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  color: activity.color,
-                  fontWeight: FontWeight.w600,
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
+                  decoration: BoxDecoration(
+                    color: activity.backgroundColor,
+                    borderRadius: BorderRadius.circular(5.r),
+                  ),
+                  child: Text(
+                    activity.label,
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      color: activity.color,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
+                if (log.localization != null) ...[
+                  SizedBox(width: 6.w),
+                  TranslationStatusBadge.fromMeta(log.localization),
+                ],
+              ],
             ),
             SizedBox(height: 9.h),
             Row(
@@ -113,6 +123,7 @@ class EmployeeTimeLogCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/constants/route_constants.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/widgets/images/app_network_image.dart';
 import '../../shared/mobile_dashboard/domain/entities/mobile_profile_entity.dart';
 import '../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
 import '../../shared/mobile_dashboard/presentation/widgets/mobile_profile_stats_banner.dart';
@@ -98,13 +99,13 @@ class SiteManagerProfile extends ConsumerWidget {
                 ],
               ),
               child: ClipOval(
-                child: (avatarUrl != null && avatarUrl.isNotEmpty)
-                    ? Image.network(
-                        avatarUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => _fallbackAvatar(),
-                      )
-                    : _fallbackAvatar(),
+                child: AppNetworkImage(
+                  imageUrl: avatarUrl,
+                  width: 90.w,
+                  height: 90.w,
+                  fit: BoxFit.cover,
+                  fallback: _fallbackAvatar(),
+                ),
               ),
             ),
             Positioned(

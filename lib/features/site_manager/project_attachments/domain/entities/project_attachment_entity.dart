@@ -1,3 +1,5 @@
+import '../../../../../core/localization/localization_meta.dart';
+
 /// Domain entity representing a project attachment (Photo or PDF Plan).
 class ProjectAttachmentEntity {
   final String id;
@@ -10,6 +12,7 @@ class ProjectAttachmentEntity {
   final String projectId;
   final String? inspectionId;
   final DateTime? createdAt;
+  final LocalizationMeta? localization;
 
   const ProjectAttachmentEntity({
     required this.id,
@@ -22,6 +25,7 @@ class ProjectAttachmentEntity {
     required this.projectId,
     this.inspectionId,
     this.createdAt,
+    this.localization,
   });
 
   bool get isPhoto => category.toUpperCase() == 'PHOTO';

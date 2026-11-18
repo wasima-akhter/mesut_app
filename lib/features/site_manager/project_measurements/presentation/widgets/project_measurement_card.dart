@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../app/theme/app_colors.dart';
 import '../../../../../core/localization/context_extensions.dart';
+import '../../../../../core/widgets/translation/translation_status_badge.dart';
 import '../../domain/entities/project_measurement_entity.dart';
 
 /// Card widget rendering a single measurement line item with edit & delete actions.
@@ -26,8 +27,9 @@ class ProjectMeasurementCard extends StatelessWidget {
         ? item.scaffoldType
         : context.loc.frontScaffold;
 
-    return Container(
-      padding: EdgeInsets.all(12.w),
+    return RepaintBoundary(
+      child: Container(
+        padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8.r),
@@ -47,15 +49,26 @@ class ProjectMeasurementCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  context.loc.lineItem(index + 1, item.position),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 14.5.sp,
-                    color: const Color(0xFF888888),
-                    fontWeight: FontWeight.w500,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        context.loc.lineItem(index + 1, item.position),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14.5.sp,
+                          color: const Color(0xFF888888),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    if (item.localization != null) ...[
+                      SizedBox(width: 6.w),
+                      TranslationStatusBadge.fromMeta(item.localization),
+                    ],
+                  ],
                 ),
               ),
               GestureDetector(
@@ -148,8 +161,9 @@ class ProjectMeasurementCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   void _showDeleteConfirmation(BuildContext context) {
     showDialog<bool>(

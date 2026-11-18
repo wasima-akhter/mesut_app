@@ -1,12 +1,12 @@
 import 'package:construction_app/core/localization/app_strings.dart';
-import 'package:construction_app/features/employee/helper/employee_enums.dart';
-import 'package:construction_app/features/employee/helper/employee_models.dart';
+import 'package:construction_app/features/employee/shared/helper/employee_enums.dart';
+import 'package:construction_app/features/employee/shared/helper/employee_models.dart';
+import 'package:construction_app/features/site_manager/home/presentation/providers/site_manager_home_provider.dart';
+import 'package:construction_app/features/site_manager/projects/presentation/providers/site_manager_project_details_provider.dart';
 import 'package:construction_app/features/site_manager/projects/domain/entities/project_phase_card_entity.dart';
-import 'package:construction_app/features/site_manager/presentation/providers/site_manager_home_provider.dart';
-import 'package:construction_app/features/site_manager/presentation/providers/site_manager_project_details_provider.dart';
-import 'package:construction_app/features/site_manager/projects/presentation/providers/site_manager_projects_provider.dart';
 import 'package:construction_app/features/site_manager/projects/enums.dart';
 import 'package:construction_app/features/site_manager/projects/models.dart';
+import 'package:construction_app/features/site_manager/projects/presentation/providers/site_manager_projects_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 

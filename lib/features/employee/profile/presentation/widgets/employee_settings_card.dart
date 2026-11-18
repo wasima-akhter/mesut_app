@@ -11,6 +11,8 @@ import 'package:construction_app/core/localization/localization_provider.dart';
 import '../../../../shared/config/presentation/providers/mobile_config_provider.dart';
 import '../../../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
 import '../../../../shared/notifications/presentation/providers/notification_settings_provider.dart';
+import '../../../offline_sync/providers/employee_sync_provider.dart';
+import '../../../offline_sync/widgets/employee_sync_details_sheet.dart';
 
 class EmployeeSettingsCard extends ConsumerWidget {
   const EmployeeSettingsCard({super.key});
@@ -18,6 +20,7 @@ class EmployeeSettingsCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notificationsEnabled = ref.watch(notificationSettingsProvider);
+    final syncState = ref.watch(employeeSyncProvider);
     final currentLang = ref.watch(appLanguageProvider);
     final langName = currentLang == AppLanguage.german
         ? context.loc.german
@@ -62,6 +65,17 @@ class EmployeeSettingsCard extends ConsumerWidget {
             onTap: () {
               ref.read(notificationSettingsProvider.notifier).toggle();
             },
+            showDivider: true,
+          ),
+          _settingRow(
+            icon: Icons.sync_rounded,
+            title: context.loc.sync,
+            trailing: syncState.hasPending
+                ? context.loc.pendingSyncCount('${syncState.totalPendingCount}')
+                : (syncState.isOnline
+                    ? context.loc.synced
+                    : context.loc.get('common.offline', 'Offline')),
+            onTap: () => EmployeeSyncDetailsSheet.show(context),
             showDivider: false,
           ),
         ],

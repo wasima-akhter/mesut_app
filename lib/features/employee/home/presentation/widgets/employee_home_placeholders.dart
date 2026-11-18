@@ -107,6 +107,28 @@ class EmployeeHomeErrorPlaceholder extends StatelessWidget {
   final VoidCallback onRetry;
   final String? message;
 
+  String _formatMessage(BuildContext context, String? raw) {
+    if (raw == null || raw.trim().isEmpty) return context.loc.somethingWentWrong;
+    final lower = raw.toLowerCase();
+    if (lower.contains('dioexception') ||
+        lower.contains('socketexception') ||
+        lower.contains('connection') ||
+        lower.contains('network') ||
+        lower.contains('timeout') ||
+        lower.contains('failed host lookup') ||
+        lower.contains('no address associated') ||
+        lower.contains('offline')) {
+      return context.loc.checkInternetConnection;
+    }
+    if (lower.contains('exception') ||
+        lower.contains('bad response') ||
+        lower.contains('status code') ||
+        lower.contains('error:')) {
+      return context.loc.somethingWentWrong;
+    }
+    return raw;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -127,7 +149,7 @@ class EmployeeHomeErrorPlaceholder extends StatelessWidget {
           ),
           SizedBox(height: 12.h),
           Text(
-            message ?? context.loc.somethingWentWrong,
+            _formatMessage(context, message),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 15.sp,

@@ -5,11 +5,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/extensions/date_time_extensions.dart';
 import '../../../../core/localization/context_extensions.dart';
+import '../../../../core/widgets/states/app_error_widget.dart';
 import '../../../shared/mobile_dashboard/domain/entities/mobile_project_entity.dart';
 import '../../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
 import '../../../shared/mobile_time_tracking/domain/entities/mobile_time_log_entity.dart';
 import '../../../shared/mobile_time_tracking/presentation/providers/mobile_time_tracking_provider.dart';
-import '../../presentation/providers/site_manager_time_provider.dart';
+import '../presentation/providers/site_manager_time_provider.dart';
 import 'site_manager_crew_card.dart';
 
 /// Slivers rendering the "Site Crew Time" section of Site Manager Time Tracking with real API data.
@@ -78,7 +79,14 @@ class SiteManagerCrewTimeView {
           ),
         ),
       ),
-      _buildCrewListSliver(context, crewTimeAsync, crewMembers),
+      _buildCrewListSliver(
+        context,
+        crewTimeAsync,
+        crewMembers,
+        () => ref
+            .read(mobileCrewTimeProvider.notifier)
+            .load(projectId: selectedProjectId),
+      ),
     ];
   }
 
@@ -164,6 +172,7 @@ class SiteManagerCrewTimeView {
     BuildContext context,
     AsyncValue<MobileCrewTimeEntity?> crewTimeAsync,
     List<MobileCrewMemberSummaryEntity> crewMembers,
+    VoidCallback onRetry,
   ) {
     return crewTimeAsync.when(
       loading: () => const SliverToBoxAdapter(
@@ -175,13 +184,11 @@ class SiteManagerCrewTimeView {
         ),
       ),
       error: (e, _) => SliverToBoxAdapter(
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.all(24.w),
-            child: Text(
-              e.toString(),
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+          child: AppErrorWidget(
+            error: e,
+            onRetry: onRetry,
           ),
         ),
       ),

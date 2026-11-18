@@ -1,3 +1,4 @@
+import 'package:construction_app/core/localization/localization_meta.dart';
 import '../../domain/entities/employee_schedule_entity.dart';
 
 class EmployeeScheduleModel {
@@ -50,6 +51,7 @@ class EmployeeScheduleModel {
                 address: (proj['address'] ?? '').toString(),
               ),
               siteManagers: siteManagers,
+              localization: LocalizationMeta.tryParse(p),
             ),
           );
         }

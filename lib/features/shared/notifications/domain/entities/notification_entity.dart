@@ -1,4 +1,5 @@
 import 'package:construction_app/core/extensions/date_time_extensions.dart';
+import 'package:construction_app/core/localization/localization_meta.dart';
 
 enum NotificationCategory {
   task,
@@ -21,6 +22,7 @@ class AppNotification {
   final String? rawType;
   final NotificationCategory type;
   final bool isRead;
+  final LocalizationMeta? localization;
 
   const AppNotification({
     required this.id,
@@ -34,6 +36,7 @@ class AppNotification {
     this.rawType,
     required this.type,
     this.isRead = false,
+    this.localization,
   });
 
   factory AppNotification.fromJson(Map<String, dynamic> json) {
@@ -56,6 +59,7 @@ class AppNotification {
       rawType: rawType,
       type: categoryFromType(rawType),
       isRead: json['isRead'] == true,
+      localization: LocalizationMeta.tryParse(json),
     );
   }
 

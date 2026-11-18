@@ -4,7 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/localization/context_extensions.dart';
 import '../../../../../core/utils/app_date_time_formatter.dart';
+import '../../../../../core/widgets/images/app_network_image.dart';
 import '../../../../../core/widgets/snack/app_snackbar.dart';
+import '../../../../../core/widgets/translation/translation_status_badge.dart';
 import '../../../projects/enums.dart';
 import '../../domain/entities/project_task_entity.dart';
 import '../providers/project_tasks_provider.dart';
@@ -16,31 +18,33 @@ class ProjectTaskCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      padding: EdgeInsets.all(10.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(7.r),
-        border: Border.all(color: const Color(0xFFE7E7E7)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildCheckbox(context, ref),
-          SizedBox(width: 9.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildTitle(),
-                SizedBox(height: 8.h),
-                _buildMetadataRow(context),
-              ],
+    return RepaintBoundary(
+      child: Container(
+        padding: EdgeInsets.all(10.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(7.r),
+          border: Border.all(color: const Color(0xFFE7E7E7)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildCheckbox(context, ref),
+            SizedBox(width: 9.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTitle(),
+                  SizedBox(height: 8.h),
+                  _buildMetadataRow(context),
+                ],
+              ),
             ),
-          ),
-          SizedBox(width: 5.w),
-          _buildDeleteButton(context, ref),
-        ],
+            SizedBox(width: 5.w),
+            _buildDeleteButton(context, ref),
+          ],
+        ),
       ),
     );
   }
@@ -110,6 +114,10 @@ class ProjectTaskCard extends ConsumerWidget {
         ),
         SizedBox(width: 7.w),
         _buildPriorityTag(),
+        if (task.localization != null) ...[
+          SizedBox(width: 6.w),
+          TranslationStatusBadge.fromMeta(task.localization),
+        ],
         const Spacer(),
         if (task.dueDate != null) ...[
           Icon(
@@ -128,17 +136,14 @@ class ProjectTaskCard extends ConsumerWidget {
   }
 
   Widget _buildAvatar() {
-    final avatarUrl = task.employee?.avatarUrl;
     return ClipOval(
-      child: avatarUrl != null && avatarUrl.isNotEmpty
-          ? Image.network(
-              avatarUrl,
-              width: 21.w,
-              height: 21.w,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => _fallbackAvatar(),
-            )
-          : _fallbackAvatar(),
+      child: AppNetworkImage(
+        imageUrl: task.employee?.avatarUrl,
+        width: 21.w,
+        height: 21.w,
+        fit: BoxFit.cover,
+        fallback: _fallbackAvatar(),
+      ),
     );
   }
 

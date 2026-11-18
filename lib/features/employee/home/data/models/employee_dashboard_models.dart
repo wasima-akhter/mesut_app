@@ -1,3 +1,4 @@
+import 'package:construction_app/core/localization/localization_meta.dart';
 import '../../domain/entities/employee_dashboard_entity.dart';
 
 class EmployeeDashboardUserModel extends EmployeeDashboardUserEntity {
@@ -79,6 +80,7 @@ class EmployeeDashboardTaskModel extends EmployeeDashboardTaskEntity {
     super.project,
     super.siteManager,
     super.workingHours,
+    super.localization,
   });
 
   factory EmployeeDashboardTaskModel.fromJson(Map<String, dynamic> json) {
@@ -104,6 +106,7 @@ class EmployeeDashboardTaskModel extends EmployeeDashboardTaskEntity {
             )
           : const EmployeeDashboardSiteManagerEntity(),
       workingHours: json['workingHours']?.toString() ?? '',
+      localization: LocalizationMeta.tryParse(json),
     );
   }
 }

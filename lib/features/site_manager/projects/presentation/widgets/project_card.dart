@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/localization/context_extensions.dart';
+import '../../../../../core/widgets/translation/translation_status_badge.dart';
 import '../../../../shared/mobile_dashboard/presentation/utils/mobile_phase_localizer.dart';
 import '../../domain/entities/project_phase_card_entity.dart';
 import 'project_card_badges.dart';
@@ -53,6 +54,10 @@ class ProjectCard extends StatelessWidget {
                   PhaseBadge(type: project.type),
                   const SizedBox(width: 7),
                   StatusLabel(status: project.status),
+                  if (project.localization != null) ...[
+                    const SizedBox(width: 6),
+                    TranslationStatusBadge.fromMeta(project.localization),
+                  ],
                   const Spacer(),
                   PriorityBadge(priority: project.priority),
                 ],

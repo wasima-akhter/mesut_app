@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 
+import '../../../../core/errors/app_error_resolver.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/storage_service.dart';
 import '../../../media/domain/repositories/media_repository.dart';
@@ -54,9 +55,10 @@ class SiteManagerSyncService {
         synced++;
       } catch (e) {
         failed++;
+        final friendlyError = AppErrorResolver.resolve(e).displayMessage;
         final updated = action.copyWith(
           attempts: action.attempts + 1,
-          lastError: e.toString(),
+          lastError: friendlyError,
         );
         await queue.update(updated);
 

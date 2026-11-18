@@ -124,7 +124,10 @@ class EmployeeTimerProjectsNotifier
       );
     } catch (e) {
       if (!_mounted) return;
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Unable to load projects. Please try again.',
+      );
     }
   }
 

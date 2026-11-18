@@ -9,8 +9,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/images/app_network_image.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
-import '../presentation/providers/site_manager_project_details_provider.dart';
+import 'presentation/providers/site_manager_project_details_provider.dart';
 import 'enums.dart';
 import 'models.dart';
 import 'overview_modules.dart';
@@ -239,19 +240,17 @@ class TasksTab extends ConsumerWidget {
                 Row(
                   children: [
                     ClipOval(
-                      child: Image.network(
-                        'https://i.pravatar.cc/100?img=12',
+                      child: AppNetworkImage(
+                        imageUrl: 'https://i.pravatar.cc/100?img=12',
                         width: 21.w,
                         height: 21.w,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) {
-                          return Container(
-                            width: 21.w,
-                            height: 21.w,
-                            color: const Color(0xFFE8E8E8),
-                            child: Icon(Icons.person, size: 14.sp),
-                          );
-                        },
+                        fallback: Container(
+                          width: 21.w,
+                          height: 21.w,
+                          color: const Color(0xFFE8E8E8),
+                          child: Icon(Icons.person, size: 14.sp),
+                        ),
                       ),
                     ),
                     SizedBox(width: 5.w),

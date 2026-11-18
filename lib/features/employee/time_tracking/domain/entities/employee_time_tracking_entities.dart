@@ -1,3 +1,5 @@
+import 'package:construction_app/core/localization/localization_meta.dart';
+
 class EmployeeActiveTimerEntity {
   const EmployeeActiveTimerEntity({
     required this.id,
@@ -82,6 +84,7 @@ class EmployeeRecentLogEntity {
     required this.projectId,
     required this.projectName,
     this.synced = true,
+    this.localization,
   });
 
   final String id;
@@ -96,6 +99,7 @@ class EmployeeRecentLogEntity {
   final String projectId;
   final String projectName;
   final bool synced;
+  final LocalizationMeta? localization;
 
   Duration get duration => endTime != null
       ? endTime!.difference(startTime)

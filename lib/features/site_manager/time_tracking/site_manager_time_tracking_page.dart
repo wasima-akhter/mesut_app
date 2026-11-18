@@ -8,7 +8,7 @@ import '../../../core/utils/app_date_time_formatter.dart';
 import '../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
 import '../../shared/mobile_time_tracking/presentation/providers/mobile_time_tracking_provider.dart';
 import '../helper/site_manager_enums.dart';
-import '../presentation/providers/site_manager_time_provider.dart';
+import 'presentation/providers/site_manager_time_provider.dart';
 import 'widgets/site_manager_add_time_sheet.dart';
 import 'widgets/site_manager_crew_time_view.dart';
 import 'widgets/site_manager_my_time_view.dart';

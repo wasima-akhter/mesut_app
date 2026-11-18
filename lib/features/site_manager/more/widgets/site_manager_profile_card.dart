@@ -7,6 +7,7 @@ import '../../../../app/constants/route_constants.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_radii.dart';
 import '../../../../core/localization/context_extensions.dart';
+import '../../../../core/widgets/images/app_network_image.dart';
 import '../../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
 
 class SiteManagerProfileCard extends ConsumerWidget {
@@ -37,13 +38,13 @@ class SiteManagerProfileCard extends ConsumerWidget {
                 color: AppColors.neutral200,
               ),
               child: ClipOval(
-                child: (avatarUrl != null && avatarUrl.isNotEmpty)
-                    ? Image.network(
-                        avatarUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => _fallbackIcon(),
-                      )
-                    : _fallbackIcon(),
+                child: AppNetworkImage(
+                  imageUrl: avatarUrl,
+                  width: 48.w,
+                  height: 48.w,
+                  fit: BoxFit.cover,
+                  fallback: _fallbackIcon(),
+                ),
               ),
             ),
             SizedBox(width: 12.w),

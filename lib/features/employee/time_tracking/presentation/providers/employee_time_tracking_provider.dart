@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/datasources/employee_time_tracking_datasource.dart';
@@ -37,10 +38,10 @@ class EmployeeTimeTrackingState {
   bool get showThisMonth => selectedPeriod == 'MONTH';
 
   String get formattedElapsed {
-    final hours = activeElapsed.inHours.toString().padLeft(2, '0');
-    final minutes = activeElapsed.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds = activeElapsed.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$hours:$minutes:$seconds';
+    final h = activeElapsed.inHours.toString().padLeft(2, '0');
+    final m = activeElapsed.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final s = activeElapsed.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$h:$m:$s';
   }
 
   EmployeeTimeTrackingState copyWith({
@@ -56,22 +57,20 @@ class EmployeeTimeTrackingState {
     Duration? activeElapsed,
     bool? isOnBreak,
     String? errorMessage,
-  }) {
-    return EmployeeTimeTrackingState(
-      isLoading: isLoading ?? this.isLoading,
-      isActionLoading: isActionLoading ?? this.isActionLoading,
-      isLoadingMoreLogs: isLoadingMoreLogs ?? this.isLoadingMoreLogs,
-      summary: summary ?? this.summary,
-      projects: projects ?? this.projects,
-      recentLogs: recentLogs ?? this.recentLogs,
-      selectedPeriod: selectedPeriod ?? this.selectedPeriod,
-      logsPage: logsPage ?? this.logsPage,
-      hasMoreLogs: hasMoreLogs ?? this.hasMoreLogs,
-      activeElapsed: activeElapsed ?? this.activeElapsed,
-      isOnBreak: isOnBreak ?? this.isOnBreak,
-      errorMessage: errorMessage,
-    );
-  }
+  }) => EmployeeTimeTrackingState(
+    isLoading: isLoading ?? this.isLoading,
+    isActionLoading: isActionLoading ?? this.isActionLoading,
+    isLoadingMoreLogs: isLoadingMoreLogs ?? this.isLoadingMoreLogs,
+    summary: summary ?? this.summary,
+    projects: projects ?? this.projects,
+    recentLogs: recentLogs ?? this.recentLogs,
+    selectedPeriod: selectedPeriod ?? this.selectedPeriod,
+    logsPage: logsPage ?? this.logsPage,
+    hasMoreLogs: hasMoreLogs ?? this.hasMoreLogs,
+    activeElapsed: activeElapsed ?? this.activeElapsed,
+    isOnBreak: isOnBreak ?? this.isOnBreak,
+    errorMessage: errorMessage,
+  );
 }
 
 class EmployeeTimeTrackingNotifier extends Notifier<EmployeeTimeTrackingState> {
@@ -89,18 +88,50 @@ class EmployeeTimeTrackingNotifier extends Notifier<EmployeeTimeTrackingState> {
   EmployeeTimeTrackingDatasource get _datasource =>
       ref.read(employeeTimeTrackingDatasourceProvider);
 
+  String _toFriendlyError(Object error) {
+    final str = error.toString().toLowerCase();
+    if (error is DioException) {
+      final t = error.type;
+      final isConn = t == DioExceptionType.connectionTimeout ||
+          t == DioExceptionType.sendTimeout ||
+          t == DioExceptionType.receiveTimeout ||
+          t == DioExceptionType.connectionError ||
+          str.contains('failed host lookup') ||
+          str.contains('socketexception') ||
+          str.contains('no address associated');
+      if (isConn) return 'No internet connection. Please check your network and try again.';
+      final code = error.response?.statusCode;
+      if (code != null) {
+        if (code >= 500) return 'Server is temporarily unavailable. Please try again shortly.';
+        if (code == 401 || code == 403) return 'Session expired. Please sign in again.';
+        if (code == 404) return 'No time logs found for this period.';
+      }
+    }
+    if (str.contains('socketexception') ||
+        str.contains('failed host lookup') ||
+        str.contains('connection') ||
+        str.contains('network') ||
+        str.contains('timeout')) {
+      return 'No internet connection. Please check your network and try again.';
+    }
+    return 'Unable to load time tracking data. Please try again.';
+  }
+
   Future<void> loadInitial() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      final results = await Future.wait([
-        _datasource.getSummary(),
-        _datasource.getProjects(),
-        _datasource.getTimeLogs(period: state.selectedPeriod),
-      ]);
+      EmployeeTimeSummaryEntity summary = const EmployeeTimeSummaryEntity();
+      List<EmployeeAssignedProjectEntity> projects = const [];
+      List<EmployeeRecentLogEntity> logs = const [];
+      Object? loadError;
 
-      final summary = results[0] as EmployeeTimeSummaryEntity;
-      final projects = results[1] as List<EmployeeAssignedProjectEntity>;
-      final logs = results[2] as List<EmployeeRecentLogEntity>;
+      try { summary = await _datasource.getSummary(); } catch (e) { loadError = e; }
+      try { projects = await _datasource.getProjects(); } catch (e) { loadError ??= e; }
+      try {
+        logs = await _datasource.getTimeLogs(period: state.selectedPeriod);
+      } catch (e) {
+        loadError ??= e;
+      }
 
       _syncActiveTimerTicker(summary.activeTimer);
 
@@ -111,31 +142,14 @@ class EmployeeTimeTrackingNotifier extends Notifier<EmployeeTimeTrackingState> {
         recentLogs: logs,
         logsPage: 1,
         hasMoreLogs: logs.length >= 20,
+        errorMessage: (logs.isEmpty && loadError != null) ? _toFriendlyError(loadError) : null,
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      state = state.copyWith(isLoading: false, errorMessage: _toFriendlyError(e));
     }
   }
 
-  Future<void> refresh() async {
-    try {
-      final results = await Future.wait([
-        _datasource.getSummary(),
-        _datasource.getTimeLogs(period: state.selectedPeriod, page: 1, limit: 20),
-      ]);
-      final summary = results[0] as EmployeeTimeSummaryEntity;
-      final logs = results[1] as List<EmployeeRecentLogEntity>;
-
-      _syncActiveTimerTicker(summary.activeTimer);
-
-      state = state.copyWith(
-        summary: summary,
-        recentLogs: logs,
-        logsPage: 1,
-        hasMoreLogs: logs.length >= 20,
-      );
-    } catch (_) {}
-  }
+  Future<void> refresh() async => loadInitial();
 
   void _syncActiveTimerTicker(EmployeeActiveTimerEntity? timer) {
     _ticker?.cancel();
@@ -222,7 +236,7 @@ class EmployeeTimeTrackingNotifier extends Notifier<EmployeeTimeTrackingState> {
       state = state.copyWith(isActionLoading: false);
       return true;
     } catch (e) {
-      state = state.copyWith(isActionLoading: false, errorMessage: e.toString());
+      state = state.copyWith(isActionLoading: false, errorMessage: _toFriendlyError(e));
       return false;
     }
   }
@@ -239,7 +253,7 @@ class EmployeeTimeTrackingNotifier extends Notifier<EmployeeTimeTrackingState> {
       state = state.copyWith(isActionLoading: false);
       return true;
     } catch (e) {
-      state = state.copyWith(isActionLoading: false, errorMessage: e.toString());
+      state = state.copyWith(isActionLoading: false, errorMessage: _toFriendlyError(e));
       return false;
     }
   }
@@ -264,7 +278,7 @@ class EmployeeTimeTrackingNotifier extends Notifier<EmployeeTimeTrackingState> {
       state = state.copyWith(isActionLoading: false);
       return true;
     } catch (e) {
-      state = state.copyWith(isActionLoading: false, errorMessage: e.toString());
+      state = state.copyWith(isActionLoading: false, errorMessage: _toFriendlyError(e));
       return false;
     }
   }

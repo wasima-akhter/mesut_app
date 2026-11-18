@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../../core/localization/localization_meta.dart';
+
 class ProjectHistoryUserEntity {
   final String id;
   final String firstName;
@@ -36,6 +38,7 @@ class ProjectHistoryEntity {
   final String details;
   final DateTime? createdAt;
   final ProjectHistoryUserEntity? user;
+  final LocalizationMeta? localization;
 
   const ProjectHistoryEntity({
     required this.id,
@@ -43,6 +46,7 @@ class ProjectHistoryEntity {
     required this.details,
     this.createdAt,
     this.user,
+    this.localization,
   });
 
   String get formattedDate {

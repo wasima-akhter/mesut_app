@@ -1,3 +1,4 @@
+import 'package:construction_app/core/localization/localization_meta.dart';
 import '../../domain/entities/employee_time_tracking_entities.dart';
 
 abstract final class EmployeeTimeTrackingModels {
@@ -85,6 +86,7 @@ abstract final class EmployeeTimeTrackingModels {
             projectId: projectMap['id']?.toString() ?? '',
             projectName: projectMap['name']?.toString() ?? '',
             synced: map['synced'] == true,
+            localization: LocalizationMeta.tryParse(map),
           );
         })
         .where((l) => l.id.isNotEmpty)

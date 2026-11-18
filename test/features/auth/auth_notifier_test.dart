@@ -8,7 +8,7 @@ import 'package:construction_app/features/auth/domain/repositories/auth_reposito
 import 'package:construction_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:construction_app/features/auth/presentation/providers/otp_provider.dart';
 import 'package:construction_app/features/auth/presentation/screens/otp_page.dart';
-import 'package:construction_app/features/employee/presentation/providers/employee_timer_provider.dart';
+import 'package:construction_app/features/employee/time_tracking/presentation/providers/employee_timer_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -45,80 +45,91 @@ void main() {
       addTearDown(container.dispose);
     });
 
-    test('signIn authenticates active user and updates userRoleProvider', () async {
-      const user = AuthUser(
-        id: 'u-1',
-        fullName: 'Max Mustermann',
-        email: 'max@geruestbau.de',
-        role: UserRole.siteManager,
-        status: UserStatus.active,
-        isProfileSetup: true,
-      );
-
-      when(
-        () => mockRepo.login(
+    test(
+      'signIn authenticates active user and updates userRoleProvider',
+      () async {
+        const user = AuthUser(
+          id: 'u-1',
+          fullName: 'Max Mustermann',
           email: 'max@geruestbau.de',
-          password: 'Password@123',
           role: UserRole.siteManager,
-          deviceIdentifier: any(named: 'deviceIdentifier'),
-          rememberMe: false,
-          fcmToken: any(named: 'fcmToken'),
-          lat: any(named: 'lat'),
-          lng: any(named: 'lng'),
-        ),
-      ).thenAnswer(
-        (_) async => const AuthSession(accessToken: 'jwt-token', user: user),
-      );
+          status: UserStatus.active,
+          isProfileSetup: true,
+        );
 
-      final outcome = await container.read(authProvider.notifier).signIn(
-        email: 'max@geruestbau.de',
-        password: 'Password@123',
-        role: UserRole.siteManager,
-      );
+        when(
+          () => mockRepo.login(
+            email: 'max@geruestbau.de',
+            password: 'Password@123',
+            role: UserRole.siteManager,
+            deviceIdentifier: any(named: 'deviceIdentifier'),
+            rememberMe: false,
+            fcmToken: any(named: 'fcmToken'),
+            lat: any(named: 'lat'),
+            lng: any(named: 'lng'),
+          ),
+        ).thenAnswer(
+          (_) async => const AuthSession(accessToken: 'jwt-token', user: user),
+        );
 
-      expect(outcome, LoginOutcome.authenticated);
-      expect(container.read(authProvider).status, AuthStatus.authenticated);
-      expect(container.read(userRoleProvider), UserRole.siteManager);
-    });
+        final outcome = await container
+            .read(authProvider.notifier)
+            .signIn(
+              email: 'max@geruestbau.de',
+              password: 'Password@123',
+              role: UserRole.siteManager,
+            );
 
-    test('signIn triggers OTP verification when user status is INACTIVE', () async {
-      const inactiveUser = AuthUser(
-        id: 'u-2',
-        fullName: 'New Employee',
-        email: 'new@geruestbau.de',
-        role: UserRole.employee,
-        status: UserStatus.inactive,
-      );
+        expect(outcome, LoginOutcome.authenticated);
+        expect(container.read(authProvider).status, AuthStatus.authenticated);
+        expect(container.read(userRoleProvider), UserRole.siteManager);
+      },
+    );
 
-      when(
-        () => mockRepo.login(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-          role: any(named: 'role'),
-          deviceIdentifier: any(named: 'deviceIdentifier'),
-          rememberMe: any(named: 'rememberMe'),
-          fcmToken: any(named: 'fcmToken'),
-          lat: any(named: 'lat'),
-          lng: any(named: 'lng'),
-        ),
-      ).thenAnswer(
-        (_) async => const AuthSession(
-          accessToken: 'temp-otp-token',
-          user: inactiveUser,
-        ),
-      );
-      when(() => mockRepo.resendOtp(otpPageToken: any(named: 'otpPageToken')))
-          .thenAnswer((_) async {});
+    test(
+      'signIn triggers OTP verification when user status is INACTIVE',
+      () async {
+        const inactiveUser = AuthUser(
+          id: 'u-2',
+          fullName: 'New Employee',
+          email: 'new@geruestbau.de',
+          role: UserRole.employee,
+          status: UserStatus.inactive,
+        );
 
-      final outcome = await container.read(authProvider.notifier).signIn(
-        email: 'new@geruestbau.de',
-        password: 'Password@123',
-        role: UserRole.employee,
-      );
+        when(
+          () => mockRepo.login(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+            role: any(named: 'role'),
+            deviceIdentifier: any(named: 'deviceIdentifier'),
+            rememberMe: any(named: 'rememberMe'),
+            fcmToken: any(named: 'fcmToken'),
+            lat: any(named: 'lat'),
+            lng: any(named: 'lng'),
+          ),
+        ).thenAnswer(
+          (_) async => const AuthSession(
+            accessToken: 'temp-otp-token',
+            user: inactiveUser,
+          ),
+        );
+        when(
+          () => mockRepo.resendOtp(otpPageToken: any(named: 'otpPageToken')),
+        ).thenAnswer((_) async {});
 
-      expect(outcome, LoginOutcome.otpVerificationRequired);
-      expect(container.read(authProvider).status, AuthStatus.otpPending);
-    });
+        final outcome = await container
+            .read(authProvider.notifier)
+            .signIn(
+              email: 'new@geruestbau.de',
+              password: 'Password@123',
+              role: UserRole.employee,
+            );
+
+        expect(outcome, LoginOutcome.otpVerificationRequired);
+        expect(container.read(authProvider).status, AuthStatus.otpPending);
+      },
+    );
 
     test('signIn returns suspended when user status is SUSPENDED', () async {
       const suspendedUser = AuthUser(
@@ -141,17 +152,17 @@ void main() {
           lng: any(named: 'lng'),
         ),
       ).thenAnswer(
-        (_) async => const AuthSession(
-          accessToken: 'token',
-          user: suspendedUser,
-        ),
+        (_) async =>
+            const AuthSession(accessToken: 'token', user: suspendedUser),
       );
 
-      final outcome = await container.read(authProvider.notifier).signIn(
-        email: 'susp@geruestbau.de',
-        password: 'Password@123',
-        role: UserRole.employee,
-      );
+      final outcome = await container
+          .read(authProvider.notifier)
+          .signIn(
+            email: 'susp@geruestbau.de',
+            password: 'Password@123',
+            role: UserRole.employee,
+          );
 
       expect(outcome, LoginOutcome.suspended);
       expect(container.read(authProvider).status, AuthStatus.suspended);
@@ -169,14 +180,16 @@ void main() {
         ),
       ).thenAnswer((_) async => 'otp-page-token-xyz');
 
-      final token = await container.read(authProvider.notifier).signUp(
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@geruestbau.de',
-        phone: '+491701234567',
-        password: 'Password@123',
-        role: UserRole.employee,
-      );
+      final token = await container
+          .read(authProvider.notifier)
+          .signUp(
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'john@geruestbau.de',
+            phone: '+491701234567',
+            password: 'Password@123',
+            role: UserRole.employee,
+          );
 
       expect(token, 'otp-page-token-xyz');
       expect(container.read(authProvider).status, AuthStatus.otpPending);

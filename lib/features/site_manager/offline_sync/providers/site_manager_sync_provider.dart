@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/connectivity/connectivity_provider.dart';
 import '../../../../core/connectivity/network_status.dart';
+import '../../../../core/errors/app_error_resolver.dart';
 import '../../../../core/network/network_providers.dart';
 import '../../../../core/storage/storage_provider.dart';
 import '../../../employee/time_tracking/presentation/providers/offline_sync_provider.dart';
@@ -148,7 +149,8 @@ class SiteManagerSyncNotifier extends Notifier<SiteManagerSyncState> {
             : null,
       );
     } catch (e) {
-      state = state.copyWith(isSyncing: false, lastSyncMessage: e.toString());
+      final friendlyError = AppErrorResolver.resolve(e).displayMessage;
+      state = state.copyWith(isSyncing: false, lastSyncMessage: friendlyError);
     }
   }
 }

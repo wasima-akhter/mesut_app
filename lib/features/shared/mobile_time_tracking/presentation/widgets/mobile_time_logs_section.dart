@@ -4,7 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/localization/context_extensions.dart';
 import '../../../../../core/localization/localization_provider.dart';
+import '../../../../../core/localization/pending_refetch_controller.dart';
 import '../../../../../core/widgets/states/app_empty_widget.dart';
+import '../../../../../core/widgets/states/app_error_widget.dart';
 import '../providers/mobile_time_tracking_provider.dart';
 import 'mobile_time_log_card.dart';
 
@@ -39,38 +41,36 @@ class MobileTimeLogsSection extends ConsumerWidget {
           }).toList(),
         ),
         SizedBox(height: 12.h),
-        logsAsync.when(
-          loading: () => const Padding(
-            padding: EdgeInsets.symmetric(vertical: 28),
-            child: Center(child: CircularProgressIndicator()),
+        PendingPollEffect(
+          hasPending: anyLocalizationPending(
+            (logsAsync.asData?.value ?? const []).map((l) => l.localization),
           ),
-          error: (_, __) => Center(
-            child: Column(
-              children: [
-                Text(context.loc.somethingWentWrong),
-                SizedBox(height: 8.h),
-                ElevatedButton(
-                  onPressed: notifier.refresh,
-                  child: Text(context.loc.mapRetry),
-                ),
-              ],
+          onPoll: notifier.refresh,
+          child: logsAsync.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.symmetric(vertical: 28),
+              child: Center(child: CircularProgressIndicator()),
             ),
-          ),
-          data: (logs) {
-            if (logs.isEmpty) {
-              return AppEmptyWidget(
-                icon: Icons.access_time_outlined,
-                title: context.loc.noTimeLogs,
-                onRetry: notifier.refresh,
+            error: (err, _) => AppErrorWidget(
+              error: err,
+              onRetry: notifier.refresh,
+            ),
+            data: (logs) {
+              if (logs.isEmpty) {
+                return AppEmptyWidget(
+                  icon: Icons.access_time_outlined,
+                  title: context.loc.noTimeLogs,
+                  onRetry: notifier.refresh,
+                );
+              }
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: logs.length,
+                itemBuilder: (_, index) => MobileTimeLogCard(log: logs[index]),
               );
-            }
-            return ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: logs.length,
-              itemBuilder: (_, index) => MobileTimeLogCard(log: logs[index]),
-            );
-          },
+            },
+          ),
         ),
       ],
     );

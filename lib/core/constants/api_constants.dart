@@ -29,6 +29,12 @@ abstract final class ApiConstants {
   static const String adminRecoverReset = '/admin/recover/reset';
 
   // ==============================
+  // Settings Endpoints
+  // ==============================
+  static const String settingsPassword = '/settings/password';
+  static const String settingsLanguage = '/settings/language';
+
+  // ==============================
   // Media Endpoints
   // ==============================
   static const String media = '/media';

@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../app/theme/app_colors.dart';
 import '../../../../../core/extensions/date_time_extensions.dart';
 import '../../../../../core/localization/context_extensions.dart';
+import '../../../../../core/widgets/translation/translation_status_badge.dart';
 import '../../../projects/enums.dart';
 import '../../domain/entities/project_note_entity.dart';
 
@@ -22,8 +23,9 @@ class ProjectNoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
+    return RepaintBoundary(
+      child: Container(
+        width: double.infinity,
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -45,15 +47,26 @@ class ProjectNoteCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Text(
-                  note.category.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 17.sp,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF222222),
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        note.category.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 17.sp,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF222222),
+                        ),
+                      ),
+                    ),
+                    if (note.localization != null) ...[
+                      SizedBox(width: 6.w),
+                      TranslationStatusBadge.fromMeta(note.localization),
+                    ],
+                  ],
                 ),
               ),
               GestureDetector(
@@ -109,8 +122,9 @@ class ProjectNoteCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   String _formatDate(DateTime? date) {
     if (date == null) return '';

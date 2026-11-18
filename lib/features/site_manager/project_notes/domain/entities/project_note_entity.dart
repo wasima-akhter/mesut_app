@@ -1,3 +1,4 @@
+import '../../../../../core/localization/localization_meta.dart';
 import '../../../projects/enums.dart';
 
 /// Author entity associated with a note.
@@ -34,7 +35,10 @@ class ProjectNoteEntity {
     this.content = '',
     this.author,
     this.createdAt,
+    this.localization,
   });
+
+  final LocalizationMeta? localization;
 
   String get authorName => author?.fullName ?? 'Site Manager';
 

@@ -6,6 +6,7 @@ import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:construction_app/app/theme/app_colors.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
 import 'package:construction_app/core/widgets/buttons/app_icon_button.dart';
+import 'package:construction_app/core/widgets/images/app_network_image.dart';
 import '../../../../shared/mobile_dashboard/domain/entities/mobile_profile_entity.dart';
 
 class EmployeeProfileHeader extends StatelessWidget {
@@ -40,21 +41,17 @@ class EmployeeProfileHeader extends StatelessWidget {
                 color: AppColors.neutral200,
               ),
               child: ClipOval(
-                child: (avatarUrl != null && avatarUrl.isNotEmpty)
-                    ? Image.network(
-                        avatarUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => const Icon(
-                          Icons.person,
-                          size: 45,
-                          color: AppColors.textSecondary,
-                        ),
-                      )
-                    : const Icon(
-                        Icons.person,
-                        size: 45,
-                        color: AppColors.textSecondary,
-                      ),
+                child: AppNetworkImage(
+                  imageUrl: avatarUrl,
+                  width: 92.w,
+                  height: 92.w,
+                  fit: BoxFit.cover,
+                  fallback: const Icon(
+                    Icons.person,
+                    size: 45,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ),
             ),
             Positioned(

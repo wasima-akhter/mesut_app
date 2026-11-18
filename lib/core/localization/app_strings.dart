@@ -298,6 +298,14 @@ class AppStrings {
       get('legal.enterCurrentPassword', 'Enter your current password');
   String get passwordChangedSuccess =>
       get('legal.passwordChangedSuccess', 'Password changed successfully');
+  String get newPasswordMustBeDifferent => get(
+        'legal.newPasswordMustBeDifferent',
+        'New password must be different from current password',
+      );
+  String get changePasswordFailed => get(
+        'legal.changePasswordFailed',
+        'Failed to change password. Please verify your current password.',
+      );
 
   // ============================================================
   // PROFILE
@@ -1052,6 +1060,7 @@ class AppStrings {
   // ============================================================
   // SYNC & RBAC
   // ============================================================
+  String get sync => get('sync.sync', 'Sync');
   String get syncNow => get('sync.syncNow', 'Sync Now');
   String pendingSyncCount(String count) =>
       get('sync.pendingCount', '{count} pending sync', {'count': count});
@@ -1063,6 +1072,9 @@ class AppStrings {
   );
   String get allSynced =>
       get('sync.allSynced', 'All changes are synchronized');
+  String get noPendingSyncItems =>
+      get('sync.noPendingSyncItems', 'All changes are in sync');
+  String get tapToSync => get('sync.tapToSync', 'Tap to sync');
   String get savedOffline =>
       get('sync.savedOffline', 'Saved offline. Will sync when back online.');
   String get offlineTimeLogs =>
@@ -1215,4 +1227,15 @@ class AppStrings {
     'Search projects, address, city...',
   );
   String get cityCologne => get('common.cityCologne', 'Cologne');
+  String get translationTranslating =>
+      get('translation.translating', 'Translating…');
+  String get translationTranslated =>
+      get('translation.translated', 'Translated');
+  String get translationOriginal => get('translation.original', 'Original');
+  String get translationUnavailable =>
+      get('translation.unavailable', 'Translation unavailable');
+  String get translationTakingLonger => get(
+    'translation.takingLonger',
+    'Translation is taking longer than expected. Showing original content.',
+  );
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/localization/context_extensions.dart';
+import '../../../../../core/widgets/images/app_network_image.dart';
 import '../../domain/entities/project_attachment_entity.dart';
 
 class ProjectCoverPhotoCard extends StatelessWidget {
@@ -21,36 +22,13 @@ class ProjectCoverPhotoCard extends StatelessWidget {
   });
 
   Widget _buildImage() {
-    final url = photo.url;
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      return Image.network(
-        url,
-        fit: BoxFit.cover,
-        width: double.infinity,
-        height: double.infinity,
-        errorBuilder: (_, __, ___) => _errorPlaceholder(),
-        loadingBuilder: (_, child, progress) {
-          if (progress == null) return child;
-          return Container(
-            color: const Color(0xFFF3F4F6),
-            child: const Center(
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          );
-        },
-      );
-    }
-    final file = File(url);
-    if (file.existsSync()) {
-      return Image.file(
-        file,
-        fit: BoxFit.cover,
-        width: double.infinity,
-        height: double.infinity,
-        errorBuilder: (_, __, ___) => _errorPlaceholder(),
-      );
-    }
-    return _errorPlaceholder();
+    return AppNetworkImage(
+      imageUrl: photo.url,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      fallback: _errorPlaceholder(),
+    );
   }
 
   Widget _errorPlaceholder() {

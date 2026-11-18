@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/widgets/translation/translation_status_badge.dart';
 import '../../../shared/mobile_dashboard/presentation/utils/mobile_phase_localizer.dart';
-import '../../domain/entities/mobile_phase_entity.dart';
+import '../domain/entities/mobile_phase_entity.dart';
 import '../models/backend_phase_status.dart';
 
 class SiteManagerPhaseCard extends StatelessWidget {
@@ -39,9 +40,10 @@ class SiteManagerPhaseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final status = BackendPhaseStatus.fromString(phase.status);
 
-    return GestureDetector(
-      onTap: onTapProject,
-      child: Container(
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTap: onTapProject,
+        child: Container(
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
           color: AppColors.surface,
@@ -54,6 +56,10 @@ class SiteManagerPhaseCard extends StatelessWidget {
             Row(
               children: [
                 _priorityBadge(context, phase.priority),
+                if (phase.localization != null) ...[
+                  SizedBox(width: 6.w),
+                  TranslationStatusBadge.fromMeta(phase.localization),
+                ],
                 const Spacer(),
                 if (phase.startDate != null) ...[
                   Icon(
@@ -170,6 +176,7 @@ class SiteManagerPhaseCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

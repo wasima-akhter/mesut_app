@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/localization/context_extensions.dart';
+import '../../../../../core/widgets/images/app_avatar.dart';
 import '../../domain/entities/project_task_entity.dart';
 import '../providers/project_task_employees_provider.dart';
 
@@ -29,18 +30,11 @@ class ProjectTaskEmployeeDropdown extends ConsumerWidget {
       );
 
   Widget _buildAvatar(ProjectTaskEmployeeEntity emp) {
-    final initial = emp.firstName.isNotEmpty
-        ? emp.firstName[0].toUpperCase()
-        : (emp.lastName.isNotEmpty ? emp.lastName[0].toUpperCase() : '?');
-    return CircleAvatar(
-      radius: 12.r,
+    return AppAvatar(
+      imageUrl: emp.avatarUrl,
+      name: '${emp.firstName} ${emp.lastName}',
+      size: 24.r,
       backgroundColor: const Color(0xFFEAEAEA),
-      backgroundImage: emp.avatarUrl != null && emp.avatarUrl!.isNotEmpty
-          ? NetworkImage(emp.avatarUrl!)
-          : null,
-      child: emp.avatarUrl == null || emp.avatarUrl!.isEmpty
-          ? Text(initial, style: TextStyle(fontSize: 11.sp, color: const Color(0xFF555555)))
-          : null,
     );
   }
 

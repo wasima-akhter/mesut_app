@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/constants/route_constants.dart';
 import '../../../../core/localization/context_extensions.dart';
+import '../../../../core/widgets/images/app_avatar.dart';
 
 class SiteManagerHomeHeader extends StatelessWidget {
   const SiteManagerHomeHeader({
@@ -49,20 +50,15 @@ class SiteManagerHomeHeader extends StatelessWidget {
           ),
         ),
         Container(
-          width: 43,
-          height: 43,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white, width: 2),
           ),
-          child: CircleAvatar(
+          child: AppAvatar(
+            imageUrl: avatarUrl,
+            name: userName,
+            size: 40,
             backgroundColor: const Color(0xFFE5E7EB),
-            backgroundImage: (avatarUrl != null && avatarUrl!.isNotEmpty)
-                ? NetworkImage(avatarUrl!)
-                : null,
-            child: (avatarUrl == null || avatarUrl!.isEmpty)
-                ? const Icon(Icons.person, color: Color(0xFF6B7280), size: 22)
-                : null,
           ),
         ),
         const SizedBox(width: 9),

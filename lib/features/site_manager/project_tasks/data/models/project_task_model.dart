@@ -1,3 +1,4 @@
+import '../../../../../core/localization/localization_meta.dart';
 import '../../../projects/enums.dart';
 import '../../domain/entities/project_task_entity.dart';
 
@@ -33,6 +34,7 @@ class ProjectTaskModel extends ProjectTaskEntity {
     super.employee,
     super.createdAt,
     super.updatedAt,
+    super.localization,
   });
 
   factory ProjectTaskModel.fromJson(Map<String, dynamic> json) {
@@ -51,6 +53,7 @@ class ProjectTaskModel extends ProjectTaskEntity {
           : null,
       createdAt: _parseDate(json['createdAt']),
       updatedAt: _parseDate(json['updatedAt']),
+      localization: LocalizationMeta.tryParse(json),
     );
   }
 

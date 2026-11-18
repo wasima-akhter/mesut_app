@@ -1,3 +1,5 @@
+import 'package:construction_app/core/localization/localization_meta.dart';
+
 class EmployeeScheduleProjectEntity {
   const EmployeeScheduleProjectEntity({
     required this.id,
@@ -38,6 +40,7 @@ class EmployeeSchedulePhaseEntity {
     required this.project,
     this.siteManagers = const [],
     this.assignedHours = 0,
+    this.localization,
   });
 
   final String id;
@@ -49,6 +52,7 @@ class EmployeeSchedulePhaseEntity {
   final EmployeeScheduleProjectEntity project;
   final List<EmployeeScheduleSiteManagerEntity> siteManagers;
   final double assignedHours;
+  final LocalizationMeta? localization;
 
   String get siteManagerNames {
     if (siteManagers.isEmpty) return '-';

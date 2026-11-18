@@ -29,8 +29,9 @@ class SiteManagerHomeMapCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 148,
+    return RepaintBoundary(
+      child: Container(
+        height: 148,
       decoration: BoxDecoration(
         color: const Color(0xFFDDE6D8),
         borderRadius: BorderRadius.circular(11),
@@ -138,8 +139,9 @@ class SiteManagerHomeMapCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class MapPlaceholderPainter extends CustomPainter {

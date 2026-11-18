@@ -8,7 +8,15 @@ import 'app_radii.dart';
 class AppTheme {
   AppTheme._();
 
-  static ThemeData get light {
+  static ThemeData? _cachedLight;
+
+  static ThemeData get light => _cachedLight ??= _buildLight();
+
+  static void invalidateCache() {
+    _cachedLight = null;
+  }
+
+  static ThemeData _buildLight() {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
@@ -25,7 +33,7 @@ class AppTheme {
         onError: AppColors.white,
       ),
 
-      fontFamily: 'Plus Jakarta Sans',
+      fontFamily: 'PlusJakartaSans',
 
       textTheme: TextTheme(
         displayLarge: TextStyle(
@@ -51,21 +59,21 @@ class AppTheme {
         ),
 
         headlineLarge: TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 29.5.sp,
           height: 1.25,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
         headlineMedium: TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 25.5.sp,
           height: 1.3,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
         headlineSmall: TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 23.5.sp,
           height: 1.3,
           fontWeight: FontWeight.w700,
@@ -73,21 +81,21 @@ class AppTheme {
         ),
 
         titleLarge: TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 21.5.sp,
           height: 1.35,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
         titleMedium: TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 19.5.sp,
           height: 1.4,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
         titleSmall: TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 17.5.sp,
           height: 1.4,
           fontWeight: FontWeight.w600,
@@ -95,21 +103,21 @@ class AppTheme {
         ),
 
         bodyLarge: TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 19.5.sp,
           height: 1.5,
           fontWeight: FontWeight.w400,
           color: AppColors.textPrimary,
         ),
         bodyMedium: TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 17.5.sp,
           height: 1.5,
           fontWeight: FontWeight.w400,
           color: AppColors.textSecondary,
         ),
         bodySmall: TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 15.5.sp,
           height: 1.45,
           fontWeight: FontWeight.w400,
@@ -145,7 +153,7 @@ class AppTheme {
         elevation: 0,
         centerTitle: false,
         titleTextStyle: TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 21.5.sp,
           height: 1.35,
           fontWeight: FontWeight.w700,
@@ -191,7 +199,7 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColors.error, width: 1.5),
         ),
         hintStyle: TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 17.5.sp,
           height: 1.5,
           fontWeight: FontWeight.w400,
@@ -223,7 +231,7 @@ class AppTheme {
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.neutral900,
         contentTextStyle: TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 17.5.sp,
           height: 1.5,
           fontWeight: FontWeight.w400,

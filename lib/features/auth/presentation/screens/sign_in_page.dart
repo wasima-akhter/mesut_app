@@ -155,7 +155,16 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
           AuthRoleSelector(
             selectedRole: _selectedRole,
             onChanged: (role) {
-              setState(() => _selectedRole = role);
+              setState(() {
+                _selectedRole = role;
+                if (kDebugMode) {
+                  _emailController.text = _selectedRole == UserRole.employee
+                      ? "abc@yopmail.com"
+                      : "xyz@yopmail.com";
+
+                  _passwordController.text = "123456abC!!";
+                }
+              });
             },
           ),
 

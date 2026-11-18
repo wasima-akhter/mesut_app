@@ -1,9 +1,9 @@
-import 'package:construction_app/features/employee/presentation/providers/employee_timer_provider.dart';
+import 'package:construction_app/features/employee/time_tracking/presentation/providers/employee_timer_provider.dart';
 import 'package:construction_app/features/entry/nav/bottom_nav_tabs.dart';
-import 'package:construction_app/features/site_manager/presentation/providers/site_manager_home_provider.dart';
-import 'package:construction_app/features/site_manager/projects/presentation/providers/site_manager_projects_provider.dart';
-import 'package:construction_app/features/site_manager/presentation/providers/site_manager_time_provider.dart';
+import 'package:construction_app/features/site_manager/home/presentation/providers/site_manager_home_provider.dart';
+import 'package:construction_app/features/site_manager/time_tracking/presentation/providers/site_manager_time_provider.dart';
 import 'package:construction_app/features/site_manager/projects/enums.dart';
+import 'package:construction_app/features/site_manager/projects/presentation/providers/site_manager_projects_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 

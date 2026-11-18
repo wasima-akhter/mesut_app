@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../../core/widgets/translation/translation_status_badge.dart';
 import '../../domain/entities/project_history_entity.dart';
 
 class ProjectHistoryItemCard extends StatelessWidget {
@@ -111,14 +112,24 @@ class ProjectHistoryItemCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    item.displayTitle,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111827),
-                      height: 1.25,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.displayTitle,
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF111827),
+                            height: 1.25,
+                          ),
+                        ),
+                      ),
+                      if (item.localization != null) ...[
+                        SizedBox(width: 6.w),
+                        TranslationStatusBadge.fromMeta(item.localization),
+                      ],
+                    ],
                   ),
                   if (item.hasDetails) _buildDetailsView(),
                   SizedBox(height: 5.h),

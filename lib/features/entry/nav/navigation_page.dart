@@ -12,6 +12,7 @@ import '../../../core/services/notification_service.dart';
 import '../../../core/services/notification_socket_service.dart';
 import '../../../core/storage/storage_provider.dart';
 import '../../employee/home/presentation/screens/employee_home_page.dart';
+import '../../employee/offline_sync/widgets/employee_sync_banner.dart';
 import '../../employee/plan/presentation/screens/employee_plan_page.dart';
 import '../../employee/time_tracking/presentation/providers/offline_sync_provider.dart';
 import '../../employee/profile/presentation/screens/employee_profile_page.dart';
@@ -69,9 +70,15 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
     unawaited(ref.read(mobileConfigProvider.notifier).refresh());
     unawaited(ref.read(mobileProfileProvider.notifier).refresh());
     unawaited(ref.read(notificationsProvider.notifier).refresh());
-    unawaited(ref.read(offlineSyncProvider.notifier).syncPendingLogs());
-    unawaited(ref.read(siteManagerSyncProvider.notifier).syncAll());
     ref.read(pushNotificationServiceProvider).consumePendingInitialNavigation();
+
+    // Stagger offline queue synchronization after initial render completes (1.2s delay)
+    // to prevent thread contention, battery spike, and jank on cold start
+    Future.delayed(const Duration(milliseconds: 1200), () {
+      if (!mounted) return;
+      unawaited(ref.read(offlineSyncProvider.notifier).syncPendingLogs());
+      unawaited(ref.read(siteManagerSyncProvider.notifier).syncAll());
+    });
   }
 
   Widget _buildTabPage(UserRole role, int index) {
@@ -152,6 +159,7 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
         child: Column(
           children: [
             if (role == UserRole.siteManager) const SiteManagerSyncBanner(),
+            if (role == UserRole.employee) const EmployeeSyncBanner(),
             Expanded(
               child: IndexedStack(index: safeIndex, children: pages),
             ),

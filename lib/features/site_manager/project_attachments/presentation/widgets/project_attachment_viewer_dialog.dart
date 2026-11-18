@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/localization/context_extensions.dart';
+import '../../../../../core/widgets/images/app_network_image.dart';
 import '../../domain/entities/project_attachment_entity.dart';
 
 class ProjectAttachmentViewerDialog extends StatelessWidget {
@@ -36,28 +37,12 @@ class ProjectAttachmentViewerDialog extends StatelessWidget {
   }
 
   Widget _buildImage() {
-    final url = attachment.url;
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      return Image.network(
-        url,
-        fit: BoxFit.contain,
-        loadingBuilder: (_, child, progress) {
-          if (progress == null) return child;
-          return const Center(
-            child: CircularProgressIndicator(color: Colors.white),
-          );
-        },
-        errorBuilder: (_, __, ___) => const Center(
-          child: Icon(Icons.broken_image, color: Colors.white54, size: 48),
-        ),
-      );
-    }
-    final file = File(url);
-    if (file.existsSync()) {
-      return Image.file(file, fit: BoxFit.contain);
-    }
-    return const Center(
-      child: Icon(Icons.broken_image, color: Colors.white54, size: 48),
+    return AppNetworkImage(
+      imageUrl: attachment.url,
+      fit: BoxFit.contain,
+      fallback: const Center(
+        child: Icon(Icons.broken_image, color: Colors.white54, size: 48),
+      ),
     );
   }
 

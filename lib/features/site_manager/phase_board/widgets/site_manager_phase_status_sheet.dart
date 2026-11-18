@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/localization/context_extensions.dart';
-import '../../domain/entities/mobile_phase_entity.dart';
+import '../domain/entities/mobile_phase_entity.dart';
 import '../models/backend_phase_status.dart';
 
 class SiteManagerPhaseStatusSheet extends StatelessWidget {

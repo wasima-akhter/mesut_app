@@ -1,11 +1,11 @@
-import 'package:construction_app/features/site_manager/data/datasources/mobile_inspection_datasource.dart';
-import 'package:construction_app/features/site_manager/data/datasources/mobile_phase_datasource.dart';
-import 'package:construction_app/features/site_manager/data/models/mobile_inspection_model.dart';
-import 'package:construction_app/features/site_manager/data/models/mobile_phase_model.dart';
-import 'package:construction_app/features/site_manager/data/repositories/mobile_inspection_repository_impl.dart';
-import 'package:construction_app/features/site_manager/data/repositories/mobile_phase_repository_impl.dart';
-import 'package:construction_app/features/site_manager/domain/entities/mobile_inspection_entity.dart';
-import 'package:construction_app/features/site_manager/domain/entities/mobile_phase_entity.dart';
+import 'package:construction_app/features/site_manager/inspection_pages/data/datasources/mobile_inspection_datasource.dart';
+import 'package:construction_app/features/site_manager/phase_board/data/datasources/mobile_phase_datasource.dart';
+import 'package:construction_app/features/site_manager/inspection_pages/data/models/mobile_inspection_model.dart';
+import 'package:construction_app/features/site_manager/phase_board/data/models/mobile_phase_model.dart';
+import 'package:construction_app/features/site_manager/inspection_pages/data/repositories/mobile_inspection_repository_impl.dart';
+import 'package:construction_app/features/site_manager/phase_board/data/repositories/mobile_phase_repository_impl.dart';
+import 'package:construction_app/features/site_manager/inspection_pages/domain/entities/mobile_inspection_entity.dart';
+import 'package:construction_app/features/site_manager/phase_board/domain/entities/mobile_phase_entity.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
