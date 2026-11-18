@@ -5,7 +5,7 @@ abstract final class AssetConstants {
   static const String animations = 'assets/animations';
 
   // Images
-  static const String appLogo = '$images/app_logo.png';
+  static const String appLogo = 'assets/logo/app_icon.png';
 
   // Illustrations
   static const String empty = '$illustrations/empty.png';

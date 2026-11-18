@@ -31,6 +31,8 @@ class ProjectDetailsScreen extends ConsumerStatefulWidget {
 }
 
 class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
+  final Set<ProjectDetailsTab> _visitedTabs = {ProjectDetailsTab.overview};
+
   @override
   void initState() {
     super.initState();
@@ -135,10 +137,23 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
   }
 
   Widget _buildTabBody(ProjectDetailsState state) {
+    _visitedTabs.add(state.selectedTab);
+    return IndexedStack(
+      index: state.selectedTab.index,
+      children: ProjectDetailsTab.values.map((tab) {
+        if (!_visitedTabs.contains(tab)) {
+          return const SizedBox.shrink();
+        }
+        return _buildTabContent(tab, state);
+      }).toList(),
+    );
+  }
+
+  Widget _buildTabContent(ProjectDetailsTab tab, ProjectDetailsState state) {
     final hasValidDetails =
         state.details != null && state.details!.id == widget.projectId;
 
-    switch (state.selectedTab) {
+    switch (tab) {
       case ProjectDetailsTab.overview:
         final effectiveStatus =
             (!hasValidDetails &&
@@ -199,10 +214,14 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
         child: Column(
           children: [
             if (hasValidDetails)
-              ProjectDetailsHeader(details: state.details!)
+              RepaintBoundary(
+                child: ProjectDetailsHeader(details: state.details!),
+              )
             else
               _buildPlaceholderHeader(context),
-            _buildFixedTabs(state.selectedTab),
+            RepaintBoundary(
+              child: _buildFixedTabs(state.selectedTab),
+            ),
             Expanded(child: _buildTabBody(state)),
           ],
         ),

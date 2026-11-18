@@ -45,7 +45,10 @@ Future<void> bootstrap({required Widget app}) async {
   final savedLangCode = sharedPreferences.getString(StorageKeys.selectedLanguage);
   final initialLanguage = AppLanguage.fromCode(savedLangCode);
   AppLanguageNotifier.activeLanguageCode = initialLanguage.code;
-  await AppLocalization.load(initialLanguage);
+  await Future.wait([
+    AppLocalization.load(AppLanguage.english),
+    AppLocalization.load(AppLanguage.german),
+  ]);
 
   final container = ProviderContainer(
     overrides: [sharedPreferencesProvider.overrideWithValue(sharedPreferences)],
@@ -80,13 +83,4 @@ Future<void> bootstrap({required Widget app}) async {
     container.dispose();
     rethrow;
   }
-
-  // Defer non-critical push notifications initialization after initial frame paint (Stage 2)
-  Future.microtask(() async {
-    try {
-      await pushService.initialize().timeout(const Duration(seconds: 4));
-    } catch (e) {
-      debugPrint('PushNotificationService deferred bootstrap warning: $e');
-    }
-  });
 }

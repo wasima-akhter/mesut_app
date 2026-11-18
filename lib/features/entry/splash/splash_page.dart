@@ -39,11 +39,11 @@ class _SplashPageState extends ConsumerState<SplashPage> {
           ref.read(storageServiceProvider).onboardingCompleted;
 
       final results = await Future.wait([
-        Future<void>.delayed(const Duration(milliseconds: 1600)),
+        Future<void>.delayed(const Duration(milliseconds: 500)),
         ref
             .read(authProvider.notifier)
             .checkSession()
-            .timeout(const Duration(seconds: 6), onTimeout: () => false),
+            .timeout(const Duration(seconds: 2), onTimeout: () => false),
       ]);
 
       isAuthenticated = results[1] as bool;
@@ -83,7 +83,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
                   'Workforce',
                   style: AppTextStyles.displaySmall.copyWith(
                     color: AppColors.white,
-                    fontFamily: 'Plus Jakarta Sans',
+                    fontFamily: 'PlusJakartaSans',
                     fontWeight: FontWeight.w700,
                   ),
                 ),

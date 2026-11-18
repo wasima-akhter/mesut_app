@@ -84,10 +84,12 @@ class SiteManagerHomePage extends ConsumerWidget {
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(18, 18, 18, 8),
                 sliver: SliverToBoxAdapter(
-                  child: SiteManagerHomeHeader(
-                    userName: userName,
-                    unreadCount: unreadCount,
-                    avatarUrl: profile?.avatarUrl,
+                  child: RepaintBoundary(
+                    child: SiteManagerHomeHeader(
+                      userName: userName,
+                      unreadCount: unreadCount,
+                      avatarUrl: profile?.avatarUrl,
+                    ),
                   ),
                 ),
               ),
@@ -141,28 +143,30 @@ class SiteManagerHomePage extends ConsumerWidget {
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 18),
                       sliver: SliverToBoxAdapter(
-                        child: SiteManagerHomeStats(
-                          stats: dashboard.stats,
-                          onTapStandingSites: () {
-                            ref
+                        child: RepaintBoundary(
+                          child: SiteManagerHomeStats(
+                            stats: dashboard.stats,
+                            onTapStandingSites: () {
+                              ref
+                                  .read(navigationProvider.notifier)
+                                  .goToTabProjects();
+                              ref
+                                  .read(siteManagerProjectsProvider.notifier)
+                                  .selectTab(ProjectTab.active);
+                              ref
+                                  .read(siteManagerProjectsProvider.notifier)
+                                  .loadInitial(isRefresh: true);
+                            },
+                            onTapInspections: () => context.push(
+                              RouteConstants.siteManagerSiteInspection,
+                            ),
+                            onTapErection: () => ref
                                 .read(navigationProvider.notifier)
-                                .goToTabProjects();
-                            ref
-                                .read(siteManagerProjectsProvider.notifier)
-                                .selectTab(ProjectTab.active);
-                            ref
-                                .read(siteManagerProjectsProvider.notifier)
-                                .loadInitial(isRefresh: true);
-                          },
-                          onTapInspections: () => context.push(
-                            RouteConstants.siteManagerSiteInspection,
+                                .goToTabProjects(),
+                            onTapDismantling: () => ref
+                                .read(navigationProvider.notifier)
+                                .goToTabProjects(),
                           ),
-                          onTapErection: () => ref
-                              .read(navigationProvider.notifier)
-                              .goToTabProjects(),
-                          onTapDismantling: () => ref
-                              .read(navigationProvider.notifier)
-                              .goToTabProjects(),
                         ),
                       ),
                     ),

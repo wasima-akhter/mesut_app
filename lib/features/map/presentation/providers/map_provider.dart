@@ -155,10 +155,10 @@ class MapNotifier extends Notifier<MapState> {
   /// Updates search query and fetches matching projects from API with debounce.
   void setSearchQuery(String query) {
     if (_isDisposed) return;
-    state = state.copyWith(searchQuery: query);
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 350), () async {
       if (_isDisposed) return;
+      state = state.copyWith(searchQuery: query);
       await _reloadLocations();
     });
   }

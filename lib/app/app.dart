@@ -64,7 +64,6 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
       designSize: const Size(393, 852),
       minTextAdapt: true,
       splitScreenMode: true,
-      useInheritedMediaQuery: true,
       builder: (_, child) {
         final theme = AppTheme.light;
         AppTextStyles.initialize(theme.textTheme);

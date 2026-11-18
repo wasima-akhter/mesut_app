@@ -5,6 +5,7 @@ import '../constants/api_constants.dart';
 import '../constants/storage_keys.dart';
 import '../network/network_providers.dart';
 import '../services/address_resolver_service.dart';
+import '../storage/storage_provider.dart';
 import 'app_language.dart';
 import 'app_localization.dart';
 import 'app_strings.dart';
@@ -21,27 +22,12 @@ class AppLanguageNotifier extends Notifier<AppLanguage> {
 
   @override
   AppLanguage build() {
-    _loadPersistedLanguage();
-    return AppLanguage.english;
-  }
-
-  Future<void> _loadPersistedLanguage() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final code = prefs.getString(_storageKey);
-      if (code != null) {
-        final language = AppLanguage.fromCode(code);
-        activeLanguageCode = language.code;
-        await AppLocalization.load(language);
-        state = language;
-      } else {
-        activeLanguageCode = AppLanguage.english.code;
-        await AppLocalization.load(AppLanguage.english);
-      }
-    } catch (_) {
-      activeLanguageCode = AppLanguage.english.code;
-      await AppLocalization.load(AppLanguage.english);
-    }
+    final prefs = ref.watch(sharedPreferencesProvider);
+    final code = prefs.getString(_storageKey);
+    final language =
+        code != null ? AppLanguage.fromCode(code) : AppLanguage.english;
+    activeLanguageCode = language.code;
+    return language;
   }
 
   Future<void> setLanguage(AppLanguage language) async {
@@ -53,7 +39,7 @@ class AppLanguageNotifier extends Notifier<AppLanguage> {
     }
 
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = ref.read(sharedPreferencesProvider);
       await prefs.setString(_storageKey, language.code);
       await prefs.setBool(StorageKeys.hasUserSelectedLanguage, true);
     } catch (_) {}
@@ -75,7 +61,7 @@ class AppLanguageNotifier extends Notifier<AppLanguage> {
   /// user has not explicitly picked a language on-device.
   Future<void> applyServerDefault(AppLanguage language) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = ref.read(sharedPreferencesProvider);
       final hasExplicitChoice =
           prefs.getBool(StorageKeys.hasUserSelectedLanguage) ?? false;
       if (hasExplicitChoice) return;

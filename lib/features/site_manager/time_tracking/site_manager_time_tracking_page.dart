@@ -26,8 +26,10 @@ class SiteManagerTimeTrackingPage extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(context),
-            _buildMainTabs(context, state.selectedTab, notifier),
+            RepaintBoundary(child: _buildHeader(context)),
+            RepaintBoundary(
+              child: _buildMainTabs(context, state.selectedTab, notifier),
+            ),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: () async {

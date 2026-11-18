@@ -185,16 +185,18 @@ class _CentralMapScreenState extends ConsumerState<CentralMapScreen> {
           Positioned(
             right: 16.w,
             top: isMulti ? 200.h : 130.h,
-            child: MapControls(
-              onRecenter: notifier.recenterOnUser,
-              onZoomIn: () =>
-                  _localMapController?.animateCamera(CameraUpdate.zoomIn()),
-              onZoomOut: () =>
-                  _localMapController?.animateCamera(CameraUpdate.zoomOut()),
-              onToggleMapType: notifier.toggleMapType,
-              onToggleTraffic: notifier.toggleTraffic,
-              isTrafficEnabled: mapState.isTrafficEnabled,
-              isHybrid: mapState.mapType == MapType.hybrid,
+            child: RepaintBoundary(
+              child: MapControls(
+                onRecenter: notifier.recenterOnUser,
+                onZoomIn: () =>
+                    _localMapController?.animateCamera(CameraUpdate.zoomIn()),
+                onZoomOut: () =>
+                    _localMapController?.animateCamera(CameraUpdate.zoomOut()),
+                onToggleMapType: notifier.toggleMapType,
+                onToggleTraffic: notifier.toggleTraffic,
+                isTrafficEnabled: mapState.isTrafficEnabled,
+                isHybrid: mapState.mapType == MapType.hybrid,
+              ),
             ),
           ),
 
@@ -204,7 +206,9 @@ class _CentralMapScreenState extends ConsumerState<CentralMapScreen> {
               left: 16.w,
               right: 16.w,
               top: isMulti ? 195.h : 95.h,
-              child: MapPermissionBanner(onEnable: notifier.recenterOnUser),
+              child: RepaintBoundary(
+                child: MapPermissionBanner(onEnable: notifier.recenterOnUser),
+              ),
             ),
 
           // 5. Bottom Overlay: Route Info Panel OR Selected Location Card
@@ -212,45 +216,51 @@ class _CentralMapScreenState extends ConsumerState<CentralMapScreen> {
             left: 16.w,
             right: 16.w,
             bottom: 20.h,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              child: mapState.activeRoute != null
-                  ? MapInfoPanel(
-                      key: const ValueKey('route_panel'),
-                      route: mapState.activeRoute!,
-                      destination: mapState.selectedLocation ??
-                          mapState.request.destination,
-                      onClose: () => notifier.clearRouteOrSelection(),
-                    )
-                  : (mapState.selectedLocation != null
-                      ? MapLocationCard(
-                          key: ValueKey('card_${mapState.selectedLocation!.id}'),
-                          location: mapState.selectedLocation!,
-                          userLocation: mapState.userLocation,
-                          onRoute: () => _handleShowRoute(
-                            mapState.selectedLocation!,
-                          ),
-                          onOpenDetails: () => _onOpenProjectDetails(
-                            mapState.selectedLocation!,
-                          ),
-                          onClose: () => notifier.selectLocation(null),
-                        )
-                      : const SizedBox.shrink()),
+            child: RepaintBoundary(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                child: mapState.activeRoute != null
+                    ? MapInfoPanel(
+                        key: const ValueKey('route_panel'),
+                        route: mapState.activeRoute!,
+                        destination: mapState.selectedLocation ??
+                            mapState.request.destination,
+                        onClose: () => notifier.clearRouteOrSelection(),
+                      )
+                    : (mapState.selectedLocation != null
+                        ? MapLocationCard(
+                            key: ValueKey('card_${mapState.selectedLocation!.id}'),
+                            location: mapState.selectedLocation!,
+                            userLocation: mapState.userLocation,
+                            onRoute: () => _handleShowRoute(
+                              mapState.selectedLocation!,
+                            ),
+                            onOpenDetails: () => _onOpenProjectDetails(
+                              mapState.selectedLocation!,
+                            ),
+                            onClose: () => notifier.selectLocation(null),
+                          )
+                        : const SizedBox.shrink()),
+              ),
             ),
           ),
 
           // 6. Loading Indicator
           if (mapState.isLoading)
             Positioned.fill(
-              child: MapLoadingView(message: context.loc.mapLoadingData),
+              child: RepaintBoundary(
+                child: MapLoadingView(message: context.loc.mapLoadingData),
+              ),
             ),
 
           // 7. Error State
           if (mapState.hasError)
             Positioned.fill(
-              child: MapErrorView(
-                message: mapState.errorMessage,
-                onRetry: notifier.retry,
+              child: RepaintBoundary(
+                child: MapErrorView(
+                  message: mapState.errorMessage,
+                  onRetry: notifier.retry,
+                ),
               ),
             ),
         ],

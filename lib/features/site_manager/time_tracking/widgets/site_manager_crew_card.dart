@@ -15,49 +15,51 @@ class SiteManagerCrewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(10.r),
-      child: InkWell(
-        onTap: () => showCrewDetails(context, member),
+    return RepaintBoundary(
+      child: Material(
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
-        child: Padding(
-          padding: EdgeInsets.all(15.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      member.user.fullName,
+        child: InkWell(
+          onTap: () => showCrewDetails(context, member),
+          borderRadius: BorderRadius.circular(10.r),
+          child: Padding(
+            padding: EdgeInsets.all(15.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        member.user.fullName,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ),
+                    Text(
+                      '${member.totalHours.toStringAsFixed(1)}h',
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
-                  ),
-                  Text(
-                    '${member.totalHours.toStringAsFixed(1)}h',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                ],
-              ),
-              SizedBox(height: 8.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      '${context.loc.loggedTime}: ${member.totalHours.toStringAsFixed(1)}h',
-                      style: Theme.of(context).textTheme.bodySmall,
+                  ],
+                ),
+                SizedBox(height: 8.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '${context.loc.loggedTime}: ${member.totalHours.toStringAsFixed(1)}h',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     ),
-                  ),
-                  Text(
-                    member.synced ? context.loc.synced : context.loc.pending,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: member.synced ? AppColors.success : AppColors.warning,
-                        ),
-                  ),
-                ],
-              ),
-            ],
+                    Text(
+                      member.synced ? context.loc.synced : context.loc.pending,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: member.synced ? AppColors.success : AppColors.warning,
+                          ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

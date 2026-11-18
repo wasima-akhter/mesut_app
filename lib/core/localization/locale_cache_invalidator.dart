@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/employee/home/presentation/providers/employee_dashboard_provider.dart';
 import '../../features/employee/plan/presentation/providers/employee_schedule_provider.dart';
 import '../../features/employee/time_tracking/presentation/providers/employee_time_tracking_provider.dart';
@@ -23,6 +24,12 @@ import '../services/address_resolver_service.dart';
 /// all screens refetch localized content immediately after a language switch.
 Future<void> onAppLanguageChanged(Ref ref) async {
   AddressResolverService.clearCache();
+
+  // If the user has not logged in yet, skip refreshing authenticated providers
+  // to avoid triggering redundant network calls and UI thread jank.
+  if (!ref.read(authProvider).isAuthenticated) {
+    return;
+  }
 
   // Employee providers
   try {

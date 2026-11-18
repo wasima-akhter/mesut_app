@@ -106,7 +106,10 @@ class PushNotificationService {
       );
 
       if (storageService.notificationsEnabled) {
-        final token = await messaging.getToken();
+        final token = await messaging.getToken().timeout(
+          const Duration(seconds: 2),
+          onTimeout: () => null,
+        );
         if (token != null && token.isNotEmpty) await storageService.saveFcmToken(token);
       } else {
         await storageService.clearFcmToken();

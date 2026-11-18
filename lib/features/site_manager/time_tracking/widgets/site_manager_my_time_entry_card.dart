@@ -26,16 +26,17 @@ class SiteManagerMyTimeEntryCard extends StatelessWidget {
         ? AppDateTimeFormatter.formatDate(entry.createdAt!.toLocal())
         : '';
 
-    return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(10.r),
-      child: InkWell(
-        onTap: () => _showEntryDetails(context, entry),
+    return RepaintBoundary(
+      child: Material(
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(10.r),
-        child: Padding(
-          padding: EdgeInsets.all(15.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: InkWell(
+          onTap: () => _showEntryDetails(context, entry),
+          borderRadius: BorderRadius.circular(10.r),
+          child: Padding(
+            padding: EdgeInsets.all(15.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(dateStr, style: Theme.of(context).textTheme.bodySmall),
               SizedBox(height: 5.h),
@@ -78,8 +79,9 @@ class SiteManagerMyTimeEntryCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _activityBadge(BackendActivityType activity) {
     final color = _activityColor(activity);

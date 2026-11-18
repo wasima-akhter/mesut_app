@@ -128,16 +128,20 @@ class _SiteManagerProjectsPageState
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-              child: ProjectHeader(
-                onOpenSearch: () => _openSearch(context, projects),
-                onOpenFilters: () => _openFilters(context, projectsState),
+              child: RepaintBoundary(
+                child: ProjectHeader(
+                  onOpenSearch: () => _openSearch(context, projects),
+                  onOpenFilters: () => _openFilters(context, projectsState),
+                ),
               ),
             ),
             const SizedBox(height: 12),
-            ProjectTabsBar(
-              selectedTab: projectsState.selectedTab,
-              onSelectTab: (tab) =>
-                  ref.read(siteManagerProjectsProvider.notifier).selectTab(tab),
+            RepaintBoundary(
+              child: ProjectTabsBar(
+                selectedTab: projectsState.selectedTab,
+                onSelectTab: (tab) =>
+                    ref.read(siteManagerProjectsProvider.notifier).selectTab(tab),
+              ),
             ),
             const SizedBox(height: 11),
             Expanded(

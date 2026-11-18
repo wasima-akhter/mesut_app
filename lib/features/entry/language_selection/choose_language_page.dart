@@ -10,7 +10,6 @@ import '../../../core/localization/app_language.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/localization/localization_provider.dart';
 import '../../../core/widgets/buttons/app_button.dart';
-import '../../shared/config/presentation/providers/mobile_config_provider.dart';
 
 class ChooseLanguagePage extends ConsumerStatefulWidget {
   const ChooseLanguagePage({super.key});
@@ -20,10 +19,11 @@ class ChooseLanguagePage extends ConsumerStatefulWidget {
 }
 
 class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
+  static const List<AppLanguage> _languages = AppLanguage.values;
+
   @override
   Widget build(BuildContext context) {
     final currentLanguage = ref.watch(appLanguageProvider);
-    final enabledLanguages = ref.watch(enabledLanguagesProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -55,24 +55,22 @@ class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
                 ),
               ),
               SizedBox(height: 32.h),
-              for (int i = 0; i < enabledLanguages.length; i++) ...[
+              for (int i = 0; i < _languages.length; i++) ...[
                 if (i > 0) SizedBox(height: 14.h),
                 _buildLanguageCard(
-                  language: enabledLanguages[i],
-                  title: enabledLanguages[i] == AppLanguage.german
+                  language: _languages[i],
+                  title: _languages[i] == AppLanguage.german
                       ? 'Deutsch'
                       : 'English',
-                  subtitle: enabledLanguages[i] == AppLanguage.german
+                  subtitle: _languages[i] == AppLanguage.german
                       ? 'German (DE/AT/CH)'
                       : 'English (US/UK)',
-                  flagEmoji: enabledLanguages[i] == AppLanguage.german
-                      ? '🇩🇪'
-                      : '🇬🇧',
-                  isSelected: currentLanguage == enabledLanguages[i],
+                  flagEmoji: _languages[i] == AppLanguage.german ? '🇩🇪' : '🇬🇧',
+                  isSelected: currentLanguage == _languages[i],
                   onTap: () {
                     ref
                         .read(appLanguageProvider.notifier)
-                        .setLanguage(enabledLanguages[i]);
+                        .setLanguage(_languages[i]);
                   },
                 ),
               ],
@@ -93,31 +91,35 @@ class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
   }
 
   Widget _buildLogo() {
-    return Container(
-      width: 58.r,
-      height: 58.r,
-      padding: EdgeInsets.all(12.r),
-      decoration: BoxDecoration(
-        color: AppColors.primary600,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Image.asset(
-        AssetConstants.appLogo,
-        fit: BoxFit.contain,
-        errorBuilder: (_, _, _) {
-          return const Icon(
-            Icons.translate_rounded,
-            size: 28,
-            color: Colors.white,
-          );
-        },
+    return RepaintBoundary(
+      child: Container(
+        width: 58.r,
+        height: 58.r,
+        padding: EdgeInsets.all(12.r),
+        decoration: BoxDecoration(
+          color: AppColors.primary600,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.25),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Image.asset(
+          AssetConstants.appLogo,
+          fit: BoxFit.contain,
+          cacheWidth: 120,
+          cacheHeight: 120,
+          errorBuilder: (_, _, _) {
+            return const Icon(
+              Icons.translate_rounded,
+              size: 28,
+              color: Colors.white,
+            );
+          },
+        ),
       ),
     );
   }
@@ -130,86 +132,81 @@ class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
-        decoration: BoxDecoration(
-          color: AppColors.white,
+    return RepaintBoundary(
+      child: Material(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14.r),
+        child: InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-            width: isSelected ? 2.0 : 1.0,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.12),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44.r,
-              height: 44.r,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.primary.withValues(alpha: 0.1)
-                    : AppColors.neutral100,
-                borderRadius: BorderRadius.circular(10.r),
+          splashColor: AppColors.primary.withValues(alpha: 0.08),
+          highlightColor: AppColors.primary.withValues(alpha: 0.04),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(
+                color: isSelected ? AppColors.primary : AppColors.border,
+                width: isSelected ? 2.0 : 1.0,
               ),
-              alignment: Alignment.center,
-              child: Text(flagEmoji, style: TextStyle(fontSize: 24.sp)),
+              color: isSelected
+                  ? AppColors.primary.withValues(alpha: 0.04)
+                  : Colors.transparent,
             ),
-            SizedBox(width: 14.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 17.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44.r,
+                  height: 44.r,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.primary.withValues(alpha: 0.1)
+                        : AppColors.neutral100,
+                    borderRadius: BorderRadius.circular(10.r),
                   ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 22.r,
-              height: 22.r,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.neutral300,
-                  width: isSelected ? 6.5 : 1.5,
+                  alignment: Alignment.center,
+                  child: Text(flagEmoji, style: TextStyle(fontSize: 24.sp)),
                 ),
-                color: Colors.white,
-              ),
+                SizedBox(width: 14.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 17.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 22.r,
+                  height: 22.r,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color:
+                          isSelected ? AppColors.primary : AppColors.neutral300,
+                      width: isSelected ? 6.5 : 1.5,
+                    ),
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

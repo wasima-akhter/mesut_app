@@ -20,12 +20,9 @@ class SiteManagerMapPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(appLanguageProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: CentralMapScreen(
-        key: const ValueKey('site-manager-central-map'),
-        initialRequest: MapRequestEntity.siteManagerOverview(),
-      ),
+    return CentralMapScreen(
+      key: const ValueKey('site-manager-central-map'),
+      initialRequest: MapRequestEntity.siteManagerOverview(),
     );
   }
 }

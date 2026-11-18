@@ -87,74 +87,76 @@ class ProjectAttachmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.r),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
-          children: [
-            Positioned.fill(child: _buildImage()),
-            if (attachment.isCover)
-              Positioned(
-                top: 8.h,
-                left: 8.w,
-                child: Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFC8102E),
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.star_rounded,
-                          size: 13.sp, color: Colors.white),
-                      SizedBox(width: 3.w),
-                      Text(
-                        context.loc.cover,
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10.r),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            children: [
+              Positioned.fill(child: _buildImage()),
+              if (attachment.isCover)
+                Positioned(
+                  top: 8.h,
+                  left: 8.w,
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFC8102E),
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.star_rounded,
+                            size: 13.sp, color: Colors.white),
+                        SizedBox(width: 3.w),
+                        Text(
+                          context.loc.cover,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            Positioned(
-              top: 4.h,
-              right: 4.w,
-              child: Material(
-                color: Colors.black.withValues(alpha: 0.35),
-                shape: const CircleBorder(),
-                child: InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: () => _showOptionsMenu(context),
-                  child: Padding(
-                    padding: EdgeInsets.all(5.w),
-                    child: Icon(
-                      Icons.more_vert,
-                      color: Colors.white,
-                      size: 18.sp,
+              Positioned(
+                top: 4.h,
+                right: 4.w,
+                child: Material(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  shape: const CircleBorder(),
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () => _showOptionsMenu(context),
+                    child: Padding(
+                      padding: EdgeInsets.all(5.w),
+                      child: Icon(
+                        Icons.more_vert,
+                        color: Colors.white,
+                        size: 18.sp,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

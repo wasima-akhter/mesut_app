@@ -31,32 +31,44 @@ class ProjectDetailsOverviewTab extends StatelessWidget {
         ),
         padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 32.h),
         children: [
-          ProjectDetailsHoursCard(details: details),
+          RepaintBoundary(child: ProjectDetailsHoursCard(details: details)),
           SizedBox(height: 10.h),
-          ProjectDetailsCustomerCard(customer: details.customer),
-          SizedBox(height: 10.h),
-          ProjectDetailsMapCard(
-            projectId: details.id,
-            coordinates: details.coordinates,
-            title: details.name,
+          RepaintBoundary(
+            child: ProjectDetailsCustomerCard(customer: details.customer),
           ),
           SizedBox(height: 10.h),
-          ProjectDetailsScaffoldCard(
-            scaffoldSpec: details.scaffoldSpecification,
-            siteAccessCode: details.siteAccessCode,
-            siteAccessNotes: details.siteAccessNotes,
+          RepaintBoundary(
+            child: ProjectDetailsMapCard(
+              projectId: details.id,
+              coordinates: details.coordinates,
+              title: details.name,
+            ),
           ),
           SizedBox(height: 10.h),
-          ProjectDetailsScheduleCard(
-            scheduleData: details.scheduleData,
-            phases: details.phases,
+          RepaintBoundary(
+            child: ProjectDetailsScaffoldCard(
+              scaffoldSpec: details.scaffoldSpecification,
+              siteAccessCode: details.siteAccessCode,
+              siteAccessNotes: details.siteAccessNotes,
+            ),
           ),
           SizedBox(height: 10.h),
-          ProjectDetailsInspectionCard(
-            inspection: details.nextSafetyInspection,
+          RepaintBoundary(
+            child: ProjectDetailsScheduleCard(
+              scheduleData: details.scheduleData,
+              phases: details.phases,
+            ),
           ),
           SizedBox(height: 10.h),
-          ProjectDetailsCrewCard(crew: details.crewBreakdown),
+          RepaintBoundary(
+            child: ProjectDetailsInspectionCard(
+              inspection: details.nextSafetyInspection,
+            ),
+          ),
+          SizedBox(height: 10.h),
+          RepaintBoundary(
+            child: ProjectDetailsCrewCard(crew: details.crewBreakdown),
+          ),
         ],
       ),
     );

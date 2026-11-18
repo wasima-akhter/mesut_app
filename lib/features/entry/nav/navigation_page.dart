@@ -70,6 +70,7 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
     unawaited(ref.read(mobileConfigProvider.notifier).refresh());
     unawaited(ref.read(mobileProfileProvider.notifier).refresh());
     unawaited(ref.read(notificationsProvider.notifier).refresh());
+    unawaited(ref.read(pushNotificationServiceProvider).initialize());
     ref.read(pushNotificationServiceProvider).consumePendingInitialNavigation();
 
     // Stagger offline queue synchronization after initial render completes (1.2s delay)
@@ -154,22 +155,32 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
     );
 
     return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            if (role == UserRole.siteManager) const SiteManagerSyncBanner(),
-            if (role == UserRole.employee) const EmployeeSyncBanner(),
-            Expanded(
-              child: IndexedStack(index: safeIndex, children: pages),
+      body: Stack(
+        children: [
+          IndexedStack(index: safeIndex, children: pages),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              bottom: false,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (role == UserRole.siteManager) const SiteManagerSyncBanner(),
+                  if (role == UserRole.employee) const EmployeeSyncBanner(),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-      bottomNavigationBar: _buildBottomNavBar(
-        tabs: tabs,
-        selectedIndex: safeIndex,
-        loc: loc,
+      bottomNavigationBar: RepaintBoundary(
+        child: _buildBottomNavBar(
+          tabs: tabs,
+          selectedIndex: safeIndex,
+          loc: loc,
+        ),
       ),
     );
   }
