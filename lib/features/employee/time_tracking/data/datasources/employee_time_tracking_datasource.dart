@@ -105,8 +105,11 @@ class EmployeeTimeTrackingDatasourceImpl
   }) async {
     try {
       final response = await apiClient.post<Map<String, dynamic>>(
-        ApiConstants.mobileEmployeeTimerStart,
-        data: {'projectId': projectId, 'activityType': activityType},
+        ApiConstants.mobileTimerStart,
+        data: {
+          'phaseId': projectId,
+          'activityType': activityType,
+        },
       );
       final data = _extractData(response.data);
       final timeLogMap = data['timeLog'] ?? data;
@@ -117,9 +120,12 @@ class EmployeeTimeTrackingDatasourceImpl
         final action = EmployeeSyncAction(
           id: localId,
           actionType: EmployeeSyncActionType.startTimer,
-          endpoint: ApiConstants.mobileEmployeeTimerStart,
+          endpoint: ApiConstants.mobileTimerStart,
           httpMethod: 'POST',
-          payload: {'projectId': projectId, 'activityType': activityType},
+          payload: {
+            'phaseId': projectId,
+            'activityType': activityType,
+          },
           projectId: projectId,
           displayTitle: 'Start Timer ($activityType)',
           createdAt: DateTime.now(),
@@ -155,7 +161,7 @@ class EmployeeTimeTrackingDatasourceImpl
     };
     try {
       await apiClient.post<Map<String, dynamic>>(
-        ApiConstants.mobileEmployeeTimerStop,
+        ApiConstants.mobileTimerStop,
         data: payload,
       );
     } catch (e) {
@@ -163,7 +169,7 @@ class EmployeeTimeTrackingDatasourceImpl
         final action = EmployeeSyncAction(
           id: 'stop_${DateTime.now().millisecondsSinceEpoch}',
           actionType: EmployeeSyncActionType.stopTimer,
-          endpoint: ApiConstants.mobileEmployeeTimerStop,
+          endpoint: ApiConstants.mobileTimerStop,
           httpMethod: 'POST',
           payload: payload,
           displayTitle: 'Stop Timer',

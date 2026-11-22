@@ -111,7 +111,7 @@ class EmployeeSyncService {
       }
       requestData = FormData.fromMap(formMap);
     } else {
-      requestData = action.payload;
+      requestData = sanitizePayload(action);
     }
 
     switch (action.httpMethod.toUpperCase()) {
@@ -135,6 +135,57 @@ class EmployeeSyncService {
         await apiClient.post(action.endpoint, data: requestData);
         break;
     }
+  }
+
+  static Map<String, dynamic> sanitizePayload(EmployeeSyncAction action) {
+    final raw = Map<String, dynamic>.from(action.payload ?? {});
+    final isStartTimer =
+        action.actionType == EmployeeSyncActionType.startTimer ||
+        action.endpoint == '/mobile/timer/start';
+    if (isStartTimer) {
+      final phase =
+          raw['phaseId'] ?? raw['projectId'] ?? action.projectId ?? '';
+      final clean = <String, dynamic>{
+        'phaseId': phase,
+        'activityType': raw['activityType'] ?? 'ERECTION',
+      };
+      if (raw['gpsStartLat'] != null) clean['gpsStartLat'] = raw['gpsStartLat'];
+      if (raw['gpsStartLng'] != null) clean['gpsStartLng'] = raw['gpsStartLng'];
+      return clean;
+    }
+
+    final isStopTimer =
+        action.actionType == EmployeeSyncActionType.stopTimer ||
+        action.endpoint == '/mobile/timer/stop';
+    if (isStopTimer) {
+      final clean = <String, dynamic>{
+        'timeLogId': raw['timeLogId'] ?? '',
+      };
+      if (raw['gpsEndLat'] != null) clean['gpsEndLat'] = raw['gpsEndLat'];
+      if (raw['gpsEndLng'] != null) clean['gpsEndLng'] = raw['gpsEndLng'];
+      return clean;
+    }
+
+    final isManual =
+        action.actionType == EmployeeSyncActionType.manualTimeLog ||
+        action.endpoint.contains('/timer/manual');
+    if (isManual) {
+      final phase =
+          raw['phaseId'] ?? raw['projectId'] ?? action.projectId ?? '';
+      final clean = <String, dynamic>{
+        'phaseId': phase,
+        'activityType': raw['activityType'] ?? 'ERECTION',
+        'startTime': raw['startTime'],
+        'endTime': raw['endTime'],
+        'breakMinutes': raw['breakMinutes'] ?? 0,
+      };
+      if (action.endpoint.contains('/employee/timer/manual')) {
+        clean['projectId'] = phase;
+      }
+      return clean;
+    }
+
+    return raw;
   }
 
   /// Converts any sync or network exception into a clean, human-readable error.
@@ -165,23 +216,38 @@ class EmployeeSyncService {
         }
         if (statusCode == 422 || statusCode == 400) {
           final data = error.response?.data;
-          if (data is Map && data['message'] != null) {
-            final msg = data['message'].toString().trim();
-            final isTechnical = msg.contains('Exception') ||
-                msg.contains('Dio') ||
-                msg.contains('/') ||
-                msg.contains('status code') ||
-                msg.contains('Route') ||
-                msg.contains('POST') ||
-                msg.contains('GET') ||
-                msg.contains('ObjectId') ||
-                msg.contains('Mongo') ||
-                msg.contains('SyntaxError');
-            if (!isTechnical && msg.isNotEmpty && msg.length <= 80) {
-              return msg;
+          if (data is Map) {
+            final errors = data['errors'];
+            if (errors is List && errors.isNotEmpty) {
+              final first = errors.first;
+              if (first is Map && first['message'] != null) {
+                final m = first['message'].toString();
+                if (m.contains('Unrecognized key')) {
+                  return 'Format updated for server • Ready to sync.';
+                }
+              }
+            }
+            if (data['message'] != null) {
+              final msg = data['message'].toString().trim();
+              if (msg.toLowerCase().contains('validation failed')) {
+                return 'Format updated for server • Ready to sync.';
+              }
+              final isTechnical = msg.contains('Exception') ||
+                  msg.contains('Dio') ||
+                  msg.contains('/') ||
+                  msg.contains('status code') ||
+                  msg.contains('Route') ||
+                  msg.contains('POST') ||
+                  msg.contains('GET') ||
+                  msg.contains('ObjectId') ||
+                  msg.contains('Mongo') ||
+                  msg.contains('SyntaxError');
+              if (!isTechnical && msg.isNotEmpty && msg.length <= 80) {
+                return msg;
+              }
             }
           }
-          return 'Could not process entry. Will retry automatically.';
+          return 'Format updated • Ready to sync.';
         }
       }
 

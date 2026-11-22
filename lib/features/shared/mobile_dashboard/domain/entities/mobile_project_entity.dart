@@ -1,3 +1,5 @@
+import 'package:construction_app/core/localization/localization_meta.dart';
+
 class MobileProjectCustomerEntity {
   const MobileProjectCustomerEntity({
     required this.id,
@@ -16,6 +18,7 @@ class MobileProjectPhaseEntity {
     required this.priority,
     this.startDate,
     this.endDate,
+    this.localization,
   });
 
   final String id;
@@ -24,6 +27,7 @@ class MobileProjectPhaseEntity {
   final String priority;
   final DateTime? startDate;
   final DateTime? endDate;
+  final LocalizationMeta? localization;
 }
 
 class MobileProjectEntity {
@@ -36,6 +40,7 @@ class MobileProjectEntity {
     this.budgetedHours = 0,
     this.totalLoggedHours = 0,
     this.isProfitable = true,
+    this.localization,
   });
 
   final String id;
@@ -46,4 +51,5 @@ class MobileProjectEntity {
   final double budgetedHours;
   final double totalLoggedHours;
   final bool isProfitable;
+  final LocalizationMeta? localization;
 }

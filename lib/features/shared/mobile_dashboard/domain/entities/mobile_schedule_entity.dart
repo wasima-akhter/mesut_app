@@ -1,3 +1,4 @@
+import 'package:construction_app/core/localization/localization_meta.dart';
 import 'mobile_dashboard_entity.dart';
 
 class MobileSchedulePhaseEntity {
@@ -9,6 +10,7 @@ class MobileSchedulePhaseEntity {
     this.startDate,
     this.endDate,
     required this.project,
+    this.localization,
   });
 
   final String id;
@@ -18,6 +20,7 @@ class MobileSchedulePhaseEntity {
   final DateTime? startDate;
   final DateTime? endDate;
   final DashboardProjectSummaryEntity project;
+  final LocalizationMeta? localization;
 }
 
 class MobileScheduleInspectionEntity {
@@ -39,6 +42,7 @@ class MobileScheduleInspectionEntity {
     this.customerCategory = '',
     this.convertedProjectId,
     this.convertedProjectName,
+    this.localization,
   });
 
   final String id;
@@ -58,6 +62,7 @@ class MobileScheduleInspectionEntity {
   final String customerCategory;
   final String? convertedProjectId;
   final String? convertedProjectName;
+  final LocalizationMeta? localization;
 }
 
 class MobileScheduleDayEntity {

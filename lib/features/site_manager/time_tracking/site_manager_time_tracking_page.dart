@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
+import '../../../core/localization/pending_refetch_controller.dart';
 import '../../../core/utils/app_date_time_formatter.dart';
 import '../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
 import '../../shared/mobile_time_tracking/presentation/providers/mobile_time_tracking_provider.dart';
@@ -31,8 +32,16 @@ class SiteManagerTimeTrackingPage extends ConsumerWidget {
               child: _buildMainTabs(context, state.selectedTab, notifier),
             ),
             Expanded(
-              child: RefreshIndicator(
-                onRefresh: () async {
+              child: PendingPollEffect(
+                hasPending: anyLocalizationPending([
+                  ...(ref.watch(mobileTimeLogsProvider).asData?.value ??
+                          const [])
+                      .map((l) => l.localization),
+                  ...(ref.watch(mobileProjectsProvider).asData?.value ??
+                          const [])
+                      .map((p) => p.localization),
+                ]),
+                onPoll: () async {
                   if (state.selectedTab == TimeTrackingTab.myTime) {
                     await ref.read(mobileTimeLogsProvider.notifier).refresh();
                   } else {
@@ -42,16 +51,28 @@ class SiteManagerTimeTrackingPage extends ConsumerWidget {
                     ]);
                   }
                 },
-                child: CustomScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(
-                    parent: BouncingScrollPhysics(),
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    if (state.selectedTab == TimeTrackingTab.myTime) {
+                      await ref.read(mobileTimeLogsProvider.notifier).refresh();
+                    } else {
+                      await Future.wait([
+                        ref.read(mobileProjectsProvider.notifier).refresh(),
+                        ref.read(mobileCrewTimeProvider.notifier).refresh(),
+                      ]);
+                    }
+                  },
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: BouncingScrollPhysics(),
+                    ),
+                    slivers: [
+                      if (state.selectedTab == TimeTrackingTab.myTime)
+                        ...SiteManagerMyTimeView.buildSlivers(context, ref)
+                      else
+                        ...SiteManagerCrewTimeView.buildSlivers(context, ref),
+                    ],
                   ),
-                  slivers: [
-                    if (state.selectedTab == TimeTrackingTab.myTime)
-                      ...SiteManagerMyTimeView.buildSlivers(context, ref)
-                    else
-                      ...SiteManagerCrewTimeView.buildSlivers(context, ref),
-                  ],
                 ),
               ),
             ),
@@ -181,8 +202,8 @@ class SiteManagerTimeTrackingPage extends ConsumerWidget {
             child: Text(
               label,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: selected ? AppColors.white : AppColors.textSecondary,
-                  ),
+                color: selected ? AppColors.white : AppColors.textSecondary,
+              ),
             ),
           ),
         ),

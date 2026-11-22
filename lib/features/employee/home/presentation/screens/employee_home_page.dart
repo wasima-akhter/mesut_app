@@ -82,8 +82,13 @@ class _EmployeeHomePageState extends ConsumerState<EmployeeHomePage> {
   }
 
   void _openAssignment(EmployeeAssignmentModel assignment) {
+    final projectId = assignment.projectId?.isNotEmpty == true
+        ? assignment.projectId
+        : (assignment.phaseId?.isNotEmpty == true
+              ? assignment.phaseId
+              : null);
     ref.read(assignmentDetailsProvider.notifier).setAssignment(assignment);
-    context.push(RouteConstants.employeeAssignmentDetails);
+    context.push(RouteConstants.employeeAssignmentDetails, extra: projectId);
   }
 
   void _startNewTimer(EmployeeAssignmentModel assignment) {
@@ -110,6 +115,7 @@ class _EmployeeHomePageState extends ConsumerState<EmployeeHomePage> {
             startTime: '07:30 am',
             endTime: '04:15 pm',
             siteManager: assignment.siteManager,
+            localization: assignment.localization,
           ),
           activity: assignment.activity,
         );
@@ -159,7 +165,13 @@ class _EmployeeHomePageState extends ConsumerState<EmployeeHomePage> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: PendingPollEffect(
-          hasPending: anyLocalizationPending(tasks.map((t) => t.localization)),
+          hasPending: anyLocalizationPending([
+            dashboard.localization,
+            user.localization,
+            ...tasks.map((t) => t.localization),
+            ...tasks.map((t) => t.project.localization),
+            ...tasks.map((t) => t.siteManager.localization),
+          ]),
           onPoll: () => ref.read(employeeDashboardProvider.notifier).refresh(),
           child: RefreshIndicator(
             onRefresh: () =>

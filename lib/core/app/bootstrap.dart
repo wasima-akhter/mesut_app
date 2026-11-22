@@ -46,8 +46,9 @@ Future<void> bootstrap({required Widget app}) async {
   final initialLanguage = AppLanguage.fromCode(savedLangCode);
   AppLanguageNotifier.activeLanguageCode = initialLanguage.code;
   await Future.wait([
-    AppLocalization.load(AppLanguage.english),
-    AppLocalization.load(AppLanguage.german),
+    AppLocalization.load(initialLanguage),
+    if (initialLanguage != AppLanguage.english)
+      AppLocalization.load(AppLanguage.english),
   ]);
 
   final container = ProviderContainer(

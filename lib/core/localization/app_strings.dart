@@ -29,6 +29,7 @@ class AppStrings {
   String get delete => get('common.delete', 'Delete');
   String get edit => get('common.edit', 'Edit');
   String get close => get('common.close', 'Close');
+  String get dismiss => get('common.dismiss', 'Dismiss');
   String get back => get('common.back', 'Back');
   String get search => get('common.search', 'Search');
   String get filter => get('common.filter', 'Filter');
@@ -354,6 +355,14 @@ class AppStrings {
   String get pauseBreak => get('employee.pauseBreak', 'Pause Break');
   String get resumeWork => get('employee.resumeWork', 'Resume Work');
   String get finishWork => get('employee.finishWork', 'Finish Work');
+  String get cancelTimer => get('employee.cancelTimer', 'Cancel Timer');
+  String get cancelTimerConfirm => get(
+    'employee.cancelTimerConfirm',
+    'Are you sure you want to cancel the active timer? The tracked time will be discarded.',
+  );
+  String get discardTimer => get('employee.discardTimer', 'Discard Timer');
+  String get keepWorking => get('employee.keepWorking', 'Keep Working');
+  String get timerCancelled => get('employee.timerCancelled', 'Timer cancelled');
   String get addTimeEntry => get('employee.addTimeEntry', 'Add Time Entry');
   String get saveEntry => get('employee.saveEntry', 'Save Entry');
   String get recentLogs => get('employee.recentLogs', 'Recent Logs');

@@ -1,64 +1,16 @@
 import 'dart:async';
 
-import 'package:construction_app/core/enums/backend_enums.dart';
-import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import 'package:construction_app/core/helpers/device_location_helper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/helper/employee_enums.dart';
 import '../../../shared/helper/employee_models.dart';
+import 'employee_timer_helpers.dart';
+import 'employee_timer_state.dart';
 import 'offline_sync_provider.dart';
 
-class EmployeeTimerState {
-  final bool isTimerRunning;
-  final bool isOnBreak;
-  final bool showThisMonth;
-  final Duration elapsed;
-  final EmployeeProjectModel currentProject;
-  final EmployeeActivityType currentActivity;
-  final List<EmployeeTimeLogModel> logs;
-
-  const EmployeeTimerState({
-    required this.isTimerRunning,
-    required this.isOnBreak,
-    required this.showThisMonth,
-    required this.elapsed,
-    required this.currentProject,
-    required this.currentActivity,
-    required this.logs,
-  });
-
-  EmployeeTimerState copyWith({
-    bool? isTimerRunning,
-    bool? isOnBreak,
-    bool? showThisMonth,
-    Duration? elapsed,
-    EmployeeProjectModel? currentProject,
-    EmployeeActivityType? currentActivity,
-    List<EmployeeTimeLogModel>? logs,
-  }) {
-    return EmployeeTimerState(
-      isTimerRunning: isTimerRunning ?? this.isTimerRunning,
-      isOnBreak: isOnBreak ?? this.isOnBreak,
-      showThisMonth: showThisMonth ?? this.showThisMonth,
-      elapsed: elapsed ?? this.elapsed,
-      currentProject: currentProject ?? this.currentProject,
-      currentActivity: currentActivity ?? this.currentActivity,
-      logs: logs ?? this.logs,
-    );
-  }
-
-  List<EmployeeTimeLogModel> get visibleLogs {
-    if (!showThisMonth) return logs;
-    return [...logs, ...logs];
-  }
-
-  String get formattedElapsed {
-    final hours = elapsed.inHours.toString().padLeft(2, '0');
-    final minutes = elapsed.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds = elapsed.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$hours:$minutes:$seconds';
-  }
-}
+export 'employee_timer_state.dart';
 
 final employeeTimerProvider =
     NotifierProvider<EmployeeTimerNotifier, EmployeeTimerState>(
@@ -67,15 +19,12 @@ final employeeTimerProvider =
 
 class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
   Timer? _ticker;
-  Duration _accumulatedBeforeRun = const Duration(
-    hours: 2,
-    minutes: 45,
-    seconds: 20,
-  );
+  Duration _accumulatedBeforeRun = Duration.zero;
   DateTime? _runStartedAt;
   DateTime? _sessionStartedAt;
   DateTime? _breakStartedAt;
   Duration _totalBreakDuration = Duration.zero;
+  bool _isDispatchedStart = false;
 
   @override
   EmployeeTimerState build() {
@@ -84,58 +33,14 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
       _ticker = null;
     });
 
-    const defaultProject = EmployeeProjectModel(
-      id: 'PRJ-0842',
-      name: 'Goltstein.Complex',
-      address: 'Goltsteinstraße 12, 50968 Köln',
-      activity: EmployeeActivityType.erection,
-      startTime: '07:30 am',
-      endTime: '04:15 pm',
-      startTimeOfDay: TimeOfDay(hour: 7, minute: 30),
-      endTimeOfDay: TimeOfDay(hour: 16, minute: 15),
-      siteManager: 'Mesut Rahaman',
-    );
-
-    final now = DateTime.now();
-    final defaultLogs = [
-      EmployeeTimeLogModel(
-        timestamp: now.toUtc(),
-        project: defaultProject,
-        duration: '8.0',
-        durationHours: 8.0,
-        breakTime: '45m',
-        breakDuration: const Duration(minutes: 45),
-        synced: true,
-      ),
-      EmployeeTimeLogModel(
-        timestamp: now.subtract(const Duration(days: 1)).toUtc(),
-        project: const EmployeeProjectModel(
-          id: 'PRJ-0842',
-          name: 'Goltstein.Complex',
-          address: 'Goltsteinstraße 12, 50968 Köln',
-          activity: EmployeeActivityType.dismantling,
-          startTime: '07:30 am',
-          endTime: '04:15 pm',
-          startTimeOfDay: TimeOfDay(hour: 7, minute: 30),
-          endTimeOfDay: TimeOfDay(hour: 16, minute: 15),
-          siteManager: 'Mesut Rahaman',
-        ),
-        duration: '8.0',
-        durationHours: 8.0,
-        breakTime: '45m',
-        breakDuration: const Duration(minutes: 45),
-        synced: true,
-      ),
-    ];
-
     return EmployeeTimerState(
       isTimerRunning: false,
       isOnBreak: false,
       showThisMonth: false,
-      elapsed: _accumulatedBeforeRun,
-      currentProject: defaultProject,
+      elapsed: Duration.zero,
+      currentProject: EmployeeTimerHelpers.defaultProject,
       currentActivity: EmployeeActivityType.erection,
-      logs: defaultLogs,
+      logs: EmployeeTimerHelpers.defaultLogs,
     );
   }
 
@@ -148,25 +53,90 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
       }
       final currentElapsed =
           _accumulatedBeforeRun + DateTime.now().difference(_runStartedAt!);
-      state = state.copyWith(elapsed: currentElapsed);
+      final remainingGrace = state.graceSecondsRemaining > 0
+          ? state.graceSecondsRemaining - 1
+          : 0;
+
+      state = state.copyWith(
+        elapsed: currentElapsed,
+        graceSecondsRemaining: remainingGrace,
+      );
+
+      if (remainingGrace == 0 && !_isDispatchedStart) {
+        _isDispatchedStart = true;
+        _dispatchStartApi();
+      }
     });
   }
 
-  void startTimer({
+  Future<bool> startTimer({
     EmployeeProjectModel? project,
     EmployeeActivityType? activity,
-  }) {
-    _accumulatedBeforeRun = state.elapsed;
-    _sessionStartedAt ??= DateTime.now().toUtc();
+  }) async {
+    final activeProject = project ?? state.currentProject;
+    final activeActivity = activity ?? state.currentActivity;
+
+    _ticker?.cancel();
+    _isDispatchedStart = false;
+    _accumulatedBeforeRun = Duration.zero;
     _totalBreakDuration = Duration.zero;
     _breakStartedAt = null;
+    final now = DateTime.now().toUtc();
+    _sessionStartedAt = now;
+    _runStartedAt = DateTime.now();
+
     state = state.copyWith(
       isTimerRunning: true,
       isOnBreak: false,
-      currentProject: project ?? state.currentProject,
-      currentActivity: activity ?? state.currentActivity,
+      elapsed: Duration.zero,
+      breakDuration: Duration.zero,
+      sessionStartedAt: now,
+      currentProject: activeProject,
+      currentActivity: activeActivity,
+      isActionLoading: false,
+      clearError: true,
+      graceSecondsRemaining: 5,
+      clearActiveTimeLogId: true,
     );
     _startTicker();
+    return true;
+  }
+
+  Future<void> _dispatchStartApi() async {
+    final activeProject = state.currentProject;
+    final activeActivity = state.currentActivity;
+    try {
+      final resolvedPhase = await EmployeeTimerHelpers.resolvePhaseId(
+        ref: ref,
+        rawId: activeProject.id,
+        activity: activeActivity,
+      );
+      final backendActivity = EmployeeTimerHelpers.mapActivity(activeActivity);
+      final coords = await DeviceLocationHelper.tryGetCoordinates();
+      final remoteDs = ref.read(mobileTimerRemoteDataSourceProvider);
+      final response = await remoteDs.startTimer(
+        phaseId: resolvedPhase,
+        activityType: backendActivity,
+        lat: coords?.lat,
+        lng: coords?.lng,
+      );
+
+      final timeLogId = EmployeeTimerHelpers.extractTimeLogId(response);
+      state = state.copyWith(
+        activeTimeLogId: timeLogId,
+        isActionLoading: false,
+      );
+    } catch (e) {
+      if (e is DioException && e.response?.statusCode == 409) {
+        final existingId = await EmployeeTimerHelpers.resolveActiveTimeLogId(
+          ref: ref,
+        );
+        state = state.copyWith(
+          activeTimeLogId: existingId,
+          isActionLoading: false,
+        );
+      }
+    }
   }
 
   void pauseTimer() {
@@ -177,18 +147,23 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
     _breakStartedAt = DateTime.now().toUtc();
     _ticker?.cancel();
     _ticker = null;
-    state = state.copyWith(isOnBreak: true, elapsed: _accumulatedBeforeRun);
+    state = state.copyWith(
+      isOnBreak: true,
+      elapsed: _accumulatedBeforeRun,
+      breakDuration: _totalBreakDuration,
+    );
   }
 
   void resumeTimer() {
     if (!state.isTimerRunning) return;
     if (_breakStartedAt != null) {
-      _totalBreakDuration += DateTime.now().toUtc().difference(
-        _breakStartedAt!,
-      );
+      _totalBreakDuration += DateTime.now().toUtc().difference(_breakStartedAt!);
       _breakStartedAt = null;
     }
-    state = state.copyWith(isOnBreak: false);
+    state = state.copyWith(
+      isOnBreak: false,
+      breakDuration: _totalBreakDuration,
+    );
     _startTicker();
   }
 
@@ -200,31 +175,51 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
     }
   }
 
-  void finishTimer() {
+  Future<bool> finishTimer() async {
     final endTime = DateTime.now().toUtc();
     if (_breakStartedAt != null) {
       _totalBreakDuration += endTime.difference(_breakStartedAt!);
       _breakStartedAt = null;
     }
 
-    final startTime = _sessionStartedAt;
+    final startTime = _sessionStartedAt ?? endTime.subtract(state.elapsed);
     final phaseId = state.currentProject.id;
     final projectName = state.currentProject.fullName;
-    final activity = _mapActivity(state.currentActivity);
+    final activity = EmployeeTimerHelpers.mapActivity(state.currentActivity);
     final breakMinutes = _totalBreakDuration.inMinutes;
 
     final elapsedMinutes = state.elapsed.inMinutes;
     final durationHours = double.parse(
       (elapsedMinutes / 60).toStringAsFixed(1),
     );
+
+    final activeId = await EmployeeTimerHelpers.stopActiveTimer(
+      ref: ref,
+      currentId: state.activeTimeLogId,
+      phaseId: phaseId,
+      activity: activity,
+    );
+
+    if (activeId == null || activeId.isEmpty) {
+      EmployeeTimerHelpers.enqueueOfflineLog(
+        ref: ref,
+        phaseId: phaseId,
+        activity: activity,
+        startTime: startTime,
+        endTime: endTime,
+        breakMinutes: breakMinutes,
+        projectName: projectName,
+      );
+    }
+
     final newLog = EmployeeTimeLogModel(
       timestamp: endTime,
       project: state.currentProject,
       duration: durationHours > 0 ? durationHours.toString() : '0.1',
       durationHours: durationHours > 0 ? durationHours : 0.1,
-      breakTime: '${_totalBreakDuration.inMinutes}m',
+      breakTime: '${breakMinutes}m',
       breakDuration: _totalBreakDuration,
-      synced: false,
+      synced: activeId != null && activeId.isNotEmpty,
     );
 
     _ticker?.cancel();
@@ -238,37 +233,51 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
       isTimerRunning: false,
       isOnBreak: false,
       elapsed: Duration.zero,
+      breakDuration: Duration.zero,
+      clearActiveTimeLogId: true,
+      clearSessionStartedAt: true,
+      isActionLoading: false,
       logs: [newLog, ...state.logs],
     );
 
-    if (startTime != null) {
-      try {
-        unawaited(
-          ref
-              .read(offlineSyncProvider.notifier)
-              .enqueueCompletedSegment(
-                phaseId: phaseId,
-                activityType: activity,
-                startTime: startTime,
-                endTime: endTime,
-                breakMinutes: breakMinutes,
-                projectName: projectName,
-              ),
-        );
-      } catch (_) {
-        // Ignore in unit test environments where SharedPreferences is not overridden.
-      }
-    }
+    return true;
   }
 
-  static BackendActivityType _mapActivity(EmployeeActivityType activity) {
-    switch (activity) {
-      case EmployeeActivityType.erection:
-        return BackendActivityType.erection;
-      case EmployeeActivityType.dismantling:
-        return BackendActivityType.dismantling;
-      case EmployeeActivityType.others:
-        return BackendActivityType.other;
+  Future<void> cancelTimer() async {
+    final wasInGrace = state.isGracePeriod || state.graceSecondsRemaining > 0;
+    final currentActiveId = state.activeTimeLogId;
+    final phaseId = state.currentProject.id;
+    final activity = EmployeeTimerHelpers.mapActivity(state.currentActivity);
+
+    _ticker?.cancel();
+    _ticker = null;
+    _runStartedAt = null;
+    _sessionStartedAt = null;
+    _totalBreakDuration = Duration.zero;
+    _accumulatedBeforeRun = Duration.zero;
+    _isDispatchedStart = false;
+
+    state = state.copyWith(
+      isTimerRunning: false,
+      isOnBreak: false,
+      elapsed: Duration.zero,
+      breakDuration: Duration.zero,
+      graceSecondsRemaining: 0,
+      clearActiveTimeLogId: true,
+      clearSessionStartedAt: true,
+      isActionLoading: false,
+    );
+
+    // Cancelled within 5 seconds: backend start was never called. Clean local cancel.
+    if (wasInGrace) return;
+
+    if (currentActiveId != null && currentActiveId.isNotEmpty) {
+      await EmployeeTimerHelpers.stopActiveTimer(
+        ref: ref,
+        currentId: currentActiveId,
+        phaseId: phaseId,
+        activity: activity,
+      );
     }
   }
 

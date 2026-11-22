@@ -1,3 +1,5 @@
+import 'package:construction_app/core/localization/localization_meta.dart';
+
 class MobileProfileEntity {
   const MobileProfileEntity({
     required this.id,
@@ -12,6 +14,7 @@ class MobileProfileEntity {
     this.hoursThisWeek = 0,
     this.assignedProjectsCount = 0,
     this.completedProjectsCount = 0,
+    this.localization,
   });
 
   final String id;
@@ -26,6 +29,7 @@ class MobileProfileEntity {
   final double hoursThisWeek;
   final int assignedProjectsCount;
   final int completedProjectsCount;
+  final LocalizationMeta? localization;
 
   String get fullName {
     final full = '$firstName $lastName'.trim();
@@ -45,6 +49,7 @@ class MobileProfileEntity {
     double? hoursThisWeek,
     int? assignedProjectsCount,
     int? completedProjectsCount,
+    LocalizationMeta? localization,
   }) {
     return MobileProfileEntity(
       id: id ?? this.id,
@@ -61,6 +66,7 @@ class MobileProfileEntity {
           assignedProjectsCount ?? this.assignedProjectsCount,
       completedProjectsCount:
           completedProjectsCount ?? this.completedProjectsCount,
+      localization: localization ?? this.localization,
     );
   }
 
@@ -77,5 +83,6 @@ class MobileProfileEntity {
         'hoursThisWeek': hoursThisWeek,
         'assignedProjectsCount': assignedProjectsCount,
         'completedProjectsCount': completedProjectsCount,
+        if (localization != null) 'localization': localization!.toJson(),
       };
 }

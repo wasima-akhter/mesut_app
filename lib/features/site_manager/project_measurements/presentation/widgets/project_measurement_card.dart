@@ -49,25 +49,21 @@ class ProjectMeasurementCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+                child: Wrap(
+                  spacing: 6.w,
+                  runSpacing: 4.h,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    Flexible(
-                      child: Text(
-                        context.loc.lineItem(index + 1, item.position),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 14.5.sp,
-                          color: const Color(0xFF888888),
-                          fontWeight: FontWeight.w500,
-                        ),
+                    Text(
+                      context.loc.lineItem(index + 1, item.position),
+                      style: TextStyle(
+                        fontSize: 14.5.sp,
+                        color: const Color(0xFF888888),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    if (item.localization != null) ...[
-                      SizedBox(width: 6.w),
+                    if (item.localization != null)
                       TranslationStatusBadge.fromMeta(item.localization),
-                    ],
                   ],
                 ),
               ),

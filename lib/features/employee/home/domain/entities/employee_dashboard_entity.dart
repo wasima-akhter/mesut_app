@@ -6,6 +6,7 @@ class EmployeeDashboardUserEntity {
   final String lastName;
   final String role;
   final String? avatarUrl;
+  final LocalizationMeta? localization;
 
   const EmployeeDashboardUserEntity({
     this.id = '',
@@ -13,6 +14,7 @@ class EmployeeDashboardUserEntity {
     this.lastName = '',
     this.role = 'EMPLOYEE',
     this.avatarUrl,
+    this.localization,
   });
 
   String get fullName {
@@ -27,6 +29,7 @@ class EmployeeDashboardProjectEntity {
   final String address;
   final double latitude;
   final double longitude;
+  final LocalizationMeta? localization;
 
   const EmployeeDashboardProjectEntity({
     this.id = '',
@@ -34,6 +37,7 @@ class EmployeeDashboardProjectEntity {
     this.address = '',
     this.latitude = 0,
     this.longitude = 0,
+    this.localization,
   });
 }
 
@@ -42,12 +46,14 @@ class EmployeeDashboardSiteManagerEntity {
   final String name;
   final String? phone;
   final String? email;
+  final LocalizationMeta? localization;
 
   const EmployeeDashboardSiteManagerEntity({
     this.id = '',
     this.name = '',
     this.phone,
     this.email,
+    this.localization,
   });
 }
 
@@ -85,6 +91,7 @@ class EmployeeDashboardEntity {
   final String formattedDate;
   final int totalUpcomingTasks;
   final List<EmployeeDashboardTaskEntity> upcomingTasks;
+  final LocalizationMeta? localization;
 
   const EmployeeDashboardEntity({
     this.user = const EmployeeDashboardUserEntity(),
@@ -92,5 +99,6 @@ class EmployeeDashboardEntity {
     this.formattedDate = '',
     this.totalUpcomingTasks = 0,
     this.upcomingTasks = const [],
+    this.localization,
   });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/employee/assignments/presentation/providers/employee_assignment_details_provider.dart';
 import '../../features/employee/home/presentation/providers/employee_dashboard_provider.dart';
 import '../../features/employee/plan/presentation/providers/employee_schedule_provider.dart';
 import '../../features/employee/time_tracking/presentation/providers/employee_time_tracking_provider.dart';
@@ -13,6 +14,7 @@ import '../../features/site_manager/inspection_pages/presentation/providers/mobi
 import '../../features/site_manager/phase_board/presentation/providers/mobile_phase_provider.dart';
 import '../../features/site_manager/project_attachments/presentation/providers/project_attachments_provider.dart';
 import '../../features/site_manager/project_dates/presentation/providers/project_dates_provider.dart';
+import '../../features/site_manager/project_details/presentation/providers/project_details_provider.dart';
 import '../../features/site_manager/project_history/presentation/providers/project_history_provider.dart';
 import '../../features/site_manager/project_measurements/presentation/providers/project_measurements_provider.dart';
 import '../../features/site_manager/project_notes/presentation/providers/project_notes_provider.dart';
@@ -36,6 +38,9 @@ Future<void> onAppLanguageChanged(Ref ref) async {
     ref.read(employeeDashboardProvider.notifier).refresh();
   } catch (_) {}
   try {
+    ref.read(assignmentDetailsProvider.notifier).refresh();
+  } catch (_) {}
+  try {
     ref.read(employeeScheduleProvider.notifier).refresh();
   } catch (_) {}
   try {
@@ -43,6 +48,9 @@ Future<void> onAppLanguageChanged(Ref ref) async {
   } catch (_) {}
   try {
     ref.read(employeeTimerProjectsProvider.notifier).loadInitial();
+  } catch (_) {}
+  try {
+    ref.read(mobileProfileProvider.notifier).refresh();
   } catch (_) {}
 
   // Site Manager providers
@@ -67,9 +75,13 @@ Future<void> onAppLanguageChanged(Ref ref) async {
   try {
     ref.invalidate(mobileCrewTimeProvider);
   } catch (_) {}
+  try {
+    ref.invalidate(mobileScheduleProvider);
+  } catch (_) {}
 
   // Project details providers
   try {
+    ref.invalidate(projectDetailsProvider);
     ref.invalidate(projectTasksProvider);
     ref.invalidate(projectMeasurementsProvider);
     ref.invalidate(projectNotesProvider);

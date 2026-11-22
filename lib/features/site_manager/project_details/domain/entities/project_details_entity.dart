@@ -1,3 +1,4 @@
+import '../../../../../core/localization/localization_meta.dart';
 import '../../../../../core/services/address_resolver_service.dart';
 
 class ProjectCoordinates {
@@ -174,6 +175,7 @@ class ProjectDetailsEntity {
   final List<LaborHoursByActivity> hoursByActivity;
   final List<CrewBreakdownItem> crewBreakdown;
   final AttachmentCounts attachmentCounts;
+  final LocalizationMeta? localization;
 
   const ProjectDetailsEntity({
     required this.id,
@@ -192,6 +194,7 @@ class ProjectDetailsEntity {
     required this.hoursByActivity,
     required this.crewBreakdown,
     required this.attachmentCounts,
+    this.localization,
   });
 
   String get formattedAddress => AddressResolverService.resolveSync(

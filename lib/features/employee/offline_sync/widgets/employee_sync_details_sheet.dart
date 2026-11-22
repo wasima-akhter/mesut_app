@@ -6,6 +6,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../core/localization/context_extensions.dart';
 import '../models/employee_sync_action.dart';
 import '../providers/employee_sync_provider.dart';
+import '../services/employee_sync_service.dart';
 
 class EmployeeSyncDetailsSheet extends ConsumerWidget {
   const EmployeeSyncDetailsSheet({super.key});
@@ -125,6 +126,7 @@ class EmployeeSyncDetailsSheet extends ConsumerWidget {
                     final friendlyError = action.lastError != null
                         ? _cleanDisplayError(context, action.lastError!)
                         : null;
+                    final payloadSummary = _formatPayloadSummary(action);
 
                     return ListTile(
                       dense: true,
@@ -155,7 +157,7 @@ class EmployeeSyncDetailsSheet extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${_formatActionType(context, action.actionType)} • ${_formatDate(action.createdAt)}',
+                            '$payloadSummary • ${_formatDate(action.createdAt)}',
                             style: TextStyle(
                               fontSize: 11.5.sp,
                               color: AppColors.textTertiary,
@@ -217,64 +219,71 @@ class EmployeeSyncDetailsSheet extends ConsumerWidget {
     );
   }
 
-  String _formatActionType(BuildContext context, EmployeeSyncActionType type) {
-    return switch (type) {
+  String _formatPayloadSummary(EmployeeSyncAction action) {
+    final p = EmployeeSyncService.sanitizePayload(action);
+    return switch (action.actionType) {
       EmployeeSyncActionType.startTimer =>
-        context.loc.get('sync.actionStartTimer', 'Timer Start'),
-      EmployeeSyncActionType.stopTimer =>
-        context.loc.get('sync.actionStopTimer', 'Timer Stop'),
+        'Timer • ${p['activityType']?.toString().toUpperCase() ?? 'ERECTION'}',
+      EmployeeSyncActionType.stopTimer => 'Timer Stop',
       EmployeeSyncActionType.manualTimeLog =>
-        context.loc.get('sync.actionManualTimeLog', 'Manual Time Entry'),
-      EmployeeSyncActionType.uploadAssignmentPhoto =>
-        context.loc.get('sync.actionUploadPhoto', 'Photo Upload'),
-      EmployeeSyncActionType.toggleAssignmentTask =>
-        context.loc.get('sync.actionToggleTask', 'Task Update'),
+        'Manual • ${p['activityType'] ?? 'ERECTION'} (${p['breakMinutes'] ?? 0}m break)',
+      EmployeeSyncActionType.uploadAssignmentPhoto => 'Photo Upload',
+      EmployeeSyncActionType.toggleAssignmentTask => 'Task Status',
     };
   }
 
   String _cleanDisplayError(BuildContext context, String rawError) {
-    final lower = rawError.toLowerCase();
-    if (lower.contains('dioexception') ||
-        lower.contains('socketexception') ||
-        lower.contains('connection') ||
-        lower.contains('network') ||
-        lower.contains('failed host lookup') ||
-        lower.contains('timeout') ||
-        lower.contains('offline')) {
-      return context.loc.get('sync.errorConnectionFailed', 'Connection issue • Will retry automatically');
+    final l = rawError.toLowerCase();
+    if (l.contains('unrecognized key') ||
+        l.contains('validation') ||
+        l.contains('422')) {
+      return context.loc
+          .get('sync.formatUpdated', 'Format updated • Ready to sync');
     }
-    if (lower.contains('status code') ||
-        lower.contains('server') ||
-        lower.contains('500') ||
-        lower.contains('502') ||
-        lower.contains('503') ||
-        lower.contains('504')) {
-      return context.loc.get('sync.errorServerUnavailable', 'Server temporarily unavailable • Will retry');
+    if (l.contains('conflict') || l.contains('409')) {
+      return context.loc
+          .get('sync.conflictResolved', 'Updated on server • Ready to sync');
     }
-    if (lower.contains('not found') || lower.contains('404')) {
+    if (l.contains('connection') ||
+        l.contains('network') ||
+        l.contains('timeout') ||
+        l.contains('offline')) {
+      return context.loc.get('sync.errorConnectionFailed',
+          'Connection issue • Will retry automatically');
+    }
+    if (l.contains('server') ||
+        l.contains('500') ||
+        l.contains('502') ||
+        l.contains('503')) {
+      return context.loc.get('sync.errorServerUnavailable',
+          'Server temporarily unavailable • Will retry');
+    }
+    if (l.contains('not found') || l.contains('404')) {
       return context.loc.get('sync.errorNotFound', 'Item not found on server');
     }
-    if (lower.contains('session') ||
-        lower.contains('unauthorized') ||
-        lower.contains('401') ||
-        lower.contains('403')) {
-      return context.loc.get('sync.errorSessionExpired', 'Session expired • Please sign in again');
+    if (l.contains('session') ||
+        l.contains('unauthorized') ||
+        l.contains('401') ||
+        l.contains('403')) {
+      return context.loc
+          .get('sync.errorSessionExpired', 'Session expired • Please sign in again');
     }
-    if (lower.contains('cannot post') ||
-        lower.contains('cannot get') ||
-        lower.contains('bad response') ||
-        lower.contains('exception:')) {
-      return context.loc.get('sync.errorSyncFailed', 'Could not sync changes • Will retry automatically');
+    if (l.contains('dioexception') ||
+        l.contains('cannot') ||
+        l.contains('bad response') ||
+        l.contains('exception:')) {
+      return context.loc.get(
+          'sync.errorSyncFailed', 'Could not sync changes • Will retry automatically');
     }
     return rawError;
   }
 
   String _formatDate(DateTime dt) {
     final l = dt.toLocal();
-    final m = l.month.toString().padLeft(2, '0');
-    final d = l.day.toString().padLeft(2, '0');
-    final hh = l.hour.toString().padLeft(2, '0');
-    final mm = l.minute.toString().padLeft(2, '0');
+    final m = '${l.month}'.padLeft(2, '0');
+    final d = '${l.day}'.padLeft(2, '0');
+    final hh = '${l.hour}'.padLeft(2, '0');
+    final mm = '${l.minute}'.padLeft(2, '0');
     return '${l.year}-$m-$d $hh:$mm';
   }
 }

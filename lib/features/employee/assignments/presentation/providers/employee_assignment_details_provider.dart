@@ -1,90 +1,87 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/helper/employee_models.dart';
+import 'employee_assignment_details_state.dart';
+import 'employee_project_details_di.dart';
 
-class AssignmentTaskItem {
-  final String id;
-  final String title;
-  final bool isCompleted;
-
-  const AssignmentTaskItem({
-    required this.id,
-    required this.title,
-    this.isCompleted = false,
-  });
-
-  AssignmentTaskItem copyWith({bool? isCompleted}) {
-    return AssignmentTaskItem(
-      id: id,
-      title: title,
-      isCompleted: isCompleted ?? this.isCompleted,
-    );
-  }
-}
-
-class AssignmentDetailsState {
-  final EmployeeAssignmentModel assignment;
-  final List<AssignmentTaskItem> tasks;
-  final bool isInstructionsExpanded;
-
-  const AssignmentDetailsState({
-    required this.assignment,
-    required this.tasks,
-    this.isInstructionsExpanded = true,
-  });
-
-  AssignmentDetailsState copyWith({
-    EmployeeAssignmentModel? assignment,
-    List<AssignmentTaskItem>? tasks,
-    bool? isInstructionsExpanded,
-  }) {
-    return AssignmentDetailsState(
-      assignment: assignment ?? this.assignment,
-      tasks: tasks ?? this.tasks,
-      isInstructionsExpanded:
-          isInstructionsExpanded ?? this.isInstructionsExpanded,
-    );
-  }
-}
-
-class AssignmentDetailsNotifier extends Notifier<AssignmentDetailsState> {
+class AssignmentDetailsNotifier
+    extends Notifier<EmployeeAssignmentDetailsState> {
   @override
-  AssignmentDetailsState build() {
-    return AssignmentDetailsState(
-      assignment: fakeAssignments.first,
-      tasks: const [
-        AssignmentTaskItem(
-          id: 'task-1',
-          title: 'Assemble base jacks and ground frame',
-          isCompleted: false,
-        ),
-        AssignmentTaskItem(
-          id: 'task-2',
-          title: 'Secure diagonal bracing on level 1',
-          isCompleted: false,
-        ),
-        AssignmentTaskItem(
-          id: 'task-3',
-          title: 'Install safety netting and toe boards',
-          isCompleted: false,
-        ),
-      ],
-    );
+  EmployeeAssignmentDetailsState build() {
+    return const EmployeeAssignmentDetailsState();
   }
 
   void setAssignment(EmployeeAssignmentModel assignment) {
-    state = state.copyWith(assignment: assignment);
+    state = state.copyWith(
+      fallbackAssignment: assignment,
+      currentProjectId: assignment.projectId,
+    );
+    final pid = assignment.projectId;
+    if (pid != null && pid.isNotEmpty) {
+      loadProject(pid);
+    }
   }
 
-  void toggleTask(String taskId) {
-    state = state.copyWith(
-      tasks: state.tasks.map((task) {
-        if (task.id == taskId) {
-          return task.copyWith(isCompleted: !task.isCompleted);
-        }
-        return task;
-      }).toList(),
-    );
+  Future<void> loadProject(String projectId, {bool isRefresh = false}) async {
+    if (projectId.isEmpty) return;
+
+    if (isRefresh) {
+      state = state.copyWith(isRefreshing: true, clearError: true);
+    } else {
+      state = state.copyWith(
+        isLoading: state.project == null,
+        currentProjectId: projectId,
+        clearError: true,
+      );
+    }
+
+    try {
+      final repo = ref.read(employeeProjectDetailsRepositoryProvider);
+      final project = await repo.getProjectDetail(projectId);
+      state = state.copyWith(
+        isLoading: false,
+        isRefreshing: false,
+        project: project,
+        tasks: project.tasks,
+        currentProjectId: projectId,
+        clearError: true,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        isRefreshing: false,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
+  Future<void> refresh() async {
+    final pid = state.currentProjectId;
+    if (pid != null && pid.isNotEmpty) {
+      await loadProject(pid, isRefresh: true);
+    }
+  }
+
+  Future<void> toggleTask(String taskId) async {
+    final previousTasks = state.tasks;
+    final updatedTasks = previousTasks.map((t) {
+      if (t.id == taskId) {
+        return t.copyWith(isCompleted: !t.isCompleted);
+      }
+      return t;
+    }).toList();
+
+    state = state.copyWith(tasks: updatedTasks);
+
+    try {
+      final repo = ref.read(employeeProjectDetailsRepositoryProvider);
+      final success = await repo.toggleTask(taskId);
+      if (!success) {
+        state = state.copyWith(tasks: previousTasks);
+      }
+    } catch (_) {
+      state = state.copyWith(tasks: previousTasks);
+    }
   }
 
   void toggleInstructions() {
@@ -95,6 +92,6 @@ class AssignmentDetailsNotifier extends Notifier<AssignmentDetailsState> {
 }
 
 final assignmentDetailsProvider =
-    NotifierProvider<AssignmentDetailsNotifier, AssignmentDetailsState>(
+    NotifierProvider<AssignmentDetailsNotifier, EmployeeAssignmentDetailsState>(
       AssignmentDetailsNotifier.new,
     );

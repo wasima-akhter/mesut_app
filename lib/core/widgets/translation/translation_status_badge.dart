@@ -17,6 +17,7 @@ class TranslationStatusBadge extends StatelessWidget {
   final String displayedLocale;
   final LocalizationMeta? meta;
   final EdgeInsetsGeometry? padding;
+  final double? maxWidth;
 
   const TranslationStatusBadge({
     super.key,
@@ -26,12 +27,14 @@ class TranslationStatusBadge extends StatelessWidget {
     this.displayedLocale = 'en',
     this.meta,
     this.padding,
+    this.maxWidth,
   });
 
   const TranslationStatusBadge.fromMeta(
     this.meta, {
     super.key,
     this.padding,
+    this.maxWidth,
   })  : translationStatus = 'READY',
         isTranslated = false,
         sourceLocale = 'en',
@@ -53,6 +56,13 @@ class TranslationStatusBadge extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    Widget wrapBadge(Widget child) {
+      return ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth ?? 135.w),
+        child: child,
+      );
+    }
+
     // 1. PENDING / PROCESSING: Translation is being processed in background worker
     // If polling timed out, fall back to a calm static "Original" chip instead
     // of an infinite spinner.
@@ -60,12 +70,88 @@ class TranslationStatusBadge extends StatelessWidget {
       if (TranslationTimeoutScope.isTimedOutOf(context)) {
         final origLabel = context.loc.translationOriginal;
         final src = effectiveMeta.sourceLocale.toUpperCase();
-        return Container(
+        return wrapBadge(
+          Container(
+            padding: padding ?? EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(6.r),
+              border: Border.all(color: Colors.grey.shade300, width: 0.5),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.translate_rounded,
+                  size: 12.sp,
+                  color: Colors.grey.shade700,
+                ),
+                SizedBox(width: 4.w),
+                Flexible(
+                  child: Text(
+                    '$origLabel ($src)',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      return wrapBadge(
+        Container(
           padding: padding ?? EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: Colors.amber.shade100,
             borderRadius: BorderRadius.circular(6.r),
-            border: Border.all(color: Colors.grey.shade300, width: 0.5),
+            border: Border.all(color: Colors.amber.shade300, width: 0.5),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 10.w,
+                height: 10.w,
+                child: CircularProgressIndicator(
+                  strokeWidth: 1.5,
+                  color: Colors.amber.shade800,
+                ),
+              ),
+              SizedBox(width: 5.w),
+              Flexible(
+                child: Text(
+                  context.loc.translationTranslating,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.amber.shade900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // 2. FAILED: Worker failed to translate; API returns source text
+    if (effectiveMeta.isFailed) {
+      return wrapBadge(
+        Container(
+          padding: padding ?? EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
+          decoration: BoxDecoration(
+            color: Colors.red.shade50,
+            borderRadius: BorderRadius.circular(6.r),
+            border: Border.all(color: Colors.red.shade200, width: 0.5),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -73,90 +159,23 @@ class TranslationStatusBadge extends StatelessWidget {
               Icon(
                 Icons.translate_rounded,
                 size: 12.sp,
-                color: Colors.grey.shade700,
+                color: Colors.red.shade700,
               ),
               SizedBox(width: 4.w),
               Flexible(
                 child: Text(
-                  '$origLabel ($src)',
+                  context.loc.translationUnavailable,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade800,
+                    color: Colors.red.shade800,
                   ),
                 ),
               ),
             ],
           ),
-        );
-      }
-
-      return Container(
-        padding: padding ?? EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
-        decoration: BoxDecoration(
-          color: Colors.amber.shade100,
-          borderRadius: BorderRadius.circular(6.r),
-          border: Border.all(color: Colors.amber.shade300, width: 0.5),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 10.w,
-              height: 10.w,
-              child: CircularProgressIndicator(
-                strokeWidth: 1.5,
-                color: Colors.amber.shade800,
-              ),
-            ),
-            SizedBox(width: 5.w),
-            Flexible(
-              child: Text(
-                context.loc.translationTranslating,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.amber.shade900,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // 2. FAILED: Worker failed to translate; API returns source text
-    if (effectiveMeta.isFailed) {
-      return Container(
-        padding: padding ?? EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
-        decoration: BoxDecoration(
-          color: Colors.red.shade50,
-          borderRadius: BorderRadius.circular(6.r),
-          border: Border.all(color: Colors.red.shade200, width: 0.5),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.translate_rounded,
-              size: 12.sp,
-              color: Colors.red.shade700,
-            ),
-            SizedBox(width: 4.w),
-            Flexible(
-              child: Text(
-                context.loc.translationUnavailable,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.red.shade800,
-                ),
-              ),
-            ),
-          ],
         ),
       );
     }
@@ -169,34 +188,37 @@ class TranslationStatusBadge extends StatelessWidget {
       final to = effectiveMeta.displayedLocale.toUpperCase();
       final label = context.loc.translationTranslated;
 
-      return Container(
-        padding: padding ?? EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
-        decoration: BoxDecoration(
-          color: Colors.blue.shade50,
-          borderRadius: BorderRadius.circular(6.r),
-          border: Border.all(color: Colors.blue.shade200, width: 0.5),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.g_translate_rounded,
-              size: 12.sp,
-              color: Colors.blue.shade700,
-            ),
-            SizedBox(width: 4.w),
-            Flexible(
-              child: Text(
-                '$label ($from → $to)',
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.blue.shade800,
+      return wrapBadge(
+        Container(
+          padding: padding ?? EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50,
+            borderRadius: BorderRadius.circular(6.r),
+            border: Border.all(color: Colors.blue.shade200, width: 0.5),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.g_translate_rounded,
+                size: 12.sp,
+                color: Colors.blue.shade700,
+              ),
+              SizedBox(width: 4.w),
+              Flexible(
+                child: Text(
+                  '$label ($from → $to)',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue.shade800,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }

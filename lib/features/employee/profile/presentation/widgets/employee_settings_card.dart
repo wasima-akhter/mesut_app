@@ -8,7 +8,7 @@ import 'package:construction_app/app/theme/app_colors.dart';
 import 'package:construction_app/core/localization/app_language.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
 import 'package:construction_app/core/localization/localization_provider.dart';
-import '../../../../shared/config/presentation/providers/mobile_config_provider.dart';
+import '../../../../shared/widgets/language_selection_bottom_sheet.dart';
 import '../../../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
 import '../../../../shared/notifications/presentation/providers/notification_settings_provider.dart';
 import '../../../offline_sync/providers/employee_sync_provider.dart';
@@ -22,9 +22,7 @@ class EmployeeSettingsCard extends ConsumerWidget {
     final notificationsEnabled = ref.watch(notificationSettingsProvider);
     final syncState = ref.watch(employeeSyncProvider);
     final currentLang = ref.watch(appLanguageProvider);
-    final langName = currentLang == AppLanguage.german
-        ? context.loc.german
-        : context.loc.english;
+    final langName = currentLang.label;
 
     return Container(
       width: double.infinity,
@@ -130,71 +128,6 @@ class EmployeeSettingsCard extends ConsumerWidget {
   }
 
   void _changeLanguage(BuildContext context, WidgetRef ref) {
-    final currentLang = ref.read(appLanguageProvider);
-    final enabledLanguages = ref.read(enabledLanguagesProvider);
-
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: AppColors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
-      ),
-      builder: (dialogContext) {
-        return SafeArea(
-          child: CustomScrollView(
-            shrinkWrap: true,
-            slivers: [
-              SliverPadding(
-                padding: EdgeInsets.all(18.w),
-                sliver: SliverToBoxAdapter(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        context.loc.selectLanguage,
-                        style: TextStyle(
-                          fontSize: 21.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      SizedBox(height: 14.h),
-                      for (final lang in enabledLanguages)
-                        ListTile(
-                          onTap: () async {
-                            Navigator.of(dialogContext).pop();
-                            final langCode = lang == AppLanguage.german
-                                ? 'DE'
-                                : 'EN';
-                            await ref
-                                .read(appLanguageProvider.notifier)
-                                .setLanguage(lang);
-                            try {
-                              await ref
-                                  .read(mobileProfileProvider.notifier)
-                                  .updateProfile(language: langCode);
-                            } catch (_) {}
-                          },
-                          title: Text(
-                            lang == AppLanguage.german
-                                ? context.loc.german
-                                : context.loc.english,
-                            style: TextStyle(fontSize: 17.sp),
-                          ),
-                          trailing: currentLang == lang
-                              ? const Icon(
-                                  Icons.check,
-                                  color: AppColors.primary,
-                                )
-                              : null,
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+    LanguageSelectionBottomSheet.show(context, ref);
   }
 }

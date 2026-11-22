@@ -223,41 +223,34 @@ class _InspectionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8.w,
-                        vertical: 4.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: badgeColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(6.r),
-                      ),
-                      child: Text(
-                        inspection.isPending
-                            ? context.loc.pending
-                            : context.loc.surveyDone,
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                          color: badgeColor,
-                        ),
+                    Expanded(
+                      child: Wrap(
+                        spacing: 6.w,
+                        runSpacing: 4.h,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                            decoration: BoxDecoration(
+                              color: badgeColor.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(6.r),
+                            ),
+                            child: Text(
+                              inspection.isPending ? context.loc.pending : context.loc.surveyDone,
+                              style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: badgeColor),
+                            ),
+                          ),
+                          if (inspection.localization != null)
+                            TranslationStatusBadge.fromMeta(inspection.localization),
+                        ],
                       ),
                     ),
-                    if (inspection.localization != null) ...[
-                      SizedBox(width: 6.w),
-                      TranslationStatusBadge.fromMeta(inspection.localization),
-                    ],
-                    const Spacer(),
+                    SizedBox(width: 6.w),
                     Text(
-                      MobilePhaseLocalizer.formatDateRange(
-                        inspection.appointmentDate,
-                        null,
-                      ),
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: AppColors.textSecondary,
-                      ),
+                      MobilePhaseLocalizer.formatDateRange(inspection.appointmentDate, null),
+                      style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary),
                     ),
                   ],
                 ),

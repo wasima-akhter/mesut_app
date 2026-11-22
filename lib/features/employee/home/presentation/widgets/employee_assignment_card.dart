@@ -83,6 +83,8 @@ class EmployeeAssignmentCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     assignment.project,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 19.sp,
                       fontWeight: FontWeight.w700,
@@ -90,6 +92,7 @@ class EmployeeAssignmentCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                SizedBox(width: 6.w),
                 TranslationStatusBadge.fromMeta(assignment.localization),
               ],
             ),

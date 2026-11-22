@@ -51,14 +51,20 @@ class ProjectCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  PhaseBadge(type: project.type),
-                  const SizedBox(width: 7),
-                  StatusLabel(status: project.status),
-                  if (project.localization != null) ...[
-                    const SizedBox(width: 6),
-                    TranslationStatusBadge.fromMeta(project.localization),
-                  ],
-                  const Spacer(),
+                  Expanded(
+                    child: Wrap(
+                      spacing: 6.w,
+                      runSpacing: 4.h,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        PhaseBadge(type: project.type),
+                        StatusLabel(status: project.status),
+                        if (project.localization != null)
+                          TranslationStatusBadge.fromMeta(project.localization),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 6.w),
                   PriorityBadge(priority: project.priority),
                 ],
               ),

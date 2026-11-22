@@ -7,6 +7,7 @@ import '../../../app/constants/route_constants.dart';
 import '../../../core/enums/app_enum.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/localization/localization_provider.dart';
+import '../../../core/localization/pending_refetch_controller.dart';
 import '../../auth/presentation/providers/auth_provider.dart';
 import '../../entry/nav/navigation_provider.dart';
 import '../../map/domain/entities/map_coordinate_entity.dart';
@@ -67,16 +68,26 @@ class SiteManagerHomePage extends ConsumerWidget {
               ? currentUser!.fullName
               : context.loc.siteManager);
 
+    final dashboard = dashboardAsync.asData?.value;
+    final hasPendingTranslations = anyLocalizationPending([
+      dashboard?.localization,
+      profile?.localization,
+      ...dashboard?.upcomingTasks.map((t) => t.localization) ?? [],
+    ]);
+
     return Scaffold(
       body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () async {
-            await Future.wait([
-              ref.read(mobileDashboardProvider.notifier).refresh(),
-              ref.read(notificationsProvider.notifier).refresh(),
-            ]);
-          },
-          child: CustomScrollView(
+        child: PendingPollEffect(
+          hasPending: hasPendingTranslations,
+          onPoll: () => ref.read(mobileDashboardProvider.notifier).refresh(),
+          child: RefreshIndicator(
+            onRefresh: () async {
+              await Future.wait([
+                ref.read(mobileDashboardProvider.notifier).refresh(),
+                ref.read(notificationsProvider.notifier).refresh(),
+              ]);
+            },
+            child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
             ),
@@ -263,6 +274,7 @@ class SiteManagerHomePage extends ConsumerWidget {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

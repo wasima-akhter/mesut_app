@@ -1,32 +1,22 @@
+import 'package:construction_app/core/localization/localization_meta.dart';
 import '../../domain/entities/mobile_dashboard_entity.dart';
 import '../../domain/entities/mobile_profile_entity.dart';
 import '../../domain/entities/mobile_project_entity.dart';
 import '../../domain/entities/mobile_schedule_entity.dart';
 
-int _asInt(dynamic value, [int fallback = 0]) {
-  if (value is int) return value;
-  if (value is num) return value.toInt();
-  return int.tryParse(value?.toString() ?? '') ?? fallback;
-}
+int _asInt(dynamic value, [int fallback = 0]) =>
+    value is int ? value : (value is num ? value.toInt() : (int.tryParse(value?.toString() ?? '') ?? fallback));
 
-double _asDouble(dynamic value, [double fallback = 0]) {
-  if (value is double) return value;
-  if (value is num) return value.toDouble();
-  return double.tryParse(value?.toString() ?? '') ?? fallback;
-}
+double _asDouble(dynamic value, [double fallback = 0]) =>
+    value is double ? value : (value is num ? value.toDouble() : (double.tryParse(value?.toString() ?? '') ?? fallback));
 
 DateTime? _asDateTime(dynamic value) {
-  if (value == null) return null;
-  final raw = value.toString().trim();
-  if (raw.isEmpty) return null;
-  return DateTime.tryParse(raw);
+  final raw = value?.toString().trim() ?? '';
+  return raw.isEmpty ? null : DateTime.tryParse(raw);
 }
 
-Map<String, dynamic> _asMap(dynamic value) {
-  if (value is Map<String, dynamic>) return value;
-  if (value is Map) return Map<String, dynamic>.from(value);
-  return const <String, dynamic>{};
-}
+Map<String, dynamic> _asMap(dynamic value) =>
+    value is Map<String, dynamic> ? value : (value is Map ? Map<String, dynamic>.from(value) : const <String, dynamic>{});
 
 class MobileDashboardModel {
   static MobileDashboardEntity fromJson(Map<String, dynamic> json) {
@@ -68,6 +58,7 @@ class MobileDashboardModel {
               name: (projectMap['name'] ?? '').toString(),
               address: (projectMap['address'] ?? '').toString(),
             ),
+            localization: LocalizationMeta.tryParse(map),
           ),
         );
       }
@@ -79,6 +70,7 @@ class MobileDashboardModel {
       stats: stats,
       upcomingTasks: upcomingTasks,
       mapPins: mapPins,
+      localization: LocalizationMeta.tryParse(json),
     );
   }
 }
@@ -165,6 +157,7 @@ class MobileProjectModel {
       isProfitable: json['isProfitable'] is bool
           ? json['isProfitable'] as bool
           : true,
+      localization: LocalizationMeta.tryParse(json),
     );
   }
 
@@ -219,6 +212,7 @@ class MobileProfileModel {
       hoursThisWeek: _asDouble(json['hoursThisWeek']),
       assignedProjectsCount: _asInt(json['assignedProjectsCount']),
       completedProjectsCount: _asInt(json['completedProjectsCount']),
+      localization: LocalizationMeta.tryParse(json),
     );
   }
 }
@@ -250,6 +244,8 @@ class MobileScheduleModel {
                 name: (proj['name'] ?? '').toString(),
                 address: (proj['address'] ?? '').toString(),
               ),
+              localization: LocalizationMeta.tryParse(p) ??
+                  LocalizationMeta.tryParse(proj),
             ),
           );
         }
@@ -273,8 +269,7 @@ class MobileScheduleModel {
               scaffoldArea: (m['scaffoldArea'] as num?)?.toDouble() ?? 0,
               scaffoldHeight: (m['scaffoldHeight'] as num?)?.toDouble() ?? 0,
               scaffoldType: (m['scaffoldType'] ?? '').toString(),
-              siteAccessInstructions:
-                  (m['siteAccessInstructions'] ?? '').toString(),
+              siteAccessInstructions: (m['siteAccessInstructions'] ?? '').toString(),
               specialRequirements: (m['specialRequirements'] ?? '').toString(),
               status: (m['status'] ?? 'PENDING').toString(),
               projectId: (m['projectId'] ?? '').toString(),
@@ -282,6 +277,7 @@ class MobileScheduleModel {
               customerCategory: (cust['category'] ?? '').toString(),
               convertedProjectId: conv['id']?.toString(),
               convertedProjectName: conv['name']?.toString(),
+              localization: LocalizationMeta.tryParse(m),
             ),
           );
         }

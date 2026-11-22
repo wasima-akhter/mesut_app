@@ -197,15 +197,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RouteConstants.employeeAssignmentDetails,
         builder: (context, state) {
-          return const AssignmentDetailsPage();
+          final extra = state.extra;
+          final projectId = extra is Map
+              ? extra['projectId'] as String?
+              : (extra is String ? extra : null);
+          return AssignmentDetailsPage(projectId: projectId);
         },
       ),
       GoRoute(
         path: RouteConstants.employeeAssignmentPhotos,
         builder: (context, state) {
-          final assignmentTitle = state.extra as String?;
+          final extra = state.extra;
+          final projectId = extra is Map
+              ? extra['projectId'] as String?
+              : (extra is String ? extra : null);
+          final title = extra is Map
+              ? extra['title'] as String?
+              : (extra is String ? extra : null);
           return EmployeeAssignmentPhotosPage(
-            assignmentTitle: assignmentTitle,
+            projectId: projectId,
+            assignmentTitle: title,
           );
         },
       ),

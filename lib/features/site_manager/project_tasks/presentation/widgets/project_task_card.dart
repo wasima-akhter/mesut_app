@@ -101,34 +101,58 @@ class ProjectTaskCard extends ConsumerWidget {
 
   Widget _buildMetadataRow(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _buildAvatar(),
-        SizedBox(width: 5.w),
-        Flexible(
-          child: Text(
-            task.employee?.fullName ?? '-',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 14.5.sp, color: const Color(0xFF777777)),
+        Expanded(
+          child: Wrap(
+            spacing: 6.w,
+            runSpacing: 4.h,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildAvatar(),
+                  SizedBox(width: 5.w),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 90.w),
+                    child: Text(
+                      task.employee?.fullName ?? '-',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14.5.sp,
+                        color: const Color(0xFF777777),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              _buildPriorityTag(),
+              if (task.localization != null)
+                TranslationStatusBadge.fromMeta(task.localization),
+            ],
           ),
         ),
-        SizedBox(width: 7.w),
-        _buildPriorityTag(),
-        if (task.localization != null) ...[
-          SizedBox(width: 6.w),
-          TranslationStatusBadge.fromMeta(task.localization),
-        ],
-        const Spacer(),
         if (task.dueDate != null) ...[
-          Icon(
-            Icons.calendar_today_outlined,
-            size: 14.sp,
-            color: const Color(0xFF888888),
-          ),
-          SizedBox(width: 4.w),
-          Text(
-            context.loc.dueOn(_formatDueDate(task.dueDate!)),
-            style: TextStyle(fontSize: 13.5.sp, color: const Color(0xFF777777)),
+          SizedBox(width: 6.w),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.calendar_today_outlined,
+                size: 14.sp,
+                color: const Color(0xFF888888),
+              ),
+              SizedBox(width: 4.w),
+              Text(
+                context.loc.dueOn(_formatDueDate(task.dueDate!)),
+                style: TextStyle(
+                  fontSize: 13.5.sp,
+                  color: const Color(0xFF777777),
+                ),
+              ),
+            ],
           ),
         ],
       ],

@@ -1,3 +1,5 @@
+import 'package:construction_app/core/localization/localization_meta.dart';
+
 class DashboardPhaseStatsEntity {
   const DashboardPhaseStatsEntity({
     this.planned = 0,
@@ -45,6 +47,7 @@ class UpcomingTaskEntity {
     this.startDate,
     this.endDate,
     required this.project,
+    this.localization,
   });
 
   final String phaseId;
@@ -54,6 +57,7 @@ class UpcomingTaskEntity {
   final DateTime? startDate;
   final DateTime? endDate;
   final DashboardProjectSummaryEntity project;
+  final LocalizationMeta? localization;
 }
 
 class MobileMapPinEntity {
@@ -77,9 +81,11 @@ class MobileDashboardEntity {
     this.stats = const DashboardStatsEntity(),
     this.upcomingTasks = const [],
     this.mapPins = const [],
+    this.localization,
   });
 
   final DashboardStatsEntity stats;
   final List<UpcomingTaskEntity> upcomingTasks;
   final List<MobileMapPinEntity> mapPins;
+  final LocalizationMeta? localization;
 }

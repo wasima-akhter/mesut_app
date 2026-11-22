@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -11,14 +9,14 @@ import '../../../core/localization/app_localization.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/services/image_service.dart';
 import '../../../core/services/permission_service.dart';
+import '../../../core/widgets/buttons/buttons.dart';
 import '../../../core/widgets/images/app_network_image.dart';
-import 'presentation/providers/site_manager_photos_provider.dart';
+import '../../../core/widgets/snack/app_snackbar.dart';
 import 'all_photos_screen.dart';
 import 'models.dart';
 import 'overview_modules.dart';
 import 'pdf_plan_preview_screen.dart';
-import '../../../core/widgets/buttons/buttons.dart';
-import '../../../core/widgets/snack/app_snackbar.dart';
+import 'presentation/providers/site_manager_photos_provider.dart';
 import 'services/pdf_export_service.dart';
 
 class PhotosTab extends ConsumerStatefulWidget {
@@ -169,10 +167,7 @@ class _PhotosTabState extends ConsumerState<PhotosTab> {
       );
     } catch (e) {
       if (!mounted) return;
-      AppSnackBar.showError(
-        context,
-        'Download failed: $e',
-      );
+      AppSnackBar.showError(context, 'Download failed: $e');
     }
   }
 
@@ -186,10 +181,7 @@ class _PhotosTabState extends ConsumerState<PhotosTab> {
         title: const Text('Delete Plan'),
         content: Text('Are you sure you want to delete "${file.name}"?'),
         actions: [
-          AppTextButton(
-            onPressed: () => Navigator.pop(ctx),
-            text: 'Cancel',
-          ),
+          AppTextButton(onPressed: () => Navigator.pop(ctx), text: 'Cancel'),
           AppButton.danger(
             fullWidth: false,
             onPressed: () {
@@ -197,10 +189,7 @@ class _PhotosTabState extends ConsumerState<PhotosTab> {
                   .read(projectPhotosProvider.notifier)
                   .removePlanFile(file.name);
               Navigator.pop(ctx);
-              AppSnackBar.showInfo(
-                context,
-                'Removed ${file.name}',
-              );
+              AppSnackBar.showInfo(context, 'Removed ${file.name}');
             },
             text: 'Delete',
           ),
@@ -310,15 +299,15 @@ class _PhotosTabState extends ConsumerState<PhotosTab> {
               }
             },
           ),
-          SizedBox(width: 14.w),
+          SizedBox(width: 8.w),
           AppButton.small(
             variant: AppButtonVariant.danger,
             onPressed: _showUploadFilesBottomSheet,
             leadingIcon: Icons.upload_outlined,
             text: loc.uploadFiles,
             borderRadius: 6.r,
-            padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 7.h),
-            textStyle: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700),
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+            textStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
           ),
         ],
       ),
@@ -1048,10 +1037,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
               icon: Icons.photo_camera_outlined,
               onTap: () {
                 widget.onSetCover();
-                AppSnackBar.showSuccess(
-                  context,
-                  loc.coverPhotoUpdated,
-                );
+                AppSnackBar.showSuccess(context, loc.coverPhotoUpdated);
               },
             ),
           ),

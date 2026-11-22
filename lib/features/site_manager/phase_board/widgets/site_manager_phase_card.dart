@@ -54,14 +54,22 @@ class SiteManagerPhaseCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _priorityBadge(context, phase.priority),
-                if (phase.localization != null) ...[
-                  SizedBox(width: 6.w),
-                  TranslationStatusBadge.fromMeta(phase.localization),
-                ],
-                const Spacer(),
+                Expanded(
+                  child: Wrap(
+                    spacing: 6.w,
+                    runSpacing: 4.h,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      _priorityBadge(context, phase.priority),
+                      if (phase.localization != null)
+                        TranslationStatusBadge.fromMeta(phase.localization),
+                    ],
+                  ),
+                ),
                 if (phase.startDate != null) ...[
+                  SizedBox(width: 6.w),
                   Icon(
                     Icons.calendar_month_outlined,
                     size: 16.sp,

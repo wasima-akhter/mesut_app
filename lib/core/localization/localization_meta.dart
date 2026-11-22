@@ -1,3 +1,5 @@
+import 'localization_provider.dart';
+
 /// Shared multilingual translation metadata returned by the backend.
 ///
 /// Supports both flat payloads (`sourceLocale` / `displayedLocale` /
@@ -20,7 +22,25 @@ class LocalizationMeta {
 
   bool get isPending {
     final status = translationStatus.toUpperCase();
-    return status == 'PENDING' || status == 'PROCESSING';
+    if (status == 'PENDING' || status == 'PROCESSING') return true;
+    if (isFailed) return false;
+
+    final activeLang =
+        AppLanguageNotifier.activeLanguageCode.toLowerCase().trim();
+    if (activeLang.isEmpty) return false;
+
+    final src = sourceLocale.toLowerCase().trim();
+    final displayed = displayedLocale.toLowerCase().trim();
+
+    if (displayed.isNotEmpty && displayed != activeLang) {
+      return true;
+    }
+
+    if (src.isNotEmpty && src != activeLang && !isTranslated) {
+      return true;
+    }
+
+    return false;
   }
 
   bool get isFailed => translationStatus.toUpperCase() == 'FAILED';
@@ -55,16 +75,34 @@ class LocalizationMeta {
     final status = src['translationStatus']?.toString().trim();
     final translated = src['isTranslated'];
 
+    final active = AppLanguageNotifier.activeLanguageCode.toLowerCase().trim();
+    final resolvedSource =
+        (source != null && source.isNotEmpty) ? source.toLowerCase() : 'en';
+    final resolvedDisplayed = (displayed != null && displayed.isNotEmpty)
+        ? displayed.toLowerCase()
+        : resolvedSource;
+    final isTrans = translated is bool ? translated : false;
+
+    String resolvedStatus;
+    if (status != null && status.isNotEmpty) {
+      resolvedStatus = status.toUpperCase();
+      if (resolvedStatus == 'READY' &&
+          (resolvedDisplayed != active ||
+              (resolvedSource != active && !isTrans))) {
+        resolvedStatus = 'PENDING';
+      }
+    } else if (resolvedDisplayed != active ||
+        (resolvedSource != active && !isTrans)) {
+      resolvedStatus = 'PENDING';
+    } else {
+      resolvedStatus = 'READY';
+    }
+
     return LocalizationMeta(
-      sourceLocale:
-          (source != null && source.isNotEmpty) ? source.toLowerCase() : 'en',
-      displayedLocale: (displayed != null && displayed.isNotEmpty)
-          ? displayed.toLowerCase()
-          : 'en',
-      isTranslated: translated is bool ? translated : false,
-      translationStatus: (status != null && status.isNotEmpty)
-          ? status.toUpperCase()
-          : 'READY',
+      sourceLocale: resolvedSource,
+      displayedLocale: resolvedDisplayed,
+      isTranslated: isTrans,
+      translationStatus: resolvedStatus,
     );
   }
 

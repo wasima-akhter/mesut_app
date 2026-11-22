@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:construction_app/app/theme/app_colors.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/localization/pending_refetch_controller.dart';
 import 'package:construction_app/core/widgets/buttons/buttons.dart';
 import 'package:construction_app/core/widgets/snack/app_snackbar.dart';
 import '../../../../auth/presentation/providers/auth_provider.dart';
@@ -39,7 +40,10 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Stack(
+        child: PendingPollEffect(
+          hasPending: profile?.localization?.isPending == true,
+          onPoll: () => ref.read(mobileProfileProvider.notifier).refresh(),
+          child: Stack(
           children: [
             RefreshIndicator(
               onRefresh: () =>
@@ -111,6 +115,7 @@ class _EmployeeProfilePageState extends ConsumerState<EmployeeProfilePage> {
             ),
             if (_isLoggingOut) const LogoutLoadingOverlay(),
           ],
+        ),
         ),
       ),
     );

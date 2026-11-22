@@ -11,6 +11,7 @@ import '../../../core/helpers/phone_helper.dart';
 import '../../../core/localization/app_language.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/localization/localization_provider.dart';
+import '../../../core/localization/pending_refetch_controller.dart';
 import '../../../core/widgets/buttons/buttons.dart';
 import '../../../core/widgets/fields/app_phone_field.dart';
 import '../../../core/widgets/snack/app_snackbar.dart';
@@ -81,44 +82,51 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           children: [
             const ProfileEditHeader(),
             Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 30.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ProfileAvatarPicker(
-                      currentAvatarUrl: _avatarUrl,
-                      selectedLocalImage: _selectedLocalImage,
-                      onImagePicked: (f) => setState(() => _selectedLocalImage = f),
-                    ),
-                    SizedBox(height: 22.h),
-                    _buildTextField(
-                      context,
-                      label: context.loc.firstName,
-                      hint: context.loc.enterFirstName,
-                      controller: _firstNameController,
-                    ),
-                    SizedBox(height: 14.h),
-                    _buildTextField(
-                      context,
-                      label: context.loc.lastName,
-                      hint: context.loc.enterLastName,
-                      controller: _lastNameController,
-                    ),
-                    SizedBox(height: 14.h),
-                    _buildPhoneField(context),
-                    SizedBox(height: 16.h),
-                    ProfileLanguageSelector(
-                      selectedCode: _selectedLanguage,
-                      onLanguageChanged: (c) => setState(() => _selectedLanguage = c),
-                    ),
-                    SizedBox(height: 18.h),
-                    ProfileReadonlyCard(
-                      email: profile?.email ?? '',
-                      role: profile?.role ?? '',
-                    ),
-                  ],
+              child: PendingPollEffect(
+                hasPending: profile?.localization?.isPending == true,
+                onPoll: () =>
+                    ref.read(mobileProfileProvider.notifier).refresh(),
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 30.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ProfileAvatarPicker(
+                        currentAvatarUrl: _avatarUrl,
+                        selectedLocalImage: _selectedLocalImage,
+                        onImagePicked: (f) =>
+                            setState(() => _selectedLocalImage = f),
+                      ),
+                      SizedBox(height: 22.h),
+                      _buildTextField(
+                        context,
+                        label: context.loc.firstName,
+                        hint: context.loc.enterFirstName,
+                        controller: _firstNameController,
+                      ),
+                      SizedBox(height: 14.h),
+                      _buildTextField(
+                        context,
+                        label: context.loc.lastName,
+                        hint: context.loc.enterLastName,
+                        controller: _lastNameController,
+                      ),
+                      SizedBox(height: 14.h),
+                      _buildPhoneField(context),
+                      SizedBox(height: 16.h),
+                      ProfileLanguageSelector(
+                        selectedCode: _selectedLanguage,
+                        onLanguageChanged: (c) =>
+                            setState(() => _selectedLanguage = c),
+                      ),
+                      SizedBox(height: 18.h),
+                      ProfileReadonlyCard(
+                        email: profile?.email ?? '',
+                        role: profile?.role ?? '',
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'app_localization.dart';
 import 'localization_meta.dart';
 import 'localization_provider.dart';
 
@@ -43,6 +44,8 @@ class PendingRefetchController {
   Timer? _timer;
   int _consecutivePolls = 0;
   bool _timedOut = false;
+  VoidCallback? _currentRefetch;
+  VoidCallback? _currentTimeout;
 
   static const int maxConsecutivePolls = 15;
 
@@ -59,23 +62,48 @@ class PendingRefetchController {
     int maxPolls = maxConsecutivePolls,
     VoidCallback? onTimeout,
   }) {
+    _currentRefetch = refetch;
+    _currentTimeout = onTimeout;
+    debugPrint(
+      '[TranslationPoll] sync: hasPending=$hasPending, activeLang=${AppLanguageNotifier.activeLanguageCode}',
+    );
+
     if (!hasPending) {
+      if (_timer != null) {
+        debugPrint(
+          '[TranslationPoll] All translations ready in selected language (${AppLanguageNotifier.activeLanguageCode}). Polling stopped.',
+        );
+      }
       _timedOut = false;
       cancel();
       return;
     }
 
-    if (_timedOut || _timer != null) return;
+    if (_timedOut) return;
+    if (_timer != null) {
+      // Poller is already active and ticking; callbacks are refreshed.
+      return;
+    }
+
     _consecutivePolls = 0;
+    debugPrint(
+      '[TranslationPoll] Started polling for pending translations (active language: ${AppLanguageNotifier.activeLanguageCode}, interval: ${interval.inSeconds}s, maxPolls: $maxPolls)...',
+    );
     _timer = Timer.periodic(interval, (_) {
       if (_consecutivePolls >= maxPolls) {
+        debugPrint(
+          '[TranslationPoll] Max polls reached ($maxPolls). Polling timed out.',
+        );
         _timedOut = true;
         cancel();
-        onTimeout?.call();
+        _currentTimeout?.call();
         return;
       }
       _consecutivePolls++;
-      refetch();
+      debugPrint(
+        '[TranslationPoll] Poll tick $_consecutivePolls/$maxPolls - refetching data in selected language (${AppLanguageNotifier.activeLanguageCode})...',
+      );
+      _currentRefetch?.call();
     });
   }
 
@@ -87,6 +115,8 @@ class PendingRefetchController {
 
   void dispose() {
     cancel();
+    _currentRefetch = null;
+    _currentTimeout = null;
   }
 }
 
@@ -137,11 +167,7 @@ class _PendingPollEffectState extends State<PendingPollEffect> {
       _notifiedTimeout = false;
       _poller.resetTimeout();
     }
-    if (oldWidget.hasPending != widget.hasPending ||
-        oldWidget.interval != widget.interval ||
-        oldWidget.maxPolls != widget.maxPolls) {
-      _syncPoller();
-    }
+    _syncPoller();
   }
 
   void _syncPoller() {
@@ -167,22 +193,60 @@ class _PendingPollEffectState extends State<PendingPollEffect> {
     final messenger = ScaffoldMessenger.maybeOf(context);
     if (messenger == null) return;
 
-    final isDe = AppLanguageNotifier.activeLanguageCode.toLowerCase() == 'de';
-    final message = isDe
-        ? 'Die Übersetzung dauert länger als erwartet. Ursprünglicher Inhalt wird angezeigt.'
-        : 'Translation is taking longer than expected. Showing original content.';
-    final retryLabel = isDe ? 'Wiederholen' : 'Retry';
+    final message = AppLocalization.current.translationTakingLonger;
+    final retryLabel = AppLocalization.current.retry;
+    final dismissLabel = AppLocalization.current.dismiss;
 
     messenger.hideCurrentSnackBar();
     messenger.showSnackBar(
       SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 5),
-        action: SnackBarAction(
-          label: retryLabel,
-          onPressed: _retryPolling,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              message,
+              style: const TextStyle(fontSize: 13.5),
+            ),
+            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    foregroundColor: Colors.white70,
+                  ),
+                  onPressed: () {
+                    messenger.hideCurrentSnackBar();
+                  },
+                  child: Text(dismissLabel),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    foregroundColor: const Color(0xFFFFB74D),
+                  ),
+                  onPressed: () {
+                    messenger.hideCurrentSnackBar();
+                    _retryPolling();
+                  },
+                  child: Text(
+                    retryLabel,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 6),
+        showCloseIcon: true,
+        closeIconColor: Colors.white70,
       ),
     );
   }

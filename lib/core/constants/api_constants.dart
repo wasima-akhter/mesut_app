@@ -50,7 +50,8 @@ abstract final class ApiConstants {
   static String mobileProjectTasks(String id) => '/mobile/projects/$id/tasks';
   static String mobileProjectEmployees(String projectId) =>
       '/mobile/projects/$projectId/employees';
-  static String mobileTaskToggle(String taskId) => '/mobile/tasks/$taskId/toggle';
+  static String mobileTaskToggle(String taskId) =>
+      '/mobile/tasks/$taskId/toggle';
   static String mobileTaskDelete(String taskId) => '/mobile/tasks/$taskId';
   static String mobileProjectMeasurements(String projectId) =>
       '/mobile/projects/$projectId/measurements';
@@ -77,14 +78,17 @@ abstract final class ApiConstants {
       '/mobile/employee/time-tracking/summary';
   static const String mobileEmployeeTimeTrackingProjects =
       '/mobile/employee/time-tracking/projects';
-  static const String mobileEmployeeTimerStart =
-      '/mobile/employee/timer/start';
-  static const String mobileEmployeeTimerStop =
-      '/mobile/employee/timer/stop';
+  static const String mobileEmployeeTimerStart = '/mobile/employee/timer/start';
+  static const String mobileEmployeeTimerStop = '/mobile/employee/timer/stop';
   static const String mobileEmployeeTimerManual =
       '/mobile/employee/timer/manual';
-  static const String mobileEmployeeTimeLogs =
-      '/mobile/employee/time-logs';
+  static const String mobileEmployeeTimeLogs = '/mobile/employee/time-logs';
+  static String mobileEmployeeProjectDetail(String projectId) =>
+      '/mobile/employee/projects/$projectId';
+  static String mobileEmployeeProjectPhotos(String projectId) =>
+      '/mobile/employee/projects/$projectId/photos';
+  static String mobileEmployeeProjectTasks(String projectId) =>
+      '/mobile/employee/projects/$projectId/tasks';
   static const String mobileMap = '/mobile/map';
   static const String mobileCustomers = '/mobile/customers';
   static const String mobileInspections = '/mobile/inspections';

@@ -74,7 +74,10 @@ class EmployeeTimeLogCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: 8.h),
-            Row(
+            Wrap(
+              spacing: 6.w,
+              runSpacing: 4.h,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
@@ -91,10 +94,8 @@ class EmployeeTimeLogCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (log.localization != null) ...[
-                  SizedBox(width: 6.w),
+                if (log.localization != null)
                   TranslationStatusBadge.fromMeta(log.localization),
-                ],
               ],
             ),
             SizedBox(height: 9.h),

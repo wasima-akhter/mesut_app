@@ -57,6 +57,7 @@ class EmployeeProjectModel {
   final TimeOfDay? startTimeOfDay;
   final TimeOfDay? endTimeOfDay;
   final String siteManager;
+  final LocalizationMeta? localization;
 
   const EmployeeProjectModel({
     required this.id,
@@ -68,6 +69,7 @@ class EmployeeProjectModel {
     this.startTimeOfDay,
     this.endTimeOfDay,
     this.siteManager = '',
+    this.localization,
   });
 
   String get fullName => name;

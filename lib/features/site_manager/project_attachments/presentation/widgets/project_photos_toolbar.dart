@@ -28,7 +28,7 @@ class ProjectPhotosToolbar extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
         decoration: BoxDecoration(
           color: selected ? const Color(0xFF222222) : Colors.white,
           borderRadius: BorderRadius.circular(6.r),
@@ -39,7 +39,7 @@ class ProjectPhotosToolbar extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 14.sp,
+            fontSize: 13.5.sp,
             color: selected ? Colors.white : const Color(0xFF555555),
             fontWeight: FontWeight.w600,
           ),
@@ -50,30 +50,50 @@ class ProjectPhotosToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _buildFilterChip(
-          label: '${context.loc.photos} ($photoCount)',
-          selected: activeFilter == 'all' || activeFilter == 'photos',
-          onTap: () =>
-              onFilterChanged(activeFilter == 'photos' ? 'all' : 'photos'),
-        ),
-        SizedBox(width: 8.w),
-        _buildFilterChip(
-          label: '${context.loc.pdfPlans} ($planCount)',
-          selected: activeFilter == 'plans',
-          onTap: () => onFilterChanged(activeFilter == 'plans' ? 'all' : 'plans'),
-        ),
-        const Spacer(),
-        AppButton.small(
-          variant: AppButtonVariant.danger,
-          onPressed: onUploadPressed,
-          leadingIcon: Icons.upload_outlined,
-          text: context.loc.uploadFiles,
-          borderRadius: 6.r,
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: constraints.maxWidth),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildFilterChip(
+                      label: '${context.loc.photos} ($photoCount)',
+                      selected: activeFilter == 'all' || activeFilter == 'photos',
+                      onTap: () => onFilterChanged(
+                        activeFilter == 'photos' ? 'all' : 'photos',
+                      ),
+                    ),
+                    SizedBox(width: 6.w),
+                    _buildFilterChip(
+                      label: '${context.loc.pdfPlans} ($planCount)',
+                      selected: activeFilter == 'plans',
+                      onTap: () => onFilterChanged(
+                        activeFilter == 'plans' ? 'all' : 'plans',
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(width: 8.w),
+                AppButton.small(
+                  variant: AppButtonVariant.danger,
+                  onPressed: onUploadPressed,
+                  leadingIcon: Icons.upload_outlined,
+                  text: context.loc.uploadFiles,
+                  borderRadius: 6.r,
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

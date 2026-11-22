@@ -1,3 +1,4 @@
+import '../../../../../core/localization/localization_meta.dart';
 import '../../domain/entities/project_details_entity.dart';
 
 class ProjectDetailsModel extends ProjectDetailsEntity {
@@ -18,6 +19,7 @@ class ProjectDetailsModel extends ProjectDetailsEntity {
     required super.hoursByActivity,
     required super.crewBreakdown,
     required super.attachmentCounts,
+    super.localization,
   });
 
   factory ProjectDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -143,6 +145,7 @@ class ProjectDetailsModel extends ProjectDetailsEntity {
       hoursByActivity: hoursByActivity,
       crewBreakdown: crewBreakdown,
       attachmentCounts: attachmentCounts,
+      localization: LocalizationMeta.tryParse(json),
     );
   }
 }

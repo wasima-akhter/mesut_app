@@ -9,11 +9,13 @@ import '../../../app/theme/app_radii.dart';
 import '../../../core/localization/app_language.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/localization/localization_provider.dart';
+import '../../../core/localization/pending_refetch_controller.dart';
 import '../../../core/widgets/buttons/buttons.dart';
 import '../../auth/presentation/providers/auth_provider.dart';
 import '../../auth/presentation/widgets/logout_dialog.dart';
 import '../../auth/presentation/widgets/logout_loading_overlay.dart';
-import '../../shared/config/presentation/providers/mobile_config_provider.dart';
+import '../../shared/widgets/language_selection_bottom_sheet.dart';
+import '../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
 import '../../shared/notifications/presentation/providers/notification_settings_provider.dart';
 import '../offline_sync/providers/site_manager_sync_provider.dart';
 import '../offline_sync/widgets/site_manager_sync_details_sheet.dart';
@@ -35,16 +37,18 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
   @override
   Widget build(BuildContext context) {
     final currentLang = ref.watch(appLanguageProvider);
+    final profile = ref.watch(mobileProfileProvider).asData?.value;
     final syncState = ref.watch(siteManagerSyncProvider);
     final notificationsEnabled = ref.watch(notificationSettingsProvider);
-    final langName = currentLang == AppLanguage.german
-        ? context.loc.german
-        : context.loc.english;
+    final langName = currentLang.label;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Stack(
+        child: PendingPollEffect(
+          hasPending: profile?.localization?.isPending == true,
+          onPoll: () => ref.read(mobileProfileProvider.notifier).refresh(),
+          child: Stack(
           children: [
             CustomScrollView(
               physics: const BouncingScrollPhysics(),
@@ -207,6 +211,7 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
       ],
     ),
   ),
+  ),
 );
   }
 
@@ -229,40 +234,7 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
   }
 
   void _showLanguageOptions() {
-    final currentLang = ref.read(appLanguageProvider);
-    final enabledLanguages = ref.read(enabledLanguagesProvider);
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(context.loc.selectLanguage),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: enabledLanguages.map((lang) {
-              final label = lang == AppLanguage.german
-                  ? context.loc.german
-                  : context.loc.english;
-              return ListTile(
-                title: Text(label),
-                trailing: currentLang == lang
-                    ? const Icon(Icons.check_circle, color: AppColors.primary)
-                    : const Icon(
-                        Icons.circle_outlined,
-                        color: AppColors.border,
-                      ),
-                onTap: () async {
-                  Navigator.pop(dialogContext);
-                  await ref
-                      .read(appLanguageProvider.notifier)
-                      .setLanguage(lang);
-                },
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
+    LanguageSelectionBottomSheet.show(context, ref);
   }
 
   void _logout() {

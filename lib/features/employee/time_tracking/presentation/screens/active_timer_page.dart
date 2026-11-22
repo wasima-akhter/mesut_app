@@ -1,21 +1,36 @@
 import 'package:construction_app/app/theme/app_colors.dart';
 import 'package:construction_app/core/extensions/date_time_extensions.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
+import 'package:construction_app/core/localization/pending_refetch_controller.dart';
 import 'package:construction_app/core/widgets/buttons/buttons.dart';
 import 'package:construction_app/core/widgets/snack/app_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../shared/helper/employee_enums.dart';
-import '../../../shared/helper/employee_models.dart';
+import '../providers/employee_timer_projects_provider.dart';
 import '../providers/employee_timer_provider.dart';
+import '../widgets/active_timer_assignment_card.dart';
+import '../widgets/active_timer_elapsed_view.dart';
+import '../widgets/active_timer_header.dart';
+import '../widgets/cancel_timer_dialog.dart';
 import '../widgets/finish_work_dialog.dart';
 
 class ActiveTimerPage extends ConsumerWidget {
   const ActiveTimerPage({super.key});
 
-  EmployeeAssignmentModel get assignment => fakeAssignments.last;
+  Future<bool> _confirmAndCancel(BuildContext context, WidgetRef ref) async {
+    final shouldCancel = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const CancelTimerDialog(),
+    );
+    if (shouldCancel == true) {
+      await ref.read(employeeTimerProvider.notifier).cancelTimer();
+      return true;
+    }
+    return false;
+  }
 
   void _finishWork(BuildContext context, WidgetRef ref) {
     final timerState = ref.read(employeeTimerProvider);
@@ -24,14 +39,21 @@ class ActiveTimerPage extends ConsumerWidget {
       barrierDismissible: false,
       builder: (_) {
         return FinishWorkDialog(
-          projectName: assignment.project,
+          projectName: timerState.currentProject.fullName,
           totalTime: timerState.formattedElapsed,
-          onSave: () {
-            ref.read(employeeTimerProvider.notifier).finishTimer();
+          onSave: () async {
             Navigator.of(context).pop();
-            Navigator.of(context).pop();
-
-            AppSnackBar.showSuccess(context, context.loc.entrySaved);
+            final success = await ref
+                .read(employeeTimerProvider.notifier)
+                .finishTimer();
+            if (context.mounted) {
+              Navigator.of(context).pop();
+              if (success) {
+                AppSnackBar.showSuccess(context, context.loc.entrySaved);
+              } else {
+                AppSnackBar.showError(context, context.loc.somethingWentWrong);
+              }
+            }
           },
         );
       },
@@ -40,152 +62,90 @@ class ActiveTimerPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isOnBreak = ref.watch(
-      employeeTimerProvider.select((s) => s.isOnBreak),
-    );
+    final timerState = ref.watch(employeeTimerProvider);
+    final isOnBreak = timerState.isOnBreak;
+    final isRunning = timerState.isTimerRunning;
+    final canCancel = timerState.canCancel;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverPadding(
-              padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 12.h),
-              sliver: SliverToBoxAdapter(
-                child: _buildHeader(context, isOnBreak),
-              ),
-            ),
-            SliverPadding(
-              padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(child: _buildAssignmentCard()),
-            ),
-            SliverToBoxAdapter(child: SizedBox(height: 12.h)),
-            SliverPadding(
-              padding: EdgeInsets.symmetric(horizontal: 18.w),
-              sliver: SliverToBoxAdapter(
-                child: _buildTimerCard(context, ref, isOnBreak),
-              ),
-            ),
-            SliverToBoxAdapter(child: SizedBox(height: 25.h)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context, bool isOnBreak) {
-    return Row(
-      children: [
-        const AppBackButton(),
-        SizedBox(width: 14.w),
-        Expanded(
-          child: Text(
-            context.loc.activeTimer,
-            style: TextStyle(
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ),
-        _statusBadge(context, isOnBreak),
-      ],
-    );
-  }
-
-  Widget _statusBadge(BuildContext context, bool isOnBreak) {
-    final color = isOnBreak ? AppColors.warning : AppColors.success;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6.r),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 7.w,
-            height: 7.w,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          SizedBox(width: 6.w),
-          Text(
-            isOnBreak ? context.loc.pauseBreak : context.loc.inProgress,
-            style: TextStyle(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAssignmentCard() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(11.r),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
-            decoration: BoxDecoration(
-              color: assignment.activity.backgroundColor,
-              borderRadius: BorderRadius.circular(6.r),
-            ),
-            child: Text(
-              assignment.activity.label,
-              style: TextStyle(
-                fontSize: 15.sp,
-                color: assignment.activity.color,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          SizedBox(height: 13.h),
-          Text(
-            assignment.project,
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Row(
-            children: [
-              const Icon(
-                Icons.location_on_outlined,
-                size: 20,
-                color: AppColors.textTertiary,
-              ),
-              SizedBox(width: 6.w),
-              Expanded(
-                child: Text(
-                  assignment.address,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    color: AppColors.textTertiary,
+    return PopScope(
+      canPop: !isRunning || !canCancel,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldCancel = await _confirmAndCancel(context, ref);
+        if (shouldCancel && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: PendingPollEffect(
+            hasPending:
+                timerState.currentProject.localization?.isPending == true,
+            onPoll: () =>
+                ref.read(employeeTimerProjectsProvider.notifier).loadInitial(),
+            child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 12.h),
+                sliver: SliverToBoxAdapter(
+                  child: ActiveTimerHeader(
+                    isOnBreak: isOnBreak,
+                    isRunning: isRunning,
+                    canCancel: canCancel,
+                    onBack: () async {
+                      if (!isRunning || !canCancel) {
+                        Navigator.of(context).pop();
+                        return;
+                      }
+                      final cancel = await _confirmAndCancel(context, ref);
+                      if (cancel && context.mounted) {
+                        Navigator.of(context).pop();
+                      }
+                    },
                   ),
                 ),
               ),
+              SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: 18.w),
+                sliver: SliverToBoxAdapter(
+                  child: ActiveTimerAssignmentCard(state: timerState),
+                ),
+              ),
+              SliverToBoxAdapter(child: SizedBox(height: 12.h)),
+              SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: 18.w),
+                sliver: SliverToBoxAdapter(
+                  child: _buildTimerCard(context, ref, timerState),
+                ),
+              ),
+              SliverToBoxAdapter(child: SizedBox(height: 25.h)),
             ],
           ),
-        ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildTimerCard(BuildContext context, WidgetRef ref, bool isOnBreak) {
+  Widget _buildTimerCard(
+    BuildContext context,
+    WidgetRef ref,
+    EmployeeTimerState state,
+  ) {
+    final isOnBreak = state.isOnBreak;
+    final startedAtText = state.sessionStartedAt != null
+        ? TimeOfDay.fromDateTime(
+            state.sessionStartedAt!.toLocal(),
+          ).formatLocalized()
+        : state.currentProject.formattedStartTime;
+    final breakText =
+        (state.breakDuration > Duration.zero
+                ? state.breakDuration
+                : const Duration(minutes: 0))
+            .formatCompactLocalized();
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       width: double.infinity,
@@ -200,15 +160,15 @@ class ActiveTimerPage extends ConsumerWidget {
       child: Column(
         children: [
           SizedBox(height: 4.h),
-          _ActiveTimerElapsedView(isOnBreak: isOnBreak),
+          ActiveTimerElapsedView(isOnBreak: isOnBreak),
           SizedBox(height: 14.h),
           Text(
-            '${context.loc.today} · ${context.loc.startedAt(const TimeOfDay(hour: 7, minute: 30).formatLocalized())}',
+            '${context.loc.today} · ${context.loc.startedAt(startedAtText)}',
             style: TextStyle(fontSize: 16.sp, color: AppColors.textTertiary),
           ),
           SizedBox(height: 5.h),
           Text(
-            '${context.loc.breakTime}: ${const Duration(minutes: 45).formatCompactLocalized()}',
+            '${context.loc.breakTime}: $breakText',
             style: TextStyle(
               fontSize: 16.sp,
               color: isOnBreak ? AppColors.warningDark : AppColors.textTertiary,
@@ -219,9 +179,8 @@ class ActiveTimerPage extends ConsumerWidget {
             children: [
               Expanded(
                 child: AppOutlinedButton(
-                  onPressed: () {
-                    ref.read(employeeTimerProvider.notifier).toggleBreak();
-                  },
+                  onPressed: () =>
+                      ref.read(employeeTimerProvider.notifier).toggleBreak(),
                   leadingIcon: isOnBreak ? Icons.play_arrow : Icons.pause,
                   text: isOnBreak
                       ? context.loc.resumeWork
@@ -248,33 +207,52 @@ class ActiveTimerPage extends ConsumerWidget {
               ),
             ],
           ),
+          SizedBox(height: 12.h),
+          if (state.canCancel)
+            AppTextButton(
+              onPressed: () async {
+                final cancel = await _confirmAndCancel(context, ref);
+                if (cancel && context.mounted) {
+                  Navigator.of(context).pop();
+                  AppSnackBar.showInfo(context, context.loc.timerCancelled);
+                }
+              },
+              leadingIcon: Icons.cancel_outlined,
+              text:
+                  '${context.loc.cancelTimer} (${state.graceSecondsRemaining}s)',
+              foregroundColor: AppColors.error,
+              textStyle: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.error,
+              ),
+            )
+          else
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4.h),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.check_circle_outline,
+                    size: 15.sp,
+                    color: AppColors.success,
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    context.loc.get(
+                      'employee.timerActiveServer',
+                      'Timer active on server • Finish work to stop',
+                    ),
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
-      ),
-    );
-  }
-}
-
-class _ActiveTimerElapsedView extends ConsumerWidget {
-  const _ActiveTimerElapsedView({required this.isOnBreak});
-
-  final bool isOnBreak;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final formatted = ref.watch(
-      employeeTimerProvider.select((s) => s.formattedElapsed),
-    );
-
-    return RepaintBoundary(
-      child: Text(
-        formatted,
-        style: TextStyle(
-          fontSize: 44.sp,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 1,
-          color: isOnBreak ? const Color(0xFFC47A0A) : AppColors.success,
-          fontFeatures: const [FontFeature.tabularFigures()],
-        ),
       ),
     );
   }

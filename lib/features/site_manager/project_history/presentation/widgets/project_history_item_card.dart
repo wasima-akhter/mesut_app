@@ -118,6 +118,8 @@ class ProjectHistoryItemCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             item.displayTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 18.sp,
                               fontWeight: FontWeight.w700,

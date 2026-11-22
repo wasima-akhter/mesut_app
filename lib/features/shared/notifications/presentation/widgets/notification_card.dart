@@ -157,9 +157,12 @@ class NotificationCard extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 8.h),
-                    Row(
+                    Wrap(
+                      spacing: 8.w,
+                      runSpacing: 4.h,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        if (item.projectTag != null) ...[
+                        if (item.projectTag != null)
                           Container(
                             padding: EdgeInsets.symmetric(
                               horizontal: 7.w,
@@ -178,8 +181,6 @@ class NotificationCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                          SizedBox(width: 8.w),
-                        ],
                         Text(
                           item.displayTime,
                           style: TextStyle(
@@ -187,10 +188,8 @@ class NotificationCard extends StatelessWidget {
                             color: AppColors.textTertiary,
                           ),
                         ),
-                        if (item.localization != null) ...[
-                          SizedBox(width: 8.w),
+                        if (item.localization != null)
                           TranslationStatusBadge.fromMeta(item.localization),
-                        ],
                       ],
                     ),
                   ],

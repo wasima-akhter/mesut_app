@@ -29,52 +29,53 @@ class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 16.h),
               _buildLogo(),
-              SizedBox(height: 28.h),
+              SizedBox(height: 18.h),
               Text(
                 context.loc.chooseLanguageTitle,
                 style: TextStyle(
-                  fontSize: 26.sp,
+                  fontSize: 24.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                   letterSpacing: -0.5,
                 ),
               ),
-              SizedBox(height: 8.h),
+              SizedBox(height: 6.h),
               Text(
                 context.loc.chooseLanguageSubtitle,
                 style: TextStyle(
-                  fontSize: 15.sp,
+                  fontSize: 14.sp,
                   color: AppColors.textSecondary,
-                  height: 1.4,
+                  height: 1.3,
                 ),
               ),
-              SizedBox(height: 32.h),
-              for (int i = 0; i < _languages.length; i++) ...[
-                if (i > 0) SizedBox(height: 14.h),
-                _buildLanguageCard(
-                  language: _languages[i],
-                  title: _languages[i] == AppLanguage.german
-                      ? 'Deutsch'
-                      : 'English',
-                  subtitle: _languages[i] == AppLanguage.german
-                      ? 'German (DE/AT/CH)'
-                      : 'English (US/UK)',
-                  flagEmoji: _languages[i] == AppLanguage.german ? '🇩🇪' : '🇬🇧',
-                  isSelected: currentLanguage == _languages[i],
-                  onTap: () {
-                    ref
-                        .read(appLanguageProvider.notifier)
-                        .setLanguage(_languages[i]);
+              SizedBox(height: 16.h),
+              Expanded(
+                child: ListView.separated(
+                  itemCount: _languages.length,
+                  separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                  itemBuilder: (context, i) {
+                    final lang = _languages[i];
+                    return _buildLanguageCard(
+                      language: lang,
+                      title: lang.label,
+                      subtitle: lang.subtitle,
+                      flagEmoji: lang.flagEmoji,
+                      isSelected: currentLanguage == lang,
+                      onTap: () {
+                        ref
+                            .read(appLanguageProvider.notifier)
+                            .setLanguage(lang);
+                      },
+                    );
                   },
                 ),
-              ],
-              const Spacer(),
+              ),
+              SizedBox(height: 12.h),
               AppButton(
                 onPressed: () {
                   context.go(RouteConstants.onboarding);
@@ -82,7 +83,7 @@ class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
                 text: context.loc.continueAction,
                 trailingIcon: Icons.arrow_forward_rounded,
               ),
-              SizedBox(height: 12.h),
+              SizedBox(height: 8.h),
             ],
           ),
         ),
@@ -93,17 +94,17 @@ class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
   Widget _buildLogo() {
     return RepaintBoundary(
       child: Container(
-        width: 58.r,
-        height: 58.r,
-        padding: EdgeInsets.all(12.r),
+        width: 50.r,
+        height: 50.r,
+        padding: EdgeInsets.all(10.r),
         decoration: BoxDecoration(
           color: AppColors.primary600,
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(14.r),
           boxShadow: [
             BoxShadow(
               color: AppColors.primary.withValues(alpha: 0.25),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -115,7 +116,7 @@ class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
           errorBuilder: (_, _, _) {
             return const Icon(
               Icons.translate_rounded,
-              size: 28,
+              size: 24,
               color: Colors.white,
             );
           },
@@ -135,16 +136,16 @@ class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
     return RepaintBoundary(
       child: Material(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(12.r),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(14.r),
+          borderRadius: BorderRadius.circular(12.r),
           splashColor: AppColors.primary.withValues(alpha: 0.08),
           highlightColor: AppColors.primary.withValues(alpha: 0.04),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(12.r),
               border: Border.all(
                 color: isSelected ? AppColors.primary : AppColors.border,
                 width: isSelected ? 2.0 : 1.0,
@@ -156,18 +157,18 @@ class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
             child: Row(
               children: [
                 Container(
-                  width: 44.r,
-                  height: 44.r,
+                  width: 38.r,
+                  height: 38.r,
                   decoration: BoxDecoration(
                     color: isSelected
                         ? AppColors.primary.withValues(alpha: 0.1)
                         : AppColors.neutral100,
-                    borderRadius: BorderRadius.circular(10.r),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
                   alignment: Alignment.center,
-                  child: Text(flagEmoji, style: TextStyle(fontSize: 24.sp)),
+                  child: Text(flagEmoji, style: TextStyle(fontSize: 20.sp)),
                 ),
-                SizedBox(width: 14.w),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,7 +176,7 @@ class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
                       Text(
                         title,
                         style: TextStyle(
-                          fontSize: 17.sp,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
                         ),
@@ -184,7 +185,7 @@ class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
                       Text(
                         subtitle,
                         style: TextStyle(
-                          fontSize: 13.sp,
+                          fontSize: 12.sp,
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -192,14 +193,14 @@ class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
                   ),
                 ),
                 Container(
-                  width: 22.r,
-                  height: 22.r,
+                  width: 20.r,
+                  height: 20.r,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
                       color:
                           isSelected ? AppColors.primary : AppColors.neutral300,
-                      width: isSelected ? 6.5 : 1.5,
+                      width: isSelected ? 6.0 : 1.5,
                     ),
                     color: Colors.white,
                   ),

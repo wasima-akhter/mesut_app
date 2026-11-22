@@ -47,25 +47,21 @@ class ProjectNoteCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+                child: Wrap(
+                  spacing: 6.w,
+                  runSpacing: 4.h,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    Flexible(
-                      child: Text(
-                        note.category.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 17.sp,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF222222),
-                        ),
+                    Text(
+                      note.category.label,
+                      style: TextStyle(
+                        fontSize: 17.sp,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF222222),
                       ),
                     ),
-                    if (note.localization != null) ...[
-                      SizedBox(width: 6.w),
+                    if (note.localization != null)
                       TranslationStatusBadge.fromMeta(note.localization),
-                    ],
                   ],
                 ),
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/localization/app_language.dart';
 import '../../../../core/localization/context_extensions.dart';
 
 class ProfileLanguageSelector extends StatelessWidget {
@@ -16,7 +17,7 @@ class ProfileLanguageSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDe = selectedCode.toUpperCase() == 'DE';
+    final current = AppLanguage.fromCode(selectedCode);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,109 +30,142 @@ class ProfileLanguageSelector extends StatelessWidget {
           ),
         ),
         SizedBox(height: 7.h),
-        Row(
-          children: [
-            Expanded(
-              child: _buildLangCard(
-                context,
-                title: context.loc.german,
-                subtitle: 'Deutsch (DE)',
-                flag: '🇩🇪',
-                isSelected: isDe,
-                onTap: () => onLanguageChanged('DE'),
-              ),
+        InkWell(
+          onTap: () => _showPicker(context, current),
+          borderRadius: BorderRadius.circular(8.r),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(color: AppColors.border),
             ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: _buildLangCard(
-                context,
-                title: context.loc.english,
-                subtitle: 'English (EN)',
-                flag: '🇬🇧',
-                isSelected: !isDe,
-                onTap: () => onLanguageChanged('EN'),
-              ),
+            child: Row(
+              children: [
+                Text(current.flagEmoji, style: TextStyle(fontSize: 22.sp)),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        current.label,
+                        style: TextStyle(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        current.subtitle,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: 20.sp,
+                  color: AppColors.textSecondary,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildLangCard(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required String flag,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.white : AppColors.neutral400,
-          borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-            width: isSelected ? 2 : 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          children: [
-            Text(flag, style: TextStyle(fontSize: 22.sp)),
-            SizedBox(width: 8.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: isSelected
-                          ? FontWeight.w700
-                          : FontWeight.w500,
-                      color: isSelected
-                          ? AppColors.textPrimary
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      color: AppColors.textSecondary.withValues(alpha: 0.75),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (isSelected)
-              Icon(
-                Icons.check_circle_rounded,
-                color: AppColors.primary,
-                size: 18.sp,
-              ),
-          ],
-        ),
+  void _showPicker(BuildContext context, AppLanguage current) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.white,
+      isScrollControlled: true,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.75,
       ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+      ),
+      builder: (dialogContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(18.w, 16.h, 12.w, 8.h),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      context.loc.selectLanguage,
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1, color: AppColors.border),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: AppLanguage.values.length,
+                  separatorBuilder: (_, __) =>
+                      const Divider(height: 1, color: AppColors.border),
+                  itemBuilder: (_, index) {
+                    final lang = AppLanguage.values[index];
+                    final isSelected = current == lang;
+                    return ListTile(
+                      onTap: () {
+                        Navigator.of(dialogContext).pop();
+                        onLanguageChanged(lang.code.toUpperCase());
+                      },
+                      leading: Text(
+                        lang.flagEmoji,
+                        style: TextStyle(fontSize: 22.sp),
+                      ),
+                      title: Text(
+                        lang.label,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.textPrimary,
+                        ),
+                      ),
+                      subtitle: Text(
+                        lang.subtitle,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      trailing: isSelected
+                          ? const Icon(
+                              Icons.check_circle_rounded,
+                              color: AppColors.primary,
+                            )
+                          : null,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

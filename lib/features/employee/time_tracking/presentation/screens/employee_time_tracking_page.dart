@@ -233,12 +233,9 @@ class _EmployeeTimeTrackingPageState
                       return EmployeeTimeLogCard(
                         log: log,
                         onTap: () {
-                          AppSnackBar.showInfo(
-                            context,
-                            '${log.project.fullName} · ${log.formattedDuration} ${context.loc.hrsShort}',
-                          );
                           context.push(
                             RouteConstants.employeeAssignmentDetails,
+                            extra: log.project.id,
                           );
                         },
                       );

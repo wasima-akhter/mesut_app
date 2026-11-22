@@ -42,26 +42,33 @@ class MobileTimeLogCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _Tag(
-                  label: MobilePhaseLocalizer.phaseType(
-                    context,
-                    log.activityType.serializedName,
+                Expanded(
+                  child: Wrap(
+                    spacing: 6.w,
+                    runSpacing: 4.h,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      _Tag(
+                        label: MobilePhaseLocalizer.phaseType(
+                          context,
+                          log.activityType.serializedName,
+                        ),
+                        color: activityColor,
+                      ),
+                      _Tag(
+                        label: log.isManual
+                            ? context.loc.manualLabel
+                            : context.loc.timerLabel,
+                        color: const Color(0xFF475569),
+                      ),
+                      if (log.localization != null)
+                        TranslationStatusBadge.fromMeta(log.localization),
+                    ],
                   ),
-                  color: activityColor,
                 ),
-                SizedBox(width: 8.w),
-                _Tag(
-                  label: log.isManual
-                      ? context.loc.manualLabel
-                      : context.loc.timerLabel,
-                  color: const Color(0xFF475569),
-                ),
-                if (log.localization != null) ...[
-                  SizedBox(width: 8.w),
-                  TranslationStatusBadge.fromMeta(log.localization),
-                ],
-                const Spacer(),
+                SizedBox(width: 6.w),
                 Text(
                   '${log.netHours.toStringAsFixed(2)} h',
                   style: TextStyle(

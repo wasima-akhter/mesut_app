@@ -7,6 +7,7 @@ import '../../../app/constants/route_constants.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/localization/localization_provider.dart';
+import '../../../core/localization/pending_refetch_controller.dart';
 import '../../../core/widgets/states/app_empty_widget.dart';
 import '../../shared/mobile_dashboard/domain/entities/mobile_schedule_entity.dart';
 import '../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
@@ -156,10 +157,17 @@ class _SiteManagerSchedulePageState
             ),
           ),
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: () =>
+            child: PendingPollEffect(
+              hasPending: anyLocalizationPending(
+                scheduleAsync.asData?.value.expand((d) => d.phases).map((p) => p.localization) ??
+                    const [],
+              ),
+              onPoll: () =>
                   ref.read(mobileScheduleProvider.notifier).refresh(),
-              child: scheduleAsync.when(
+              child: RefreshIndicator(
+                onRefresh: () =>
+                    ref.read(mobileScheduleProvider.notifier).refresh(),
+                child: scheduleAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (_, __) => Center(
                   child: Column(
@@ -243,6 +251,7 @@ class _SiteManagerSchedulePageState
                   );
                 },
               ),
+            ),
             ),
           ),
         ],

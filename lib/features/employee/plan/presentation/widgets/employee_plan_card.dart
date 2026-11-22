@@ -72,10 +72,13 @@ class EmployeePlanCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Text(
                   projectName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 19.sp,
                     fontWeight: FontWeight.w700,
@@ -83,25 +86,32 @@ class EmployeePlanCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: badgeColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(5.r),
-                ),
-                child: Text(
-                  _formatType(context),
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    color: badgeColor,
-                    fontWeight: FontWeight.w600,
+              SizedBox(width: 6.w),
+              Wrap(
+                spacing: 6.w,
+                runSpacing: 4.h,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                alignment: WrapAlignment.end,
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                    decoration: BoxDecoration(
+                      color: badgeColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(5.r),
+                    ),
+                    child: Text(
+                      _formatType(context),
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        color: badgeColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
+                  if (phase.localization != null)
+                    TranslationStatusBadge.fromMeta(phase.localization),
+                ],
               ),
-              if (phase.localization != null) ...[
-                SizedBox(width: 6.w),
-                TranslationStatusBadge.fromMeta(phase.localization),
-              ],
             ],
           ),
           if (phase.project.address.isNotEmpty) ...[

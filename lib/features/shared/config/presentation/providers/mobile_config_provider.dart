@@ -74,11 +74,7 @@ final mobileConfigProvider =
 
 /// Languages enabled by backend `/mobile/config` (falls back to all AppLanguage values).
 final enabledLanguagesProvider = Provider<List<AppLanguage>>((ref) {
-  final configAsync = ref.watch(mobileConfigProvider);
-  return configAsync.maybeWhen(
-    data: (config) => config.supportedAppLanguages,
-    orElse: () => AppLanguage.values,
-  );
+  return AppLanguage.values;
 });
 
 /// Backend flag `CompanyProfile.allowEmployeeManualTime` from `/mobile/config`.
