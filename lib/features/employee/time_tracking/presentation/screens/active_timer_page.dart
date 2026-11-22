@@ -16,23 +16,31 @@ import '../widgets/active_timer_header.dart';
 import '../widgets/cancel_timer_dialog.dart';
 import '../widgets/finish_work_dialog.dart';
 
-class ActiveTimerPage extends ConsumerWidget {
+class ActiveTimerPage extends ConsumerStatefulWidget {
   const ActiveTimerPage({super.key});
 
-  Future<bool> _confirmAndCancel(BuildContext context, WidgetRef ref) async {
+  @override
+  ConsumerState<ActiveTimerPage> createState() => _ActiveTimerPageState();
+}
+
+class _ActiveTimerPageState extends ConsumerState<ActiveTimerPage> {
+  bool _manuallyStopped = false;
+
+  Future<bool> _confirmAndCancel(BuildContext context) async {
     final shouldCancel = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (_) => const CancelTimerDialog(),
     );
     if (shouldCancel == true) {
+      _manuallyStopped = true;
       await ref.read(employeeTimerProvider.notifier).cancelTimer();
       return true;
     }
     return false;
   }
 
-  void _finishWork(BuildContext context, WidgetRef ref) {
+  void _finishWork(BuildContext context) {
     final timerState = ref.read(employeeTimerProvider);
     showDialog(
       context: context,
@@ -42,6 +50,7 @@ class ActiveTimerPage extends ConsumerWidget {
           projectName: timerState.currentProject.fullName,
           totalTime: timerState.formattedElapsed,
           onSave: () async {
+            _manuallyStopped = true;
             Navigator.of(context).pop();
             final success = await ref
                 .read(employeeTimerProvider.notifier)
@@ -60,20 +69,63 @@ class ActiveTimerPage extends ConsumerWidget {
     );
   }
 
+  Future<void> _handleLeaveScreen() async {
+    final timerState = ref.read(employeeTimerProvider);
+    if (!timerState.isTimerRunning) {
+      Navigator.of(context).pop();
+      return;
+    }
+    if (timerState.canCancel) {
+      final cancel = await _confirmAndCancel(context);
+      if (cancel && mounted) {
+        Navigator.of(context).pop();
+      }
+      return;
+    }
+    _manuallyStopped = true;
+    await ref.read(employeeTimerProvider.notifier).finishTimer();
+    if (mounted) {
+      Navigator.of(context).pop();
+      AppSnackBar.showInfo(context, context.loc.workFinished);
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void dispose() {
+    if (!_manuallyStopped) {
+      final timerState = ref.read(employeeTimerProvider);
+      if (timerState.isTimerRunning &&
+          !timerState.canCancel &&
+          timerState.graceSecondsRemaining == 0) {
+        ref.read(employeeTimerProvider.notifier).finishTimer();
+      }
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final timerState = ref.watch(employeeTimerProvider);
     final isOnBreak = timerState.isOnBreak;
     final isRunning = timerState.isTimerRunning;
     final canCancel = timerState.canCancel;
 
     return PopScope(
-      canPop: !isRunning || !canCancel,
+      canPop: !isRunning,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        final shouldCancel = await _confirmAndCancel(context, ref);
-        if (shouldCancel && context.mounted) {
-          Navigator.of(context).pop();
+        if (canCancel) {
+          final shouldCancel = await _confirmAndCancel(context);
+          if (shouldCancel && context.mounted) {
+            Navigator.of(context).pop();
+          }
+        } else if (isRunning && !canCancel && timerState.graceSecondsRemaining == 0) {
+          _manuallyStopped = true;
+          await ref.read(employeeTimerProvider.notifier).finishTimer();
+          if (context.mounted) {
+            Navigator.of(context).pop();
+            AppSnackBar.showInfo(context, context.loc.workFinished);
+          }
         }
       },
       child: Scaffold(
@@ -94,16 +146,7 @@ class ActiveTimerPage extends ConsumerWidget {
                     isOnBreak: isOnBreak,
                     isRunning: isRunning,
                     canCancel: canCancel,
-                    onBack: () async {
-                      if (!isRunning || !canCancel) {
-                        Navigator.of(context).pop();
-                        return;
-                      }
-                      final cancel = await _confirmAndCancel(context, ref);
-                      if (cancel && context.mounted) {
-                        Navigator.of(context).pop();
-                      }
-                    },
+                    onBack: _handleLeaveScreen,
                   ),
                 ),
               ),
@@ -117,7 +160,7 @@ class ActiveTimerPage extends ConsumerWidget {
               SliverPadding(
                 padding: EdgeInsets.symmetric(horizontal: 18.w),
                 sliver: SliverToBoxAdapter(
-                  child: _buildTimerCard(context, ref, timerState),
+                  child: _buildTimerCard(context, timerState),
                 ),
               ),
               SliverToBoxAdapter(child: SizedBox(height: 25.h)),
@@ -131,20 +174,16 @@ class ActiveTimerPage extends ConsumerWidget {
 
   Widget _buildTimerCard(
     BuildContext context,
-    WidgetRef ref,
     EmployeeTimerState state,
   ) {
     final isOnBreak = state.isOnBreak;
     final startedAtText = state.sessionStartedAt != null
-        ? TimeOfDay.fromDateTime(
-            state.sessionStartedAt!.toLocal(),
-          ).formatLocalized()
+        ? TimeOfDay.fromDateTime(state.sessionStartedAt!.toLocal()).formatLocalized()
         : state.currentProject.formattedStartTime;
-    final breakText =
-        (state.breakDuration > Duration.zero
-                ? state.breakDuration
-                : const Duration(minutes: 0))
-            .formatCompactLocalized();
+    final breakText = (state.breakDuration > Duration.zero
+            ? state.breakDuration
+            : const Duration(minutes: 0))
+        .formatCompactLocalized();
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
@@ -201,7 +240,7 @@ class ActiveTimerPage extends ConsumerWidget {
               SizedBox(width: 10.w),
               Expanded(
                 child: AppButton(
-                  onPressed: () => _finishWork(context, ref),
+                  onPressed: () => _finishWork(context),
                   text: context.loc.finishWork,
                 ),
               ),
@@ -211,7 +250,7 @@ class ActiveTimerPage extends ConsumerWidget {
           if (state.canCancel)
             AppTextButton(
               onPressed: () async {
-                final cancel = await _confirmAndCancel(context, ref);
+                final cancel = await _confirmAndCancel(context);
                 if (cancel && context.mounted) {
                   Navigator.of(context).pop();
                   AppSnackBar.showInfo(context, context.loc.timerCancelled);

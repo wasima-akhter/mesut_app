@@ -26,6 +26,8 @@ class ProjectDetailsHeader extends StatelessWidget {
       ),
       child: Text(
         text,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontSize: 14.5.sp,
           fontWeight: FontWeight.w600,

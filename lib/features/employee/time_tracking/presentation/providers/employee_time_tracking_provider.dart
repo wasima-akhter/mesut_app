@@ -1,77 +1,14 @@
 import 'dart:async';
+import 'package:construction_app/core/helpers/device_location_helper.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/datasources/employee_time_tracking_datasource.dart';
 import '../../domain/entities/employee_time_tracking_entities.dart';
+import 'employee_timer_helpers.dart';
+import 'employee_time_tracking_state.dart';
 
-class EmployeeTimeTrackingState {
-  const EmployeeTimeTrackingState({
-    this.isLoading = false,
-    this.isActionLoading = false,
-    this.isLoadingMoreLogs = false,
-    this.summary = const EmployeeTimeSummaryEntity(),
-    this.projects = const [],
-    this.recentLogs = const [],
-    this.selectedPeriod = 'WEEK',
-    this.logsPage = 1,
-    this.hasMoreLogs = false,
-    this.activeElapsed = Duration.zero,
-    this.isOnBreak = false,
-    this.errorMessage,
-  });
-
-  final bool isLoading;
-  final bool isActionLoading;
-  final bool isLoadingMoreLogs;
-  final EmployeeTimeSummaryEntity summary;
-  final List<EmployeeAssignedProjectEntity> projects;
-  final List<EmployeeRecentLogEntity> recentLogs;
-  final String selectedPeriod;
-  final int logsPage;
-  final bool hasMoreLogs;
-  final Duration activeElapsed;
-  final bool isOnBreak;
-  final String? errorMessage;
-
-  bool get isTimerRunning => summary.hasActiveTimer;
-  bool get showThisMonth => selectedPeriod == 'MONTH';
-
-  String get formattedElapsed {
-    final h = activeElapsed.inHours.toString().padLeft(2, '0');
-    final m = activeElapsed.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final s = activeElapsed.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$h:$m:$s';
-  }
-
-  EmployeeTimeTrackingState copyWith({
-    bool? isLoading,
-    bool? isActionLoading,
-    bool? isLoadingMoreLogs,
-    EmployeeTimeSummaryEntity? summary,
-    List<EmployeeAssignedProjectEntity>? projects,
-    List<EmployeeRecentLogEntity>? recentLogs,
-    String? selectedPeriod,
-    int? logsPage,
-    bool? hasMoreLogs,
-    Duration? activeElapsed,
-    bool? isOnBreak,
-    String? errorMessage,
-  }) => EmployeeTimeTrackingState(
-    isLoading: isLoading ?? this.isLoading,
-    isActionLoading: isActionLoading ?? this.isActionLoading,
-    isLoadingMoreLogs: isLoadingMoreLogs ?? this.isLoadingMoreLogs,
-    summary: summary ?? this.summary,
-    projects: projects ?? this.projects,
-    recentLogs: recentLogs ?? this.recentLogs,
-    selectedPeriod: selectedPeriod ?? this.selectedPeriod,
-    logsPage: logsPage ?? this.logsPage,
-    hasMoreLogs: hasMoreLogs ?? this.hasMoreLogs,
-    activeElapsed: activeElapsed ?? this.activeElapsed,
-    isOnBreak: isOnBreak ?? this.isOnBreak,
-    errorMessage: errorMessage,
-  );
-}
+export 'employee_time_tracking_state.dart';
 
 class EmployeeTimeTrackingNotifier extends Notifier<EmployeeTimeTrackingState> {
   Timer? _ticker;
@@ -162,7 +99,7 @@ class EmployeeTimeTrackingNotifier extends Notifier<EmployeeTimeTrackingState> {
     state = state.copyWith(activeElapsed: initialElapsed);
 
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (state.isOnBreak) return;
+      if (state.isOnBreak || !state.isTimerRunning) return;
       state = state.copyWith(activeElapsed: state.activeElapsed + const Duration(seconds: 1));
     });
   }
@@ -241,14 +178,41 @@ class EmployeeTimeTrackingNotifier extends Notifier<EmployeeTimeTrackingState> {
     }
   }
 
+  void _clearLocalActiveTimer() {
+    final cur = state.summary;
+    state = state.copyWith(
+      summary: EmployeeTimeSummaryEntity(
+        todayHours: cur.todayHours,
+        weekHours: cur.weekHours,
+        weeklyHoursTarget: cur.weeklyHoursTarget,
+        weekNumber: cur.weekNumber,
+        weekStartDate: cur.weekStartDate,
+        weekEndDate: cur.weekEndDate,
+        activeTimer: null,
+      ),
+      activeElapsed: Duration.zero,
+      isOnBreak: false,
+    );
+  }
+
   Future<bool> stopTimer({double? lat, double? lng}) async {
-    final activeId = state.summary.activeTimer?.id;
-    if (activeId == null) return false;
+    _ticker?.cancel();
+    _ticker = null;
+    final activeId = state.summary.activeTimer?.id ??
+        await EmployeeTimerHelpers.resolveActiveTimeLogId(ref: ref);
+    _clearLocalActiveTimer();
+    if (activeId == null || activeId.isEmpty) return false;
 
     state = state.copyWith(isActionLoading: true);
     try {
-      await _datasource.stopTimer(timeLogId: activeId, gpsEndLat: lat, gpsEndLng: lng);
-      _ticker?.cancel();
+      final coords = (lat != null && lng != null)
+          ? null
+          : await DeviceLocationHelper.tryGetCoordinates();
+      await _datasource.stopTimer(
+        timeLogId: activeId,
+        gpsEndLat: lat ?? coords?.lat,
+        gpsEndLng: lng ?? coords?.lng,
+      );
       await refresh();
       state = state.copyWith(isActionLoading: false);
       return true;

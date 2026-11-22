@@ -31,6 +31,8 @@ class EmployeeAssignmentCard extends StatelessWidget {
       ),
       child: Text(
         activity.label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontSize: 15.sp,
           color: activity.color,
@@ -66,8 +68,8 @@ class EmployeeAssignmentCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                _activityChip(activity),
-                const Spacer(),
+                Flexible(child: _activityChip(activity)),
+                SizedBox(width: 8.w),
                 Text(
                   assignment.formattedSchedule,
                   style: TextStyle(

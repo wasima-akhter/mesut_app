@@ -1,5 +1,6 @@
 import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:construction_app/app/theme/app_colors.dart';
+import 'package:construction_app/core/helpers/device_location_helper.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
 import 'package:construction_app/core/localization/pending_refetch_controller.dart';
 import 'package:construction_app/core/pagination/app_pagination_footer.dart';
@@ -12,6 +13,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../shared/helper/employee_bottom_sheets.dart';
 import '../providers/employee_time_tracking_provider.dart';
+import '../providers/employee_timer_provider.dart';
 import '../widgets/employee_active_timer_card.dart';
 import '../widgets/employee_add_time_sheet.dart';
 import '../widgets/employee_start_timer_sheet.dart';
@@ -61,7 +63,14 @@ class _EmployeeTimeTrackingPageState
       projectName: projectName,
       totalLogged: totalLogged,
       onSave: () async {
-        await ref.read(employeeTimeTrackingProvider.notifier).stopTimer();
+        final coords = await DeviceLocationHelper.tryGetCoordinates();
+        await Future.wait([
+          ref.read(employeeTimeTrackingProvider.notifier).stopTimer(
+            lat: coords?.lat,
+            lng: coords?.lng,
+          ),
+          ref.read(employeeTimerProvider.notifier).finishTimer(),
+        ]);
         if (mounted) {
           AppSnackBar.showSuccess(context, context.loc.workFinished);
         }
@@ -81,8 +90,11 @@ class _EmployeeTimeTrackingPageState
   Widget build(BuildContext context) {
     final summary =
         ref.watch(employeeTimeTrackingProvider.select((s) => s.summary));
-    final isTimerRunning =
+    final trackingRunning =
         ref.watch(employeeTimeTrackingProvider.select((s) => s.isTimerRunning));
+    final fallbackRunning =
+        ref.watch(employeeTimerProvider.select((s) => s.isTimerRunning));
+    final isTimerRunning = trackingRunning || fallbackRunning;
     final recentLogs =
         ref.watch(employeeTimeTrackingProvider.select((s) => s.recentLogs));
     final isLoading =
@@ -143,12 +155,14 @@ class _EmployeeTimeTrackingPageState
                   sliver: SliverToBoxAdapter(
                     child: EmployeeActiveTimerCard(
                       onFinish: () {
-                        final name =
-                            summary.activeTimer?.projectName.isNotEmpty == true
-                            ? summary.activeTimer!.projectName
-                            : 'Project';
-                        final durationStr =
-                            '${summary.activeTimer?.netHours.toStringAsFixed(1) ?? '0.0'} hrs';
+                        final tracking = ref.read(employeeTimeTrackingProvider);
+                        final fallback = ref.read(employeeTimerProvider);
+                        final name = tracking.summary.activeTimer?.projectName.isNotEmpty == true
+                            ? tracking.summary.activeTimer!.projectName
+                            : fallback.currentProject.fullName;
+                        final durationStr = tracking.isTimerRunning
+                            ? tracking.formattedElapsed
+                            : fallback.formattedElapsed;
                         _finishTimer(name, durationStr);
                       },
                     ),

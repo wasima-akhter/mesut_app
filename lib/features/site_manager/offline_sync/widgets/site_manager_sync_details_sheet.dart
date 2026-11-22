@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/localization/context_extensions.dart';
+import '../models/site_manager_sync_action.dart';
 import '../providers/site_manager_sync_provider.dart';
 
 class SiteManagerSyncDetailsSheet extends ConsumerWidget {
@@ -21,6 +22,7 @@ class SiteManagerSyncDetailsSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final syncState = ref.watch(siteManagerSyncProvider);
+    final visibleActions = syncState.visiblePendingActions;
 
     return Container(
       constraints: BoxConstraints(maxHeight: 0.75.sh),
@@ -60,28 +62,27 @@ class SiteManagerSyncDetailsSheet extends ConsumerWidget {
                     children: [
                       Text(
                         context.loc.synced,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       Text(
                         syncState.isOnline
                             ? context.loc.pendingSyncCount(
-                                '${syncState.totalPendingCount}',
+                                '${visibleActions.length}',
                               )
-                            : '${context.loc.get('common.offline', 'Offline')} • ${context.loc.pendingSyncCount('${syncState.totalPendingCount}')}',
+                            : '${context.loc.get('common.offline', 'Offline')} • ${context.loc.pendingSyncCount('${visibleActions.length}')}',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
                   ),
                 ),
-                if (syncState.hasPending)
+                if (visibleActions.isNotEmpty)
                   ElevatedButton(
                     onPressed: syncState.isSyncing
                         ? null
                         : () => ref
-                            .read(siteManagerSyncProvider.notifier)
-                            .syncAll(),
+                              .read(siteManagerSyncProvider.notifier)
+                              .syncAll(),
                     child: Text(
                       syncState.isSyncing
                           ? context.loc.syncingInProgress
@@ -91,8 +92,7 @@ class SiteManagerSyncDetailsSheet extends ConsumerWidget {
               ],
             ),
             Divider(height: 24.h),
-            if (syncState.pendingActions.isEmpty &&
-                syncState.timeLogsPendingCount == 0)
+            if (visibleActions.isEmpty)
               Expanded(
                 child: Center(
                   child: Column(
@@ -119,20 +119,7 @@ class SiteManagerSyncDetailsSheet extends ConsumerWidget {
               Expanded(
                 child: ListView(
                   children: [
-                    if (syncState.timeLogsPendingCount > 0)
-                      ListTile(
-                        leading: const Icon(Icons.access_time_filled_rounded),
-                        title: Text(
-                          context.loc.get(
-                            'sync.offlineTimeLogs',
-                            'Offline Time Logs',
-                          ),
-                        ),
-                        subtitle: Text(
-                          '${syncState.timeLogsPendingCount} ${context.loc.pendingSyncLabel}',
-                        ),
-                      ),
-                    ...syncState.pendingActions.map((action) {
+                    ...visibleActions.map((action) {
                       return ListTile(
                         leading: const Icon(Icons.pending_actions_rounded),
                         title: Text(action.displayTitle),

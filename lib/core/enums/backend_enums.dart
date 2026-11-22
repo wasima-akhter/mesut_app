@@ -1,13 +1,22 @@
+import '../localization/app_localization.dart';
 import 'app_enum.dart';
 
-/// Backend-aligned role enum matching API payloads (`EMPLOYEE`, `SITE_MANAGER`, `ADMIN`).
+/// Backend-aligned role enum matching API payloads (`EMPLOYEE`, `SITE_MANAGER`).
 enum BackendRole {
   employee('EMPLOYEE'),
-  siteManager('SITE_MANAGER'),
-  admin('ADMIN');
+  siteManager('SITE_MANAGER');
 
   const BackendRole(this.serializedName);
   final String serializedName;
+
+  String get label {
+    switch (this) {
+      case BackendRole.employee:
+        return AppLocalization.current.employee;
+      case BackendRole.siteManager:
+        return AppLocalization.current.siteManagerRole;
+    }
+  }
 
   static BackendRole fromString(
     String? raw, {
@@ -17,8 +26,7 @@ enum BackendRole {
     final normalized = raw.trim().toUpperCase().replaceAll(' ', '_');
     return BackendRole.values.firstWhere(
       (e) =>
-          e.serializedName == normalized ||
-          e.name.toUpperCase() == normalized,
+          e.serializedName == normalized || e.name.toUpperCase() == normalized,
       orElse: () => fallback,
     );
   }
@@ -35,7 +43,6 @@ enum BackendRole {
   UserRole toUserRole() {
     switch (this) {
       case BackendRole.siteManager:
-      case BackendRole.admin:
         return UserRole.siteManager;
       case BackendRole.employee:
         return UserRole.employee;
@@ -51,6 +58,17 @@ enum UserStatus {
 
   const UserStatus(this.serializedName);
   final String serializedName;
+
+  String get label {
+    switch (this) {
+      case UserStatus.active:
+        return AppLocalization.current.active;
+      case UserStatus.inactive:
+        return AppLocalization.current.get('status.inactive', 'Inactive');
+      case UserStatus.suspended:
+        return AppLocalization.current.get('status.suspended', 'Suspended');
+    }
+  }
 
   static UserStatus fromString(
     String? raw, {
@@ -86,6 +104,24 @@ enum BackendActivityType {
 
   const BackendActivityType(this.serializedName);
   final String serializedName;
+
+  String get label {
+    switch (this) {
+      case BackendActivityType.erection:
+        return AppLocalization.current.scaffoldErection;
+      case BackendActivityType.dismantling:
+        return AppLocalization.current.scaffoldDismantling;
+      case BackendActivityType.transport:
+        return AppLocalization.current.get('activity.transport', 'Transport');
+      case BackendActivityType.maintenance:
+        return AppLocalization.current.get(
+          'activity.maintenance',
+          'Maintenance',
+        );
+      case BackendActivityType.other:
+        return AppLocalization.current.otherActivity;
+    }
+  }
 
   static BackendActivityType fromString(
     String? raw, {
@@ -149,7 +185,8 @@ enum ApiErrorType {
       (e) =>
           e.serializedName == normalized || e.name.toUpperCase() == normalized,
       orElse: () {
-        if (normalized == 'ACCOUNT_INACTIVE' || normalized.contains('INACTIVE')) {
+        if (normalized == 'ACCOUNT_INACTIVE' ||
+            normalized.contains('INACTIVE')) {
           return ApiErrorType.accountInactive;
         }
         if (normalized.contains('CREDENTIAL')) {
@@ -199,7 +236,8 @@ enum ApiErrorType {
         if (normalized == 'BAD_REQUEST') {
           return ApiErrorType.badRequest;
         }
-        if (normalized.contains('AUTH') || normalized.contains('UNAUTHORIZED')) {
+        if (normalized.contains('AUTH') ||
+            normalized.contains('UNAUTHORIZED')) {
           return ApiErrorType.unauthorized;
         }
         if (normalized.contains('SERVER') || normalized.contains('INTERNAL')) {

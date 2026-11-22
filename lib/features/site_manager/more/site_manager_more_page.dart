@@ -5,8 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
-import '../../../app/theme/app_radii.dart';
-import '../../../core/localization/app_language.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/localization/localization_provider.dart';
 import '../../../core/localization/pending_refetch_controller.dart';

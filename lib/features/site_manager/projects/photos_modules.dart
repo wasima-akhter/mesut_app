@@ -178,10 +178,13 @@ class _PhotosTabState extends ConsumerState<PhotosTab> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.r),
         ),
-        title: const Text('Delete Plan'),
-        content: Text('Are you sure you want to delete "${file.name}"?'),
+        title: Text(AppLocalization.current.deletePlan),
+        content: Text(AppLocalization.current.deletePlanConfirmation),
         actions: [
-          AppTextButton(onPressed: () => Navigator.pop(ctx), text: 'Cancel'),
+          AppTextButton(
+            onPressed: () => Navigator.pop(ctx),
+            text: AppLocalization.current.cancel,
+          ),
           AppButton.danger(
             fullWidth: false,
             onPressed: () {
@@ -189,9 +192,12 @@ class _PhotosTabState extends ConsumerState<PhotosTab> {
                   .read(projectPhotosProvider.notifier)
                   .removePlanFile(file.name);
               Navigator.pop(ctx);
-              AppSnackBar.showInfo(context, 'Removed ${file.name}');
+              AppSnackBar.showInfo(
+                context,
+                AppLocalization.current.attachmentDeleted,
+              );
             },
-            text: 'Delete',
+            text: AppLocalization.current.delete,
           ),
         ],
       ),
@@ -702,7 +708,7 @@ class _PhotosTabState extends ConsumerState<PhotosTab> {
 
             // Delete Button
             IconButton(
-              tooltip: 'Delete Plan',
+              tooltip: AppLocalization.current.deletePlan,
               icon: Icon(
                 Icons.delete_outline,
                 size: 19.sp,

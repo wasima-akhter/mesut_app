@@ -1,3 +1,5 @@
+import '../localization/app_localization.dart';
+
 enum ProjectStatus {
   planning,
   active,
@@ -7,13 +9,13 @@ enum ProjectStatus {
   String get label {
     switch (this) {
       case ProjectStatus.planning:
-        return 'Planning';
+        return AppLocalization.current.get('status.planning', 'Planning');
       case ProjectStatus.active:
-        return 'Active';
+        return AppLocalization.current.active;
       case ProjectStatus.onHold:
-        return 'On Hold';
+        return AppLocalization.current.onHold;
       case ProjectStatus.completed:
-        return 'Completed';
+        return AppLocalization.current.completed;
     }
   }
 }

@@ -5,6 +5,7 @@ import '../../../../core/localization/context_extensions.dart';
 import '../../../../core/services/launcher_service.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/buttons/app_outlined_button.dart';
+import '../../../shared/mobile_dashboard/presentation/utils/mobile_phase_localizer.dart';
 import '../../domain/entities/map_coordinate_entity.dart';
 import '../../domain/entities/map_location_entity.dart';
 
@@ -57,7 +58,7 @@ class MapLocationCard extends StatelessWidget {
               ],
               if (location.priority != null) ...[
                 _badge(
-                  text: location.priority!,
+                  text: MobilePhaseLocalizer.priority(context, location.priority!),
                   color: _getPriorityColor(location.priority),
                   outlined: true,
                 ),

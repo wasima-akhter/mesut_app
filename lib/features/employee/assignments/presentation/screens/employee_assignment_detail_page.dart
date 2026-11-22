@@ -48,6 +48,7 @@ class _AssignmentDetailsPageState extends ConsumerState<AssignmentDetailsPage> {
     final fallback = state.fallbackAssignment;
 
     final id = project?.id ?? fallback?.projectId ?? 'project';
+    final phaseId = project?.phase?.id ?? fallback?.phaseId;
     final name = project?.name ?? fallback?.project ?? 'Project';
     final address = project?.fullAddress ?? fallback?.address ?? '';
     final activity = fallback?.activity ?? EmployeeActivityType.erection;
@@ -55,6 +56,7 @@ class _AssignmentDetailsPageState extends ConsumerState<AssignmentDetailsPage> {
     ref.read(employeeTimerProvider.notifier).startTimer(
           project: EmployeeProjectModel(
             id: id,
+            phaseId: phaseId,
             name: name,
             address: address,
             activity: activity,

@@ -1,3 +1,5 @@
+import '../localization/app_localization.dart';
+
 enum JobStatus {
   upcoming,
   active,
@@ -7,13 +9,13 @@ enum JobStatus {
   String get label {
     switch (this) {
       case JobStatus.upcoming:
-        return 'Upcoming';
+        return AppLocalization.current.get('status.upcoming', 'Upcoming');
       case JobStatus.active:
-        return 'Active';
+        return AppLocalization.current.active;
       case JobStatus.completed:
-        return 'Completed';
+        return AppLocalization.current.completed;
       case JobStatus.cancelled:
-        return 'Cancelled';
+        return AppLocalization.current.get('status.cancelled', 'Cancelled');
     }
   }
 }

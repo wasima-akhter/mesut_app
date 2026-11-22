@@ -18,6 +18,7 @@ class EmployeeTimeTrackingMappers {
       timestamp: start,
       project: EmployeeProjectModel(
         id: entity.projectId.isNotEmpty ? entity.projectId : entity.phaseId,
+        phaseId: entity.phaseId.isNotEmpty ? entity.phaseId : null,
         name: entity.projectName,
         address: '',
         activity: activity,
@@ -45,6 +46,7 @@ class EmployeeTimeTrackingMappers {
         .map(
           (e) => EmployeeProjectModel(
             id: e.id,
+            phaseId: e.phaseId,
             name: e.displayName,
             address: '',
             activity: e.phaseType.toUpperCase() == 'DISMANTLING'

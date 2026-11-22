@@ -1,3 +1,5 @@
+import '../localization/app_localization.dart';
+
 enum AbsenceType {
   vacation,
   sick,
@@ -7,13 +9,13 @@ enum AbsenceType {
   String get label {
     switch (this) {
       case AbsenceType.vacation:
-        return 'Vacation';
+        return AppLocalization.current.get('absence.vacation', 'Vacation');
       case AbsenceType.sick:
-        return 'Sick Leave';
+        return AppLocalization.current.get('absence.sick', 'Sick Leave');
       case AbsenceType.personal:
-        return 'Personal';
+        return AppLocalization.current.get('absence.personal', 'Personal');
       case AbsenceType.other:
-        return 'Other';
+        return AppLocalization.current.otherActivity;
     }
   }
 }

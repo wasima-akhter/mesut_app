@@ -8,6 +8,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../core/localization/context_extensions.dart';
 import '../../../../core/widgets/buttons/buttons.dart';
 import '../../../shared/mobile_dashboard/domain/entities/mobile_schedule_entity.dart';
+import '../../../shared/mobile_dashboard/presentation/utils/mobile_phase_localizer.dart';
 
 class CalendarPhaseCard extends StatelessWidget {
   const CalendarPhaseCard({super.key, required this.phase});
@@ -65,6 +66,8 @@ class CalendarPhaseCard extends StatelessWidget {
                 ),
                 child: Text(
                   _formatPhaseType(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 13.sp,
                     color: color,
@@ -82,7 +85,9 @@ class CalendarPhaseCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                   child: Text(
-                    phase.priority,
+                    MobilePhaseLocalizer.priority(context, phase.priority),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 11.sp,
                       color: AppColors.textSecondary,

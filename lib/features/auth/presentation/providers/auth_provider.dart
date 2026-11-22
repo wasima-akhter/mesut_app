@@ -47,10 +47,7 @@ class AuthNotifier extends Notifier<AuthState> with AuthOtpMixin {
       );
     }
 
-    return AuthState(
-      status: AuthStatus.unauthenticated,
-      rememberMe: rememberMe,
-    );
+    return AuthState(status: AuthStatus.unauthenticated, rememberMe: rememberMe);
   }
 
   void _onSessionExpired() {
@@ -59,6 +56,7 @@ class AuthNotifier extends Notifier<AuthState> with AuthOtpMixin {
     } catch (_) {}
     clearUserSessionState(ref);
     ref.read(userRoleProvider.notifier).clearRole();
+    unawaited(ref.read(appLanguageProvider.notifier).resetOnLogout());
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
@@ -80,9 +78,7 @@ class AuthNotifier extends Notifier<AuthState> with AuthOtpMixin {
       if (!hasValid) return;
 
       final devCtx = await AuthDeviceContext.resolve(ref);
-      final user = await ref
-          .read(authRepositoryProvider)
-          .checkSession(
+      final user = await ref.read(authRepositoryProvider).checkSession(
             deviceIdentifier: devCtx.deviceIdentifier,
             fcmToken: devCtx.fcmToken,
             lat: devCtx.lat,
@@ -114,32 +110,22 @@ class AuthNotifier extends Notifier<AuthState> with AuthOtpMixin {
     final storageService = ref.read(storageServiceProvider);
     try {
       final hasValidToken = await storageService.hasValidAccessToken().timeout(
-        const Duration(milliseconds: 1500),
-        onTimeout: () => false,
-      );
+            const Duration(milliseconds: 1500),
+            onTimeout: () => false,
+          );
       if (!hasValidToken) {
         final hasToken = await storageService.hasAccessToken().timeout(
-          const Duration(milliseconds: 1000),
-          onTimeout: () => false,
-        );
-        if (hasToken) {
-          await storageService.clearAuthentication();
-        }
+              const Duration(milliseconds: 1000),
+              onTimeout: () => false,
+            );
+        if (hasToken) await storageService.clearAuthentication();
         ref.read(userRoleProvider.notifier).clearRole();
-        state = state.copyWith(
-          status: AuthStatus.unauthenticated,
-          clearUser: true,
-          isLoading: false,
-        );
+        state = state.copyWith(status: AuthStatus.unauthenticated, clearUser: true, isLoading: false);
         return false;
       }
 
-      // Fast-path: If user has a valid unexpired token and cached user,
-      // authenticate instantly without blocking the splash screen!
       final cachedUser = ref.read(authRepositoryProvider).getCurrentUser();
-      final cachedRole =
-          cachedUser?.role ??
-          UserRoleExtension.fromString(storageService.getUserRole());
+      final cachedRole = cachedUser?.role ?? UserRoleExtension.fromString(storageService.getUserRole());
 
       if (cachedUser != null && cachedRole != null) {
         ref.read(userRoleProvider.notifier).setRole(cachedRole);
@@ -149,39 +135,39 @@ class AuthNotifier extends Notifier<AuthState> with AuthOtpMixin {
           selectedRole: cachedRole,
           isLoading: false,
         );
+        unawaited(
+          ref.read(appLanguageProvider.notifier).syncForSession(
+                role: cachedRole,
+                userId: cachedUser.id,
+                backendLanguage: cachedUser.language,
+              ),
+        );
         unawaited(heartbeatCheck(throttle: false));
         return true;
       }
 
       state = state.copyWith(isLoading: true, clearError: true);
       final devCtx = await AuthDeviceContext.resolve(ref);
-      final user = await ref
-          .read(authRepositoryProvider)
-          .checkSession(
+      final user = await ref.read(authRepositoryProvider).checkSession(
             deviceIdentifier: devCtx.deviceIdentifier,
             fcmToken: devCtx.fcmToken,
             lat: devCtx.lat,
             lng: devCtx.lng,
-          )
-          .timeout(const Duration(seconds: 3), onTimeout: () => null);
+          ).timeout(const Duration(seconds: 3), onTimeout: () => null);
 
       if (user != null) {
         ref.read(userRoleProvider.notifier).setRole(user.role);
-        state = state.copyWith(
-          status: AuthStatus.authenticated,
-          user: user,
-          selectedRole: user.role,
-          isLoading: false,
-        );
+        await ref.read(appLanguageProvider.notifier).syncForSession(
+              role: user.role,
+              userId: user.id,
+              backendLanguage: user.language,
+            );
+        state = state.copyWith(status: AuthStatus.authenticated, user: user, selectedRole: user.role, isLoading: false);
         return true;
       }
 
       ref.read(userRoleProvider.notifier).clearRole();
-      state = state.copyWith(
-        status: AuthStatus.unauthenticated,
-        clearUser: true,
-        isLoading: false,
-      );
+      state = state.copyWith(status: AuthStatus.unauthenticated, clearUser: true, isLoading: false);
       return false;
     } catch (e) {
       final userMsg = _resolveError(e);
@@ -207,9 +193,7 @@ class AuthNotifier extends Notifier<AuthState> with AuthOtpMixin {
     final storageService = ref.read(storageServiceProvider);
     try {
       final devCtx = await AuthDeviceContext.resolve(ref);
-      final session = await ref
-          .read(authRepositoryProvider)
-          .login(
+      final session = await ref.read(authRepositoryProvider).login(
             email: email,
             password: password,
             role: role,
@@ -274,6 +258,14 @@ class AuthNotifier extends Notifier<AuthState> with AuthOtpMixin {
         isLoading: false,
         isSuccess: true,
       );
+
+      // Scoped language sync for this authenticated user and role
+      await ref.read(appLanguageProvider.notifier).syncForSession(
+            role: session.user.role,
+            userId: session.user.id,
+            backendLanguage: session.user.language,
+          );
+
       return LoginOutcome.authenticated;
     } catch (e) {
       final userMsg = _resolveError(e);
@@ -301,6 +293,7 @@ class AuthNotifier extends Notifier<AuthState> with AuthOtpMixin {
       } catch (_) {}
       clearUserSessionState(ref);
       ref.read(userRoleProvider.notifier).clearRole();
+      await ref.read(appLanguageProvider.notifier).resetOnLogout();
       state = AuthState(
         status: AuthStatus.unauthenticated,
         rememberMe: ref.read(storageServiceProvider).rememberMe,

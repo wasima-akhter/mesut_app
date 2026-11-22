@@ -71,6 +71,7 @@ class AppStrings {
   String get on => get('common.on', 'On');
   String get off => get('common.off', 'Off');
   String get open => get('common.open', 'Open');
+  String get active => get('common.active', 'Active');
   String get completed => get('common.completed', 'Completed');
   String get inProgress => get('common.inProgress', 'In Progress');
   String get notStarted => get('common.notStarted', 'Not Started');

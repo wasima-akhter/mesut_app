@@ -44,7 +44,16 @@ class EmployeeSyncState {
   final DateTime? lastSyncedAt;
   final String? lastSyncMessage;
 
-  int get totalPendingCount => pendingActions.length;
+  List<EmployeeSyncAction> get visiblePendingActions =>
+      pendingActions.where((action) {
+        final isTimer = action.actionType == EmployeeSyncActionType.startTimer ||
+            action.actionType == EmployeeSyncActionType.stopTimer ||
+            action.actionType == EmployeeSyncActionType.manualTimeLog ||
+            action.endpoint.contains('/timer/');
+        return !isTimer;
+      }).toList();
+
+  int get totalPendingCount => visiblePendingActions.length;
   bool get hasPending => totalPendingCount > 0;
 
   EmployeeSyncState copyWith({
@@ -93,10 +102,20 @@ class EmployeeSyncNotifier extends Notifier<EmployeeSyncState> {
     });
 
     final initialQueue = queue.loadQueue();
+    for (final action in initialQueue) {
+      final isTimer = action.actionType == EmployeeSyncActionType.startTimer ||
+          action.actionType == EmployeeSyncActionType.stopTimer ||
+          action.actionType == EmployeeSyncActionType.manualTimeLog ||
+          action.endpoint.contains('/timer/');
+      if (isTimer) {
+        queue.remove(action.id);
+      }
+    }
+    final cleanedQueue = queue.loadQueue();
     final lastSync = storage.getLastSyncTime();
 
     return EmployeeSyncState(
-      pendingActions: initialQueue,
+      pendingActions: cleanedQueue,
       lastSyncedAt: lastSync,
     );
   }

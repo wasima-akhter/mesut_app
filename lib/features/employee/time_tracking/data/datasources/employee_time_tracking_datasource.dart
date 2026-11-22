@@ -154,16 +154,17 @@ class EmployeeTimeTrackingDatasourceImpl
     double? gpsEndLat,
     double? gpsEndLng,
   }) async {
-    final payload = {
+    final payload = <String, dynamic>{
       'timeLogId': timeLogId,
-      'gpsEndLat': gpsEndLat ?? 0,
-      'gpsEndLng': gpsEndLng ?? 0,
+      if (gpsEndLat != null) 'gpsEndLat': gpsEndLat,
+      if (gpsEndLng != null) 'gpsEndLng': gpsEndLng,
     };
     try {
       await apiClient.post<Map<String, dynamic>>(
         ApiConstants.mobileTimerStop,
         data: payload,
       );
+      await cacheService?.save('time_summary', null);
     } catch (e) {
       if (syncQueue != null) {
         final action = EmployeeSyncAction(

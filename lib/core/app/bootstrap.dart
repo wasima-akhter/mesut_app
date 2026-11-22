@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/shared/notifications/presentation/providers/notifications_provider.dart';
 import '../constants/storage_keys.dart';
+import '../enums/app_enum.dart';
 import '../localization/app_language.dart';
 import '../localization/app_localization.dart';
 import '../localization/localization_provider.dart';
@@ -42,7 +43,12 @@ Future<void> bootstrap({required Widget app}) async {
 
   // Initialize SharedPreferences & preload saved localization before ProviderScope.
   final sharedPreferences = await SharedPreferences.getInstance();
-  final savedLangCode = sharedPreferences.getString(StorageKeys.selectedLanguage);
+  final savedRoleStr = sharedPreferences.getString(StorageKeys.userRole);
+  final savedRole = UserRoleExtension.fromString(savedRoleStr);
+  final savedLangCode = savedRole != null
+      ? (sharedPreferences.getString(AppLanguageNotifier.roleStorageKey(savedRole)) ??
+          sharedPreferences.getString(StorageKeys.selectedLanguage))
+      : sharedPreferences.getString(StorageKeys.selectedLanguage);
   final initialLanguage = AppLanguage.fromCode(savedLangCode);
   AppLanguageNotifier.activeLanguageCode = initialLanguage.code;
   await Future.wait([

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../../core/localization/context_extensions.dart';
 import '../../../../../core/widgets/buttons/buttons.dart';
+import '../../../../shared/mobile_dashboard/presentation/utils/mobile_phase_localizer.dart';
 import '../../domain/entities/project_phase_dates_entity.dart';
 import 'project_phase_duration_field.dart';
 
@@ -163,7 +164,9 @@ class _ProjectPhaseDateCardState extends State<ProjectPhaseDateCard> {
                   borderRadius: BorderRadius.circular(4.r),
                 ),
                 child: Text(
-                  widget.phase.status,
+                  MobilePhaseLocalizer.status(context, widget.phase.status),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,

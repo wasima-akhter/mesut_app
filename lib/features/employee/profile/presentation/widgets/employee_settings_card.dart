@@ -5,11 +5,9 @@ import 'package:go_router/go_router.dart';
 
 import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:construction_app/app/theme/app_colors.dart';
-import 'package:construction_app/core/localization/app_language.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
 import 'package:construction_app/core/localization/localization_provider.dart';
 import '../../../../shared/widgets/language_selection_bottom_sheet.dart';
-import '../../../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
 import '../../../../shared/notifications/presentation/providers/notification_settings_provider.dart';
 import '../../../offline_sync/providers/employee_sync_provider.dart';
 import '../../../offline_sync/widgets/employee_sync_details_sheet.dart';

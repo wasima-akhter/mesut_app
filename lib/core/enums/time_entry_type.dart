@@ -1,3 +1,5 @@
+import '../localization/app_localization.dart';
+
 enum TimeEntryType {
   regular,
   breakTime,
@@ -6,11 +8,11 @@ enum TimeEntryType {
   String get label {
     switch (this) {
       case TimeEntryType.regular:
-        return 'Regular';
+        return AppLocalization.current.get('timeEntry.regular', 'Regular');
       case TimeEntryType.breakTime:
-        return 'Break';
+        return AppLocalization.current.get('timeEntry.break', 'Break');
       case TimeEntryType.overtime:
-        return 'Overtime';
+        return AppLocalization.current.get('timeEntry.overtime', 'Overtime');
     }
   }
 }

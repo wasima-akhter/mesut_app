@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/enums/backend_enums.dart';
 import '../../../../core/localization/context_extensions.dart';
+import '../../../shared/mobile_dashboard/presentation/utils/mobile_phase_localizer.dart';
 import '../../../shared/mobile_time_tracking/domain/entities/mobile_time_log_entity.dart';
 import '../bottom_sheet_container.dart';
 
@@ -83,7 +84,12 @@ class SiteManagerCrewCard extends StatelessWidget {
               SizedBox(width: 7.w),
               Expanded(
                 child: Text(
-                  activity.serializedName,
+                  MobilePhaseLocalizer.phaseType(
+                    context,
+                    activity.serializedName,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.white),
                 ),
               ),

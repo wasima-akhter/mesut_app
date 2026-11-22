@@ -1,3 +1,5 @@
+import '../localization/app_localization.dart';
+
 enum InspectionStatus {
   scheduled,
   inProgress,
@@ -7,13 +9,13 @@ enum InspectionStatus {
   String get label {
     switch (this) {
       case InspectionStatus.scheduled:
-        return 'Scheduled';
+        return AppLocalization.current.get('status.scheduled', 'Scheduled');
       case InspectionStatus.inProgress:
-        return 'In Progress';
+        return AppLocalization.current.inProgress;
       case InspectionStatus.completed:
-        return 'Completed';
+        return AppLocalization.current.completed;
       case InspectionStatus.failed:
-        return 'Failed';
+        return AppLocalization.current.get('status.failed', 'Failed');
     }
   }
 }

@@ -50,7 +50,17 @@ class SiteManagerSyncState {
   final DateTime? lastSyncedAt;
   final String? lastSyncMessage;
 
-  int get totalPendingCount => pendingActions.length + timeLogsPendingCount;
+  List<SiteManagerSyncAction> get visiblePendingActions =>
+      pendingActions.where((action) {
+        final isTimer =
+            action.actionType == SiteManagerSyncActionType.startTimer ||
+            action.actionType == SiteManagerSyncActionType.stopTimer ||
+            action.actionType == SiteManagerSyncActionType.manualTimeLog ||
+            action.endpoint.contains('/timer/');
+        return !isTimer;
+      }).toList();
+
+  int get totalPendingCount => visiblePendingActions.length;
   bool get hasPending => totalPendingCount > 0;
 
   SiteManagerSyncState copyWith({

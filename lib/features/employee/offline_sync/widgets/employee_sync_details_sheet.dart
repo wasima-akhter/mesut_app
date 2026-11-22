@@ -23,6 +23,7 @@ class EmployeeSyncDetailsSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final syncState = ref.watch(employeeSyncProvider);
+    final visibleActions = syncState.visiblePendingActions;
 
     return Container(
       constraints: BoxConstraints(maxHeight: 0.75.sh),
@@ -70,15 +71,15 @@ class EmployeeSyncDetailsSheet extends ConsumerWidget {
                       Text(
                         syncState.isOnline
                             ? context.loc.pendingSyncCount(
-                                '${syncState.totalPendingCount}',
+                                '${visibleActions.length}',
                               )
-                            : '${context.loc.get('common.offline', 'Offline')} • ${context.loc.pendingSyncCount('${syncState.totalPendingCount}')}',
+                            : '${context.loc.get('common.offline', 'Offline')} • ${context.loc.pendingSyncCount('${visibleActions.length}')}',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
                   ),
                 ),
-                if (syncState.hasPending)
+                if (visibleActions.isNotEmpty)
                   ElevatedButton(
                     onPressed: syncState.isSyncing
                         ? null
@@ -93,7 +94,7 @@ class EmployeeSyncDetailsSheet extends ConsumerWidget {
               ],
             ),
             Divider(height: 24.h),
-            if (syncState.pendingActions.isEmpty)
+            if (visibleActions.isEmpty)
               Expanded(
                 child: Center(
                   child: Column(
@@ -119,10 +120,10 @@ class EmployeeSyncDetailsSheet extends ConsumerWidget {
             else
               Expanded(
                 child: ListView.separated(
-                  itemCount: syncState.pendingActions.length,
+                  itemCount: visibleActions.length,
                   separatorBuilder: (_, _) => Divider(height: 12.h),
                   itemBuilder: (context, index) {
-                    final action = syncState.pendingActions[index];
+                    final action = visibleActions[index];
                     final friendlyError = action.lastError != null
                         ? _cleanDisplayError(context, action.lastError!)
                         : null;
@@ -234,46 +235,26 @@ class EmployeeSyncDetailsSheet extends ConsumerWidget {
 
   String _cleanDisplayError(BuildContext context, String rawError) {
     final l = rawError.toLowerCase();
-    if (l.contains('unrecognized key') ||
-        l.contains('validation') ||
-        l.contains('422')) {
-      return context.loc
-          .get('sync.formatUpdated', 'Format updated • Ready to sync');
+    if (l.contains('unrecognized key') || l.contains('validation') || l.contains('422')) {
+      return context.loc.get('sync.formatUpdated', 'Format updated • Ready to sync');
     }
     if (l.contains('conflict') || l.contains('409')) {
-      return context.loc
-          .get('sync.conflictResolved', 'Updated on server • Ready to sync');
+      return context.loc.get('sync.conflictResolved', 'Updated on server • Ready to sync');
     }
-    if (l.contains('connection') ||
-        l.contains('network') ||
-        l.contains('timeout') ||
-        l.contains('offline')) {
-      return context.loc.get('sync.errorConnectionFailed',
-          'Connection issue • Will retry automatically');
+    if (l.contains('connection') || l.contains('network') || l.contains('timeout') || l.contains('offline')) {
+      return context.loc.get('sync.errorConnectionFailed', 'Connection issue • Will retry automatically');
     }
-    if (l.contains('server') ||
-        l.contains('500') ||
-        l.contains('502') ||
-        l.contains('503')) {
-      return context.loc.get('sync.errorServerUnavailable',
-          'Server temporarily unavailable • Will retry');
+    if (l.contains('server') || l.contains('500') || l.contains('502') || l.contains('503')) {
+      return context.loc.get('sync.errorServerUnavailable', 'Server temporarily unavailable • Will retry');
     }
     if (l.contains('not found') || l.contains('404')) {
       return context.loc.get('sync.errorNotFound', 'Item not found on server');
     }
-    if (l.contains('session') ||
-        l.contains('unauthorized') ||
-        l.contains('401') ||
-        l.contains('403')) {
-      return context.loc
-          .get('sync.errorSessionExpired', 'Session expired • Please sign in again');
+    if (l.contains('session') || l.contains('unauthorized') || l.contains('401') || l.contains('403')) {
+      return context.loc.get('sync.errorSessionExpired', 'Session expired • Please sign in again');
     }
-    if (l.contains('dioexception') ||
-        l.contains('cannot') ||
-        l.contains('bad response') ||
-        l.contains('exception:')) {
-      return context.loc.get(
-          'sync.errorSyncFailed', 'Could not sync changes • Will retry automatically');
+    if (l.contains('dioexception') || l.contains('cannot') || l.contains('bad response') || l.contains('exception:')) {
+      return context.loc.get('sync.errorSyncFailed', 'Could not sync changes • Will retry automatically');
     }
     return rawError;
   }

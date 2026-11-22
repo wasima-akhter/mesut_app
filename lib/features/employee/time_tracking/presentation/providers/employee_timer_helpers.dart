@@ -70,7 +70,13 @@ abstract final class EmployeeTimerHelpers {
     required Ref ref,
     required String rawId,
     required EmployeeActivityType activity,
+    String? directPhaseId,
   }) async {
+    if (directPhaseId != null &&
+        directPhaseId.isNotEmpty &&
+        isValidUuid(directPhaseId)) {
+      return directPhaseId;
+    }
     if (isValidUuid(rawId)) return rawId;
     try {
       final projects = await ref
@@ -144,6 +150,7 @@ abstract final class EmployeeTimerHelpers {
     String? currentId,
     required String phaseId,
     required BackendActivityType activity,
+    String? directPhaseId,
   }) async {
     String? activeId = await resolveActiveTimeLogId(
       ref: ref,
@@ -159,6 +166,7 @@ abstract final class EmployeeTimerHelpers {
           ref: ref,
           rawId: phaseId,
           activity: mapBackendToEmployee(activity),
+          directPhaseId: directPhaseId,
         );
         final startRes = await remoteDs.startTimer(
           phaseId: resolvedPhase,

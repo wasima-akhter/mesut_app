@@ -5,6 +5,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../core/enums/backend_enums.dart';
 import '../../../../core/localization/context_extensions.dart';
 import '../../../../core/utils/app_date_time_formatter.dart';
+import '../../../shared/mobile_dashboard/presentation/utils/mobile_phase_localizer.dart';
 import '../../../shared/mobile_time_tracking/domain/entities/mobile_time_log_entity.dart';
 import '../bottom_sheet_container.dart';
 
@@ -44,10 +45,16 @@ class SiteManagerMyTimeEntryCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      entry.activityType.serializedName,
+                      MobilePhaseLocalizer.phaseType(
+                        context,
+                        entry.activityType.serializedName,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                   ),
+                  SizedBox(width: 8.w),
                   Text(
                     '${entry.netHours.toStringAsFixed(1)}h',
                     style: Theme.of(context).textTheme.titleSmall,
@@ -55,18 +62,23 @@ class SiteManagerMyTimeEntryCard extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 8.h),
-              _activityBadge(entry.activityType),
+              _activityBadge(context, entry.activityType),
               SizedBox(height: 12.h),
               Row(
                 children: [
                   Expanded(
                     child: Text(
                       '$startStr – $endStr • ${context.loc.breakLabel}: ${entry.breakMinutes}m',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),
+                  SizedBox(width: 8.w),
                   Text(
-                    entry.status,
+                    MobilePhaseLocalizer.status(context, entry.status),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: entry.status == 'APPROVED'
                               ? AppColors.success
@@ -83,7 +95,7 @@ class SiteManagerMyTimeEntryCard extends StatelessWidget {
   );
 }
 
-  Widget _activityBadge(BackendActivityType activity) {
+  Widget _activityBadge(BuildContext context, BackendActivityType activity) {
     final color = _activityColor(activity);
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
@@ -92,7 +104,9 @@ class SiteManagerMyTimeEntryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(6.r),
       ),
       child: Text(
-        activity.serializedName,
+        MobilePhaseLocalizer.phaseType(context, activity.serializedName),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontSize: 11.sp,
           fontWeight: FontWeight.w600,
@@ -118,9 +132,20 @@ class SiteManagerMyTimeEntryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _detailRow(context, context.loc.activityType, entry.activityType.serializedName),
+            _detailRow(
+              context,
+              context.loc.activityType,
+              MobilePhaseLocalizer.phaseType(
+                context,
+                entry.activityType.serializedName,
+              ),
+            ),
             _detailRow(context, context.loc.phase, entry.phaseId),
-            _detailRow(context, context.loc.status, entry.status),
+            _detailRow(
+              context,
+              context.loc.status,
+              MobilePhaseLocalizer.status(context, entry.status),
+            ),
             _detailRow(context, context.loc.breakTime, '${entry.breakMinutes}m'),
             _detailRow(context, context.loc.total, '${entry.netHours.toStringAsFixed(1)}h'),
             if (entry.user != null)

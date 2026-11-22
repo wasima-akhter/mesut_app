@@ -107,7 +107,9 @@ class MobileTimeLogCard extends StatelessWidget {
                 ],
                 const Spacer(),
                 Text(
-                  log.status,
+                  MobilePhaseLocalizer.status(context, log.status),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
@@ -149,6 +151,8 @@ class _Tag extends StatelessWidget {
       ),
       child: Text(
         label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontSize: 12.sp,
           fontWeight: FontWeight.w600,

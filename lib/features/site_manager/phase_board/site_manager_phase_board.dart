@@ -49,11 +49,13 @@ class _SiteManagerPhaseBoardPageState
           .read(mobilePhasesProvider.notifier)
           .updateStatus(phase.id, chosen);
       if (!mounted) return;
+      final oldStatusName =
+          BackendPhaseStatus.fromString(phase.status).localizedName(context);
       final newStatusName =
           BackendPhaseStatus.fromString(chosen).localizedName(context);
       AppSnackBar.showSuccess(
         context,
-        context.loc.phaseChanged(phase.status, newStatusName),
+        context.loc.phaseChanged(oldStatusName, newStatusName),
       );
     } catch (e) {
       if (!mounted) return;

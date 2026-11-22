@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/constants/api_constants.dart';
-import '../../../../../core/helpers/device_location_helper.dart';
 import '../../../../../core/localization/context_extensions.dart';
 import '../../../../../core/services/address_resolver_service.dart';
 import '../../../../../core/widgets/snack/app_snackbar.dart';

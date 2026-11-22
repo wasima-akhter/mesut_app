@@ -22,6 +22,8 @@ class PhaseBadge extends StatelessWidget {
       ),
       child: Text(
         label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           color: color,
           fontSize: 16.sp,
@@ -51,6 +53,8 @@ class PriorityBadge extends StatelessWidget {
       ),
       child: Text(
         label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           color: color,
           fontSize: 16.sp,
@@ -84,12 +88,16 @@ class StatusLabel extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 5),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 15.sp,
-            color: color,
-            fontWeight: FontWeight.w400,
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 15.sp,
+              color: color,
+              fontWeight: FontWeight.w400,
+            ),
           ),
         ),
       ],

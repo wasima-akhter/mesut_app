@@ -132,7 +132,8 @@ class EmployeeActiveTimerCard extends ConsumerWidget {
                   onPressed: () {
                     if (isApiActive) {
                       ref.read(employeeTimeTrackingProvider.notifier).toggleBreak();
-                    } else {
+                    }
+                    if (fallbackState.isTimerRunning) {
                       if (fallbackState.isOnBreak) {
                         ref.read(employeeTimerProvider.notifier).resumeTimer();
                       } else {

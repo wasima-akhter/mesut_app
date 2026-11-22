@@ -1,8 +1,10 @@
+import 'package:construction_app/app/constants/route_constants.dart';
 import 'package:construction_app/app/theme/app_colors.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
 import 'package:construction_app/core/widgets/translation/translation_status_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../domain/entities/employee_schedule_entity.dart';
@@ -30,8 +32,9 @@ class EmployeePlanCard extends StatelessWidget {
 
   String _formatTimeRange(String locale) {
     if (phase.startDate == null && phase.endDate == null) {
-      if (phase.assignedHours > 0)
+      if (phase.assignedHours > 0) {
         return '${phase.assignedHours.toStringAsFixed(0)}h';
+      }
       return '-';
     }
     final fmt = DateFormat.jm(locale);
@@ -68,120 +71,134 @@ class EmployeePlanCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(9.r),
           border: Border.all(color: AppColors.border),
         ),
-        child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            final projectId =
+                phase.project.id.isNotEmpty ? phase.project.id : phase.id;
+            context.push(
+              RouteConstants.employeeAssignmentDetails,
+              extra: projectId,
+            );
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  projectName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 19.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              SizedBox(width: 6.w),
-              Wrap(
-                spacing: 6.w,
-                runSpacing: 4.h,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                alignment: WrapAlignment.end,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                    decoration: BoxDecoration(
-                      color: badgeColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(5.r),
-                    ),
+                  Expanded(
                     child: Text(
-                      _formatType(context),
+                      projectName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 15.sp,
-                        color: badgeColor,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 19.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ),
-                  if (phase.localization != null)
-                    TranslationStatusBadge.fromMeta(phase.localization),
+                  SizedBox(width: 6.w),
+                  Wrap(
+                    spacing: 6.w,
+                    runSpacing: 4.h,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    alignment: WrapAlignment.end,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 4.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: badgeColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(5.r),
+                        ),
+                        child: Text(
+                          _formatType(context),
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            color: badgeColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      if (phase.localization != null)
+                        TranslationStatusBadge.fromMeta(phase.localization),
+                    ],
+                  ),
+                ],
+              ),
+              if (phase.project.address.isNotEmpty) ...[
+                SizedBox(height: 6.h),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 16.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                    SizedBox(width: 4.w),
+                    Expanded(
+                      child: Text(
+                        phase.project.address,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 15.sp,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              SizedBox(height: 8.h),
+              Row(
+                children: [
+                  Icon(
+                    Icons.access_time_outlined,
+                    size: 16.sp,
+                    color: AppColors.textTertiary,
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    timeStr,
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      color: AppColors.textTertiary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 6.h),
+              Row(
+                children: [
+                  Icon(
+                    Icons.person_outline_rounded,
+                    size: 18.sp,
+                    color: AppColors.textTertiary,
+                  ),
+                  SizedBox(width: 6.w),
+                  Expanded(
+                    child: Text(
+                      '${context.loc.siteLead}: ${phase.siteManagerNames}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ],
           ),
-          if (phase.project.address.isNotEmpty) ...[
-            SizedBox(height: 6.h),
-            Row(
-              children: [
-                Icon(
-                  Icons.location_on_outlined,
-                  size: 16.sp,
-                  color: AppColors.textSecondary,
-                ),
-                SizedBox(width: 4.w),
-                Expanded(
-                  child: Text(
-                    phase.project.address,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-          SizedBox(height: 8.h),
-          Row(
-            children: [
-              Icon(
-                Icons.access_time_outlined,
-                size: 16.sp,
-                color: AppColors.textTertiary,
-              ),
-              SizedBox(width: 6.w),
-              Text(
-                timeStr,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  color: AppColors.textTertiary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 6.h),
-          Row(
-            children: [
-              Icon(
-                Icons.person_outline_rounded,
-                size: 18.sp,
-                color: AppColors.textTertiary,
-              ),
-              SizedBox(width: 6.w),
-              Expanded(
-                child: Text(
-                  '${context.loc.siteLead}: ${phase.siteManagerNames}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    color: AppColors.textTertiary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

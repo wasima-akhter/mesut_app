@@ -1,3 +1,5 @@
+import '../localization/app_localization.dart';
+
 enum TaskStatus {
   todo,
   inProgress,
@@ -6,11 +8,11 @@ enum TaskStatus {
   String get label {
     switch (this) {
       case TaskStatus.todo:
-        return 'To Do';
+        return AppLocalization.current.get('status.todo', 'To Do');
       case TaskStatus.inProgress:
-        return 'In Progress';
+        return AppLocalization.current.inProgress;
       case TaskStatus.completed:
-        return 'Completed';
+        return AppLocalization.current.completed;
     }
   }
 }

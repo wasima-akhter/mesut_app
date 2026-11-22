@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -89,27 +87,23 @@ class _AllPhotosScreenState extends ConsumerState<AllPhotosScreen> {
                 SizedBox(height: 18.h),
 
                 Text(
-                  'Compiling Photos into PDF...',
-
+                  context.loc.get('photos.compilingPdf', 'Compiling Photos into PDF...'),
                   style: TextStyle(
                     fontSize: 18.sp,
-
                     fontWeight: FontWeight.w700,
-
                     color: const Color(0xFF222222),
                   ),
                 ),
-
                 SizedBox(height: 6.h),
-
                 Text(
-                  'Processing ${photosToExport.length} images with project header',
-
+                  context.loc.get(
+                    'photos.processingImages',
+                    'Processing {count} images with project header',
+                    {'count': photosToExport.length.toString()},
+                  ),
                   textAlign: TextAlign.center,
-
                   style: TextStyle(
                     fontSize: 15.sp,
-
                     color: const Color(0xFF666666),
                   ),
                 ),

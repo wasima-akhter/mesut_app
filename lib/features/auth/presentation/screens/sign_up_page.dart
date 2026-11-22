@@ -113,7 +113,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           firstName: firstName,
           lastName: lastName,
           email: email,
-          phone: "0123456789" ?? formattedPhone,
+          phone: formattedPhone,
           password: password,
           role: _selectedRole,
         );

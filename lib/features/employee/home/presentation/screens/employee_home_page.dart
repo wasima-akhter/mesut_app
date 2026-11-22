@@ -93,22 +93,23 @@ class _EmployeeHomePageState extends ConsumerState<EmployeeHomePage> {
 
   void _startNewTimer(EmployeeAssignmentModel assignment) {
     ref.read(assignmentDetailsProvider.notifier).setAssignment(assignment);
-    final projectId = assignment.projectId?.isNotEmpty == true
-        ? assignment.projectId!
-        : (assignment.phaseId?.isNotEmpty == true
-              ? assignment.phaseId!
+    final targetPhaseId = assignment.phaseId?.isNotEmpty == true
+        ? assignment.phaseId!
+        : (assignment.projectId?.isNotEmpty == true
+              ? assignment.projectId!
               : assignment.project);
     ref
         .read(employeeTimeTrackingProvider.notifier)
         .startTimer(
-          projectId: projectId,
+          projectId: targetPhaseId,
           activityType: assignment.activity.name.toUpperCase(),
         );
     ref
         .read(employeeTimerProvider.notifier)
         .startTimer(
           project: EmployeeProjectModel(
-            id: projectId,
+            id: targetPhaseId,
+            phaseId: assignment.phaseId,
             name: assignment.project,
             address: assignment.address,
             activity: assignment.activity,

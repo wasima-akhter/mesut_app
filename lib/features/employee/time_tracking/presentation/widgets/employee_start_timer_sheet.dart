@@ -1,11 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import 'package:construction_app/app/theme/app_colors.dart';
 import 'package:construction_app/core/localization/context_extensions.dart';
 import 'package:construction_app/core/widgets/buttons/buttons.dart';
 import 'package:construction_app/core/widgets/snack/app_snackbar.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../shared/helper/employee_enums.dart';
 import '../../../shared/helper/employee_models.dart';
@@ -15,9 +14,7 @@ import '../providers/employee_timer_projects_provider.dart';
 import '../providers/employee_timer_provider.dart';
 import 'employee_project_phase_picker.dart';
 
-Future<void> showEmployeeStartTimerSheet({
-  required BuildContext context,
-}) {
+Future<void> showEmployeeStartTimerSheet({required BuildContext context}) {
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -48,12 +45,14 @@ class _EmployeeStartTimerSheetState
     }
 
     setState(() => _isSubmitting = true);
-    final projectId = _selectedProject!.id;
+    final targetPhaseId = _selectedPhase!.phaseId.isNotEmpty
+        ? _selectedPhase!.phaseId
+        : _selectedProject!.id;
     final activityType = _selectedPhase!.phaseType.toUpperCase();
 
     final success = await ref
         .read(employeeTimeTrackingProvider.notifier)
-        .startTimer(projectId: projectId, activityType: activityType);
+        .startTimer(projectId: targetPhaseId, activityType: activityType);
 
     if (!mounted) return;
     setState(() => _isSubmitting = false);
@@ -62,9 +61,12 @@ class _EmployeeStartTimerSheetState
       final act = activityType == 'DISMANTLING'
           ? EmployeeActivityType.dismantling
           : EmployeeActivityType.erection;
-      ref.read(employeeTimerProvider.notifier).startTimer(
+      ref
+          .read(employeeTimerProvider.notifier)
+          .startTimer(
             project: EmployeeProjectModel(
-              id: projectId,
+              id: _selectedProject!.id,
+              phaseId: _selectedPhase!.phaseId,
               name: _selectedProject!.name,
               activity: act,
             ),
@@ -141,7 +143,9 @@ class _EmployeeStartTimerSheetState
               SizedBox(height: 8.h),
               AppTextButton(
                 text: context.loc.cancel,
-                onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                onPressed: _isSubmitting
+                    ? null
+                    : () => Navigator.of(context).pop(),
                 foregroundColor: AppColors.textSecondary,
               ),
             ],

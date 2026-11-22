@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/localization/context_extensions.dart';
+import '../../../../shared/mobile_dashboard/presentation/utils/mobile_phase_localizer.dart';
 import '../../domain/entities/project_details_entity.dart';
 import 'project_details_metrics_box.dart';
 
@@ -190,7 +191,12 @@ class ProjectDetailsHoursCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        act.activityType,
+                        MobilePhaseLocalizer.phaseType(
+                          context,
+                          act.activityType,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 15.5.sp,
                           fontWeight: FontWeight.w600,

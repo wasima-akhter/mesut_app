@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:construction_app/core/helpers/device_location_helper.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/helper/employee_enums.dart';
@@ -17,7 +18,8 @@ final employeeTimerProvider =
       EmployeeTimerNotifier.new,
     );
 
-class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
+class EmployeeTimerNotifier extends Notifier<EmployeeTimerState>
+    with WidgetsBindingObserver {
   Timer? _ticker;
   Duration _accumulatedBeforeRun = Duration.zero;
   DateTime? _runStartedAt;
@@ -28,7 +30,9 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
 
   @override
   EmployeeTimerState build() {
+    WidgetsBinding.instance.addObserver(this);
     ref.onDispose(() {
+      WidgetsBinding.instance.removeObserver(this);
       _ticker?.cancel();
       _ticker = null;
     });
@@ -42,6 +46,15 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
       currentActivity: EmployeeActivityType.erection,
       logs: EmployeeTimerHelpers.defaultLogs,
     );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final isLeaving = state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached;
+    if (isLeaving && this.state.isTimerRunning && !this.state.canCancel && this.state.graceSecondsRemaining == 0) {
+      finishTimer();
+    }
   }
 
   void _startTicker() {
@@ -78,8 +91,7 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
 
     _ticker?.cancel();
     _isDispatchedStart = false;
-    _accumulatedBeforeRun = Duration.zero;
-    _totalBreakDuration = Duration.zero;
+    _accumulatedBeforeRun = _totalBreakDuration = Duration.zero;
     _breakStartedAt = null;
     final now = DateTime.now().toUtc();
     _sessionStartedAt = now;
@@ -108,8 +120,9 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
     try {
       final resolvedPhase = await EmployeeTimerHelpers.resolvePhaseId(
         ref: ref,
-        rawId: activeProject.id,
+        rawId: activeProject.effectivePhaseId,
         activity: activeActivity,
+        directPhaseId: activeProject.phaseId,
       );
       final backendActivity = EmployeeTimerHelpers.mapActivity(activeActivity);
       final coords = await DeviceLocationHelper.tryGetCoordinates();
@@ -183,21 +196,21 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
     }
 
     final startTime = _sessionStartedAt ?? endTime.subtract(state.elapsed);
-    final phaseId = state.currentProject.id;
+    final phaseId = state.currentProject.effectivePhaseId;
     final projectName = state.currentProject.fullName;
     final activity = EmployeeTimerHelpers.mapActivity(state.currentActivity);
     final breakMinutes = _totalBreakDuration.inMinutes;
 
     final elapsedMinutes = state.elapsed.inMinutes;
-    final durationHours = double.parse(
-      (elapsedMinutes / 60).toStringAsFixed(1),
-    );
+    final durationHours =
+        double.parse((elapsedMinutes / 60).toStringAsFixed(1));
 
     final activeId = await EmployeeTimerHelpers.stopActiveTimer(
       ref: ref,
       currentId: state.activeTimeLogId,
       phaseId: phaseId,
       activity: activity,
+      directPhaseId: state.currentProject.phaseId,
     );
 
     if (activeId == null || activeId.isEmpty) {
@@ -224,10 +237,8 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
 
     _ticker?.cancel();
     _ticker = null;
-    _runStartedAt = null;
-    _sessionStartedAt = null;
-    _totalBreakDuration = Duration.zero;
-    _accumulatedBeforeRun = Duration.zero;
+    _runStartedAt = _sessionStartedAt = null;
+    _totalBreakDuration = _accumulatedBeforeRun = Duration.zero;
 
     state = state.copyWith(
       isTimerRunning: false,
@@ -246,15 +257,14 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
   Future<void> cancelTimer() async {
     final wasInGrace = state.isGracePeriod || state.graceSecondsRemaining > 0;
     final currentActiveId = state.activeTimeLogId;
-    final phaseId = state.currentProject.id;
+    final phaseId = state.currentProject.effectivePhaseId;
     final activity = EmployeeTimerHelpers.mapActivity(state.currentActivity);
+    final directPhase = state.currentProject.phaseId;
 
     _ticker?.cancel();
     _ticker = null;
-    _runStartedAt = null;
-    _sessionStartedAt = null;
-    _totalBreakDuration = Duration.zero;
-    _accumulatedBeforeRun = Duration.zero;
+    _runStartedAt = _sessionStartedAt = null;
+    _totalBreakDuration = _accumulatedBeforeRun = Duration.zero;
     _isDispatchedStart = false;
 
     state = state.copyWith(
@@ -277,6 +287,7 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState> {
         currentId: currentActiveId,
         phaseId: phaseId,
         activity: activity,
+        directPhaseId: directPhase,
       );
     }
   }

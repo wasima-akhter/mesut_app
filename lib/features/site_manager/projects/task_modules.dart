@@ -312,6 +312,8 @@ class TasksTab extends ConsumerWidget {
       ),
       child: Text(
         priority.label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontSize: 12.5.sp,
           color: priority.color,

@@ -49,6 +49,7 @@ class EmployeeAssignmentModel {
 
 class EmployeeProjectModel {
   final String id;
+  final String? phaseId;
   final String name;
   final String address;
   final EmployeeActivityType activity;
@@ -61,6 +62,7 @@ class EmployeeProjectModel {
 
   const EmployeeProjectModel({
     required this.id,
+    this.phaseId,
     required this.name,
     this.address = '',
     this.activity = EmployeeActivityType.erection,
@@ -72,9 +74,40 @@ class EmployeeProjectModel {
     this.localization,
   });
 
+  String get effectivePhaseId =>
+      (phaseId != null && phaseId!.trim().isNotEmpty) ? phaseId!.trim() : id.trim();
+
   String get fullName => name;
 
   String get displayName => fullName;
+
+  EmployeeProjectModel copyWith({
+    String? id,
+    String? phaseId,
+    String? name,
+    String? address,
+    EmployeeActivityType? activity,
+    String? startTime,
+    String? endTime,
+    TimeOfDay? startTimeOfDay,
+    TimeOfDay? endTimeOfDay,
+    String? siteManager,
+    LocalizationMeta? localization,
+  }) {
+    return EmployeeProjectModel(
+      id: id ?? this.id,
+      phaseId: phaseId ?? this.phaseId,
+      name: name ?? this.name,
+      address: address ?? this.address,
+      activity: activity ?? this.activity,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      startTimeOfDay: startTimeOfDay ?? this.startTimeOfDay,
+      endTimeOfDay: endTimeOfDay ?? this.endTimeOfDay,
+      siteManager: siteManager ?? this.siteManager,
+      localization: localization ?? this.localization,
+    );
+  }
 
   String get formattedStartTime {
     if (startTimeOfDay != null) {

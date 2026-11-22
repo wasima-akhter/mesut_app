@@ -1,3 +1,4 @@
+import 'package:construction_app/core/enums/app_enum.dart';
 import 'package:construction_app/core/localization/app_language.dart';
 import 'package:construction_app/core/localization/localization_meta.dart';
 import 'package:construction_app/core/localization/localization_provider.dart';
@@ -152,6 +153,34 @@ void main() {
 
       expect(poller.isTimedOut, isFalse);
       poller.dispose();
+    });
+  });
+
+  group('Role-scoped Language Isolation', () {
+    test('generates independent storage keys for different roles', () {
+      expect(
+        AppLanguageNotifier.roleStorageKey(UserRole.employee),
+        'selected_language_role_employee',
+      );
+      expect(
+        AppLanguageNotifier.roleStorageKey(UserRole.siteManager),
+        'selected_language_role_sitemanager',
+      );
+      expect(
+        AppLanguageNotifier.roleStorageKey(UserRole.employee),
+        isNot(equals(AppLanguageNotifier.roleStorageKey(UserRole.siteManager))),
+      );
+    });
+
+    test('generates independent storage keys for different user IDs', () {
+      expect(
+        AppLanguageNotifier.userStorageKey('user_123'),
+        'selected_language_user_user_123',
+      );
+      expect(
+        AppLanguageNotifier.userStorageKey('user_456'),
+        'selected_language_user_user_456',
+      );
     });
   });
 }
