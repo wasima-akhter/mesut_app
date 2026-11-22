@@ -86,12 +86,13 @@ class AppLanguageNotifier extends Notifier<AppLanguage> {
       await prefs.setBool(StorageKeys.hasUserSelectedLanguage, true);
     } catch (_) {}
 
-    // Persist to backend preference if reachable
+    // Persist to backend preference via POST /api/v1/settings/language
+    // Payload following z_new_docs/language_body.md: { "language": "RO" }
     try {
       final apiClient = ref.read(apiClientProvider);
       await apiClient.post(
         ApiConstants.settingsLanguage,
-        data: {'language': language.code.toUpperCase()},
+        data: {'language': language.apiCode},
       );
     } catch (_) {}
 

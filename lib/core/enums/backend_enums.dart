@@ -114,10 +114,7 @@ enum BackendActivityType {
       case BackendActivityType.transport:
         return AppLocalization.current.get('activity.transport', 'Transport');
       case BackendActivityType.maintenance:
-        return AppLocalization.current.get(
-          'activity.maintenance',
-          'Maintenance',
-        );
+        return AppLocalization.current.maintenance;
       case BackendActivityType.other:
         return AppLocalization.current.otherActivity;
     }

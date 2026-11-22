@@ -60,6 +60,8 @@ class SiteManagerHomeMapCard extends StatelessWidget {
               ),
               child: Text(
                 '$activeSitesCount ${context.loc.activeSites}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
@@ -118,12 +120,16 @@ class SiteManagerHomeMapCard extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      context.loc.navMap,
-                      style: TextStyle(
-                        color: const Color(0xFFE22B3B),
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
+                    Flexible(
+                      child: Text(
+                        context.loc.navMap,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: const Color(0xFFE22B3B),
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 4),

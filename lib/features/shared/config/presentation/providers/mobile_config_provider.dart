@@ -72,9 +72,16 @@ final mobileConfigProvider =
       MobileConfigNotifier.new,
     );
 
-/// Languages enabled by backend `/mobile/config` (falls back to all AppLanguage values).
+/// Languages enabled across the application (from GET /mobile/config → enabledLanguages, falling back to company's 19 enabled languages).
 final enabledLanguagesProvider = Provider<List<AppLanguage>>((ref) {
-  return AppLanguage.values;
+  final configAsync = ref.watch(mobileConfigProvider);
+  return configAsync.maybeWhen(
+    data: (config) {
+      final langs = config.supportedAppLanguages;
+      return langs.isNotEmpty ? langs : AppLanguage.companyEnabledLanguages;
+    },
+    orElse: () => AppLanguage.companyEnabledLanguages,
+  );
 });
 
 /// Backend flag `CompanyProfile.allowEmployeeManualTime` from `/mobile/config`.

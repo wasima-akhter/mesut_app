@@ -50,6 +50,8 @@ class SiteManagerHomeStats extends StatelessWidget {
                   children: [
                     Text(
                       context.loc.standingScaffold,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 17.sp,
@@ -104,6 +106,8 @@ class SiteManagerHomeStats extends StatelessWidget {
                     ),
                     Text(
                       context.loc.inspections,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: const Color(0xFFE32638),
                         fontSize: 17.sp,
@@ -220,18 +224,27 @@ class SiteManagerHomeStats extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  context.loc.planned,
-                  style: TextStyle(
-                    color: const Color(0xFF858585),
-                    fontSize: 16.sp,
+                Expanded(
+                  child: Text(
+                    context.loc.planned,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: const Color(0xFF858585),
+                      fontSize: 16.sp,
+                    ),
                   ),
                 ),
-                Text(
-                  context.loc.running,
-                  style: TextStyle(
-                    color: const Color(0xFF858585),
-                    fontSize: 16.sp,
+                Expanded(
+                  child: Text(
+                    context.loc.running,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.end,
+                    style: TextStyle(
+                      color: const Color(0xFF858585),
+                      fontSize: 16.sp,
+                    ),
                   ),
                 ),
               ],

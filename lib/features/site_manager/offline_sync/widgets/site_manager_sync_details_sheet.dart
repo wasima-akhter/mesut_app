@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/localization/context_extensions.dart';
-import '../models/site_manager_sync_action.dart';
 import '../providers/site_manager_sync_provider.dart';
 
 class SiteManagerSyncDetailsSheet extends ConsumerWidget {

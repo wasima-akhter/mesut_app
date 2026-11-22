@@ -33,6 +33,14 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
   bool _isLoggingOut = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(mobileProfileProvider.notifier).refresh();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final currentLang = ref.watch(appLanguageProvider);
     final profile = ref.watch(mobileProfileProvider).asData?.value;
@@ -48,14 +56,19 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
           onPoll: () => ref.read(mobileProfileProvider.notifier).refresh(),
           child: Stack(
           children: [
-            CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 30.h),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      const SiteManagerProfileCard(),
+            RefreshIndicator(
+              onRefresh: () =>
+                  ref.read(mobileProfileProvider.notifier).refresh(),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                slivers: [
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 30.h),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        const SiteManagerProfileCard(),
                   SizedBox(height: 14.h),
 
                   SiteManagerSection(
@@ -150,7 +163,9 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
                             : context.loc.off,
                         trailing: Switch.adaptive(
                           value: notificationsEnabled,
-                          activeColor: AppColors.primary,
+                          activeThumbColor: AppColors.primary,
+                          activeTrackColor:
+                              AppColors.primary.withValues(alpha: 0.5),
                           onChanged: (_) {
                             ref
                                 .read(notificationSettingsProvider.notifier)
@@ -205,11 +220,12 @@ class _SiteManagerMorePageState extends ConsumerState<SiteManagerMorePage> {
             ),
           ],
         ),
-        if (_isLoggingOut) const LogoutLoadingOverlay(),
-      ],
-    ),
+      ),
+      if (_isLoggingOut) const LogoutLoadingOverlay(),
+    ],
   ),
-  ),
+),
+),
 );
   }
 

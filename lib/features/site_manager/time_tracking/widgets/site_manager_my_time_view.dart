@@ -157,9 +157,19 @@ class SiteManagerMyTimeView {
     return Column(
       crossAxisAlignment: alignRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
-        Text(title, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.neutral400)),
+        Text(
+          title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.neutral400),
+        ),
         SizedBox(height: 3.h),
-        Text(value, style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.white)),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.white),
+        ),
       ],
     );
   }
@@ -189,6 +199,8 @@ class SiteManagerMyTimeView {
           child: Center(
             child: Text(
               isRunning ? context.loc.stopTimer : context.loc.startNewTimer,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.white),
             ),
           ),
@@ -202,14 +214,19 @@ class SiteManagerMyTimeView {
     String activePeriod,
     MobileTimeLogsNotifier notifier,
   ) {
-    return Row(
-      children: [
-        _filterChip(context, context.loc.today, activePeriod == 'TODAY', () => notifier.setPeriod('TODAY')),
-        SizedBox(width: 7.w),
-        _filterChip(context, context.loc.thisWeek, activePeriod == 'WEEK', () => notifier.setPeriod('WEEK')),
-        SizedBox(width: 7.w),
-        _filterChip(context, context.loc.thisMonth, activePeriod == 'MONTH', () => notifier.setPeriod('MONTH')),
-      ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _filterChip(context, context.loc.today, activePeriod == 'TODAY', () => notifier.setPeriod('TODAY')),
+          SizedBox(width: 7.w),
+          _filterChip(context, context.loc.thisWeek, activePeriod == 'WEEK', () => notifier.setPeriod('WEEK')),
+          SizedBox(width: 7.w),
+          _filterChip(context, context.loc.thisMonth, activePeriod == 'MONTH', () => notifier.setPeriod('MONTH')),
+        ],
+      ),
     );
   }
 
@@ -229,6 +246,8 @@ class SiteManagerMyTimeView {
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
           child: Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   color: selected ? AppColors.white : AppColors.textSecondary,
                 ),

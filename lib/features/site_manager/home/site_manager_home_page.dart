@@ -190,6 +190,8 @@ class SiteManagerHomePage extends ConsumerWidget {
                             Expanded(
                               child: Text(
                                 "${context.loc.upcomingTasks} (${tasks.length})",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontSize: 25.sp,
                                   fontWeight: FontWeight.w700,
@@ -205,6 +207,8 @@ class SiteManagerHomePage extends ConsumerWidget {
                                 children: [
                                   Text(
                                     context.loc.viewAll,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       fontSize: 16.sp,
                                       color: const Color(0xFF888888),

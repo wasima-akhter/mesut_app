@@ -201,6 +201,8 @@ class SiteManagerTimeTrackingPage extends ConsumerWidget {
           child: Center(
             child: Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: selected ? AppColors.white : AppColors.textSecondary,
               ),

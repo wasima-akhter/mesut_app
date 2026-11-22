@@ -20,14 +20,27 @@ class SiteManagerHomeOperationCard extends StatelessWidget {
   final VoidCallback onOpenRoute;
 
   String _localizeOperationType(BuildContext context, String type) {
-    switch (type.toLowerCase()) {
-      case 'erection':
+    final normalized = type.trim().toUpperCase().replaceAll(' ', '_');
+    switch (normalized) {
+      case 'ERECTION':
+      case 'SCAFFOLD_ERECTION':
         return context.loc.erectionPhase;
-      case 'dismantling':
+      case 'DISMANTLING':
+      case 'SCAFFOLD_DISMANTLING':
         return context.loc.dismantlingPhase;
-      case 'standing':
-      case 'standing scaffold':
+      case 'STANDING':
+      case 'STANDING_SCAFFOLD':
         return context.loc.standingScaffold;
+      case 'INSPECTION':
+      case 'INSPECTIONS':
+        return context.loc.inspections;
+      case 'MAINTENANCE':
+        return context.loc.maintenancePhase;
+      case 'TRANSPORT':
+        return context.loc.get('activity.transport', 'Transport');
+      case 'OTHER':
+      case 'OTHERS':
+        return context.loc.otherActivity;
       default:
         return MobilePhaseLocalizer.phaseType(context, type);
     }
@@ -90,6 +103,8 @@ class SiteManagerHomeOperationCard extends StatelessWidget {
             const SizedBox(height: 9),
             Text(
               task.project.name.isNotEmpty ? task.project.name : task.phaseId,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 19.sp,
                 fontWeight: FontWeight.w700,

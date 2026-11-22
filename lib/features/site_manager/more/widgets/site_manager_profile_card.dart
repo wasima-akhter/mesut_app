@@ -8,6 +8,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_radii.dart';
 import '../../../../core/localization/context_extensions.dart';
 import '../../../../core/widgets/images/app_network_image.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
 
 class SiteManagerProfileCard extends ConsumerWidget {
@@ -16,8 +17,11 @@ class SiteManagerProfileCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(mobileProfileProvider).asData?.value;
-    final fullName = profile?.fullName ?? '';
-    final avatarUrl = profile?.avatarUrl;
+    final currentUser = ref.watch(currentUserProvider);
+    final fullName = profile?.fullName.isNotEmpty == true
+        ? profile!.fullName
+        : (currentUser?.fullName ?? '');
+    final avatarUrl = profile?.avatarUrl ?? currentUser?.avatarUrl;
 
     return GestureDetector(
       onTap: () => context.push(RouteConstants.siteManagerProfileEdit),
@@ -54,6 +58,8 @@ class SiteManagerProfileCard extends ConsumerWidget {
                 children: [
                   Text(
                     fullName.isNotEmpty ? fullName : context.loc.siteManagerRole,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -61,6 +67,8 @@ class SiteManagerProfileCard extends ConsumerWidget {
                   SizedBox(height: 2.h),
                   Text(
                     context.loc.siteManagerRole,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.textSecondary,
                         ),

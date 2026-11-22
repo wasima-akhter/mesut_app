@@ -10,6 +10,7 @@ import '../../../core/localization/app_language.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/localization/localization_provider.dart';
 import '../../../core/widgets/buttons/app_button.dart';
+import '../../shared/config/presentation/providers/mobile_config_provider.dart';
 
 class ChooseLanguagePage extends ConsumerStatefulWidget {
   const ChooseLanguagePage({super.key});
@@ -19,11 +20,10 @@ class ChooseLanguagePage extends ConsumerStatefulWidget {
 }
 
 class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
-  static const List<AppLanguage> _languages = AppLanguage.values;
-
   @override
   Widget build(BuildContext context) {
     final currentLanguage = ref.watch(appLanguageProvider);
+    final languages = ref.watch(enabledLanguagesProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -56,10 +56,10 @@ class _ChooseLanguagePageState extends ConsumerState<ChooseLanguagePage> {
               SizedBox(height: 16.h),
               Expanded(
                 child: ListView.separated(
-                  itemCount: _languages.length,
+                  itemCount: languages.length,
                   separatorBuilder: (_, __) => SizedBox(height: 10.h),
                   itemBuilder: (context, i) {
-                    final lang = _languages[i];
+                    final lang = languages[i];
                     return _buildLanguageCard(
                       language: lang,
                       title: lang.label,

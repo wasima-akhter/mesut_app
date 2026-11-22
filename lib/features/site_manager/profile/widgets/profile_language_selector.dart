@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/localization/app_language.dart';
 import '../../../../core/localization/context_extensions.dart';
+import '../../../shared/config/presentation/providers/mobile_config_provider.dart';
 
-class ProfileLanguageSelector extends StatelessWidget {
+class ProfileLanguageSelector extends ConsumerWidget {
   const ProfileLanguageSelector({
     super.key,
     required this.selectedCode,
@@ -16,8 +18,9 @@ class ProfileLanguageSelector extends StatelessWidget {
   final ValueChanged<String> onLanguageChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final current = AppLanguage.fromCode(selectedCode);
+    final languages = ref.watch(enabledLanguagesProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,7 +34,7 @@ class ProfileLanguageSelector extends StatelessWidget {
         ),
         SizedBox(height: 7.h),
         InkWell(
-          onTap: () => _showPicker(context, current),
+          onTap: () => _showPicker(context, current, languages),
           borderRadius: BorderRadius.circular(8.r),
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
@@ -79,7 +82,11 @@ class ProfileLanguageSelector extends StatelessWidget {
     );
   }
 
-  void _showPicker(BuildContext context, AppLanguage current) {
+  void _showPicker(
+    BuildContext context,
+    AppLanguage current,
+    List<AppLanguage> languages,
+  ) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: AppColors.white,
@@ -119,16 +126,16 @@ class ProfileLanguageSelector extends StatelessWidget {
               Flexible(
                 child: ListView.separated(
                   shrinkWrap: true,
-                  itemCount: AppLanguage.values.length,
+                  itemCount: languages.length,
                   separatorBuilder: (_, __) =>
                       const Divider(height: 1, color: AppColors.border),
                   itemBuilder: (_, index) {
-                    final lang = AppLanguage.values[index];
+                    final lang = languages[index];
                     final isSelected = current == lang;
                     return ListTile(
                       onTap: () {
                         Navigator.of(dialogContext).pop();
-                        onLanguageChanged(lang.code.toUpperCase());
+                        onLanguageChanged(lang.apiCode);
                       },
                       leading: Text(
                         lang.flagEmoji,

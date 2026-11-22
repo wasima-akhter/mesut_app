@@ -266,7 +266,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             language: _selectedLanguage,
           );
 
-      final newLocale = AppLanguage.fromCode(_selectedLanguage.toLowerCase());
+      final newLocale = AppLanguage.fromCode(_selectedLanguage);
       await ref.read(appLanguageProvider.notifier).setLanguage(newLocale);
 
       if (mounted) {

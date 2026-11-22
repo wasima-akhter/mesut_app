@@ -59,7 +59,10 @@ class LegalContentItem {
 class MobileConfigEntity {
   const MobileConfigEntity({
     this.defaultLanguage = 'en',
-    this.enabledLanguages = const ['en', 'de'],
+    this.enabledLanguages = const [
+      'de', 'en', 'tr', 'pl', 'ro', 'fr', 'es', 'it', 'nl', 'pt',
+      'ru', 'uk', 'bg', 'hr', 'sr', 'sq', 'el', 'hi', 'ar',
+    ],
     this.allowEmployeeManualTime = true,
     this.legalContents = const [],
   });
@@ -89,11 +92,9 @@ class MobileConfigEntity {
               .toLowerCase();
         }
         if (code != null && code.isNotEmpty) {
-          final normalized = code.startsWith('de')
-              ? 'de'
-              : (code.startsWith('en') ? 'en' : code);
-          if (!enabled.contains(normalized)) {
-            enabled.add(normalized);
+          final lang = AppLanguage.fromCode(code);
+          if (!enabled.contains(lang.code)) {
+            enabled.add(lang.code);
           }
         }
       }
@@ -110,8 +111,12 @@ class MobileConfigEntity {
     }
 
     return MobileConfigEntity(
-      defaultLanguage: defaultLangRaw.startsWith('de') ? 'de' : 'en',
-      enabledLanguages: enabled.isEmpty ? const ['en', 'de'] : enabled,
+      defaultLanguage: AppLanguage.fromCode(defaultLangRaw).code,
+      enabledLanguages: enabled.isEmpty
+          ? AppLanguage.companyEnabledApiCodes
+              .map((c) => c.toLowerCase())
+              .toList()
+          : enabled,
       allowEmployeeManualTime: json['allowEmployeeManualTime'] is bool
           ? json['allowEmployeeManualTime'] as bool
           : true,
@@ -134,7 +139,7 @@ class MobileConfigEntity {
         langs.add(lang);
       }
     }
-    return langs.isEmpty ? AppLanguage.values : langs;
+    return langs.isEmpty ? AppLanguage.companyEnabledLanguages : langs;
   }
 
   LegalContentItem? findLegal(LegalContentType type) {

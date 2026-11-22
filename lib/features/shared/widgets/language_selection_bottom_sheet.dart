@@ -6,6 +6,7 @@ import '../../../app/theme/app_colors.dart';
 import '../../../core/localization/app_language.dart';
 import '../../../core/localization/context_extensions.dart';
 import '../../../core/localization/localization_provider.dart';
+import '../../shared/config/presentation/providers/mobile_config_provider.dart';
 import '../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
 
 class LanguageSelectionBottomSheet {
@@ -15,7 +16,10 @@ class LanguageSelectionBottomSheet {
     bool syncProfile = true,
   }) {
     final currentLang = ref.read(appLanguageProvider);
-    final languages = AppLanguage.values;
+    final enabledLangs = ref.read(enabledLanguagesProvider);
+    final languages = enabledLangs.contains(currentLang)
+        ? enabledLangs
+        : [...enabledLangs, currentLang];
 
     return showModalBottomSheet<AppLanguage>(
       context: context,
@@ -73,7 +77,7 @@ class LanguageSelectionBottomSheet {
                             await ref
                                 .read(mobileProfileProvider.notifier)
                                 .updateProfile(
-                                  language: lang.code.toUpperCase(),
+                                  language: lang.apiCode,
                                 );
                           } catch (_) {}
                         }
