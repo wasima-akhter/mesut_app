@@ -36,10 +36,14 @@ class _StepThreeSpecsScheduleState
   void initState() {
     super.initState();
     final state = ref.read(createProjectProvider);
-    _areaController =
-        TextEditingController(text: state.scaffoldArea.toStringAsFixed(0));
-    _heightController =
-        TextEditingController(text: state.scaffoldHeight.toStringAsFixed(0));
+    _areaController = TextEditingController(
+      text: state.scaffoldArea > 0 ? state.scaffoldArea.toStringAsFixed(0) : '',
+    );
+    _heightController = TextEditingController(
+      text: state.scaffoldHeight > 0
+          ? state.scaffoldHeight.toStringAsFixed(0)
+          : '',
+    );
     _typeController = TextEditingController(text: state.scaffoldType);
     _notesController = TextEditingController(text: state.noteContent);
   }
@@ -54,8 +58,8 @@ class _StepThreeSpecsScheduleState
   }
 
   void _syncInputs() {
-    final area = double.tryParse(_areaController.text.trim()) ?? 450.0;
-    final height = double.tryParse(_heightController.text.trim()) ?? 15.0;
+    final area = double.tryParse(_areaController.text.trim()) ?? 0.0;
+    final height = double.tryParse(_heightController.text.trim()) ?? 0.0;
     ref.read(createProjectProvider.notifier).updateStepThree(
           scaffoldArea: area,
           scaffoldHeight: height,

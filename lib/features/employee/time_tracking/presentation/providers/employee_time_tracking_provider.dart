@@ -178,6 +178,12 @@ class EmployeeTimeTrackingNotifier extends Notifier<EmployeeTimeTrackingState> {
     }
   }
 
+  void clearActiveTimer() {
+    _ticker?.cancel();
+    _ticker = null;
+    _clearLocalActiveTimer();
+  }
+
   void _clearLocalActiveTimer() {
     final cur = state.summary;
     state = state.copyWith(
@@ -201,7 +207,10 @@ class EmployeeTimeTrackingNotifier extends Notifier<EmployeeTimeTrackingState> {
     final activeId = state.summary.activeTimer?.id ??
         await EmployeeTimerHelpers.resolveActiveTimeLogId(ref: ref);
     _clearLocalActiveTimer();
-    if (activeId == null || activeId.isEmpty) return false;
+    if (activeId == null || activeId.isEmpty) {
+      await refresh();
+      return true;
+    }
 
     state = state.copyWith(isActionLoading: true);
     try {

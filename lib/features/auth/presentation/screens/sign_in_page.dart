@@ -45,6 +45,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         _emailController.text = savedEmail;
       }
     }
+
+    _emailController.text = _selectedRole == UserRole.employee
+        ? "employee@allround.com"
+        : "manager@allround.com";
+    _passwordController.text = _selectedRole == UserRole.employee
+        ? "Employee123!"
+        : "Manager123!";
   }
 
   @override
@@ -159,10 +166,12 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 _selectedRole = role;
                 if (kDebugMode) {
                   _emailController.text = _selectedRole == UserRole.employee
-                      ? "abc@yopmail.com"
-                      : "xyz@yopmail.com";
+                      ? "employee@allround.com"
+                      : "manager@allround.com";
 
-                  _passwordController.text = "123456abC!!";
+                  _passwordController.text = _selectedRole == UserRole.employee
+                      ? "Employee123!"
+                      : "Manager123!";
                 }
               });
             },

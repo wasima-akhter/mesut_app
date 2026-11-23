@@ -22,11 +22,7 @@ class MapRepositoryImpl implements MapRepository {
     String? search,
   }) async {
     if (_client == null) {
-      var result = MockMapDataSource.sampleLocations;
-      if (category != null && category.isNotEmpty && category != 'All') {
-        result = result.where((loc) => loc.type == category).toList();
-      }
-      return result;
+      return [];
     }
 
     AppLogger.info(
@@ -167,9 +163,7 @@ class MapRepositoryImpl implements MapRepository {
   @override
   Future<MapLocationEntity?> getLocationById(String id) async {
     if (_client == null) {
-      return MockMapDataSource.sampleLocations
-          .where((loc) => loc.id == id)
-          .firstOrNull;
+      return null;
     }
 
     AppLogger.info('Fetching real location by ID: $id', name: 'MAP');

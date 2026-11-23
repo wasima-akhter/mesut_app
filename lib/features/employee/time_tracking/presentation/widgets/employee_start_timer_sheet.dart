@@ -61,6 +61,8 @@ class _EmployeeStartTimerSheetState
       final act = activityType == 'DISMANTLING'
           ? EmployeeActivityType.dismantling
           : EmployeeActivityType.erection;
+      final activeTimer =
+          ref.read(employeeTimeTrackingProvider).summary.activeTimer;
       ref
           .read(employeeTimerProvider.notifier)
           .startTimer(
@@ -71,6 +73,8 @@ class _EmployeeStartTimerSheetState
               activity: act,
             ),
             activity: act,
+            activeTimeLogId: activeTimer?.id,
+            isAlreadyDispatched: true,
           );
       Navigator.of(context).pop();
       AppSnackBar.showInfo(context, context.loc.timerRunning);

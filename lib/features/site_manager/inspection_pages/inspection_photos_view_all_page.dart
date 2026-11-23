@@ -38,64 +38,7 @@ class _InspectionPhotosViewAllPageState
     extends State<InspectionPhotosViewAllPage> {
   String _selectedCategory = 'All';
 
-  final List<InspectionPhotoItem> _photos = [
-    const InspectionPhotoItem(
-      id: '1',
-      title: 'North Facade - Level 3 Base Jack',
-      category: 'Foundation',
-      url: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800',
-      timestamp: 'Today, 10:15 am',
-    ),
-    const InspectionPhotoItem(
-      id: '2',
-      title: 'West Wing Wall Anchor Ties',
-      category: 'Anchors',
-      url: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800',
-      timestamp: 'Today, 10:20 am',
-    ),
-    const InspectionPhotoItem(
-      id: '3',
-      title: 'Main Entrance Pedestrian Tunnel',
-      category: 'Scaffold',
-      url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800',
-      timestamp: 'Today, 10:24 am',
-    ),
-    const InspectionPhotoItem(
-      id: '4',
-      title: 'Guardrail & Toe-board Inspection',
-      category: 'Safety',
-      url: 'https://images.unsplash.com/photo-1590725175248-ecb2a7f7a4c6?w=800',
-      timestamp: 'Yesterday, 04:10 pm',
-    ),
-    const InspectionPhotoItem(
-      id: '5',
-      title: 'Base Jack Leveling on Compact Ground',
-      category: 'Foundation',
-      url: 'https://images.unsplash.com/photo-1541971875076-8f970d573be6?w=800',
-      timestamp: '16 Sep 2026, 14:00',
-    ),
-    const InspectionPhotoItem(
-      id: '6',
-      title: 'Roof Protection Scaffold Section B',
-      category: 'Scaffold',
-      url: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=800',
-      timestamp: '16 Sep 2026, 11:30',
-    ),
-    const InspectionPhotoItem(
-      id: '7',
-      title: 'Ladder Access Hatch Security Check',
-      category: 'Safety',
-      url: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800',
-      timestamp: '15 Sep 2026, 09:45',
-    ),
-    const InspectionPhotoItem(
-      id: '8',
-      title: 'Diagonal Bracing Alignment',
-      category: 'Scaffold',
-      url: 'https://images.unsplash.com/photo-1508873696983-2df5293cb395?w=800',
-      timestamp: '15 Sep 2026, 08:30',
-    ),
-  ];
+  final List<InspectionPhotoItem> _photos = [];
 
   List<String> get _categories => [
         'All',

@@ -30,12 +30,16 @@ class ProjectDetailsInspectionCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(
-                context.loc.safetyInspection,
-                style: TextStyle(
-                  fontSize: 18.5.sp,
-                  color: const Color(0xFF111111),
-                  fontWeight: FontWeight.w700,
+              Flexible(
+                child: Text(
+                  context.loc.safetyInspection,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 18.5.sp,
+                    color: const Color(0xFF111111),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
               const Spacer(),
@@ -59,7 +63,11 @@ class ProjectDetailsInspectionCard extends StatelessWidget {
           SizedBox(height: 10.h),
           Row(
             children: [
-              Icon(Icons.event_outlined, size: 18.sp, color: const Color(0xFF777777)),
+              Icon(
+                Icons.event_outlined,
+                size: 18.sp,
+                color: const Color(0xFF777777),
+              ),
               SizedBox(width: 8.w),
               Text(
                 '${context.loc.nextDueDate}: $dateStr',
@@ -75,7 +83,11 @@ class ProjectDetailsInspectionCard extends StatelessWidget {
             SizedBox(height: 8.h),
             Row(
               children: [
-                Icon(Icons.business_outlined, size: 18.sp, color: const Color(0xFF777777)),
+                Icon(
+                  Icons.business_outlined,
+                  size: 18.sp,
+                  color: const Color(0xFF777777),
+                ),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
@@ -96,7 +108,11 @@ class ProjectDetailsInspectionCard extends StatelessWidget {
             SizedBox(height: 8.h),
             Row(
               children: [
-                Icon(Icons.location_on_outlined, size: 18.sp, color: const Color(0xFF777777)),
+                Icon(
+                  Icons.location_on_outlined,
+                  size: 18.sp,
+                  color: const Color(0xFF777777),
+                ),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(

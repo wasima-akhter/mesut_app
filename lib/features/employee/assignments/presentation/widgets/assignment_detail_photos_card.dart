@@ -6,6 +6,7 @@ import '../../../../../app/constants/route_constants.dart';
 import '../../../../../app/theme/app_colors.dart';
 import '../../../../../core/localization/context_extensions.dart';
 import '../../../../../core/widgets/buttons/buttons.dart';
+import '../../../../../core/widgets/images/app_network_image.dart';
 import '../../domain/entities/employee_project_details_entity.dart';
 
 class AssignmentDetailPhotosCard extends StatelessWidget {
@@ -41,10 +42,11 @@ class AssignmentDetailPhotosCard extends StatelessWidget {
         border: Border.all(color: AppColors.border, width: 0.8),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Image.network(
-        photo.url,
+      child: AppNetworkImage(
+        imageUrl: photo.url,
+        height: 90.h,
         fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => const Center(
+        fallback: const Center(
           child: Icon(
             Icons.broken_image_outlined,
             color: AppColors.textTertiary,

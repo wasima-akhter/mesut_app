@@ -41,8 +41,11 @@ Future<void> bootstrap({required Widget app}) async {
     return true;
   };
 
-  // Initialize SharedPreferences & preload saved localization before ProviderScope.
-  final sharedPreferences = await SharedPreferences.getInstance();
+  // Parallelize SharedPreferences initialization & base English localization
+  final prefsFuture = SharedPreferences.getInstance();
+  final englishLocFuture = AppLocalization.load(AppLanguage.english);
+
+  final sharedPreferences = await prefsFuture;
   final savedRoleStr = sharedPreferences.getString(StorageKeys.userRole);
   final savedRole = UserRoleExtension.fromString(savedRoleStr);
   final savedLangCode = savedRole != null
@@ -51,11 +54,15 @@ Future<void> bootstrap({required Widget app}) async {
       : sharedPreferences.getString(StorageKeys.selectedLanguage);
   final initialLanguage = AppLanguage.fromCode(savedLangCode);
   AppLanguageNotifier.activeLanguageCode = initialLanguage.code;
-  await Future.wait([
-    AppLocalization.load(initialLanguage),
-    if (initialLanguage != AppLanguage.english)
-      AppLocalization.load(AppLanguage.english),
-  ]);
+
+  if (initialLanguage == AppLanguage.english) {
+    await englishLocFuture;
+  } else {
+    await Future.wait([
+      englishLocFuture,
+      AppLocalization.load(initialLanguage),
+    ]);
+  }
 
   final container = ProviderContainer(
     overrides: [sharedPreferencesProvider.overrideWithValue(sharedPreferences)],

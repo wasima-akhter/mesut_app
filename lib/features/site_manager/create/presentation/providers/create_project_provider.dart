@@ -1,14 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/constants/api_constants.dart';
+import '../../../../../core/errors/app_error_resolver.dart';
 import '../../../../../core/localization/context_extensions.dart';
 import '../../../../../core/services/address_resolver_service.dart';
 import '../../../../../core/widgets/snack/app_snackbar.dart';
 import '../../../../auth/presentation/providers/auth_provider.dart';
 import '../../../../map/services/location_service.dart';
-import '../../../offline_sync/models/site_manager_sync_action.dart';
-import '../../../offline_sync/providers/site_manager_sync_provider.dart';
 import '../../../projects/presentation/providers/site_manager_projects_provider.dart';
 import '../../data/repositories/create_project_repository_impl.dart';
 import '../../domain/entities/create_project_entity.dart';
@@ -151,11 +150,7 @@ class CreateProjectNotifier extends Notifier<CreateProjectState> {
     String? placeLabel,
   }) {
     final resolved = placeLabel ?? AddressResolverService.resolveSync(lat, lng);
-    state = state.copyWith(
-      lat: lat,
-      lng: lng,
-      placeLabel: resolved,
-    );
+    state = state.copyWith(lat: lat, lng: lng, placeLabel: resolved);
   }
 
   Future<bool> useCurrentLocation() async {
@@ -227,10 +222,10 @@ class CreateProjectNotifier extends Notifier<CreateProjectState> {
         category: !state.isExistingClient ? state.clientCategory : null,
       ),
       contact: ContactPayload(
-        name: state.contactName.trim().isNotEmpty ? state.contactName.trim() : 'Lead',
-        phone: state.contactPhone.trim().isNotEmpty ? state.contactPhone.trim() : '+491701234567',
-        email: state.contactEmail.trim().isNotEmpty ? state.contactEmail.trim() : 'contact@example.com',
-        role: state.contactRole.trim().isNotEmpty ? state.contactRole.trim() : 'Project lead',
+        name: state.contactName.trim(),
+        phone: state.contactPhone.trim(),
+        email: state.contactEmail.trim(),
+        role: state.contactRole.trim(),
       ),
       scheduleData: state.scheduleData.isNotEmpty
           ? state.scheduleData
@@ -253,26 +248,34 @@ class CreateProjectNotifier extends Notifier<CreateProjectState> {
 
     try {
       await _repository.createProject(payload);
-      state = state.copyWith(isSubmitting: false);
+      state = state.copyWith(isSubmitting: false, clearError: true);
       ref
           .read(siteManagerProjectsProvider.notifier)
           .loadInitial(isRefresh: true);
       AppSnackBar.showSuccess(context, context.loc.projectCreatedSuccess);
       return true;
-    } catch (_) {
-      final action = SiteManagerSyncAction(
-        id: 'create_proj_${DateTime.now().millisecondsSinceEpoch}',
-        actionType: SiteManagerSyncActionType.createProject,
-        endpoint: ApiConstants.mobileProjects,
-        httpMethod: 'POST',
-        displayTitle: 'Project: ${payload.name}',
-        createdAt: DateTime.now(),
-        payload: payload.toJson(),
-      );
-      await ref.read(siteManagerSyncProvider.notifier).enqueue(action);
-      state = state.copyWith(isSubmitting: false);
-      AppSnackBar.showSuccess(context, context.loc.savedOffline);
-      return true;
+    } catch (e) {
+      String errorMessage = '';
+      if (e is DioException) {
+        final data = e.response?.data;
+        if (data is Map && data['message'] != null) {
+          errorMessage = data['message'].toString();
+        } else if (data is String && data.isNotEmpty) {
+          errorMessage = data;
+        }
+      }
+      if (errorMessage.isEmpty) {
+        errorMessage = AppErrorResolver.resolve(e).displayMessage;
+      }
+      if (errorMessage.isEmpty) {
+        errorMessage = context.loc.somethingWentWrong;
+      }
+
+      state = state.copyWith(isSubmitting: false, errorMessage: errorMessage);
+      if (context.mounted) {
+        AppSnackBar.showError(context, errorMessage);
+      }
+      return false;
     }
   }
 }

@@ -37,7 +37,9 @@ class _StepOneGeneralInfoState extends ConsumerState<StepOneGeneralInfo> {
     _nameController = TextEditingController(text: state.projectName);
     _clientNameController = TextEditingController(text: state.clientName);
     _contactNameController = TextEditingController(text: state.contactName);
-    _phoneController = TextEditingController(text: state.contactPhone);
+    final parsed = PhoneHelper.parseInitialPhone(state.contactPhone);
+    _selectedCountry = parsed.country;
+    _phoneController = TextEditingController(text: parsed.nationalNumber);
     _emailController = TextEditingController(text: state.contactEmail);
     _roleController = TextEditingController(text: state.contactRole);
   }
@@ -60,17 +62,14 @@ class _StepOneGeneralInfoState extends ConsumerState<StepOneGeneralInfo> {
       AppSnackBar.showError(context, context.loc.pleaseEnterProjectName);
       return;
     }
-
     if (state.isExistingClient && state.selectedClientId.isEmpty) {
       AppSnackBar.showError(context, context.loc.pleaseSelectExistingCustomer);
       return;
     }
-
     if (!state.isExistingClient && _clientNameController.text.trim().isEmpty) {
       AppSnackBar.showError(context, context.loc.pleaseEnterCustomerName);
       return;
     }
-
     if (_contactNameController.text.trim().isEmpty) {
       AppSnackBar.showError(context, context.loc.pleaseEnterContactPersonName);
       return;
@@ -85,7 +84,9 @@ class _StepOneGeneralInfoState extends ConsumerState<StepOneGeneralInfo> {
 
     ref.read(createProjectProvider.notifier).updateStepOne(
           projectName: _nameController.text.trim(),
-          clientName: state.isExistingClient ? state.clientName : _clientNameController.text.trim(),
+          clientName: state.isExistingClient
+              ? state.clientName
+              : _clientNameController.text.trim(),
           contactName: _contactNameController.text.trim(),
           contactPhone: formattedPhone,
           contactEmail: _emailController.text.trim(),
@@ -106,10 +107,7 @@ class _StepOneGeneralInfoState extends ConsumerState<StepOneGeneralInfo> {
         SizedBox(height: 14.h),
         FormFieldLabel(label: context.loc.projectName),
         SizedBox(height: 6.h),
-        FormTextField(
-          controller: _nameController,
-          hint: 'e.g. Goltstein Complex',
-        ),
+        FormTextField(controller: _nameController, hint: 'e.g. Goltstein Complex'),
         SizedBox(height: 14.h),
         FormFieldLabel(label: context.loc.customer),
         SizedBox(height: 6.h),
@@ -130,9 +128,7 @@ class _StepOneGeneralInfoState extends ConsumerState<StepOneGeneralInfo> {
                   child: Container(
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: state.isExistingClient
-                          ? Colors.black
-                          : Colors.transparent,
+                      color: state.isExistingClient ? Colors.black : Colors.transparent,
                       borderRadius: BorderRadius.circular(5.r),
                     ),
                     child: Text(
@@ -140,9 +136,7 @@ class _StepOneGeneralInfoState extends ConsumerState<StepOneGeneralInfo> {
                       style: TextStyle(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
-                        color: state.isExistingClient
-                            ? Colors.white
-                            : const Color(0xFF666666),
+                        color: state.isExistingClient ? Colors.white : const Color(0xFF666666),
                       ),
                     ),
                   ),
@@ -156,9 +150,7 @@ class _StepOneGeneralInfoState extends ConsumerState<StepOneGeneralInfo> {
                   child: Container(
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: !state.isExistingClient
-                          ? Colors.black
-                          : Colors.transparent,
+                      color: !state.isExistingClient ? Colors.black : Colors.transparent,
                       borderRadius: BorderRadius.circular(5.r),
                     ),
                     child: Text(
@@ -166,9 +158,7 @@ class _StepOneGeneralInfoState extends ConsumerState<StepOneGeneralInfo> {
                       style: TextStyle(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
-                        color: !state.isExistingClient
-                            ? Colors.white
-                            : const Color(0xFF666666),
+                        color: !state.isExistingClient ? Colors.white : const Color(0xFF666666),
                       ),
                     ),
                   ),
@@ -180,32 +170,30 @@ class _StepOneGeneralInfoState extends ConsumerState<StepOneGeneralInfo> {
         SizedBox(height: 8.h),
         if (state.isExistingClient)
           CustomerDropdownField(
-            selectedCustomerId: state.selectedClientId.isNotEmpty
-                ? state.selectedClientId
-                : null,
-            selectedCustomerName:
-                state.clientName.isNotEmpty ? state.clientName : null,
+            selectedCustomerId: state.selectedClientId.isNotEmpty ? state.selectedClientId : null,
+            selectedCustomerName: state.clientName.isNotEmpty ? state.clientName : null,
             onCustomerSelected: (customer) {
               ref.read(createProjectProvider.notifier).updateStepOne(
                     selectedClientId: customer.id,
                     clientName: customer.name,
                     clientCategory: customer.category,
                   );
-              if (customer.primaryContact != null) {
-                final contact = customer.primaryContact!;
-                if (_contactNameController.text.trim().isEmpty) {
+              final contact = customer.primaryContact;
+              if (contact != null) {
+                if (contact.name.isNotEmpty) {
                   _contactNameController.text = contact.name;
                 }
-                if (_phoneController.text.trim().isEmpty &&
-                    contact.phone.isNotEmpty) {
-                  _phoneController.text = contact.phone;
+                if (contact.phone.isNotEmpty) {
+                  final parsed = PhoneHelper.parseInitialPhone(contact.phone);
+                  setState(() {
+                    _selectedCountry = parsed.country;
+                    _phoneController.text = parsed.nationalNumber;
+                  });
                 }
-                if (_emailController.text.trim().isEmpty &&
-                    contact.email.isNotEmpty) {
+                if (contact.email.isNotEmpty) {
                   _emailController.text = contact.email;
                 }
-                if (_roleController.text.trim().isEmpty &&
-                    contact.role.isNotEmpty) {
+                if (contact.role.isNotEmpty) {
                   _roleController.text = contact.role;
                 }
               }
@@ -219,7 +207,7 @@ class _StepOneGeneralInfoState extends ConsumerState<StepOneGeneralInfo> {
           SizedBox(height: 8.h),
           Wrap(
             spacing: 8.w,
-            children: ['COMMERCIAL', 'PRIVATE', 'MUNICIPALITY'].map((cat) {
+            children: ['COMMERCIAL', 'MUNICIPALITY', 'ARCHITECT', 'PRIVATE'].map((cat) {
               return ChoiceChip(
                 label: Text(cat),
                 selected: state.clientCategory == cat,
@@ -267,6 +255,7 @@ class _StepOneGeneralInfoState extends ConsumerState<StepOneGeneralInfo> {
         FormFieldLabel(label: context.loc.phoneNumber),
         SizedBox(height: 6.h),
         AppPhoneField(
+          key: ValueKey(_selectedCountry.code),
           controller: _phoneController,
           initialCountryCode: _selectedCountry.code,
           hint: context.loc.enterPhone,

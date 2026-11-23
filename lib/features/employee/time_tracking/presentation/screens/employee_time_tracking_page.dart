@@ -39,6 +39,9 @@ class _EmployeeTimeTrackingPageState
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(employeeTimeTrackingProvider.notifier).refresh();
+    });
   }
 
   @override
@@ -64,13 +67,11 @@ class _EmployeeTimeTrackingPageState
       totalLogged: totalLogged,
       onSave: () async {
         final coords = await DeviceLocationHelper.tryGetCoordinates();
-        await Future.wait([
-          ref.read(employeeTimeTrackingProvider.notifier).stopTimer(
-            lat: coords?.lat,
-            lng: coords?.lng,
-          ),
-          ref.read(employeeTimerProvider.notifier).finishTimer(),
-        ]);
+        await ref.read(employeeTimeTrackingProvider.notifier).stopTimer(
+          lat: coords?.lat,
+          lng: coords?.lng,
+        );
+        await ref.read(employeeTimerProvider.notifier).finishTimer();
         if (mounted) {
           AppSnackBar.showSuccess(context, context.loc.workFinished);
         }

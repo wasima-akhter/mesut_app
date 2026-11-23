@@ -91,20 +91,22 @@ class _EmployeeHomePageState extends ConsumerState<EmployeeHomePage> {
     context.push(RouteConstants.employeeAssignmentDetails, extra: projectId);
   }
 
-  void _startNewTimer(EmployeeAssignmentModel assignment) {
+  Future<void> _startNewTimer(EmployeeAssignmentModel assignment) async {
     ref.read(assignmentDetailsProvider.notifier).setAssignment(assignment);
     final targetPhaseId = assignment.phaseId?.isNotEmpty == true
         ? assignment.phaseId!
         : (assignment.projectId?.isNotEmpty == true
               ? assignment.projectId!
               : assignment.project);
-    ref
+    await ref
         .read(employeeTimeTrackingProvider.notifier)
         .startTimer(
           projectId: targetPhaseId,
           activityType: assignment.activity.name.toUpperCase(),
         );
-    ref
+    final activeTimer =
+        ref.read(employeeTimeTrackingProvider).summary.activeTimer;
+    await ref
         .read(employeeTimerProvider.notifier)
         .startTimer(
           project: EmployeeProjectModel(
@@ -119,8 +121,12 @@ class _EmployeeHomePageState extends ConsumerState<EmployeeHomePage> {
             localization: assignment.localization,
           ),
           activity: assignment.activity,
+          activeTimeLogId: activeTimer?.id,
+          isAlreadyDispatched: true,
         );
-    context.push(RouteConstants.employeeActiveTimerPage);
+    if (mounted) {
+      context.push(RouteConstants.employeeActiveTimerPage);
+    }
   }
 
   void _showNavigationMessage(EmployeeAssignmentModel assignment) {
@@ -161,18 +167,23 @@ class _EmployeeHomePageState extends ConsumerState<EmployeeHomePage> {
     final taskCount = dashboard.totalUpcomingTasks > 0
         ? dashboard.totalUpcomingTasks
         : tasks.length;
+    final hasPendingTranslations = ref.watch(
+      employeeDashboardProvider.select(
+        (s) => anyLocalizationPending([
+          s.dashboard.localization,
+          s.dashboard.user.localization,
+          ...s.dashboard.upcomingTasks.map((t) => t.localization),
+          ...s.dashboard.upcomingTasks.map((t) => t.project.localization),
+          ...s.dashboard.upcomingTasks.map((t) => t.siteManager.localization),
+        ]),
+      ),
+    );
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: PendingPollEffect(
-          hasPending: anyLocalizationPending([
-            dashboard.localization,
-            user.localization,
-            ...tasks.map((t) => t.localization),
-            ...tasks.map((t) => t.project.localization),
-            ...tasks.map((t) => t.siteManager.localization),
-          ]),
+          hasPending: hasPendingTranslations,
           onPoll: () => ref.read(employeeDashboardProvider.notifier).refresh(),
           child: RefreshIndicator(
             onRefresh: () =>
@@ -237,11 +248,13 @@ class _EmployeeHomePageState extends ConsumerState<EmployeeHomePage> {
                     separatorBuilder: (_, _) => SizedBox(height: 14.h),
                     itemBuilder: (context, index) {
                       final assignment = _toAssignment(tasks[index]);
-                      return EmployeeAssignmentCard(
-                        assignment: assignment,
-                        onTap: () => _openAssignment(assignment),
-                        onNavigate: () => _showNavigationMessage(assignment),
-                        onStartTimer: () => _startNewTimer(assignment),
+                      return RepaintBoundary(
+                        child: EmployeeAssignmentCard(
+                          assignment: assignment,
+                          onTap: () => _openAssignment(assignment),
+                          onNavigate: () => _showNavigationMessage(assignment),
+                          onStartTimer: () => _startNewTimer(assignment),
+                        ),
                       );
                     },
                   ),

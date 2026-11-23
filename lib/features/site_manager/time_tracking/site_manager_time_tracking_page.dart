@@ -43,7 +43,10 @@ class SiteManagerTimeTrackingPage extends ConsumerWidget {
                 ]),
                 onPoll: () async {
                   if (state.selectedTab == TimeTrackingTab.myTime) {
-                    await ref.read(mobileTimeLogsProvider.notifier).refresh();
+                    await Future.wait([
+                      ref.read(mobileTimeLogsProvider.notifier).refresh(),
+                      ref.read(mobileProjectsProvider.notifier).refresh(),
+                    ]);
                   } else {
                     await Future.wait([
                       ref.read(mobileProjectsProvider.notifier).refresh(),
@@ -54,7 +57,10 @@ class SiteManagerTimeTrackingPage extends ConsumerWidget {
                 child: RefreshIndicator(
                   onRefresh: () async {
                     if (state.selectedTab == TimeTrackingTab.myTime) {
-                      await ref.read(mobileTimeLogsProvider.notifier).refresh();
+                      await Future.wait([
+                        ref.read(mobileTimeLogsProvider.notifier).refresh(),
+                        ref.read(mobileProjectsProvider.notifier).refresh(),
+                      ]);
                     } else {
                       await Future.wait([
                         ref.read(mobileProjectsProvider.notifier).refresh(),

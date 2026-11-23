@@ -33,9 +33,9 @@ class SiteManagerProfileNotifier extends Notifier<SiteManagerProfileState> {
   @override
   SiteManagerProfileState build() {
     return const SiteManagerProfileState(
-      name: 'Mesut Rahman',
-      email: 'tim.mueller@allround.de',
-      phone: '+49 170 1234567',
+      name: '',
+      email: '',
+      phone: '',
     );
   }
 

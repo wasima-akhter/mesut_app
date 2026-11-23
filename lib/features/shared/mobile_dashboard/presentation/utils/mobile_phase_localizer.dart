@@ -96,6 +96,8 @@ abstract final class MobilePhaseLocalizer {
     switch (normalized) {
       case 'ENQUIRY':
         return context.loc.preconstruction;
+      case 'QUOTATION':
+        return context.loc.quotation;
       case 'ORDER_CONFIRMED':
         return context.loc.orderConfirmed;
       case 'PLANNED':
@@ -129,6 +131,8 @@ abstract final class MobilePhaseLocalizer {
     switch (rawStatus.trim().toUpperCase()) {
       case 'ENQUIRY':
         return const Color(0xFF6B7280);
+      case 'QUOTATION':
+        return const Color(0xFF8B5CF6);
       case 'ORDER_CONFIRMED':
         return const Color(0xFF2563EB);
       case 'PLANNED':

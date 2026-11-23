@@ -220,7 +220,7 @@ class ProjectNote {
   ProjectNote({
     required this.category,
     required this.details,
-    this.author = 'Mesut Yilmaz',
+    this.author = '',
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 

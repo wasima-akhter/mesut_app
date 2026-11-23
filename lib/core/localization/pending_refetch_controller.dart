@@ -87,23 +87,38 @@ class PendingRefetchController {
 
     _consecutivePolls = 0;
     debugPrint(
-      '[TranslationPoll] Started polling for pending translations (active language: ${AppLanguageNotifier.activeLanguageCode}, interval: ${interval.inSeconds}s, maxPolls: $maxPolls)...',
+      '[TranslationPoll] Started progressive backoff polling for pending translations (active language: ${AppLanguageNotifier.activeLanguageCode}, base: ${interval.inSeconds}s, maxPolls: $maxPolls)...',
     );
-    _timer = Timer.periodic(interval, (_) {
-      if (_consecutivePolls >= maxPolls) {
-        debugPrint(
-          '[TranslationPoll] Max polls reached ($maxPolls). Polling timed out.',
-        );
-        _timedOut = true;
-        cancel();
-        _currentTimeout?.call();
-        return;
-      }
+    _scheduleNextPoll(baseInterval: interval, maxPolls: maxPolls);
+  }
+
+  void _scheduleNextPoll({
+    required Duration baseInterval,
+    required int maxPolls,
+  }) {
+    if (_consecutivePolls >= maxPolls) {
+      debugPrint(
+        '[TranslationPoll] Max polls reached ($maxPolls). Polling timed out.',
+      );
+      _timedOut = true;
+      cancel();
+      _currentTimeout?.call();
+      return;
+    }
+
+    // Progressive backoff: base (e.g. 2s/3s) -> 4s -> 8s -> 16s -> capped at 30s
+    final shift = _consecutivePolls > 4 ? 4 : _consecutivePolls;
+    final delaySec =
+        (baseInterval.inSeconds * (1 << shift)).clamp(baseInterval.inSeconds, 30);
+    final delay = Duration(seconds: delaySec);
+
+    _timer = Timer(delay, () {
       _consecutivePolls++;
       debugPrint(
-        '[TranslationPoll] Poll tick $_consecutivePolls/$maxPolls - refetching data in selected language (${AppLanguageNotifier.activeLanguageCode})...',
+        '[TranslationPoll] Poll tick $_consecutivePolls/$maxPolls (delay: ${delaySec}s) - refetching data in selected language (${AppLanguageNotifier.activeLanguageCode})...',
       );
       _currentRefetch?.call();
+      _scheduleNextPoll(baseInterval: baseInterval, maxPolls: maxPolls);
     });
   }
 

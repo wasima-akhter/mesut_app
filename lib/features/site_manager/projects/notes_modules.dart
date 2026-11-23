@@ -16,15 +16,7 @@ class NotesTab extends StatefulWidget {
 }
 
 class _NotesTabState extends State<NotesTab> {
-  final List<ProjectNote> _notes = [
-    ProjectNote(
-      category: ProjectNoteCategory.siteAccess,
-      details:
-          'Entry via Gate 2 on south side. Code: 4821. Heavy trucks allowed after 08:00 AM only.',
-      author: 'Mesut Yilmaz',
-      createdAt: DateTime(2026, 9, 18, 8, 15),
-    ),
-  ];
+  final List<ProjectNote> _notes = [];
 
   @override
   Widget build(BuildContext context) {
@@ -505,7 +497,7 @@ class _ProjectNoteBottomSheetState extends State<_ProjectNoteBottomSheet> {
       ProjectNote(
         category: _category,
         details: details,
-        author: widget.note?.author ?? 'Mesut Yilmaz',
+        author: widget.note?.author ?? '',
         createdAt: widget.note?.createdAt ?? DateTime.now(),
       ),
     );

@@ -20,7 +20,7 @@ class MapRouteEntity {
     required this.waypoints,
     required this.distanceKm,
     required this.durationMinutes,
-    this.isMockData = true,
+    this.isMockData = false,
     this.encodedPolyline,
   });
 
@@ -67,7 +67,7 @@ class MapRouteEntity {
           .toList(),
       distanceKm: (json['distanceKm'] as num).toDouble(),
       durationMinutes: json['durationMinutes'] as int,
-      isMockData: json['isMockData'] as bool? ?? true,
+      isMockData: json['isMockData'] as bool? ?? false,
       encodedPolyline: json['encodedPolyline'] as String?,
     );
   }

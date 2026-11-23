@@ -69,7 +69,7 @@ Widget buildCustomerCard([BuildContext? context]) {
             ),
             SizedBox(width: 7.w),
             Text(
-              'Hochief AG',
+              '-',
               style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w700),
             ),
             SizedBox(width: 5.w),
@@ -90,12 +90,12 @@ Widget buildCustomerCard([BuildContext? context]) {
             children: [
               _contactRow(
                 icon: Icons.person_outline,
-                text: loc.contactLabel('Andreas Weber (${loc.projectLead})'),
+                text: loc.contactLabel('-'),
               ),
               SizedBox(height: 8.h),
-              _contactRow(icon: Icons.phone_outlined, text: '+49 221 555 0192'),
+              _contactRow(icon: Icons.phone_outlined, text: '-'),
               SizedBox(height: 8.h),
-              _contactRow(icon: Icons.mail_outline, text: 'you@gmail.com'),
+              _contactRow(icon: Icons.mail_outline, text: '-'),
             ],
           ),
         ),
@@ -107,12 +107,7 @@ Widget buildCustomerCard([BuildContext? context]) {
                 icon: Icons.phone_outlined,
                 label: loc.callClient,
                 onTap: () async {
-                  final success = await AppLauncherService.makePhoneCall(
-                    '+49 221 555 0192',
-                  );
-                  if (!success) {
-                    showMessage(loc.callingClient);
-                  }
+                  showMessage(loc.callingClient);
                 },
               ),
             ),
@@ -122,13 +117,7 @@ Widget buildCustomerCard([BuildContext? context]) {
                 icon: Icons.mail_outline,
                 label: loc.mailClient,
                 onTap: () async {
-                  final success = await AppLauncherService.sendEmail(
-                    email: 'you@gmail.com',
-                    subject: 'Project Inquiry: Andreas Weber',
-                  );
-                  if (!success) {
-                    showMessage(loc.openingEmail);
-                  }
+                  showMessage(loc.openingEmail);
                 },
               ),
             ),

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/helper/employee_enums.dart';
 import '../../../shared/helper/employee_models.dart';
+import 'employee_time_tracking_provider.dart';
 import 'employee_timer_helpers.dart';
 import 'employee_timer_state.dart';
 import 'offline_sync_provider.dart';
@@ -15,8 +16,8 @@ export 'employee_timer_state.dart';
 
 final employeeTimerProvider =
     NotifierProvider<EmployeeTimerNotifier, EmployeeTimerState>(
-      EmployeeTimerNotifier.new,
-    );
+  EmployeeTimerNotifier.new,
+);
 
 class EmployeeTimerNotifier extends Notifier<EmployeeTimerState>
     with WidgetsBindingObserver {
@@ -52,7 +53,10 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final isLeaving = state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached;
-    if (isLeaving && this.state.isTimerRunning && !this.state.canCancel && this.state.graceSecondsRemaining == 0) {
+    if (isLeaving &&
+        this.state.isTimerRunning &&
+        !this.state.canCancel &&
+        this.state.graceSecondsRemaining == 0) {
       finishTimer();
     }
   }
@@ -85,12 +89,15 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState>
   Future<bool> startTimer({
     EmployeeProjectModel? project,
     EmployeeActivityType? activity,
+    String? activeTimeLogId,
+    bool isAlreadyDispatched = false,
   }) async {
     final activeProject = project ?? state.currentProject;
     final activeActivity = activity ?? state.currentActivity;
 
     _ticker?.cancel();
-    _isDispatchedStart = false;
+    _isDispatchedStart = isAlreadyDispatched ||
+        (activeTimeLogId != null && activeTimeLogId.isNotEmpty);
     _accumulatedBeforeRun = _totalBreakDuration = Duration.zero;
     _breakStartedAt = null;
     final now = DateTime.now().toUtc();
@@ -107,8 +114,9 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState>
       currentActivity: activeActivity,
       isActionLoading: false,
       clearError: true,
-      graceSecondsRemaining: 5,
-      clearActiveTimeLogId: true,
+      graceSecondsRemaining: _isDispatchedStart ? 0 : 5,
+      activeTimeLogId: activeTimeLogId,
+      clearActiveTimeLogId: activeTimeLogId == null,
     );
     _startTicker();
     return true;
@@ -135,19 +143,13 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState>
       );
 
       final timeLogId = EmployeeTimerHelpers.extractTimeLogId(response);
-      state = state.copyWith(
-        activeTimeLogId: timeLogId,
-        isActionLoading: false,
-      );
+      state = state.copyWith(activeTimeLogId: timeLogId, isActionLoading: false);
     } catch (e) {
       if (e is DioException && e.response?.statusCode == 409) {
-        final existingId = await EmployeeTimerHelpers.resolveActiveTimeLogId(
-          ref: ref,
-        );
-        state = state.copyWith(
-          activeTimeLogId: existingId,
-          isActionLoading: false,
-        );
+        final existingId =
+            await EmployeeTimerHelpers.resolveActiveTimeLogId(ref: ref);
+        state =
+            state.copyWith(activeTimeLogId: existingId, isActionLoading: false);
       }
     }
   }
@@ -170,13 +172,11 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState>
   void resumeTimer() {
     if (!state.isTimerRunning) return;
     if (_breakStartedAt != null) {
-      _totalBreakDuration += DateTime.now().toUtc().difference(_breakStartedAt!);
+      _totalBreakDuration +=
+          DateTime.now().toUtc().difference(_breakStartedAt!);
       _breakStartedAt = null;
     }
-    state = state.copyWith(
-      isOnBreak: false,
-      breakDuration: _totalBreakDuration,
-    );
+    state = state.copyWith(isOnBreak: false, breakDuration: _totalBreakDuration);
     _startTicker();
   }
 
@@ -251,6 +251,11 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState>
       logs: [newLog, ...state.logs],
     );
 
+    try {
+      ref.read(employeeTimeTrackingProvider.notifier).clearActiveTimer();
+      unawaited(ref.read(employeeTimeTrackingProvider.notifier).refresh());
+    } catch (_) {}
+
     return true;
   }
 
@@ -278,7 +283,11 @@ class EmployeeTimerNotifier extends Notifier<EmployeeTimerState>
       isActionLoading: false,
     );
 
-    // Cancelled within 5 seconds: backend start was never called. Clean local cancel.
+    try {
+      ref.read(employeeTimeTrackingProvider.notifier).clearActiveTimer();
+      unawaited(ref.read(employeeTimeTrackingProvider.notifier).refresh());
+    } catch (_) {}
+
     if (wasInGrace) return;
 
     if (currentActiveId != null && currentActiveId.isNotEmpty) {

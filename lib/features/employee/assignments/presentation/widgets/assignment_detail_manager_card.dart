@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../app/theme/app_colors.dart';
 import '../../../../../core/localization/context_extensions.dart';
 import '../../../../../core/services/launcher_service.dart';
+import '../../../../../core/widgets/images/app_network_image.dart';
 import '../../../../../core/widgets/snack/app_snackbar.dart';
 import '../../../shared/helper/employee_models.dart';
 import '../../domain/entities/employee_project_details_entity.dart';
@@ -49,21 +50,17 @@ class AssignmentDetailManagerCard extends StatelessWidget {
               color: AppColors.neutral200,
             ),
             clipBehavior: Clip.antiAlias,
-            child: manager?.avatarUrl != null && manager!.avatarUrl!.isNotEmpty
-                ? Image.network(
-                    manager!.avatarUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => const Icon(
-                      Icons.person,
-                      color: AppColors.neutral500,
-                      size: 27,
-                    ),
-                  )
-                : const Icon(
-                    Icons.person,
-                    color: AppColors.neutral500,
-                    size: 27,
-                  ),
+            child: AppNetworkImage(
+              imageUrl: manager?.avatarUrl,
+              width: 50.w,
+              height: 50.w,
+              fit: BoxFit.cover,
+              fallback: const Icon(
+                Icons.person,
+                color: AppColors.neutral500,
+                size: 27,
+              ),
+            ),
           ),
           SizedBox(width: 12.w),
           Expanded(

@@ -26,8 +26,6 @@ class ScheduleItemCard extends StatelessWidget {
     'dismantling',
     'standing',
     'maintenance',
-    'inspection',
-    'other',
   ];
 
   String _typeLabel(BuildContext context, String type) {
@@ -36,8 +34,7 @@ class ScheduleItemCard extends StatelessWidget {
       'dismantling' => context.loc.dismantlingPhase,
       'standing' => context.loc.standingScaffold,
       'maintenance' => context.loc.maintenance,
-      'inspection' => context.loc.safetyInspection,
-      _ => context.loc.other,
+      _ => MobilePhaseLocalizer.phaseType(context, type),
     };
   }
 
@@ -134,7 +131,9 @@ class ScheduleItemCard extends StatelessWidget {
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
-                value: item.type.toLowerCase(),
+                value: availableTypes.contains(item.type.toLowerCase())
+                    ? item.type.toLowerCase()
+                    : availableTypes.first,
                 isExpanded: true,
                 items: availableTypes.map((t) {
                   return DropdownMenuItem<String>(

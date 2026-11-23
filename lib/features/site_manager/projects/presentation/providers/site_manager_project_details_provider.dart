@@ -23,66 +23,13 @@ class ProjectDetailsState {
     this.tasks = const [],
     this.measurementItems = const [],
     this.notes = const [],
-    this.voiceNotes = const [
-      'Voice note 01 • North facade inspection audio record (0:45)',
-    ],
+    this.voiceNotes = const [],
     this.selectedPhotoCategory = 'All',
-    this.photos = const [
-      PhotoItem(
-        title: 'Erection - Level 3 Complete',
-        meta: '18 Sep 2026, 14:22 • Tim Müller',
-        tag: 'Erection',
-        badge: 'NEW',
-        imagePath: 'assets/images/project_preview.jpg',
-      ),
-      PhotoItem(
-        title: 'Base Jack Leveling Check',
-        meta: '17 Sep 2026, 09:10 • Mesut Yilmaz',
-        tag: 'Base Check',
-        badge: null,
-        imagePath: 'assets/images/project_preview.jpg',
-      ),
-      PhotoItem(
-        title: 'Corner Anchor Detail B2',
-        meta: '16 Sep 2026, 16:45 • Tim Müller',
-        tag: 'Anchor Check',
-        badge: null,
-        imagePath: 'assets/images/project_preview.jpg',
-      ),
-    ],
-    this.totalLoggedHours = 142.5,
-    this.budgetHours = 160.0,
-    this.crewHours = const [
-      EmployeeLaborSummary(
-        employeeName: 'Tim Müller',
-        role: 'Lead Scaffolder',
-        loggedHours: 54.5,
-        recentActivity: 'Erection Phase',
-      ),
-      EmployeeLaborSummary(
-        employeeName: 'Alex Brown',
-        role: 'Scaffolder',
-        loggedHours: 46.0,
-        recentActivity: 'Erection & Anchoring',
-      ),
-      EmployeeLaborSummary(
-        employeeName: 'John Smith',
-        role: 'Scaffolder',
-        loggedHours: 32.0,
-        recentActivity: 'Material Handling',
-      ),
-      EmployeeLaborSummary(
-        employeeName: 'Mesut Yilmaz',
-        role: 'Site Manager',
-        loggedHours: 10.0,
-        recentActivity: 'Safety Inspection',
-      ),
-    ],
-    this.activityHours = const {
-      'Erection': 82.5,
-      'Dismantling': 36.0,
-      'Standing & Inspection': 24.0,
-    },
+    this.photos = const [],
+    this.totalLoggedHours = 0.0,
+    this.budgetHours = 0.0,
+    this.crewHours = const [],
+    this.activityHours = const {},
   });
 
   bool get isProfitable =>
@@ -141,86 +88,7 @@ class ProjectDetailsState {
 class ProjectDetailsNotifier extends Notifier<ProjectDetailsState> {
   @override
   ProjectDetailsState build() {
-    return ProjectDetailsState(
-      tasks: [
-        ProjectTask(
-          description:
-              'Anchor scaffolds ties into reinforced concrete at 4th floor',
-          employee: 'Tim Muler',
-          priority: ProjectPriority.high,
-          dueDate: null,
-        ),
-        ProjectTask(
-          description:
-              'Anchor scaffolds ties into reinforced concrete at 4th floor',
-          employee: 'Tim Muler',
-          priority: ProjectPriority.high,
-          dueDate: null,
-        ),
-        ProjectTask(
-          description:
-              'Anchor scaffolds ties into reinforced concrete at 4th floor',
-          employee: 'Tim Muler',
-          priority: ProjectPriority.high,
-          dueDate: null,
-          completed: true,
-        ),
-        ProjectTask(
-          description:
-              'Anchor scaffolds ties into reinforced concrete at 4th floor',
-          employee: 'Tim Muler',
-          priority: ProjectPriority.high,
-          dueDate: null,
-          completed: true,
-        ),
-      ],
-      measurementItems: [
-        MeasurementItem(
-          position: 'Section A - North Facade',
-          length: 18.50,
-          height: 12.00,
-          quantity: 1,
-          unit: 'm²',
-          remark: 'Front Scaffold (Fassadengerüst)',
-        ),
-        MeasurementItem(
-          position: 'Section B - West Wing',
-          length: 14.00,
-          height: 9.50,
-          quantity: 1,
-          unit: 'm²',
-          remark: 'Front Scaffold (Fassadengerüst)',
-        ),
-        MeasurementItem(
-          position: 'Roof Protection - North',
-          length: 18.50,
-          height: 2.00,
-          quantity: 1,
-          unit: 'm²',
-          remark: 'Roof Safety Scaffold',
-        ),
-      ],
-      notes: [
-        ProjectNote(
-          category: ProjectNoteCategory.general,
-          author: 'Mesut Yilmaz',
-          details:
-              'Ground check completed. North facade ground is level and ready for base jacks. Client requested extra pedestrian tunnel at main entrance.',
-        ),
-        ProjectNote(
-          category: ProjectNoteCategory.siteAccess,
-          author: 'Tim Muller',
-          details:
-              'Material delivery received: 120 standards, 80 ledgers, base plates confirmed. Stored at laydown area B as agreed with site security.',
-        ),
-        ProjectNote(
-          category: ProjectNoteCategory.specialRequirements,
-          author: 'Mesut Yilmaz',
-          details:
-              'Pre-assembly briefing done with crew. High-wind protocol reviewed. Weather forecast shows rain on Thursday - plan to finish Section A by Wednesday evening.',
-        ),
-      ],
-    );
+    return const ProjectDetailsState();
   }
 
   void selectTab(ProjectDetailsTab tab) {

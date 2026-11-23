@@ -170,6 +170,23 @@ class CreateProjectPayload {
     this.photos = const [],
   });
 
+  static String normalizeStatus(String raw) {
+    final upper = raw.trim().toUpperCase();
+    switch (upper) {
+      case 'ENQUIRY':
+      case 'QUOTATION':
+      case 'ORDER_CONFIRMED':
+      case 'IN_PROGRESS':
+      case 'COMPLETED':
+      case 'POSTPONED':
+        return upper;
+      case 'PLANNED':
+      case 'NOT_STARTED':
+      default:
+        return 'ENQUIRY';
+    }
+  }
+
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{
       'name': name,
@@ -180,7 +197,7 @@ class CreateProjectPayload {
       'scaffoldSpecification': scaffoldSpecification.toJson(),
       'priority': priority.toUpperCase(),
       'phaseType': phaseType.toUpperCase(),
-      'status': status.toUpperCase(),
+      'status': normalizeStatus(status),
       'customer': customer.toJson(),
       'contact': contact.toJson(),
       'scheduleData': scheduleData.map((s) => s.toJson()).toList(),

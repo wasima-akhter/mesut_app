@@ -19,8 +19,29 @@ class LocationWorkflowStatusCard extends StatelessWidget {
     required this.onStatusChanged,
   });
 
+  static const List<String> availablePhases = [
+    'ERECTION',
+    'DISMANTLING',
+    'STANDING',
+    'MAINTENANCE',
+  ];
+
+  static const List<String> availableStatuses = [
+    'ENQUIRY',
+    'QUOTATION',
+    'ORDER_CONFIRMED',
+    'IN_PROGRESS',
+    'COMPLETED',
+    'POSTPONED',
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final safePhase =
+        availablePhases.contains(phaseType) ? phaseType : availablePhases.first;
+    final safeStatus =
+        availableStatuses.contains(status) ? status : availableStatuses.first;
+
     return FormCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,8 +51,8 @@ class LocationWorkflowStatusCard extends StatelessWidget {
           FormFieldLabelSmall(label: context.loc.projectPhase),
           SizedBox(height: 6.h),
           _buildDropdown(
-            value: phaseType,
-            items: const ['ERECTION', 'DISMANTLING', 'STANDING', 'MAINTENANCE'],
+            value: safePhase,
+            items: availablePhases,
             labelBuilder: (type) =>
                 MobilePhaseLocalizer.phaseType(context, type),
             onChanged: (val) {
@@ -42,14 +63,8 @@ class LocationWorkflowStatusCard extends StatelessWidget {
           FormFieldLabelSmall(label: context.loc.operationalStatus),
           SizedBox(height: 6.h),
           _buildDropdown(
-            value: status,
-            items: const [
-              'ENQUIRY',
-              'PLANNED',
-              'IN_PROGRESS',
-              'ON_HOLD',
-              'COMPLETED',
-            ],
+            value: safeStatus,
+            items: availableStatuses,
             labelBuilder: (s) => MobilePhaseLocalizer.status(context, s),
             onChanged: (val) {
               if (val != null) onStatusChanged(val);

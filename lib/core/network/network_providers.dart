@@ -21,7 +21,7 @@ final appConfigProvider = Provider<AppConfig>((ref) {
 /// Locale interceptor injecting `x-locale` and `Accept-Language`.
 final localeInterceptorProvider = Provider<LocaleInterceptor>((ref) {
   return LocaleInterceptor(() {
-    return ref.watch(appLanguageProvider).code;
+    return ref.read(appLanguageProvider).code;
   });
 });
 

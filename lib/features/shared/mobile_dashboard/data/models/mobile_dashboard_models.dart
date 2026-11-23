@@ -127,11 +127,11 @@ class MobileProjectModel {
           ),
         );
       }
-    } else if (json.containsKey('phaseId')) {
+    } else if (json.containsKey('phaseId') || json.containsKey('activePhaseId')) {
       phases.add(
         MobileProjectPhaseEntity(
-          id: (json['phaseId'] ?? '').toString(),
-          type: (json['type'] ?? '').toString(),
+          id: (json['phaseId'] ?? json['activePhaseId'] ?? '').toString(),
+          type: (json['type'] ?? json['activePhaseType'] ?? 'ERECTION').toString(),
           status: (json['status'] ?? '').toString(),
           priority: (json['priority'] ?? '').toString(),
           startDate: _asDateTime(json['startDate']),

@@ -13,50 +13,16 @@ import 'offline_sync_provider.dart';
 
 abstract final class EmployeeTimerHelpers {
   static const defaultProject = EmployeeProjectModel(
-    id: 'PRJ-0842',
-    name: 'Goltstein.Complex',
-    address: 'Goltsteinstraße 12, 50968 Köln',
+    id: '',
+    name: '',
+    address: '',
     activity: EmployeeActivityType.erection,
-    startTime: '07:30 am',
-    endTime: '04:15 pm',
-    startTimeOfDay: TimeOfDay(hour: 7, minute: 30),
-    endTimeOfDay: TimeOfDay(hour: 16, minute: 15),
-    siteManager: 'Mesut Rahaman',
+    startTime: '',
+    endTime: '',
+    siteManager: '',
   );
 
-  static List<EmployeeTimeLogModel> get defaultLogs {
-    final now = DateTime.now();
-    return [
-      EmployeeTimeLogModel(
-        timestamp: now.toUtc(),
-        project: defaultProject,
-        duration: '8.0',
-        durationHours: 8.0,
-        breakTime: '45m',
-        breakDuration: const Duration(minutes: 45),
-        synced: true,
-      ),
-      EmployeeTimeLogModel(
-        timestamp: now.subtract(const Duration(days: 1)).toUtc(),
-        project: const EmployeeProjectModel(
-          id: 'PRJ-0842',
-          name: 'Goltstein.Complex',
-          address: 'Goltsteinstraße 12, 50968 Köln',
-          activity: EmployeeActivityType.dismantling,
-          startTime: '07:30 am',
-          endTime: '04:15 pm',
-          startTimeOfDay: TimeOfDay(hour: 7, minute: 30),
-          endTimeOfDay: TimeOfDay(hour: 16, minute: 15),
-          siteManager: 'Mesut Rahaman',
-        ),
-        duration: '8.0',
-        durationHours: 8.0,
-        breakTime: '45m',
-        breakDuration: const Duration(minutes: 45),
-        synced: true,
-      ),
-    ];
-  }
+  static List<EmployeeTimeLogModel> get defaultLogs => const [];
 
   static bool isValidUuid(String? str) {
     if (str == null || str.isEmpty) return false;
@@ -159,24 +125,6 @@ abstract final class EmployeeTimerHelpers {
 
     final remoteDs = ref.read(mobileTimerRemoteDataSourceProvider);
     final coords = await DeviceLocationHelper.tryGetCoordinates();
-
-    if (activeId == null || activeId.isEmpty) {
-      try {
-        final resolvedPhase = await resolvePhaseId(
-          ref: ref,
-          rawId: phaseId,
-          activity: mapBackendToEmployee(activity),
-          directPhaseId: directPhaseId,
-        );
-        final startRes = await remoteDs.startTimer(
-          phaseId: resolvedPhase,
-          activityType: activity,
-          lat: coords?.lat,
-          lng: coords?.lng,
-        );
-        activeId = extractTimeLogId(startRes);
-      } catch (_) {}
-    }
 
     if (activeId != null && activeId.isNotEmpty) {
       try {

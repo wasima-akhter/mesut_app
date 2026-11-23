@@ -612,13 +612,13 @@ class _FinishWorkSheetState extends State<_FinishWorkSheet> {
       saving = true;
     });
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      await Future.sync(widget.onSave);
+    } catch (_) {}
 
     if (!mounted) return;
 
     Navigator.of(context).pop();
-
-    widget.onSave();
   }
 
   @override

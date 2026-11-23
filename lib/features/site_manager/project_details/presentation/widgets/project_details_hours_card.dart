@@ -133,14 +133,16 @@ class ProjectDetailsHoursCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  context.loc.budgetConsumedPercent(
-                    (progress * 100).toInt().toString(),
-                  ),
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF344054),
+                Flexible(
+                  child: Text(
+                    context.loc.budgetConsumedPercent(
+                      (progress * 100).toInt().toString(),
+                    ),
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF344054),
+                    ),
                   ),
                 ),
                 Text(

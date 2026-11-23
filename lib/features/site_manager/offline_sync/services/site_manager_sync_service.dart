@@ -62,8 +62,15 @@ class SiteManagerSyncService {
         );
         await queue.update(updated);
 
-        // If it's a connectivity issue or timeout, stop further attempts this cycle.
+        // If it's an unrecoverable client error (e.g. 403 Forbidden), discard it from queue.
         if (e is DioException) {
+          final statusCode = e.response?.statusCode ?? 0;
+          if (statusCode >= 400 && statusCode < 500 && statusCode != 408) {
+            await queue.remove(action.id);
+            continue;
+          }
+
+          // If it's a connectivity issue or timeout, stop further attempts this cycle.
           final isNetworkIssue = e.type == DioExceptionType.connectionError ||
               e.type == DioExceptionType.connectionTimeout ||
               e.type == DioExceptionType.unknown;

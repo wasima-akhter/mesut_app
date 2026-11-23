@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SiteManagerHomeState {
@@ -12,44 +11,10 @@ class SiteManagerHomeState {
   const SiteManagerHomeState({
     this.notificationsEnabled = false,
     this.showAllOperations = false,
-    this.activeSites = 3,
-    this.scaffolds = 30,
-    this.inspectionsDue = 30,
-    this.operations = const [
-      {
-        'type': 'Erection',
-        'typeColor': Color(0xFF00A651),
-        'project': 'Prj-0842 . Goltsteins.Complex',
-        'address': 'Goltsteinstrabe 12, 50968 Köln',
-        'client': 'Mesut Rahaman',
-        'planned': 14,
-        'running': 5,
-        'loggedHours': 142.5,
-        'budgetHours': 160.0,
-      },
-      {
-        'type': 'Dismantling',
-        'typeColor': Color(0xFFFF9800),
-        'project': 'Prj-0845 . Riverside Tower',
-        'address': 'Rheinstrasse 28, 50667 Köln',
-        'client': 'David Miller',
-        'planned': 8,
-        'running': 3,
-        'loggedHours': 85.0,
-        'budgetHours': 120.0,
-      },
-      {
-        'type': 'Erection',
-        'typeColor': Color(0xFF00A651),
-        'project': 'Prj-0850 . Central Plaza',
-        'address': 'Hohenzollernring 44, 50672 Köln',
-        'client': 'Thomas Weber',
-        'planned': 15,
-        'running': 7,
-        'loggedHours': 114.5,
-        'budgetHours': 100.0,
-      },
-    ],
+    this.activeSites = 0,
+    this.scaffolds = 0,
+    this.inspectionsDue = 0,
+    this.operations = const [],
   });
 
   List<Map<String, dynamic>> get visibleOperations =>
@@ -91,5 +56,5 @@ class SiteManagerHomeNotifier extends Notifier<SiteManagerHomeState> {
 
 final siteManagerHomeProvider =
     NotifierProvider<SiteManagerHomeNotifier, SiteManagerHomeState>(
-  SiteManagerHomeNotifier.new,
-);
+      SiteManagerHomeNotifier.new,
+    );

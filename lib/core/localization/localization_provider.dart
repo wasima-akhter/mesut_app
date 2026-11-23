@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/auth/presentation/providers/auth_di_providers.dart';
 import '../constants/api_constants.dart';
 import '../constants/storage_keys.dart';
 import '../enums/app_enum.dart';
@@ -34,23 +36,23 @@ class AppLanguageNotifier extends Notifier<AppLanguage> {
 
     // 1. If a role is active:
     if (currentRole != null) {
-      final roleCode = prefs.getString(roleStorageKey(currentRole));
+      final roleCode = prefs.getString(roleStorageKey(currentRole)) ??
+          prefs.getString(_storageKey);
       if (roleCode != null) {
         final lang = AppLanguage.fromCode(roleCode);
         activeLanguageCode = lang.code;
         return lang;
       }
-      // Never inherit another role's selection; default to German 'de'
       const defaultLang = AppLanguage.german;
       activeLanguageCode = defaultLang.code;
       return defaultLang;
     }
 
     // 2. Pre-login / unauthenticated:
-    final preLoginCode =
-        prefs.getString(preLoginKey) ?? prefs.getString(_storageKey);
-    final language = preLoginCode != null
-        ? AppLanguage.fromCode(preLoginCode)
+    final savedCode =
+        prefs.getString(_storageKey) ?? prefs.getString(preLoginKey);
+    final language = savedCode != null
+        ? AppLanguage.fromCode(savedCode)
         : AppLanguage.german;
     activeLanguageCode = language.code;
     return language;
@@ -70,31 +72,40 @@ class AppLanguageNotifier extends Notifier<AppLanguage> {
 
     try {
       final prefs = ref.read(sharedPreferencesProvider);
-      final currentRole = role ?? ref.read(userRoleProvider);
+      final currentRole = role ??
+          ref.read(userRoleProvider) ??
+          UserRoleExtension.fromString(prefs.getString(StorageKeys.userRole));
+      final currentUserId = userId ??
+          ref.read(currentUserProvider)?.id ??
+          ref.read(authRepositoryProvider).getCurrentUser()?.id;
 
       if (currentRole != null) {
         await prefs.setString(roleStorageKey(currentRole), language.code);
       }
-      if (userId != null && userId.isNotEmpty) {
-        await prefs.setString(userStorageKey(userId), language.code);
+      if (currentUserId != null && currentUserId.isNotEmpty) {
+        await prefs.setString(userStorageKey(currentUserId), language.code);
       }
 
       await prefs.setString(_storageKey, language.code);
-      if (currentRole == null) {
-        await prefs.setString(preLoginKey, language.code);
-      }
+      await prefs.setString(preLoginKey, language.code);
       await prefs.setBool(StorageKeys.hasUserSelectedLanguage, true);
     } catch (_) {}
 
     // Persist to backend preference via POST /api/v1/settings/language
     // Payload following z_new_docs/language_body.md: { "language": "RO" }
     try {
-      final apiClient = ref.read(apiClientProvider);
-      await apiClient.post(
-        ApiConstants.settingsLanguage,
-        data: {'language': language.apiCode},
-      );
-    } catch (_) {}
+      final storage = ref.read(storageServiceProvider);
+      final token = await storage.getAccessToken();
+      if (token != null && token.isNotEmpty) {
+        final apiClient = ref.read(apiClientProvider);
+        await apiClient.post(
+          ApiConstants.settingsLanguage,
+          data: {'language': language.apiCode},
+        );
+      }
+    } catch (e, stack) {
+      debugPrint('[AppLanguageNotifier] Failed to persist language via POST ${ApiConstants.settingsLanguage}: $e\n$stack');
+    }
 
     // Clear caches and refetch active screens
     await onAppLanguageChanged(ref);
@@ -117,14 +128,7 @@ class AppLanguageNotifier extends Notifier<AppLanguage> {
       }
     }
 
-    // 2. Check user's backend profile language
-    if (targetLang == null &&
-        backendLanguage != null &&
-        backendLanguage.isNotEmpty) {
-      targetLang = AppLanguage.fromCode(backendLanguage);
-    }
-
-    // 3. Check role-specific preference
+    // 2. Check role-specific preference
     if (targetLang == null) {
       final roleCode = prefs.getString(roleStorageKey(role));
       if (roleCode != null) {
@@ -132,7 +136,22 @@ class AppLanguageNotifier extends Notifier<AppLanguage> {
       }
     }
 
-    // 4. Default for this role (never leak previous role's language)
+    // 3. Check general device preference
+    if (targetLang == null) {
+      final selectedCode = prefs.getString(_storageKey);
+      if (selectedCode != null) {
+        targetLang = AppLanguage.fromCode(selectedCode);
+      }
+    }
+
+    // 4. Check user's backend profile language
+    if (targetLang == null &&
+        backendLanguage != null &&
+        backendLanguage.isNotEmpty) {
+      targetLang = AppLanguage.fromCode(backendLanguage);
+    }
+
+    // 5. Default for this role (never leak previous role's language)
     targetLang ??= AppLanguage.german;
 
     activeLanguageCode = targetLang.code;

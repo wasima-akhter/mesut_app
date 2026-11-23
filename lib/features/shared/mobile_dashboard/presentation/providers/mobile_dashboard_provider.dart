@@ -76,8 +76,8 @@ class MobileProjectsNotifier extends AsyncNotifier<List<MobileProjectEntity>> {
     _page = 1;
     final items = await ref
         .watch(mobileDashboardRepositoryProvider)
-        .getProjects(page: 1, limit: 20);
-    _hasMore = items.length >= 20;
+        .getProjects(page: 1, limit: 50);
+    _hasMore = items.length >= 50;
     return items;
   }
 
@@ -93,8 +93,8 @@ class MobileProjectsNotifier extends AsyncNotifier<List<MobileProjectEntity>> {
     state = await AsyncValue.guard(() async {
       final items = await ref
           .read(mobileDashboardRepositoryProvider)
-          .getProjects(page: 1, limit: 20);
-      _hasMore = items.length >= 20;
+          .getProjects(page: 1, limit: 50);
+      _hasMore = items.length >= 50;
       return items;
     });
   }

@@ -10,7 +10,9 @@ import '../../../../core/widgets/buttons/buttons.dart';
 import '../../../../core/widgets/snack/app_snackbar.dart';
 import '../../../shared/mobile_dashboard/domain/entities/mobile_project_entity.dart';
 import '../../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
+import '../../../shared/mobile_dashboard/presentation/utils/mobile_phase_localizer.dart';
 import '../../../shared/mobile_time_tracking/presentation/providers/mobile_time_tracking_provider.dart';
+import '../presentation/providers/site_manager_time_provider.dart';
 
 /// Modal bottom sheet to manually record a new time entry for a project phase.
 class SiteManagerAddTimeSheet extends ConsumerStatefulWidget {
@@ -40,6 +42,12 @@ class _SiteManagerAddTimeSheetState
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => ref.read(mobileProjectsProvider.notifier).refresh());
+  }
+
+  @override
   Widget build(BuildContext context) {
     final projectsAsync = ref.watch(mobileProjectsProvider);
     final projects = projectsAsync.asData?.value ?? const <MobileProjectEntity>[];
@@ -53,18 +61,16 @@ class _SiteManagerAddTimeSheetState
       _selectedProjectId = validProjects.first.id;
     }
 
-    final selectedProject = validProjects
-        .where((p) => p.id == _selectedProjectId)
-        .firstOrNull;
-
+    final selectedProject = validProjects.where((p) => p.id == _selectedProjectId).firstOrNull;
+    final phasesAsync = _selectedProjectId != null
+        ? ref.watch(projectPhasesProvider(_selectedProjectId!))
+        : const AsyncValue.data(<MobileProjectPhaseEntity>[]);
+    final rawPhases = phasesAsync.asData?.value ?? selectedProject?.phases ?? const <MobileProjectPhaseEntity>[];
     final seenPhases = <String>{};
-    final phases = (selectedProject?.phases ?? const <MobileProjectPhaseEntity>[])
-        .where((ph) => ph.id.isNotEmpty && seenPhases.add(ph.id))
-        .toList();
+    final phases = rawPhases.where((ph) => ph.id.isNotEmpty && seenPhases.add(ph.id)).toList();
+    final isPhasesLoading = phasesAsync.isLoading && phases.isEmpty;
 
-    if (phases.isNotEmpty &&
-        (_selectedPhaseId == null ||
-            !phases.any((p) => p.id == _selectedPhaseId))) {
+    if (phases.isNotEmpty && (_selectedPhaseId == null || !phases.any((p) => p.id == _selectedPhaseId))) {
       _selectedPhaseId = phases.first.id;
     } else if (phases.isEmpty) {
       _selectedPhaseId = null;
@@ -76,10 +82,7 @@ class _SiteManagerAddTimeSheetState
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
       padding: EdgeInsets.fromLTRB(
-        20.w,
-        12.h,
-        20.w,
-        MediaQuery.of(context).viewInsets.bottom + 20.h,
+        20.w, 12.h, 20.w, MediaQuery.of(context).viewInsets.bottom + 20.h,
       ),
       child: SingleChildScrollView(
         child: SafeArea(
@@ -91,68 +94,71 @@ class _SiteManagerAddTimeSheetState
                 child: Container(
                   width: 40.w,
                   height: 4.h,
-                  decoration: BoxDecoration(
-                    color: AppColors.neutral300,
-                    borderRadius: BorderRadius.circular(10.r),
+                  decoration: BoxDecoration(color: AppColors.neutral300, borderRadius: BorderRadius.circular(10.r)),
+                ),
+              ),
+              SizedBox(height: 18.h),
+              Center(child: Text(context.loc.addTimeEntry, style: Theme.of(context).textTheme.titleLarge)),
+              SizedBox(height: 18.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(context.loc.project, style: Theme.of(context).textTheme.labelLarge),
+                  InkWell(
+                    onTap: () async {
+                      await ref.read(mobileProjectsProvider.notifier).refresh();
+                      if (_selectedProjectId != null) {
+                        ref.invalidate(projectPhasesProvider(_selectedProjectId!));
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(4.r),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.refresh, size: 14.sp, color: AppColors.primary),
+                          SizedBox(width: 4.w),
+                          Text(
+                            context.loc.get('common.refresh', 'Refresh'),
+                            style: TextStyle(fontSize: 12.sp, color: AppColors.primary, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-              SizedBox(height: 18.h),
-              Center(
-                child: Text(
-                  context.loc.addTimeEntry,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-              SizedBox(height: 18.h),
-              Text(context.loc.project, style: Theme.of(context).textTheme.labelLarge),
               SizedBox(height: 8.h),
               _buildProjectDropdown(validProjects),
               SizedBox(height: 18.h),
               Text(context.loc.activityType, style: Theme.of(context).textTheme.labelLarge),
               SizedBox(height: 8.h),
-              _buildPhaseDropdown(phases),
+              _buildPhaseDropdown(phases, isPhasesLoading),
               SizedBox(height: 18.h),
               Text(context.loc.startTime, style: Theme.of(context).textTheme.labelLarge),
               SizedBox(height: 8.h),
-              _buildTimeField(
-                time: _startTime,
-                onSelected: (t) => setState(() => _startTime = t),
-              ),
+              _buildTimeField(time: _startTime, onSelected: (t) => setState(() => _startTime = t)),
               SizedBox(height: 18.h),
               Text(context.loc.endTime, style: Theme.of(context).textTheme.labelLarge),
               SizedBox(height: 8.h),
-              _buildTimeField(
-                time: _endTime,
-                onSelected: (t) => setState(() => _endTime = t),
-              ),
+              _buildTimeField(time: _endTime, onSelected: (t) => setState(() => _endTime = t)),
               SizedBox(height: 18.h),
               Text(context.loc.breakTime, style: Theme.of(context).textTheme.labelLarge),
               SizedBox(height: 8.h),
-              _buildTimeField(
-                time: _breakTime,
-                onSelected: (t) => setState(() => _breakTime = t),
-              ),
+              _buildTimeField(time: _breakTime, onSelected: (t) => setState(() => _breakTime = t)),
               SizedBox(height: 12.h),
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.all(12.w),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceTertiary,
-                  borderRadius: AppRadii.medium,
-                ),
-                child: Text(
-                  context.loc.workingTimeDeductBreak,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                decoration: BoxDecoration(color: AppColors.surfaceTertiary, borderRadius: AppRadii.medium),
+                child: Text(context.loc.workingTimeDeductBreak, style: Theme.of(context).textTheme.bodySmall),
               ),
               SizedBox(height: 20.h),
               AppButton(
                 text: context.loc.saveEntry,
                 isLoading: _isLoading,
-                onPressed: (_selectedProjectId == null ||
-                        _selectedPhaseId == null ||
-                        _isLoading)
+                onPressed: (_selectedProjectId == null || _selectedPhaseId == null || _isLoading)
                     ? null
                     : () => _saveEntry(phases),
                 borderRadius: 8.r,
@@ -183,29 +189,38 @@ class _SiteManagerAddTimeSheetState
         : validProjects.first.id;
 
     return DropdownButtonFormField<String>(
+      key: ValueKey('add_project_$_selectedProjectId'),
+      value: effectiveValue,
       isExpanded: true,
-      initialValue: effectiveValue,
       decoration: InputDecoration(hintText: context.loc.selectProject),
-      items: validProjects.map((project) {
-        return DropdownMenuItem<String>(
-          value: project.id,
-          child: Text(
-            project.name,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-          ),
-        );
-      }).toList(),
+      items: validProjects.map((project) => DropdownMenuItem(
+        value: project.id,
+        child: Text(project.name, overflow: TextOverflow.ellipsis, maxLines: 1),
+      )).toList(),
       onChanged: (val) {
-        setState(() {
-          _selectedProjectId = val;
-          _selectedPhaseId = null;
-        });
+        if (val != null && val != _selectedProjectId) {
+          setState(() {
+            _selectedProjectId = val;
+            _selectedPhaseId = null;
+          });
+        }
       },
     );
   }
 
-  Widget _buildPhaseDropdown(List<MobileProjectPhaseEntity> phases) {
+  Widget _buildPhaseDropdown(List<MobileProjectPhaseEntity> phases, bool isLoading) {
+    if (isLoading) {
+      return Container(
+        height: 48.h,
+        padding: EdgeInsets.symmetric(horizontal: 14.w),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(8.r), border: Border.all(color: AppColors.border)),
+        child: Row(children: [
+          SizedBox(width: 14.w, height: 14.w, child: const CircularProgressIndicator(strokeWidth: 2)),
+          SizedBox(width: 8.w),
+          Text(context.loc.get('common.loading', 'Loading...'), style: Theme.of(context).textTheme.bodySmall),
+        ]),
+      );
+    }
     if (phases.isEmpty) {
       return InputDecorator(
         decoration: InputDecoration(hintText: context.loc.noPhases),
@@ -217,19 +232,14 @@ class _SiteManagerAddTimeSheetState
         : phases.first.id;
 
     return DropdownButtonFormField<String>(
+      key: ValueKey('add_phase_${_selectedProjectId}_$effectiveValue'),
+      value: effectiveValue,
       isExpanded: true,
-      initialValue: effectiveValue,
       decoration: InputDecoration(hintText: context.loc.phase),
-      items: phases.map((phase) {
-        return DropdownMenuItem<String>(
-          value: phase.id,
-          child: Text(
-            phase.type.toUpperCase(),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-          ),
-        );
-      }).toList(),
+      items: phases.map((phase) => DropdownMenuItem(
+        value: phase.id,
+        child: Text(MobilePhaseLocalizer.phaseType(context, phase.type), overflow: TextOverflow.ellipsis, maxLines: 1),
+      )).toList(),
       onChanged: (val) {
         if (val != null) setState(() => _selectedPhaseId = val);
       },

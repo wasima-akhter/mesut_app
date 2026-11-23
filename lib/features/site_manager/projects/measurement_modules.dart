@@ -15,24 +15,7 @@ class MeasurementTab extends StatefulWidget {
 }
 
 class _MeasurementTabState extends State<MeasurementTab> {
-  final List<MeasurementItem> _measurements = [
-    MeasurementItem(
-      position: 'North facade',
-      length: 30,
-      height: 10,
-      quantity: 1,
-      unit: 'M²',
-      remark: 'Level 1 to 4 fully sheeted',
-    ),
-    MeasurementItem(
-      position: 'North facade',
-      length: 30,
-      height: 10,
-      quantity: 1,
-      unit: 'M²',
-      remark: 'Level 1 to 4 fully sheeted',
-    ),
-  ];
+  final List<MeasurementItem> _measurements = [];
 
   Widget buildMeasurementTab() {
     final totalArea = _measurements.fold<double>(

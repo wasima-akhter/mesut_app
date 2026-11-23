@@ -10,7 +10,9 @@ import '../../../../core/widgets/buttons/buttons.dart';
 import '../../../../core/widgets/snack/app_snackbar.dart';
 import '../../../shared/mobile_dashboard/domain/entities/mobile_project_entity.dart';
 import '../../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
+import '../../../shared/mobile_dashboard/presentation/utils/mobile_phase_localizer.dart';
 import '../../../shared/mobile_time_tracking/presentation/providers/mobile_time_tracking_provider.dart';
+import '../presentation/providers/site_manager_time_provider.dart';
 
 /// Modal bottom sheet to start a new active timer for a project and its phase.
 class SiteManagerStartTimerSheet extends ConsumerStatefulWidget {
@@ -37,6 +39,12 @@ class _SiteManagerStartTimerSheetState
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => ref.read(mobileProjectsProvider.notifier).refresh());
+  }
+
+  @override
   Widget build(BuildContext context) {
     final projectsAsync = ref.watch(mobileProjectsProvider);
     final projects =
@@ -51,15 +59,14 @@ class _SiteManagerStartTimerSheetState
       _selectedProjectId = validProjects.first.id;
     }
 
-    final selectedProject = validProjects
-        .where((p) => p.id == _selectedProjectId)
-        .firstOrNull;
-
+    final selectedProject = validProjects.where((p) => p.id == _selectedProjectId).firstOrNull;
+    final phasesAsync = _selectedProjectId != null
+        ? ref.watch(projectPhasesProvider(_selectedProjectId!))
+        : const AsyncValue.data(<MobileProjectPhaseEntity>[]);
+    final rawPhases = phasesAsync.asData?.value ?? selectedProject?.phases ?? const <MobileProjectPhaseEntity>[];
     final seenPhases = <String>{};
-    final phases =
-        (selectedProject?.phases ?? const <MobileProjectPhaseEntity>[])
-            .where((ph) => ph.id.isNotEmpty && seenPhases.add(ph.id))
-            .toList();
+    final phases = rawPhases.where((ph) => ph.id.isNotEmpty && seenPhases.add(ph.id)).toList();
+    final isPhasesLoading = phasesAsync.isLoading && phases.isEmpty;
 
     if (phases.isNotEmpty &&
         (_selectedPhaseId == null ||
@@ -112,19 +119,41 @@ class _SiteManagerStartTimerSheetState
                 ),
               ),
               SizedBox(height: 24.h),
-              Text(
-                context.loc.assignedProject,
-                style: Theme.of(context).textTheme.labelLarge,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(context.loc.assignedProject, style: Theme.of(context).textTheme.labelLarge),
+                  InkWell(
+                    onTap: () async {
+                      await ref.read(mobileProjectsProvider.notifier).refresh();
+                      if (_selectedProjectId != null) {
+                        ref.invalidate(projectPhasesProvider(_selectedProjectId!));
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(4.r),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.refresh, size: 14.sp, color: AppColors.primary),
+                          SizedBox(width: 4.w),
+                          Text(
+                            context.loc.get('common.refresh', 'Refresh'),
+                            style: TextStyle(fontSize: 12.sp, color: AppColors.primary, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: 8.h),
               _buildProjectDropdown(validProjects),
               SizedBox(height: 18.h),
-              Text(
-                context.loc.activityType,
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
+              Text(context.loc.activityType, style: Theme.of(context).textTheme.labelLarge),
               SizedBox(height: 8.h),
-              _buildPhaseDropdown(phases),
+              _buildPhaseDropdown(phases, isPhasesLoading),
               SizedBox(height: 12.h),
               Container(
                 width: double.infinity,
@@ -176,36 +205,42 @@ class _SiteManagerStartTimerSheetState
         : validProjects.first.id;
 
     return DropdownButtonFormField<String>(
+      key: ValueKey('start_project_$_selectedProjectId'),
+      value: effectiveValue,
       isExpanded: true,
-      initialValue: effectiveValue,
       decoration: InputDecoration(hintText: context.loc.selectProject),
-      items: validProjects.map((project) {
-        return DropdownMenuItem<String>(
-          value: project.id,
-          child: Text(
-            project.name,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-          ),
-        );
-      }).toList(),
+      items: validProjects.map((project) => DropdownMenuItem(
+        value: project.id,
+        child: Text(project.name, overflow: TextOverflow.ellipsis, maxLines: 1),
+      )).toList(),
       onChanged: (val) {
-        setState(() {
-          _selectedProjectId = val;
-          _selectedPhaseId = null;
-        });
+        if (val != null && val != _selectedProjectId) {
+          setState(() {
+            _selectedProjectId = val;
+            _selectedPhaseId = null;
+          });
+        }
       },
     );
   }
 
-  Widget _buildPhaseDropdown(List<MobileProjectPhaseEntity> phases) {
+  Widget _buildPhaseDropdown(List<MobileProjectPhaseEntity> phases, bool isLoading) {
+    if (isLoading) {
+      return Container(
+        height: 48.h,
+        padding: EdgeInsets.symmetric(horizontal: 14.w),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(8.r), border: Border.all(color: AppColors.border)),
+        child: Row(children: [
+          SizedBox(width: 14.w, height: 14.w, child: const CircularProgressIndicator(strokeWidth: 2)),
+          SizedBox(width: 8.w),
+          Text(context.loc.get('common.loading', 'Loading...'), style: Theme.of(context).textTheme.bodySmall),
+        ]),
+      );
+    }
     if (phases.isEmpty) {
       return InputDecorator(
         decoration: InputDecoration(hintText: context.loc.noPhases),
-        child: Text(
-          context.loc.noPhases,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        child: Text(context.loc.noPhases, style: Theme.of(context).textTheme.bodySmall),
       );
     }
     final effectiveValue = phases.any((p) => p.id == _selectedPhaseId)
@@ -213,19 +248,14 @@ class _SiteManagerStartTimerSheetState
         : phases.first.id;
 
     return DropdownButtonFormField<String>(
+      key: ValueKey('start_phase_${_selectedProjectId}_$effectiveValue'),
+      value: effectiveValue,
       isExpanded: true,
-      initialValue: effectiveValue,
       decoration: InputDecoration(hintText: context.loc.phase),
-      items: phases.map((phase) {
-        return DropdownMenuItem<String>(
-          value: phase.id,
-          child: Text(
-            phase.type.toUpperCase(),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-          ),
-        );
-      }).toList(),
+      items: phases.map((phase) => DropdownMenuItem(
+        value: phase.id,
+        child: Text(MobilePhaseLocalizer.phaseType(context, phase.type), overflow: TextOverflow.ellipsis, maxLines: 1),
+      )).toList(),
       onChanged: (val) {
         if (val != null) setState(() => _selectedPhaseId = val);
       },

@@ -58,22 +58,14 @@ class SiteManagerHomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(appLanguageProvider);
     final dashboardAsync = ref.watch(mobileDashboardProvider);
-    final unreadCount = ref.watch(unreadNotificationsCountProvider);
-    final currentUser = ref.watch(currentUserProvider);
-    final profile = ref.watch(mobileProfileProvider).asData?.value;
-
-    final userName = profile?.fullName.isNotEmpty == true
-        ? profile!.fullName
-        : (currentUser?.fullName.isNotEmpty == true
-              ? currentUser!.fullName
-              : context.loc.siteManager);
-
-    final dashboard = dashboardAsync.asData?.value;
-    final hasPendingTranslations = anyLocalizationPending([
-      dashboard?.localization,
-      profile?.localization,
-      ...dashboard?.upcomingTasks.map((t) => t.localization) ?? [],
-    ]);
+    final hasPendingTranslations = ref.watch(
+      mobileDashboardProvider.select(
+        (d) => anyLocalizationPending([
+          d.asData?.value?.localization,
+          ...d.asData?.value?.upcomingTasks.map((t) => t.localization) ?? [],
+        ]),
+      ),
+    );
 
     return Scaffold(
       body: SafeArea(
@@ -95,12 +87,26 @@ class SiteManagerHomePage extends ConsumerWidget {
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(18, 18, 18, 8),
                 sliver: SliverToBoxAdapter(
-                  child: RepaintBoundary(
-                    child: SiteManagerHomeHeader(
-                      userName: userName,
-                      unreadCount: unreadCount,
-                      avatarUrl: profile?.avatarUrl,
-                    ),
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final unreadCount =
+                          ref.watch(unreadNotificationsCountProvider);
+                      final currentUser = ref.watch(currentUserProvider);
+                      final profile =
+                          ref.watch(mobileProfileProvider).asData?.value;
+                      final userName = profile?.fullName.isNotEmpty == true
+                          ? profile!.fullName
+                          : (currentUser?.fullName.isNotEmpty == true
+                              ? currentUser!.fullName
+                              : context.loc.siteManager);
+                      return RepaintBoundary(
+                        child: SiteManagerHomeHeader(
+                          userName: userName,
+                          unreadCount: unreadCount,
+                          avatarUrl: profile?.avatarUrl,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),

@@ -1,7 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../shared/mobile_dashboard/domain/entities/mobile_project_entity.dart';
+import '../../../../shared/mobile_dashboard/presentation/providers/mobile_dashboard_provider.dart';
 import '../../../helper/site_manager_enums.dart';
 import '../../../helper/site_manager_models.dart';
+import '../../../project_details/data/repositories/project_details_repository_impl.dart';
 
 class SiteManagerTimeState {
   final TimeTrackingTab selectedTab;
@@ -79,3 +83,36 @@ final siteManagerTimeProvider =
     NotifierProvider<SiteManagerTimeNotifier, SiteManagerTimeState>(
       SiteManagerTimeNotifier.new,
     );
+
+final projectPhasesProvider =
+    FutureProvider.family<List<MobileProjectPhaseEntity>, String>((
+      ref,
+      projectId,
+    ) async {
+      if (projectId.trim().isEmpty) return const [];
+      try {
+        final repository = ref.read(projectDetailsRepositoryProvider);
+        final details = await repository.getProjectDetails(projectId);
+        final phases = details.phases
+            .where((p) => p.id.isNotEmpty)
+            .map(
+              (p) => MobileProjectPhaseEntity(
+                id: p.id,
+                type: p.type,
+                status: p.status,
+                priority: p.priority,
+                startDate: p.startDate,
+                endDate: p.endDate,
+              ),
+            )
+            .toList();
+        if (phases.isNotEmpty) return phases;
+      } catch (e) {
+        debugPrint('[projectPhasesProvider] Details error for $projectId: $e');
+      }
+
+      final projects =
+          ref.read(mobileProjectsProvider).asData?.value ?? const [];
+      final matched = projects.where((p) => p.id == projectId).firstOrNull;
+      return matched?.phases ?? const [];
+    });

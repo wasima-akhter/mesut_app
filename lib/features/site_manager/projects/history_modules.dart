@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/localization/app_localization.dart';
+import '../../../core/localization/context_extensions.dart';
 
 class HistoryTab extends StatefulWidget {
   const HistoryTab({super.key});
@@ -11,39 +12,7 @@ class HistoryTab extends StatefulWidget {
 }
 
 class _HistoryTabState extends State<HistoryTab> {
-  List<_HistoryItem> get _history {
-    final loc = AppLocalization.current;
-    return [
-      _HistoryItem(
-        icon: Icons.refresh_rounded,
-        color: const Color(0xFF12B76A),
-        title: loc.durationUpdated('2.0 days', '2.5 days'),
-        user: 'Mesut Yilmaz (${loc.siteManagerRole})',
-        date: 'Sep 18, 2026 at 06:30 AM',
-      ),
-      _HistoryItem(
-        icon: Icons.edit_outlined,
-        color: const Color(0xFF4F7CFF),
-        title: loc.phaseChanged(loc.orderConfirmed, loc.erectionPhase),
-        user: 'Mesut Yilmaz (${loc.siteManagerRole})',
-        date: 'Sep 18, 2026 at 07:30 AM',
-      ),
-      _HistoryItem(
-        icon: Icons.camera_alt_outlined,
-        color: const Color(0xFFF79009),
-        title: loc.phaseChanged(loc.orderConfirmed, loc.erectionPhase),
-        user: 'Mesut Yilmaz (${loc.siteManagerRole})',
-        date: 'Sep 18, 2026 at 07:30 AM',
-      ),
-      _HistoryItem(
-        icon: Icons.folder_outlined,
-        color: const Color(0xFF7B61FF),
-        title: loc.phaseChanged(loc.orderConfirmed, loc.erectionPhase),
-        user: 'Mesut Yilmaz (${loc.siteManagerRole})',
-        date: 'Sep 18, 2026 at 07:30 AM',
-      ),
-    ];
-  }
+  List<_HistoryItem> get _history => const [];
 
   @override
   Widget build(BuildContext context) {
@@ -53,13 +22,37 @@ class _HistoryTabState extends State<HistoryTab> {
         SliverPadding(
           padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 30.h),
           sliver: SliverToBoxAdapter(
-            child: Column(
-              children: [
-                ..._history.asMap().entries.map((entry) {
-                  return _buildHistoryItem(entry.value, entry.key);
-                }),
-              ],
-            ),
+            child: _history.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40.h),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.history_outlined,
+                            size: 48.sp,
+                            color: const Color(0xFF9CA3AF),
+                          ),
+                          SizedBox(height: 10.h),
+                          Text(
+                            context.loc.noData,
+                            style: TextStyle(
+                              fontSize: 15.sp,
+                              color: const Color(0xFF6B7280),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : Column(
+                    children: [
+                      ..._history.asMap().entries.map((entry) {
+                        return _buildHistoryItem(entry.value, entry.key);
+                      }),
+                    ],
+                  ),
           ),
         ),
       ],

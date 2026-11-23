@@ -42,10 +42,10 @@ class EmployeeProfileNotifier extends Notifier<EmployeeProfileState> {
   EmployeeProfileState build() {
     return const EmployeeProfileState(
       notificationsEnabled: true,
-      name: 'Tim Muler',
-      email: 'tim.muler@gmail.com',
-      phone: '+49 170 1234567',
-      roleTitle: 'Scaffolder / Gerüstbauer',
+      name: '',
+      email: '',
+      phone: '',
+      roleTitle: '',
     );
   }
 
