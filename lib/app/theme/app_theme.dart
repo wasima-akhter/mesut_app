@@ -8,6 +8,8 @@ import 'app_radii.dart';
 class AppTheme {
   AppTheme._();
 
+  static const List<String> fontFallback = ['Roboto', 'Arial', 'sans-serif'];
+
   static ThemeData? _cachedLight;
 
   static ThemeData get light => _cachedLight ??= _buildLight();
@@ -34,6 +36,7 @@ class AppTheme {
       ),
 
       fontFamily: 'PlusJakartaSans',
+      fontFamilyFallback: fontFallback,
 
       textTheme: TextTheme(
         displayLarge: TextStyle(

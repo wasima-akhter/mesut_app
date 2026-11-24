@@ -12,6 +12,7 @@ class AppLocalization {
   const AppLocalization(this.strings);
 
   static final Map<AppLanguage, AppStrings> _cache = {};
+  static Map<String, String> _rawEnglishMap = {};
   static AppStrings _current = const AppStrings({});
 
   static AppStrings get current => _current;
@@ -33,14 +34,36 @@ class AppLocalization {
       return _current;
     }
 
+    // Ensure English base map is available for non-English fallbacks
+    if (language != AppLanguage.english && _rawEnglishMap.isEmpty) {
+      try {
+        final enJson = await rootBundle.loadString('assets/l10n/en.json');
+        final Map<String, dynamic> enDecoded = json.decode(enJson);
+        for (final entry in enDecoded.entries) {
+          final val = entry.value.toString();
+          if (val.trim().isNotEmpty) {
+            _rawEnglishMap[entry.key] = val;
+          }
+        }
+      } catch (_) {}
+    }
+
     try {
       final jsonString = await rootBundle.loadString(
         'assets/l10n/${language.code}.json',
       );
       final Map<String, dynamic> jsonMap = json.decode(jsonString);
-      final stringMap = jsonMap.map(
-        (key, value) => MapEntry(key, value.toString()),
-      );
+      final Map<String, String> stringMap = Map.of(_rawEnglishMap);
+      for (final entry in jsonMap.entries) {
+        final val = entry.value.toString();
+        if (val.trim().isNotEmpty) {
+          stringMap[entry.key] = val;
+        }
+      }
+
+      if (language == AppLanguage.english && _rawEnglishMap.isEmpty) {
+        _rawEnglishMap = Map.of(stringMap);
+      }
 
       final appStrings = AppStrings(stringMap);
       _cache[language] = appStrings;
@@ -48,8 +71,8 @@ class AppLocalization {
       AppStrings.current = _current;
       return appStrings;
     } catch (e) {
-      // Fallback to empty Map if asset loading fails, AppStrings will use default fallbacks
-      final fallback = AppStrings(const {});
+      // Fallback to English map or empty Map if asset loading fails
+      final fallback = AppStrings(_rawEnglishMap);
       _cache[language] = fallback;
       _current = fallback;
       AppStrings.current = _current;

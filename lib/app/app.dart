@@ -65,6 +65,7 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (_, child) {
+        AppTheme.invalidateCache();
         final theme = AppTheme.light;
         AppTextStyles.initialize(theme.textTheme);
         return MaterialApp.router(

@@ -92,6 +92,8 @@ class SiteManagerMyTimeView {
                 child: SiteManagerMyTimeEntryCard(entry: logs[index]),
               ),
               childCount: logs.length,
+              addRepaintBoundaries: true,
+              addAutomaticKeepAlives: false,
             ),
           ),
         );

@@ -5,6 +5,9 @@
 -keep class io.flutter.view.**  { *; }
 -keep class io.flutter.**  { *; }
 -keep class io.flutter.plugins.**  { *; }
+-keep class io.flutter.embedding.** { *; }
+-keep class io.flutter.plugin.editing.** { *; }
+-keep class io.flutter.plugin.platform.** { *; }
 
 # Google Play Core & Deferred Components (R8 suppression for Flutter embedding)
 -dontwarn com.google.android.play.core.**
