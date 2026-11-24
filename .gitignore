@@ -48,3 +48,10 @@ app.*.map.json
 
 # Google Maps API Key
 google_map_api_key.txt
+
+# Firebase service account credentials
+*firebase-adminsdk*.json
+*-adminsdk-*.json
+
+config.bat
+node_modules
